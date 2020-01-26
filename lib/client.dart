@@ -71,7 +71,7 @@ class Client {
     return response;
   }
 
-  Future<http.Response> get(String url, Map<String, String> params) async {
+  Future<http.Response> get(String url, {Map<String, String> params = _emptyMap}) async {
     final uri = _buildUri(url: url, params: params);
     var response = await http.get(uri, headers: getHttpHeaders());
     return _handleResponse(response);
@@ -95,7 +95,7 @@ class Client {
     return _handleResponse(response);
   }
 
-  Future<http.Response> delete(String url, Map<String, String> params) async {
+  Future<http.Response> delete(String url, {Map<String, String> params = _emptyMap}) async {
     final uri = _buildUri(url: url, params: params);
     var response = await http.delete(uri, headers: getHttpHeaders());
     return _handleResponse(response);
@@ -127,7 +127,7 @@ class Client {
       payload.addAll(options);
     }
 
-    return get("/channels", {"payload": jsonEncode(payload)}).then(
+    return get("/channels", params: {"payload": jsonEncode(payload)}).then(
         (value) => QueryChannelsResponse.fromJson(json.decode(value.body)));
   }
 
@@ -199,7 +199,7 @@ class Client {
   Future<dynamic> getDevices() async => null;
 
   Future<EmptyResponse> removeDevice(String id) async {
-    return delete("/devices", {
+    return delete("/devices", params: {
       "id": id,
     }).then((value) => EmptyResponse.fromJson(json.decode(value.body)));
   }
@@ -227,7 +227,7 @@ class Client {
   }
 
   Future<EmptyResponse> unbanUser(String targetUserID) async {
-    return delete("/moderation/ban", {
+    return delete("/moderation/ban", params: {
       "target_user_id": targetUserID,
     }).then((value) => EmptyResponse.fromJson(json.decode(value.body)));
   }
@@ -268,13 +268,13 @@ class Client {
   }
 
   Future<EmptyResponse> deleteMessage(String messageID) async {
-    return delete("/messages/$messageID", {})
+    return delete("/messages/$messageID")
         .then((value) => EmptyResponse.fromJson(json.decode(value.body)));
   }
 
   // TODO getMessage: parse response correctly
   Future<EmptyResponse> getMessage(String messageID) async {
-    return get("/messages/$messageID", {})
+    return get("/messages/$messageID")
         .then((value) => EmptyResponse.fromJson(json.decode(value.body)));
   }
 }

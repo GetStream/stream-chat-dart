@@ -1,14 +1,15 @@
+import 'dart:convert';
+
 import 'package:stream_chat_dart/api/requests.dart';
-import 'package:stream_chat_dart/models/channel_config.dart';
 import 'package:stream_chat_dart/models/event.dart';
 import 'package:stream_chat_dart/models/member.dart';
 import 'package:stream_chat_dart/models/message.dart';
 import 'package:stream_chat_dart/models/reaction.dart';
 
 import '../client.dart';
+import 'responses.dart';
 
 class Channel {
-
   Client _client;
   String type;
   String id;
@@ -16,102 +17,162 @@ class Channel {
 
   Channel(this._client, this.type, this.id, this.data);
 
-  // TODO getConfig
-  ChannelConfig getConfig() => null;
+  Client get client => _client;
 
-  // TODO sendMessage
-  sendMessage(Message message) async => null;
+  String _channelURL() => "${client.baseURL}/channels/$type/$id";
+
+  // TODO: sendMessage response type
+  Future<EmptyResponse> sendMessage(Message message) {
+    return client.post("${this._channelURL()}/message", {
+      "message": message.toJson()
+    }).then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+  }
 
   // TODO sendFile
-  sendFile() async => null;
+  Future<EmptyResponse> sendFile() async => null;
 
   // TODO sendImage
-  sendImage() async => null;
+  Future<EmptyResponse> sendImage() async => null;
 
-  // TODO deleteFile
-  deleteFile(String url) async => null;
+  Future<EmptyResponse> deleteFile(String url) {
+    return client.delete("${this._channelURL()}/file", params: {
+      "url": url
+    }).then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+  }
 
-  // TODO deleteImage
-  deleteImage(String url) async => null;
+  Future<EmptyResponse> deleteImage(String url) {
+    return client.delete("${this._channelURL()}/image", params: {
+      "url": url
+    }).then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+  }
 
-  // TODO sendEvent
-  sendEvent(Event event) async => null;
+  Future<EmptyResponse> sendEvent(Event event) {
+    return client
+        .post("${this._channelURL()}/event", {"event": event.toJson()}).then(
+            (value) => EmptyResponse.fromJson(json.decode(value.body)));
+  }
 
-  // TODO sendReaction
-  sendReaction(String messageID, Reaction reaction) async => null;
+  // TODO sendReaction response type
+  Future<EmptyResponse> sendReaction(String messageID, Reaction reaction) {
+    return client.post("${client.baseURL}/messages/$messageID/reaction", {
+      "reaction": reaction.toJson()
+    }).then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+  }
 
-  // TODO deleteReaction
-  deleteReaction(String messageID, String reactionType) async => null;
+  Future<EmptyResponse> deleteReaction(String messageID, String reactionType) {
+    return client
+        .delete("${client.baseURL}/messages/$messageID/reaction/$reactionType")
+        .then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+  }
 
   // TODO update
-  update(dynamic channelData, Message updateMessage) async => null;
+  Future<EmptyResponse> update(
+          dynamic channelData, Message updateMessage) async =>
+      null;
 
-  // TODO delete
-  delete()  async => null;
+  Future<EmptyResponse> delete() {
+    return client
+        .delete(_channelURL())
+        .then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+  }
 
-  // TODO truncate
-  truncate() async => null;
+  Future<EmptyResponse> truncate() {
+    return client.post("${_channelURL()}/truncate", {}).then(
+        (value) => EmptyResponse.fromJson(json.decode(value.body)));
+  }
 
-  // TODO acceptInvite
-  acceptInvite() async => null;
+  // TODO acceptInvite, options??
+  Future<EmptyResponse> acceptInvite() async => null;
 
-  // TODO rejectInvite
-  rejectInvite() async => null;
+  // TODO rejectInvite, options??
+  Future<EmptyResponse> rejectInvite() async => null;
 
-  // TODO addMembers
-  addMembers(List<Member> members, Message message) async => null;
+  // TODO addMembers response type
+  Future<EmptyResponse> addMembers(List<Member> members, Message message) {
+    return client.post(_channelURL(), {
+      "add_members": members.map((m) => m.toJson()),
+      "message": message.toJson(),
+    }).then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+  }
 
-  // TODO addModerators
-  addModerators(List<Member> members, Message message) async => null;
+  // TODO addModerators response type
+  Future<EmptyResponse> addModerators(List<Member> members, Message message) {
+    return client.post(_channelURL(), {
+      "add_moderators": members.map((m) => m.toJson()),
+      "message": message.toJson(),
+    }).then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+  }
 
-  // TODO inviteMembers
-  inviteMembers(List<Member> members, Message message) async => null;
+  // TODO inviteMembers response type
+  Future<EmptyResponse> inviteMembers(List<Member> members, Message message) {
+    return client.post(_channelURL(), {
+      "invites": members.map((m) => m.toJson()),
+      "message": message.toJson(),
+    }).then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+  }
 
-  // TODO removeMembers
-  removeMembers(List<Member> members, Message message) async => null;
+  // TODO removeMembers response type
+  Future<EmptyResponse> removeMembers(List<Member> members, Message message) {
+    return client.post(_channelURL(), {
+      "remove_members": members.map((m) => m.toJson()),
+      "message": message.toJson(),
+    }).then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+  }
 
-  // TODO demoteModerators
-  demoteModerators(List<Member> members, Message message) async => null;
+  // TODO demoteModerators response type
+  Future<EmptyResponse> demoteModerators(
+      List<Member> members, Message message) {
+    return client.post(_channelURL(), {
+      "demote_moderators": members.map((m) => m.toJson()),
+      "message": message.toJson(),
+    }).then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+  }
 
-  // TODO sendAction
-  sendAction(String messageID, dynamic formData) async => null;
+  // TODO sendAction (see Run Message Action)
+  Future<EmptyResponse> sendAction(String messageID, dynamic formData) async =>
+      null;
 
-  // TODO markRead
-  markRead() async => null;
+  Future<EmptyResponse> markRead() {
+    return client.post("$_channelURL()/read", {}).then(
+        (value) => EmptyResponse.fromJson(json.decode(value.body)));
+  }
 
-  // TODO markRead
-  watch(dynamic options) async => null;
+  // TODO watch
+  Future<EmptyResponse> watch(dynamic options) async => null;
 
-  // TODO stopWatching
-  stopWatching() async => null;
+  Future<EmptyResponse> stopWatching() {
+    return client.post("$_channelURL()/stop-watching", {}).then(
+            (value) => EmptyResponse.fromJson(json.decode(value.body)));
+  }
 
   // TODO getReplies
-  getReplies(String parentID, PaginationParams options) => null;
+  Future<EmptyResponse> getReplies(String parentID, PaginationParams options) =>
+      null;
 
   // TODO getReactions
-  getReactions(String messageID, dynamic options) async => null;
+  Future<EmptyResponse> getReactions(String messageID, dynamic options) async =>
+      null;
 
   // TODO getMessagesById
-  getMessagesById(List<String> messageIDs) async => null;
+  Future<EmptyResponse> getMessagesById(List<String> messageIDs) async => null;
 
   // TODO create
-  create() async => null;
+  Future<EmptyResponse> create() async => null;
 
   // TODO query
-  query(dynamic options) async => null;
+  Future<EmptyResponse> query(dynamic options) async => null;
 
   // TODO banUser
-  banUser(String userID, dynamic options) async => null;
+  Future<EmptyResponse> banUser(String userID, dynamic options) async => null;
 
   // TODO hide
-  hide(bool clearHistory) async => null;
+  Future<EmptyResponse> hide(bool clearHistory) async => null;
 
   // TODO show
-  show() async => null;
+  Future<EmptyResponse> show() async => null;
 
   // TODO unbanUser
-  unbanUser(String userID) async => null;
+  Future<EmptyResponse> unbanUser(String userID) async => null;
 
   Stream<Event> on(String eventType) => null;
-
 }

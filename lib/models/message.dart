@@ -1,6 +1,9 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_chat_dart/models/reaction.dart';
 import 'package:stream_chat_dart/models/serialization.dart';
 import 'package:stream_chat_dart/models/user.dart';
+
+import 'attachment.dart';
 
 part 'message.g.dart';
 
@@ -10,11 +13,22 @@ class Message {
   String text;
   String type;
 
-  // TODO: attachments
-  // TODO: latest_reactions
-  // TODO: own_reactions
-  // TODO: mentioned_users
-  // TODO: reaction_counts
+  List<Attachment> attachments;
+
+  @JsonKey(name: 'mentioned_users')
+  List<User> mentionedUsers;
+
+  @JsonKey(name: 'reaction_counts')
+  Map<String, int> reactionCounts;
+
+  @JsonKey(name: 'reaction_scores')
+  Map<String, int> reactionScores;
+
+  @JsonKey(name: 'latest_reactions')
+  List<Reaction> latestReactions;
+
+  @JsonKey(name: 'own_reactions')
+  List<Reaction> ownReactions;
 
   @JsonKey(name: 'parent_id')
   String parentID;
@@ -48,6 +62,7 @@ class Message {
     'own_reactions',
     'mentioned_users',
     'reaction_counts',
+    'reaction_scores',
     'parent_id',
     'reply_count',
     'show_in_channel',

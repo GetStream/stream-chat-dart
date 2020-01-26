@@ -25,7 +25,30 @@ Message _$MessageFromJson(Map<String, dynamic> json) {
     json['user'] == null
         ? null
         : User.fromJson(json['user'] as Map<String, dynamic>),
-  )..extraData = json['extraData'] as Map<String, dynamic>;
+  )
+    ..attachments = (json['attachments'] as List)
+        ?.map((e) =>
+            e == null ? null : Attachment.fromJson(e as Map<String, dynamic>))
+        ?.toList()
+    ..mentionedUsers = (json['mentioned_users'] as List)
+        ?.map(
+            (e) => e == null ? null : User.fromJson(e as Map<String, dynamic>))
+        ?.toList()
+    ..reactionCounts = (json['reaction_counts'] as Map<String, dynamic>)?.map(
+      (k, e) => MapEntry(k, e as int),
+    )
+    ..reactionScores = (json['reaction_scores'] as Map<String, dynamic>)?.map(
+      (k, e) => MapEntry(k, e as int),
+    )
+    ..latestReactions = (json['latest_reactions'] as List)
+        ?.map((e) =>
+            e == null ? null : Reaction.fromJson(e as Map<String, dynamic>))
+        ?.toList()
+    ..ownReactions = (json['own_reactions'] as List)
+        ?.map((e) =>
+            e == null ? null : Reaction.fromJson(e as Map<String, dynamic>))
+        ?.toList()
+    ..extraData = json['extraData'] as Map<String, dynamic>;
 }
 
 Map<String, dynamic> _$MessageToJson(Message instance) {
@@ -33,6 +56,14 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
     'id': instance.id,
     'text': instance.text,
     'type': instance.type,
+    'attachments': instance.attachments?.map((e) => e?.toJson())?.toList(),
+    'mentioned_users':
+        instance.mentionedUsers?.map((e) => e?.toJson())?.toList(),
+    'reaction_counts': instance.reactionCounts,
+    'reaction_scores': instance.reactionScores,
+    'latest_reactions':
+        instance.latestReactions?.map((e) => e?.toJson())?.toList(),
+    'own_reactions': instance.ownReactions?.map((e) => e?.toJson())?.toList(),
     'parent_id': instance.parentID,
     'reply_count': instance.replyCount,
     'show_in_channel': instance.showInChannel,
