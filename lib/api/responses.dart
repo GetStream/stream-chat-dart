@@ -20,6 +20,6 @@ class EmptyResponse {
 
   EmptyResponse(this.duration);
 
-  factory EmptyResponse.fromJson(Map<String, dynamic> json) => _$EmptyResponseFromJson(json);
+  static EmptyResponse fromJson(Map<String, dynamic> json) => _$EmptyResponseFromJson(json);
   Map<String, dynamic> toJson() => _$EmptyResponseToJson(this);
 }
