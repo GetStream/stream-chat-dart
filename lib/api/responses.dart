@@ -10,7 +10,7 @@ class QueryChannelsResponse {
 
   QueryChannelsResponse(this.duration, this.channels);
 
-  factory QueryChannelsResponse.fromJson(Map<String, dynamic> json) => _$QueryChannelsResponseFromJson(json);
+  static QueryChannelsResponse fromJson(Map<String, dynamic> json) => _$QueryChannelsResponseFromJson(json);
   Map<String, dynamic> toJson() => _$QueryChannelsResponseToJson(this);
 }
 

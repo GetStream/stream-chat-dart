@@ -127,8 +127,20 @@ class Client {
       payload.addAll(options);
     }
 
-    return get("/channels", params: {"payload": jsonEncode(payload)}).then(
-        (value) => QueryChannelsResponse.fromJson(json.decode(value.body)));
+    final response = await get("/channels", params: {"payload": jsonEncode(payload)});
+    return _decode<QueryChannelsResponse>(response.body, QueryChannelsResponse.fromJson);
+  }
+
+  // Used to log errors and stacktrace in case of bad json deserialization
+  _decode<T>(String j, T Function(Map<String, dynamic>) decodeFunction) {
+    try {
+      return decodeFunction(json.decode(j));
+    } catch (error, stacktrace) {
+      print('Error decoding response');
+      print(error);
+      print(stacktrace);
+      throw error;
+    }
   }
 
   _getAuthType() => _anonymous ? 'anonymous' : 'jwt';
