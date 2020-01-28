@@ -126,8 +126,10 @@ class GetMessageResponse {
 class AddModeratorsResponse {
   Channel channel;
   String duration;
+  List<Member> members;
+  Message message;
 
-  AddModeratorsResponse(this.duration, this.channel);
+  AddModeratorsResponse(this.duration, this.channel, this.message, this.members);
 
   static AddModeratorsResponse fromJson(Map<String, dynamic> json) =>
       _$AddModeratorsResponseFromJson(json);
@@ -138,8 +140,10 @@ class AddModeratorsResponse {
 class InviteMembersResponse {
   Channel channel;
   String duration;
+  List<Member> members;
+  Message message;
 
-  InviteMembersResponse(this.duration, this.channel);
+  InviteMembersResponse(this.duration, this.channel, this.message, this.members);
 
   static InviteMembersResponse fromJson(Map<String, dynamic> json) =>
       _$InviteMembersResponseFromJson(json);
@@ -150,8 +154,10 @@ class InviteMembersResponse {
 class RemoveMembersResponse {
   Channel channel;
   String duration;
+  List<Member> members;
+  Message message;
 
-  RemoveMembersResponse(this.duration, this.channel);
+  RemoveMembersResponse(this.duration, this.channel, this.message, this.members);
 
   static RemoveMembersResponse fromJson(Map<String, dynamic> json) =>
       _$RemoveMembersResponseFromJson(json);
@@ -162,8 +168,10 @@ class RemoveMembersResponse {
 class AddMembersResponse {
   Channel channel;
   String duration;
+  List<Member> members;
+  Message message;
 
-  AddMembersResponse(this.duration, this.channel);
+  AddMembersResponse(this.duration, this.channel, this.message, this.members);
 
   static AddMembersResponse fromJson(Map<String, dynamic> json) =>
       _$AddMembersResponseFromJson(json);

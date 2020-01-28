@@ -160,6 +160,13 @@ AddModeratorsResponse _$AddModeratorsResponseFromJson(
     json['channel'] == null
         ? null
         : Channel.fromJson(json['channel'] as Map<String, dynamic>),
+    json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>),
+    (json['members'] as List)
+        ?.map((e) =>
+            e == null ? null : Member.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
   );
 }
 
@@ -168,6 +175,8 @@ Map<String, dynamic> _$AddModeratorsResponseToJson(
     <String, dynamic>{
       'channel': instance.channel?.toJson(),
       'duration': instance.duration,
+      'members': instance.members?.map((e) => e?.toJson())?.toList(),
+      'message': instance.message?.toJson(),
     };
 
 InviteMembersResponse _$InviteMembersResponseFromJson(
@@ -177,6 +186,13 @@ InviteMembersResponse _$InviteMembersResponseFromJson(
     json['channel'] == null
         ? null
         : Channel.fromJson(json['channel'] as Map<String, dynamic>),
+    json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>),
+    (json['members'] as List)
+        ?.map((e) =>
+            e == null ? null : Member.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
   );
 }
 
@@ -185,6 +201,8 @@ Map<String, dynamic> _$InviteMembersResponseToJson(
     <String, dynamic>{
       'channel': instance.channel?.toJson(),
       'duration': instance.duration,
+      'members': instance.members?.map((e) => e?.toJson())?.toList(),
+      'message': instance.message?.toJson(),
     };
 
 RemoveMembersResponse _$RemoveMembersResponseFromJson(
@@ -194,6 +212,13 @@ RemoveMembersResponse _$RemoveMembersResponseFromJson(
     json['channel'] == null
         ? null
         : Channel.fromJson(json['channel'] as Map<String, dynamic>),
+    json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>),
+    (json['members'] as List)
+        ?.map((e) =>
+            e == null ? null : Member.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
   );
 }
 
@@ -202,6 +227,8 @@ Map<String, dynamic> _$RemoveMembersResponseToJson(
     <String, dynamic>{
       'channel': instance.channel?.toJson(),
       'duration': instance.duration,
+      'members': instance.members?.map((e) => e?.toJson())?.toList(),
+      'message': instance.message?.toJson(),
     };
 
 AddMembersResponse _$AddMembersResponseFromJson(Map<String, dynamic> json) {
@@ -210,6 +237,13 @@ AddMembersResponse _$AddMembersResponseFromJson(Map<String, dynamic> json) {
     json['channel'] == null
         ? null
         : Channel.fromJson(json['channel'] as Map<String, dynamic>),
+    json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>),
+    (json['members'] as List)
+        ?.map((e) =>
+            e == null ? null : Member.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
   );
 }
 
@@ -217,6 +251,8 @@ Map<String, dynamic> _$AddMembersResponseToJson(AddMembersResponse instance) =>
     <String, dynamic>{
       'channel': instance.channel?.toJson(),
       'duration': instance.duration,
+      'members': instance.members?.map((e) => e?.toJson())?.toList(),
+      'message': instance.message?.toJson(),
     };
 
 EmptyResponse _$EmptyResponseFromJson(Map<String, dynamic> json) {
