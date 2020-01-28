@@ -50,6 +50,26 @@ Map<String, dynamic> _$SendImageResponseToJson(SendImageResponse instance) =>
       'duration': instance.duration,
     };
 
+SendReactionResponse _$SendReactionResponseFromJson(Map<String, dynamic> json) {
+  return SendReactionResponse(
+    json['duration'] as String,
+    json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>),
+    json['reaction'] == null
+        ? null
+        : Reaction.fromJson(json['reaction'] as Map<String, dynamic>),
+  );
+}
+
+Map<String, dynamic> _$SendReactionResponseToJson(
+        SendReactionResponse instance) =>
+    <String, dynamic>{
+      'message': instance.message?.toJson(),
+      'reaction': instance.reaction?.toJson(),
+      'duration': instance.duration,
+    };
+
 EmptyResponse _$EmptyResponseFromJson(Map<String, dynamic> json) {
   return EmptyResponse(
     json['duration'] as String,

@@ -1,3 +1,6 @@
+import 'package:stream_chat_dart/models/message.dart';
+import 'package:stream_chat_dart/models/reaction.dart';
+
 import '../models/channel_state.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -36,6 +39,18 @@ class SendImageResponse {
 
   static SendImageResponse fromJson(Map<String, dynamic> json) => _$SendImageResponseFromJson(json);
   Map<String, dynamic> toJson() => _$SendImageResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class SendReactionResponse {
+  Message message;
+  Reaction reaction;
+  String duration;
+
+  SendReactionResponse(this.duration, this.message, this.reaction);
+
+  static SendReactionResponse fromJson(Map<String, dynamic> json) => _$SendReactionResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$SendReactionResponseToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)

@@ -68,16 +68,15 @@ class Channel {
     });
   }
 
-  // TODO sendReaction response type
   Future<EmptyResponse> sendReaction(
     String messageID,
     Reaction reaction,
   ) async {
-    final response = await _client.dioClient.post<String>(
+    final res = await _client.dioClient.post<String>(
       "/messages/$messageID/reaction",
       data: {"reaction": reaction.toJson()},
     );
-    return _client.decode(response.data, EmptyResponse.fromJson);
+    return _client.decode(res.data, SendReactionResponse.fromJson);
   }
 
   Future<EmptyResponse> deleteReaction(String messageID, String reactionType) {
@@ -95,13 +94,13 @@ class Channel {
       null;
 
   Future<EmptyResponse> delete() async {
-    final response = await _client.dioClient.delete<String>(_channelURL());
+    final response = await _client.dioClient.delete<String>(channelURL);
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> truncate() async {
     final response =
-        await _client.dioClient.post<String>("${_channelURL()}/truncate");
+        await _client.dioClient.post<String>("${channelURL}/truncate");
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
@@ -113,7 +112,7 @@ class Channel {
 
   // TODO addMembers response type
   Future<EmptyResponse> addMembers(List<Member> members, Message message) {
-    return _client.dioClient.post<String>(_channelURL(), data: {
+    return _client.dioClient.post<String>(channelURL, data: {
       "add_members": members.map((m) => m.toJson()),
       "message": message.toJson(),
     }).then((res) => EmptyResponse.fromJson(json.decode(res.data)));
@@ -121,7 +120,7 @@ class Channel {
 
   // TODO addModerators response type
   Future<EmptyResponse> addModerators(List<Member> members, Message message) {
-    return _client.dioClient.post<String>(_channelURL(), data: {
+    return _client.dioClient.post<String>(channelURL, data: {
       "add_moderators": members.map((m) => m.toJson()),
       "message": message.toJson(),
     }).then((res) => EmptyResponse.fromJson(json.decode(res.data)));
@@ -129,7 +128,7 @@ class Channel {
 
   // TODO inviteMembers response type
   Future<EmptyResponse> inviteMembers(List<Member> members, Message message) {
-    return _client.dioClient.post<String>(_channelURL(), data: {
+    return _client.dioClient.post<String>(channelURL, data: {
       "invites": members.map((m) => m.toJson()),
       "message": message.toJson(),
     }).then((res) => EmptyResponse.fromJson(json.decode(res.data)));
@@ -137,7 +136,7 @@ class Channel {
 
   // TODO removeMembers response type
   Future<EmptyResponse> removeMembers(List<Member> members, Message message) {
-    return _client.dioClient.post<String>(_channelURL(), data: {
+    return _client.dioClient.post<String>(channelURL, data: {
       "remove_members": members.map((m) => m.toJson()),
       "message": message.toJson(),
     }).then((res) => EmptyResponse.fromJson(json.decode(res.data)));
@@ -146,7 +145,7 @@ class Channel {
   // TODO demoteModerators response type
   Future<EmptyResponse> demoteModerators(
       List<Member> members, Message message) {
-    return _client.dioClient.post<String>(_channelURL(), data: {
+    return _client.dioClient.post<String>(channelURL, data: {
       "demote_moderators": members.map((m) => m.toJson()),
       "message": message.toJson(),
     }).then((res) => EmptyResponse.fromJson(json.decode(res.data)));
@@ -158,7 +157,7 @@ class Channel {
 
   Future<EmptyResponse> markRead() async {
     final response =
-        await _client.dioClient.post<String>("$_channelURL()/read");
+        await _client.dioClient.post<String>("$channelURL/read");
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
@@ -167,7 +166,7 @@ class Channel {
 
   Future<EmptyResponse> stopWatching() async {
     final response =
-        await _client.dioClient.post<String>("$_channelURL()/stop-watching");
+        await _client.dioClient.post<String>("$channelURL/stop-watching");
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
