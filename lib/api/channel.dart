@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:stream_chat_dart/api/requests.dart';
 import 'package:stream_chat_dart/models/event.dart';
 import 'package:stream_chat_dart/models/member.dart';
@@ -19,46 +20,59 @@ class Channel {
 
   Client get client => _client;
 
-  String _channelURL() => "/channels/$type/$id";
+  String get channelURL => "/channels/$type/$id";
 
   // TODO: sendMessage response type
   Future<EmptyResponse> sendMessage(Message message) async {
     final response = await _client.dioClient.post<String>(
-      "${this._channelURL()}/message",
+      "$channelURL/message",
       data: {"message": message.toJson()},
     );
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
-  // TODO sendFile
-  Future<EmptyResponse> sendFile() async => null;
+  Future<EmptyResponse> sendFile(MultipartFile file) async {
+    final response = await _client.dioClient.post<String>(
+      "$channelURL/file",
+      data: FormData.fromMap({'file': file}),
+    );
+    return _client.decode(response.data, SendFileResponse.fromJson);
+  }
 
-  // TODO sendImage
-  Future<EmptyResponse> sendImage() async => null;
+  Future<EmptyResponse> sendImage(MultipartFile file) async {
+    final response = await _client.dioClient.post<String>(
+      "$channelURL/image",
+      data: FormData.fromMap({'file': file}),
+    );
+    return _client.decode(response.data, SendImageResponse.fromJson);
+  }
 
   Future<EmptyResponse> deleteFile(String url) async {
     final response = await _client.dioClient
-        .delete("${this._channelURL()}/file", queryParameters: {"url": url});
+        .delete("$channelURL/file", queryParameters: {"url": url});
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> deleteImage(String url) async {
     final response = await _client.dioClient
-        .delete("${this._channelURL()}/image", queryParameters: {"url": url});
+        .delete("$channelURL/image", queryParameters: {"url": url});
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> sendEvent(Event event) {
     return _client.dioClient.post<String>(
-      "${this._channelURL()}/event",
+      "$channelURL/event",
       data: {"event": event.toJson()},
-    ).then(
-        (value) => EmptyResponse.fromJson(json.decode(value.data.toString())));
+    ).then((res) {
+      return EmptyResponse.fromJson(json.decode(res.data.toString()));
+    });
   }
 
   // TODO sendReaction response type
   Future<EmptyResponse> sendReaction(
-      String messageID, Reaction reaction) async {
+    String messageID,
+    Reaction reaction,
+  ) async {
     final response = await _client.dioClient.post<String>(
       "/messages/$messageID/reaction",
       data: {"reaction": reaction.toJson()},
@@ -86,7 +100,8 @@ class Channel {
   }
 
   Future<EmptyResponse> truncate() async {
-    final response = await _client.dioClient.post<String>("${_channelURL()}/truncate");
+    final response =
+        await _client.dioClient.post<String>("${_channelURL()}/truncate");
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
@@ -142,7 +157,8 @@ class Channel {
       null;
 
   Future<EmptyResponse> markRead() async {
-    final response = await _client.dioClient.post<String>("$_channelURL()/read");
+    final response =
+        await _client.dioClient.post<String>("$_channelURL()/read");
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 

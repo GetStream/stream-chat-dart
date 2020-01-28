@@ -15,6 +15,30 @@ class QueryChannelsResponse {
 }
 
 @JsonSerializable(explicitToJson: true)
+class SendFileResponse {
+  // the url of the uploaded file
+  String file;
+  String duration;
+
+  SendFileResponse(this.duration, this.file);
+
+  static SendFileResponse fromJson(Map<String, dynamic> json) => _$SendFileResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$SendFileResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class SendImageResponse {
+  // the url of the uploaded file
+  String file;
+  String duration;
+
+  SendImageResponse(this.duration, this.file);
+
+  static SendImageResponse fromJson(Map<String, dynamic> json) => _$SendImageResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$SendImageResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
 class EmptyResponse {
   String duration;
 

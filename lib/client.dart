@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:dio_flutter_transformer/dio_flutter_transformer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:logging/logging.dart';
 import 'package:stream_chat_dart/api/channel.dart';
@@ -195,9 +196,6 @@ class Client {
         "api_key": apiKey,
         "connection_id": _connectionId,
       };
-
-  // TODO
-  Future<Response> sendFile() async => null;
 
   // TODO setAnonymousUser
   Future<Event> setAnonymousUser() async => null;

@@ -24,6 +24,32 @@ Map<String, dynamic> _$QueryChannelsResponseToJson(
       'duration': instance.duration,
     };
 
+SendFileResponse _$SendFileResponseFromJson(Map<String, dynamic> json) {
+  return SendFileResponse(
+    json['duration'] as String,
+    json['file'] as String,
+  );
+}
+
+Map<String, dynamic> _$SendFileResponseToJson(SendFileResponse instance) =>
+    <String, dynamic>{
+      'file': instance.file,
+      'duration': instance.duration,
+    };
+
+SendImageResponse _$SendImageResponseFromJson(Map<String, dynamic> json) {
+  return SendImageResponse(
+    json['duration'] as String,
+    json['file'] as String,
+  );
+}
+
+Map<String, dynamic> _$SendImageResponseToJson(SendImageResponse instance) =>
+    <String, dynamic>{
+      'file': instance.file,
+      'duration': instance.duration,
+    };
+
 EmptyResponse _$EmptyResponseFromJson(Map<String, dynamic> json) {
   return EmptyResponse(
     json['duration'] as String,
