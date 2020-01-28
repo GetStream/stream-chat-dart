@@ -125,15 +125,25 @@ class GetMessageResponse {
 @JsonSerializable(explicitToJson: true)
 class AddModeratorsResponse {
   Channel channel;
-  List<Member> members;
-  Message message;
   String duration;
 
-  AddModeratorsResponse(this.duration, this.message, this.members);
+  AddModeratorsResponse(this.duration, this.channel);
 
   static AddModeratorsResponse fromJson(Map<String, dynamic> json) =>
       _$AddModeratorsResponseFromJson(json);
   Map<String, dynamic> toJson() => _$AddModeratorsResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class AddMembersResponse {
+  Channel channel;
+  String duration;
+
+  AddMembersResponse(this.duration, this.channel);
+
+  static AddMembersResponse fromJson(Map<String, dynamic> json) =>
+      _$AddMembersResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$AddMembersResponseToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)

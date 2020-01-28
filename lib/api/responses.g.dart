@@ -157,24 +157,31 @@ AddModeratorsResponse _$AddModeratorsResponseFromJson(
     Map<String, dynamic> json) {
   return AddModeratorsResponse(
     json['duration'] as String,
-    json['message'] == null
+    json['channel'] == null
         ? null
-        : Message.fromJson(json['message'] as Map<String, dynamic>),
-    (json['members'] as List)
-        ?.map((e) =>
-            e == null ? null : Member.fromJson(e as Map<String, dynamic>))
-        ?.toList(),
-  )..channel = json['channel'] == null
-      ? null
-      : Channel.fromJson(json['channel'] as Map<String, dynamic>);
+        : Channel.fromJson(json['channel'] as Map<String, dynamic>),
+  );
 }
 
 Map<String, dynamic> _$AddModeratorsResponseToJson(
         AddModeratorsResponse instance) =>
     <String, dynamic>{
       'channel': instance.channel?.toJson(),
-      'members': instance.members?.map((e) => e?.toJson())?.toList(),
-      'message': instance.message?.toJson(),
+      'duration': instance.duration,
+    };
+
+AddMembersResponse _$AddMembersResponseFromJson(Map<String, dynamic> json) {
+  return AddMembersResponse(
+    json['duration'] as String,
+    json['channel'] == null
+        ? null
+        : Channel.fromJson(json['channel'] as Map<String, dynamic>),
+  );
+}
+
+Map<String, dynamic> _$AddMembersResponseToJson(AddMembersResponse instance) =>
+    <String, dynamic>{
+      'channel': instance.channel?.toJson(),
       'duration': instance.duration,
     };
 

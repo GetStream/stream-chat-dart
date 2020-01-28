@@ -109,12 +109,13 @@ class Channel {
   // TODO rejectInvite, options??
   Future<EmptyResponse> rejectInvite() async => null;
 
-  // TODO addMembers response type
-  Future<EmptyResponse> addMembers(List<Member> members, Message message) {
-    return _client.dioClient.post<String>(channelURL, data: {
+  Future<AddMembersResponse> addMembers(
+      List<Member> members, Message message) async {
+    final res = await _client.dioClient.post<String>(channelURL, data: {
       "add_members": members.map((m) => m.toJson()),
       "message": message.toJson(),
-    }).then((res) => EmptyResponse.fromJson(json.decode(res.data)));
+    });
+    return _client.decode(res.data, AddMembersResponse.fromJson);
   }
 
   Future<AddModeratorsResponse> addModerators(
