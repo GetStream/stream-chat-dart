@@ -140,12 +140,12 @@ class Channel {
     return _client.decode(res.data, InviteMembersResponse.fromJson);
   }
 
-  // TODO removeMembers response type
-  Future<EmptyResponse> removeMembers(List<Member> members, Message message) {
-    return _client.dioClient.post<String>(channelURL, data: {
+  Future<RemoveMembersResponse> removeMembers(List<Member> members, Message message) async {
+    final res = await _client.dioClient.post<String>(channelURL, data: {
       "remove_members": members.map((m) => m.toJson()),
       "message": message.toJson(),
-    }).then((res) => EmptyResponse.fromJson(json.decode(res.data)));
+    });
+    return _client.decode(res.data, RemoveMembersResponse.fromJson);
   }
 
   // TODO demoteModerators response type

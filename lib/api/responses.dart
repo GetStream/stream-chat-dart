@@ -147,6 +147,18 @@ class InviteMembersResponse {
 }
 
 @JsonSerializable(explicitToJson: true)
+class RemoveMembersResponse {
+  Channel channel;
+  String duration;
+
+  RemoveMembersResponse(this.duration, this.channel);
+
+  static RemoveMembersResponse fromJson(Map<String, dynamic> json) =>
+      _$RemoveMembersResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$RemoveMembersResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
 class AddMembersResponse {
   Channel channel;
   String duration;

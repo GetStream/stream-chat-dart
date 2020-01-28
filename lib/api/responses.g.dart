@@ -187,6 +187,23 @@ Map<String, dynamic> _$InviteMembersResponseToJson(
       'duration': instance.duration,
     };
 
+RemoveMembersResponse _$RemoveMembersResponseFromJson(
+    Map<String, dynamic> json) {
+  return RemoveMembersResponse(
+    json['duration'] as String,
+    json['channel'] == null
+        ? null
+        : Channel.fromJson(json['channel'] as Map<String, dynamic>),
+  );
+}
+
+Map<String, dynamic> _$RemoveMembersResponseToJson(
+        RemoveMembersResponse instance) =>
+    <String, dynamic>{
+      'channel': instance.channel?.toJson(),
+      'duration': instance.duration,
+    };
+
 AddMembersResponse _$AddMembersResponseFromJson(Map<String, dynamic> json) {
   return AddMembersResponse(
     json['duration'] as String,
