@@ -8,7 +8,7 @@ This library is currently under development: you can subscribe for updates [here
 
 ## Getting started
 
-You must add the library as a dependency to your project. At the moment the library is under development and there is not package published on pub.dev
+### Add dependency
 
 ```yaml
 dependencies:
