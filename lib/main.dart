@@ -12,7 +12,7 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    var client = new Client(apiKey: "6xjf3dex3n7d");
+    var client = new Client("6xjf3dex3n7d");
 
     return
       StreamChatContainer(

@@ -3,8 +3,8 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
+import 'package:logging/logging.dart';
 import 'package:stream_chat_dart/api/channel.dart';
-
 import 'exceptions.dart';
 import 'models/event.dart';
 import 'api/requests.dart';
@@ -13,26 +13,37 @@ import 'models/message.dart';
 import 'models/user.dart';
 import 'api/websocket.dart';
 
-class Options {
-  static const Options DEFAULT = const Options();
-  const Options();
-}
+typedef void LogHandlerFunction(LogRecord record);
 
 const Map<String, String> _emptyMap = {};
 
 class Client {
   static const defaultBaseURL = "chat-us-east-1.stream-io-api.com";
 
+  // TODO: keep-alive, connection timeout, connection pool (HttpClient dart:io)
   Client(
-      {@required this.apiKey,
-      this.options = Options.DEFAULT,
-      this.baseURL = defaultBaseURL});
+    this.apiKey, {
+    this.baseURL = defaultBaseURL,
+    this.logLevel = Level.WARNING,
+    LogHandlerFunction logHandlerFunction,
+    this.requestTimeout = const Duration(seconds: 6),
+  }) {
+    Logger.root.level = logLevel;
+    if (logHandlerFunction == null) {
+      logHandlerFunction = (record) {
+        print(
+            '(${record.time}) ${record.level.name}: ${record.loggerName} | ${record.message}');
+      };
+    }
+    logger.onRecord.listen(logHandlerFunction);
+  }
 
+  final Logger logger = Logger('HTTP');
+  final Level logLevel;
   final String apiKey;
-  final Options options;
   final String baseURL;
-  final StreamController<Event> _controller =
-      StreamController<Event>.broadcast();
+  final Duration requestTimeout;
+  final _controller = StreamController<Event>.broadcast();
 
   Stream get stream => _controller.stream;
 
@@ -71,31 +82,42 @@ class Client {
     return response;
   }
 
-  Future<http.Response> get(String url, {Map<String, String> params = _emptyMap}) async {
+  Future<http.Response> get(
+    String url, {
+    Map<String, String> params = _emptyMap,
+  }) async {
+    logger.info('get - $url - $params');
     final uri = _buildUri(url: url, params: params);
     var response = await http.get(uri, headers: getHttpHeaders());
     return _handleResponse(response);
   }
 
   Future<http.Response> put(String url, Map<String, dynamic> data) async {
+    logger.info('put - $url - $data');
     final uri = _buildUri(url: url);
     var response = await http.put(uri, headers: getHttpHeaders(), body: data);
     return _handleResponse(response);
   }
 
   Future<http.Response> post(String url, Map<String, dynamic> data) async {
+    logger.info('put - $url - $data');
     final uri = _buildUri(url: url);
     var response = await http.post(uri, headers: getHttpHeaders(), body: data);
     return _handleResponse(response);
   }
 
   Future<http.Response> patch(String url, Map<String, dynamic> data) async {
+    logger.info('patch - $url - $data');
     final uri = _buildUri(url: url);
     var response = await http.patch(uri, headers: getHttpHeaders(), body: data);
     return _handleResponse(response);
   }
 
-  Future<http.Response> delete(String url, {Map<String, String> params = _emptyMap}) async {
+  Future<http.Response> delete(
+    String url, {
+    Map<String, String> params = _emptyMap,
+  }) async {
+    logger.info('delete - $url - $params');
     final uri = _buildUri(url: url, params: params);
     var response = await http.delete(uri, headers: getHttpHeaders());
     return _handleResponse(response);
@@ -107,8 +129,13 @@ class Client {
         "x-stream-client": getUserAgent(),
       };
 
-  Future<QueryChannelsResponse> queryChannels(QueryFilter filter,
-      List<SortOption> sort, Map<String, dynamic> options) async {
+  Future<QueryChannelsResponse> queryChannels(
+    QueryFilter filter,
+    List<SortOption> sort,
+    Map<String, dynamic> options,
+  ) async {
+    logger.info(
+        'queryChannels - filter: ${json.encode(filter)} - sort: ${json.encode(sort)} - options: $options');
     final Map<String, dynamic> defaultOptions = {
       "state": true,
       "watch": true,
@@ -127,8 +154,23 @@ class Client {
       payload.addAll(options);
     }
 
-    return get("/channels", params: {"payload": jsonEncode(payload)}).then(
-        (value) => QueryChannelsResponse.fromJson(json.decode(value.body)));
+    final response = await get("/channels", params: {
+      "payload": jsonEncode(payload),
+    });
+    return decode<QueryChannelsResponse>(
+      response.body,
+      QueryChannelsResponse.fromJson,
+    );
+  }
+
+  // Used to log errors and stacktrace in case of bad json deserialization
+  decode<T>(String j, T Function(Map<String, dynamic>) decoderFunction) {
+    try {
+      return decoderFunction(json.decode(j));
+    } catch (error, stacktrace) {
+      logger.severe('Error decoding response', error, stacktrace);
+      throw error;
+    }
   }
 
   _getAuthType() => _anonymous ? 'anonymous' : 'jwt';
@@ -189,71 +231,82 @@ class Client {
   Future<dynamic> search() async => null;
 
   Future<EmptyResponse> addDevice(String id, String pushProvider) async {
-    return post("/devices", {
+    final response = await post("/devices", {
       "id": id,
       "push_provider": pushProvider,
-    }).then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+    });
+    return decode(response.body, EmptyResponse.fromJson);
   }
 
   // TODO getDevices
   Future<dynamic> getDevices() async => null;
 
   Future<EmptyResponse> removeDevice(String id) async {
-    return delete("/devices", params: {
+    final response = await delete("/devices", params: {
       "id": id,
-    }).then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+    });
+    return decode(response.body, EmptyResponse.fromJson);
   }
 
-  Channel channel(
-      {@required String type, String id, Map<String, dynamic> custom}) {
+  Channel channel({
+    @required String type,
+    String id,
+    Map<String, dynamic> custom,
+  }) {
     return Channel(this, type, id, custom);
   }
 
   // TODO updateUser: parse response
   Future<EmptyResponse> updateUser(User user) async {
-    return post("/users", {
+    final response = await post("/users", {
       "users": {user.id: user.toJson()},
-    }).then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+    });
+    return decode(response.body, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> banUser(
       String targetUserID, Map<String, dynamic> options) async {
-    var data = Map<String, dynamic>.from(options)
+    final data = Map<String, dynamic>.from(options)
       ..addAll({
         "target_user_id": targetUserID,
       });
-    return post("/moderation/ban", data)
-        .then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+    final response = await post("/moderation/ban", data);
+    return decode(response.body, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> unbanUser(String targetUserID) async {
-    return delete("/moderation/ban", params: {
+    final response = await delete("/moderation/ban", params: {
       "target_user_id": targetUserID,
-    }).then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+    });
+    return decode(response.body, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> muteUser(String targetID) async {
-    return post("/moderation/mute", {
+    final response = await post("/moderation/mute", {
       "target_id": targetID,
-    }).then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+    });
+    return decode(response.body, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> unmuteUser(String targetID) async {
-    return post("/moderation/unmute", {
+    final response = await post("/moderation/unmute", {
       "target_id": targetID,
-    }).then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+    });
+    return decode(response.body, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> flagMessage(String messageID) async {
-    return post("/moderation/flag", {
+    final response = await post("/moderation/flag", {
       "target_message_id": messageID,
-    }).then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+    });
+    return decode(response.body, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> unflagMessage(String messageID) async {
-    return post("/moderation/unflag", {
+    final response = await post("/moderation/unflag", {
       "target_message_id": messageID,
-    }).then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+    });
+    return decode(response.body, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> markAllRead() async {
@@ -268,8 +321,8 @@ class Client {
   }
 
   Future<EmptyResponse> deleteMessage(String messageID) async {
-    return delete("/messages/$messageID")
-        .then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+    final response = await delete("/messages/$messageID");
+    return decode(response.body, EmptyResponse.fromJson);
   }
 
   // TODO getMessage: parse response correctly
