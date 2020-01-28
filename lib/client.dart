@@ -314,9 +314,8 @@ class Client {
     return decode(response.data, EmptyResponse.fromJson);
   }
 
-  // TODO getMessage: parse response correctly
-  Future<EmptyResponse> getMessage(String messageID) async {
+  Future<GetMessageResponse> getMessage(String messageID) async {
     final response = await dioClient.get<String>("/messages/$messageID");
-    return decode(response.data, EmptyResponse.fromJson);
+    return decode(response.data, GetMessageResponse.fromJson);
   }
 }
