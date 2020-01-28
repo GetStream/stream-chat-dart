@@ -179,6 +179,20 @@ class AddMembersResponse {
 }
 
 @JsonSerializable(explicitToJson: true)
+class DemoteModeratorsResponse {
+  Channel channel;
+  String duration;
+  List<Member> members;
+  Message message;
+
+  DemoteModeratorsResponse(this.duration, this.channel, this.message, this.members);
+
+  static DemoteModeratorsResponse fromJson(Map<String, dynamic> json) =>
+      _$DemoteModeratorsResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$DemoteModeratorsResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
 class EmptyResponse {
   String duration;
 

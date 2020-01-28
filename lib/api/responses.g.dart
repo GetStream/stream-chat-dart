@@ -255,6 +255,32 @@ Map<String, dynamic> _$AddMembersResponseToJson(AddMembersResponse instance) =>
       'message': instance.message?.toJson(),
     };
 
+DemoteModeratorsResponse _$DemoteModeratorsResponseFromJson(
+    Map<String, dynamic> json) {
+  return DemoteModeratorsResponse(
+    json['duration'] as String,
+    json['channel'] == null
+        ? null
+        : Channel.fromJson(json['channel'] as Map<String, dynamic>),
+    json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>),
+    (json['members'] as List)
+        ?.map((e) =>
+            e == null ? null : Member.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
+  );
+}
+
+Map<String, dynamic> _$DemoteModeratorsResponseToJson(
+        DemoteModeratorsResponse instance) =>
+    <String, dynamic>{
+      'channel': instance.channel?.toJson(),
+      'duration': instance.duration,
+      'members': instance.members?.map((e) => e?.toJson())?.toList(),
+      'message': instance.message?.toJson(),
+    };
+
 EmptyResponse _$EmptyResponseFromJson(Map<String, dynamic> json) {
   return EmptyResponse(
     json['duration'] as String,
