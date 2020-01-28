@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 import 'package:stream_chat_dart/api/channel.dart';
 import 'exceptions.dart';
@@ -15,34 +15,15 @@ import 'api/websocket.dart';
 
 typedef void LogHandlerFunction(LogRecord record);
 
-const Map<String, String> _emptyMap = {};
-
 class Client {
   static const defaultBaseURL = "chat-us-east-1.stream-io-api.com";
-
-  // TODO: keep-alive, connection timeout, connection pool (HttpClient dart:io)
-  Client(
-    this.apiKey, {
-    this.baseURL = defaultBaseURL,
-    this.logLevel = Level.WARNING,
-    LogHandlerFunction logHandlerFunction,
-    this.requestTimeout = const Duration(seconds: 6),
-  }) {
-    Logger.root.level = logLevel;
-    if (logHandlerFunction == null) {
-      logHandlerFunction = (LogRecord record) {
-        print(
-            '(${record.time}) ${record.level.name}: ${record.loggerName} | ${record.message}');
-      };
-    }
-    logger.onRecord.listen(logHandlerFunction);
-  }
 
   final Logger logger = Logger('HTTP');
   final Level logLevel;
   final String apiKey;
   final String baseURL;
-  final Duration requestTimeout;
+  final Dio dioClient = Dio();
+
   final _controller = StreamController<Event>.broadcast();
 
   Stream get stream => _controller.stream;
@@ -53,6 +34,64 @@ class Client {
   String _connectionId;
   WebSocket _ws;
 
+  // TODO: keep-alive, connection timeout, connection pool (HttpClient dart:io)
+  Client(
+    this.apiKey, {
+    this.baseURL = defaultBaseURL,
+    this.logLevel = Level.WARNING,
+    LogHandlerFunction logHandlerFunction,
+    Duration connectTimeout = const Duration(seconds: 6),
+    Duration receiveTimeout = const Duration(seconds: 6),
+  }) {
+    _setupLogger(logHandlerFunction);
+
+    dioClient.options.baseUrl = 'https://$baseURL';
+    dioClient.options.receiveTimeout = receiveTimeout.inMilliseconds;
+    dioClient.options.connectTimeout = connectTimeout.inMilliseconds;
+    dioClient.interceptors.add(InterceptorsWrapper(
+      onRequest: (options) async {
+        logger.info('''
+
+          method: ${options.method}
+          url: ${options.uri} 
+          headers: ${options.headers}
+          data: ${options.data.toString()}
+
+        ''');
+        options.queryParameters.addAll(commonQueryParams);
+        options.headers.addAll(httpHeaders);
+        return options;
+      },
+      onError: (error) async {
+        logger.severe(error.message, error);
+        return error;
+      },
+      onResponse: (response) async {
+        if (response.statusCode != 200) {
+          return dioClient.reject(ApiError(
+            response.data,
+            response.statusCode,
+          ));
+        }
+        return response;
+      },
+    ));
+  }
+
+  void _setupLogger(LogHandlerFunction logHandlerFunction) {
+    Logger.root.level = logLevel;
+    if (logHandlerFunction == null) {
+      logHandlerFunction = (LogRecord record) {
+        print(
+            '(${record.time}) ${record.level.name}: ${record.loggerName} | ${record.message}');
+        if (record.stackTrace != null) {
+          print(record.stackTrace);
+        }
+      };
+    }
+    logger.onRecord.listen(logHandlerFunction);
+  }
+
   Future<Event> setUser(User user, String token) {
     _user = user;
     _token = token;
@@ -61,6 +100,7 @@ class Client {
   }
 
   void dispose(filename) {
+    dioClient.close();
     _controller.close();
   }
 
@@ -69,61 +109,7 @@ class Client {
 
   void handleEvent(Event event) => _controller.add(event);
 
-  Uri _buildUri({@required String url, Map<String, String> params: _emptyMap}) {
-    var fullParams = new Map<String, String>.from(params)
-      ..addAll(getCommonQueryParams());
-    return Uri.https(baseURL, url, fullParams);
-  }
-
-  http.Response _handleResponse(http.Response response) {
-    if (response.statusCode != 200) {
-      throw ApiError(response.body, response.statusCode);
-    }
-    return response;
-  }
-
-  Future<http.Response> get(
-    String url, {
-    Map<String, String> params = _emptyMap,
-  }) async {
-    logger.info('get - $url - $params');
-    final uri = _buildUri(url: url, params: params);
-    var response = await http.get(uri, headers: getHttpHeaders());
-    return _handleResponse(response);
-  }
-
-  Future<http.Response> put(String url, Map<String, dynamic> data) async {
-    logger.info('put - $url - $data');
-    final uri = _buildUri(url: url);
-    var response = await http.put(uri, headers: getHttpHeaders(), body: data);
-    return _handleResponse(response);
-  }
-
-  Future<http.Response> post(String url, Map<String, dynamic> data) async {
-    logger.info('put - $url - $data');
-    final uri = _buildUri(url: url);
-    var response = await http.post(uri, headers: getHttpHeaders(), body: data);
-    return _handleResponse(response);
-  }
-
-  Future<http.Response> patch(String url, Map<String, dynamic> data) async {
-    logger.info('patch - $url - $data');
-    final uri = _buildUri(url: url);
-    var response = await http.patch(uri, headers: getHttpHeaders(), body: data);
-    return _handleResponse(response);
-  }
-
-  Future<http.Response> delete(
-    String url, {
-    Map<String, String> params = _emptyMap,
-  }) async {
-    logger.info('delete - $url - $params');
-    final uri = _buildUri(url: url, params: params);
-    var response = await http.delete(uri, headers: getHttpHeaders());
-    return _handleResponse(response);
-  }
-
-  Map<String, String> getHttpHeaders() => {
+  Map<String, String> get httpHeaders => {
         "Authorization": _token,
         "stream-auth-type": _getAuthType(),
         "x-stream-client": getUserAgent(),
@@ -154,11 +140,14 @@ class Client {
       payload.addAll(options);
     }
 
-    final response = await get("/channels", params: {
-      "payload": jsonEncode(payload),
-    });
+    final response = await dioClient.get<String>(
+      "/channels",
+      queryParameters: {
+        "payload": jsonEncode(payload),
+      },
+    );
     return decode<QueryChannelsResponse>(
-      response.body,
+      response.data,
       QueryChannelsResponse.fromJson,
     );
   }
@@ -178,7 +167,7 @@ class Client {
   // TODO: get the right version of the lib from the build toolchain
   getUserAgent() => "stream_chat_dart-client-0.0.1";
 
-  Map<String, String> getCommonQueryParams() => {
+  Map<String, String> get commonQueryParams => {
         "user_id": _user.id,
         "api_key": apiKey,
         "connection_id": _connectionId,
@@ -206,7 +195,7 @@ class Client {
   }
 
   // TODO
-  Future<http.Response> sendFile() async => null;
+  Future<Response> sendFile() async => null;
 
   // TODO setAnonymousUser
   Future<Event> setAnonymousUser() async => null;
@@ -215,8 +204,8 @@ class Client {
   Future<Event> setGuestUser(User user) async {
     var guestUser, guestToken;
     _anonymous = true;
-    var response = await post("/guest", {"user": user.toJson()})
-        .whenComplete(() => _anonymous = false);
+    var response = await dioClient.post<String>("/guest",
+        data: {"user": user.toJson()}).whenComplete(() => _anonymous = false);
     // TODO: parse response into guestUser and guestToken
     return setUser(guestUser, guestToken);
   }
@@ -231,21 +220,21 @@ class Client {
   Future<dynamic> search() async => null;
 
   Future<EmptyResponse> addDevice(String id, String pushProvider) async {
-    final response = await post("/devices", {
+    final response = await dioClient.post<String>("/devices", data: {
       "id": id,
       "push_provider": pushProvider,
     });
-    return decode(response.body, EmptyResponse.fromJson);
+    return decode(response.data, EmptyResponse.fromJson);
   }
 
   // TODO getDevices
   Future<dynamic> getDevices() async => null;
 
   Future<EmptyResponse> removeDevice(String id) async {
-    final response = await delete("/devices", params: {
+    final response = await dioClient.delete<String>("/devices", queryParameters: {
       "id": id,
     });
-    return decode(response.body, EmptyResponse.fromJson);
+    return decode(response.data, EmptyResponse.fromJson);
   }
 
   Channel channel({
@@ -258,10 +247,10 @@ class Client {
 
   // TODO updateUser: parse response
   Future<EmptyResponse> updateUser(User user) async {
-    final response = await post("/users", {
+    final response = await dioClient.post<String>("/users", data: {
       "users": {user.id: user.toJson()},
     });
-    return decode(response.body, EmptyResponse.fromJson);
+    return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> banUser(
@@ -270,64 +259,65 @@ class Client {
       ..addAll({
         "target_user_id": targetUserID,
       });
-    final response = await post("/moderation/ban", data);
-    return decode(response.body, EmptyResponse.fromJson);
+    final response = await dioClient.post<String>("/moderation/ban", data: data);
+    return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> unbanUser(String targetUserID) async {
-    final response = await delete("/moderation/ban", params: {
+    final response =
+        await dioClient.delete<String>("/moderation/ban", queryParameters: {
       "target_user_id": targetUserID,
     });
-    return decode(response.body, EmptyResponse.fromJson);
+    return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> muteUser(String targetID) async {
-    final response = await post("/moderation/mute", {
+    final response = await dioClient.post<String>("/moderation/mute", data: {
       "target_id": targetID,
     });
-    return decode(response.body, EmptyResponse.fromJson);
+    return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> unmuteUser(String targetID) async {
-    final response = await post("/moderation/unmute", {
+    final response = await dioClient.post<String>("/moderation/unmute", data: {
       "target_id": targetID,
     });
-    return decode(response.body, EmptyResponse.fromJson);
+    return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> flagMessage(String messageID) async {
-    final response = await post("/moderation/flag", {
+    final response = await dioClient.post<String>("/moderation/flag", data: {
       "target_message_id": messageID,
     });
-    return decode(response.body, EmptyResponse.fromJson);
+    return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> unflagMessage(String messageID) async {
-    final response = await post("/moderation/unflag", {
+    final response = await dioClient.post<String>("/moderation/unflag", data: {
       "target_message_id": messageID,
     });
-    return decode(response.body, EmptyResponse.fromJson);
+    return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> markAllRead() async {
-    return post("/channels/read", {})
-        .then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+    return dioClient.post<String>("/channels/read").then(
+        (res) => EmptyResponse.fromJson(json.decode(res.data)));
   }
 
   // TODO updateMessage: parse response correctly
   Future<EmptyResponse> updateMessage(Message message) async {
-    return post("/messages/${message.id}", {})
-        .then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+    return dioClient.post<String>("/messages/${message.id}").then(
+        (res) => EmptyResponse.fromJson(json.decode(res.data)));
   }
 
   Future<EmptyResponse> deleteMessage(String messageID) async {
-    final response = await delete("/messages/$messageID");
-    return decode(response.body, EmptyResponse.fromJson);
+    final response = await dioClient.delete<String>("/messages/$messageID");
+    return decode(response.data, EmptyResponse.fromJson);
   }
 
   // TODO getMessage: parse response correctly
   Future<EmptyResponse> getMessage(String messageID) async {
-    return get("/messages/$messageID")
-        .then((value) => EmptyResponse.fromJson(json.decode(value.body)));
+    return dioClient.get<String>("/messages/$messageID").then(
+        (res) => EmptyResponse.fromJson(json.decode(res.data)));
   }
 }

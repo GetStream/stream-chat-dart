@@ -11,11 +11,13 @@ Read _$ReadFromJson(Map<String, dynamic> json) {
     json['last_read'] == null
         ? null
         : DateTime.parse(json['last_read'] as String),
-    json['user'] as String,
+    json['user'] == null
+        ? null
+        : User.fromJson(json['user'] as Map<String, dynamic>),
   );
 }
 
 Map<String, dynamic> _$ReadToJson(Read instance) => <String, dynamic>{
       'last_read': instance.lastRead?.toIso8601String(),
-      'user': instance.user,
+      'user': instance.user?.toJson(),
     };
