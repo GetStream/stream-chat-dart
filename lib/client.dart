@@ -177,7 +177,7 @@ class Client {
   }
 
   // Used to log errors and stacktrace in case of bad json deserialization
-  decode<T>(String j, T Function(Map<String, dynamic>) decoderFunction) {
+  T decode<T>(String j, T Function(Map<String, dynamic>) decoderFunction) {
     try {
       return decoderFunction(json.decode(j));
     } catch (error, stacktrace) {

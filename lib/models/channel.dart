@@ -54,10 +54,21 @@ class Channel {
     'members',
   ];
 
-
-  Channel(this.id, this.type, this.cid, this.config, this.createdBy,
-      this.frozen, this.lastMessageAt, this.createdAt, this.updatedAt,
-      this.deletedAt, this.memberCount, this.members, this.extraData);
+  Channel(
+    this.id,
+    this.type,
+    this.cid,
+    this.config,
+    this.createdBy,
+    this.frozen,
+    this.lastMessageAt,
+    this.createdAt,
+    this.updatedAt,
+    this.deletedAt,
+    this.memberCount,
+    this.members,
+    this.extraData,
+  );
 
   factory Channel.fromJson(Map<String, dynamic> json) {
     return _$ChannelFromJson(
@@ -65,6 +76,9 @@ class Channel {
   }
 
   Map<String, dynamic> toJson() {
-    return Serialization.moveKeysToMapInPlace(_$ChannelToJson(this), topLevelFields);
+    return Serialization.moveKeysToMapInPlace(
+      _$ChannelToJson(this),
+      topLevelFields,
+    );
   }
 }

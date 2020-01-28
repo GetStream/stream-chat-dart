@@ -31,7 +31,7 @@ class Channel {
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
-  Future<EmptyResponse> sendFile(MultipartFile file) async {
+  Future<SendFileResponse> sendFile(MultipartFile file) async {
     final response = await _client.dioClient.post<String>(
       "$channelURL/file",
       data: FormData.fromMap({'file': file}),
@@ -39,7 +39,7 @@ class Channel {
     return _client.decode(response.data, SendFileResponse.fromJson);
   }
 
-  Future<EmptyResponse> sendImage(MultipartFile file) async {
+  Future<SendImageResponse> sendImage(MultipartFile file) async {
     final response = await _client.dioClient.post<String>(
       "$channelURL/image",
       data: FormData.fromMap({'file': file}),
@@ -68,7 +68,7 @@ class Channel {
     });
   }
 
-  Future<EmptyResponse> sendReaction(
+  Future<SendReactionResponse> sendReaction(
     String messageID,
     Reaction reaction,
   ) async {
@@ -100,7 +100,7 @@ class Channel {
 
   Future<EmptyResponse> truncate() async {
     final response =
-        await _client.dioClient.post<String>("${channelURL}/truncate");
+        await _client.dioClient.post<String>("$channelURL/truncate");
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
@@ -118,12 +118,11 @@ class Channel {
     }).then((res) => EmptyResponse.fromJson(json.decode(res.data)));
   }
 
-  // TODO addModerators response type
-  Future<EmptyResponse> addModerators(List<Member> members, Message message) {
+  Future<AddModeratorsResponse> addModerators(List<Member> moderators, Message message) {
     return _client.dioClient.post<String>(channelURL, data: {
-      "add_moderators": members.map((m) => m.toJson()),
+      "add_moderators": moderators.map((m) => m.toJson()),
       "message": message.toJson(),
-    }).then((res) => EmptyResponse.fromJson(json.decode(res.data)));
+    }).then((res) => AddModeratorsResponse.fromJson(json.decode(res.data)));
   }
 
   // TODO inviteMembers response type

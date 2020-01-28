@@ -1,3 +1,5 @@
+import 'package:stream_chat_dart/models/channel.dart';
+import 'package:stream_chat_dart/models/member.dart';
 import 'package:stream_chat_dart/models/message.dart';
 import 'package:stream_chat_dart/models/reaction.dart';
 
@@ -51,6 +53,19 @@ class SendReactionResponse {
 
   static SendReactionResponse fromJson(Map<String, dynamic> json) => _$SendReactionResponseFromJson(json);
   Map<String, dynamic> toJson() => _$SendReactionResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class AddModeratorsResponse {
+  Channel channel;
+  List<Member> members;
+  Message message;
+  String duration;
+
+  AddModeratorsResponse(this.duration, this.message, this.members);
+
+  static AddModeratorsResponse fromJson(Map<String, dynamic> json) => _$AddModeratorsResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$AddModeratorsResponseToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
