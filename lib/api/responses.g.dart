@@ -70,6 +70,24 @@ Map<String, dynamic> _$SendReactionResponseToJson(
       'duration': instance.duration,
     };
 
+SetGuestUserResponse _$SetGuestUserResponseFromJson(Map<String, dynamic> json) {
+  return SetGuestUserResponse(
+    json['duration'] as String,
+    json['access_token'] as String,
+    json['user'] == null
+        ? null
+        : User.fromJson(json['user'] as Map<String, dynamic>),
+  );
+}
+
+Map<String, dynamic> _$SetGuestUserResponseToJson(
+        SetGuestUserResponse instance) =>
+    <String, dynamic>{
+      'access_token': instance.accessToken,
+      'user': instance.user?.toJson(),
+      'duration': instance.duration,
+    };
+
 AddModeratorsResponse _$AddModeratorsResponseFromJson(
     Map<String, dynamic> json) {
   return AddModeratorsResponse(

@@ -2,6 +2,7 @@ import 'package:stream_chat_dart/models/channel.dart';
 import 'package:stream_chat_dart/models/member.dart';
 import 'package:stream_chat_dart/models/message.dart';
 import 'package:stream_chat_dart/models/reaction.dart';
+import 'package:stream_chat_dart/models/user.dart';
 
 import '../models/channel_state.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -57,6 +58,20 @@ class SendReactionResponse {
   static SendReactionResponse fromJson(Map<String, dynamic> json) =>
       _$SendReactionResponseFromJson(json);
   Map<String, dynamic> toJson() => _$SendReactionResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class SetGuestUserResponse {
+  @JsonKey(name: 'access_token')
+  String accessToken;
+  User user;
+  String duration;
+
+  SetGuestUserResponse(this.duration, this.accessToken, this.user);
+
+  static SetGuestUserResponse fromJson(Map<String, dynamic> json) =>
+      _$SetGuestUserResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$SetGuestUserResponseToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)

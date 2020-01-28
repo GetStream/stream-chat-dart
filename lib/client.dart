@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:dio_flutter_transformer/dio_flutter_transformer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:logging/logging.dart';
 import 'package:stream_chat_dart/api/channel.dart';
@@ -200,14 +199,13 @@ class Client {
   // TODO setAnonymousUser
   Future<Event> setAnonymousUser() async => null;
 
-  // TODO setGuestUser
   Future<Event> setGuestUser(User user) async {
-    var guestUser, guestToken;
     _anonymous = true;
-    var response = await dioClient.post<String>("/guest",
-        data: {"user": user.toJson()}).whenComplete(() => _anonymous = false);
-    // TODO: parse response into guestUser and guestToken
-    return setUser(guestUser, guestToken);
+    final response = await dioClient
+        .post<String>("/guest", data: {"user": user.toJson()})
+        .then((res) => decode(res.data, SetGuestUserResponse.fromJson))
+        .whenComplete(() => _anonymous = false);
+    return setUser(response.user, response.accessToken);
   }
 
   // TODO disconnect
