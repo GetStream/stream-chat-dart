@@ -87,6 +87,18 @@ class UpdateUsersResponse {
 }
 
 @JsonSerializable(explicitToJson: true)
+class UpdateMessageResponse {
+  Message message;
+  String duration;
+
+  UpdateMessageResponse(this.duration, this.message);
+
+  static UpdateMessageResponse fromJson(Map<String, dynamic> json) =>
+      _$UpdateMessageResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$UpdateMessageResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
 class AddModeratorsResponse {
   Channel channel;
   List<Member> members;

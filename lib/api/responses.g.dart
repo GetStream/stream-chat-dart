@@ -105,6 +105,23 @@ Map<String, dynamic> _$UpdateUsersResponseToJson(
       'duration': instance.duration,
     };
 
+UpdateMessageResponse _$UpdateMessageResponseFromJson(
+    Map<String, dynamic> json) {
+  return UpdateMessageResponse(
+    json['duration'] as String,
+    json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>),
+  );
+}
+
+Map<String, dynamic> _$UpdateMessageResponseToJson(
+        UpdateMessageResponse instance) =>
+    <String, dynamic>{
+      'message': instance.message?.toJson(),
+      'duration': instance.duration,
+    };
+
 AddModeratorsResponse _$AddModeratorsResponseFromJson(
     Map<String, dynamic> json) {
   return AddModeratorsResponse(

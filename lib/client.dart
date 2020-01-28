@@ -304,11 +304,10 @@ class Client {
         .then((res) => EmptyResponse.fromJson(json.decode(res.data)));
   }
 
-  // TODO updateMessage: parse response correctly
-  Future<EmptyResponse> updateMessage(Message message) async {
+  Future<UpdateMessageResponse> updateMessage(Message message) async {
     return dioClient
         .post<String>("/messages/${message.id}")
-        .then((res) => EmptyResponse.fromJson(json.decode(res.data)));
+        .then((res) => decode(res.data, UpdateMessageResponse.fromJson));
   }
 
   Future<EmptyResponse> deleteMessage(String messageID) async {
