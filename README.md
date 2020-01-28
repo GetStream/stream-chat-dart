@@ -2,7 +2,7 @@
 
 ![](https://img.shields.io/badge/platform-flutter%20%7C%20flutter%20web-ff69b4.svg?style=flat-square)
 
-stream-chat-dart is the official Dart client for Stream Chat, a service for building chat applications.
+stream-chat-dart is the official Dart client for Stream Chat, a service for building chat applications. This library can be used on any Dart project and on both mobile and web apps with Flutter.
 
 You can sign up for a Stream account at https://getstream.io/chat/
 
@@ -58,7 +58,22 @@ myLogHandlerFunction = (LogRecord record) {
 var client = Client("stream-chat-api-key", logHandlerFunction: myLogHandlerFunction);
 ```
 
+## Contributing
+
+### Code conventions
+
+- Make sure that you run `dartfmt` before commiting your code
+- Make sure all public methods and functions are well documented
+
+### Running tests 
+
+### Releasing a new version
+
+TODO: 
+
 ### Watch models and generate JSON code
+
+JSON serialization relies on code generation; make sure to keep that running while you make changes to the library
 
 ```bash
 flutter pub run build_runner watch
