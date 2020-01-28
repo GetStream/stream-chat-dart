@@ -26,7 +26,9 @@ class ChannelListState extends State<ChannelList> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    channels = StreamChatContainer.of(context).client.queryChannels(widget.filter, widget.sort, widget.options);
+    channels = StreamChatContainer.of(context)
+        .client
+        .queryChannels(widget.filter, widget.sort, widget.options);
   }
 
   @override
@@ -46,7 +48,8 @@ class ChannelListState extends State<ChannelList> {
                     if (i < _channels.length) {
                       return Column(
                         children: <Widget>[
-                          ChannelPreview(channel: _channels[i].channel).build(context),
+                          ChannelPreview(channel: _channels[i].channel)
+                              .build(context),
                         ],
                       );
                     } else {
@@ -58,9 +61,7 @@ class ChannelListState extends State<ChannelList> {
               return Text(snapshot.error.toString());
             }
             return CircularProgressIndicator();
-          }
-      ),
+          }),
     );
   }
-
 }

@@ -5,7 +5,6 @@ part 'user.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class User {
-
   String id;
 
   @JsonKey(includeIfNull: false)
@@ -18,12 +17,11 @@ class User {
   User(this.id, this.extraData);
 
   factory User.fromJson(Map<String, dynamic> json) {
-    return _$UserFromJson(
-        Serialization.moveKeysToRoot(json, topLevelFields));
+    return _$UserFromJson(Serialization.moveKeysToRoot(json, topLevelFields));
   }
 
   Map<String, dynamic> toJson() {
-    return Serialization.moveKeysToMapInPlace(_$UserToJson(this), topLevelFields);
+    return Serialization.moveKeysToMapInPlace(
+        _$UserToJson(this), topLevelFields);
   }
-
 }

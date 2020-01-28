@@ -5,7 +5,7 @@ import 'action.dart';
 part 'attachment.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-class Attachment{
+class Attachment {
   String type;
 
   @JsonKey(name: 'title_link')
@@ -71,16 +71,30 @@ class Attachment{
     'actions',
   ];
 
-  Attachment(this.type, this.titleLink, this.title, this.thumbURL, this.text,
-      this.pretext, this.ogScrapeURL, this.imageURL, this.footerIcon,
-      this.footer, this.fields, this.fallback, this.color, this.authorName,
-      this.authorLink, this.authorIcon, this.assetURL, this.actions,
+  Attachment(
+      this.type,
+      this.titleLink,
+      this.title,
+      this.thumbURL,
+      this.text,
+      this.pretext,
+      this.ogScrapeURL,
+      this.imageURL,
+      this.footerIcon,
+      this.footer,
+      this.fields,
+      this.fallback,
+      this.color,
+      this.authorName,
+      this.authorLink,
+      this.authorIcon,
+      this.assetURL,
+      this.actions,
       this.extraData);
 
   factory Attachment.fromJson(Map<String, dynamic> json) =>
       _$AttachmentFromJson(Serialization.moveKeysToRoot(json, topLevelFields));
 
-  Map<String, dynamic> toJson() =>
-      Serialization.moveKeysToMapInPlace(_$AttachmentToJson(this), topLevelFields);
-
+  Map<String, dynamic> toJson() => Serialization.moveKeysToMapInPlace(
+      _$AttachmentToJson(this), topLevelFields);
 }

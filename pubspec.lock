@@ -162,6 +162,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.3.3"
+  dio:
+    dependency: "direct main"
+    description:
+      name: dio
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.8"
+  dio_flutter_transformer:
+    dependency: "direct main"
+    description:
+      name: dio_flutter_transformer
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.2"
   english_words:
     dependency: "direct main"
     description:
@@ -208,7 +222,7 @@ packages:
     source: hosted
     version: "0.14.0+3"
   http:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: http
       url: "https://pub.dartlang.org"

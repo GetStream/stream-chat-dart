@@ -14,7 +14,6 @@ import '../models/user.dart';
 // TODO: if parsing an error into an event fails we should not hide the original error
 // TODO: implement reconnection logic
 class WebSocket {
-
   final String baseUrl;
   final User user;
   final Map<String, String> connectParams;
@@ -41,26 +40,22 @@ class WebSocket {
     data["user_details"] = user.toJson();
 
     qs["json"] = json.encode(data);
-    
+
     var uri = Uri.https(baseUrl, "connect", qs);
     var path = uri.toString().replaceFirst("https", "wss");
 
     var channel = HtmlWebSocketChannel.connect(path);
-    channel.stream.listen(
-      (data) {
-        final event = decodeEvent(data);
-        if (_resolved) {
-          handler(event);
-        } else {
-          _resolved = true;
-          completer.complete(event);
-        }
-      },
-      onError: (error) {
-        completer.completeError(error);
+    channel.stream.listen((data) {
+      final event = decodeEvent(data);
+      if (_resolved) {
+        handler(event);
+      } else {
+        _resolved = true;
+        completer.complete(event);
       }
-    );
+    }, onError: (error) {
+      completer.completeError(error);
+    });
     return completer.future;
   }
-
 }

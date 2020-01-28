@@ -17,7 +17,8 @@ class StreamChatContainer extends StatefulWidget {
   }) : state = StreamChatState(client);
 
   static StreamChatState of(BuildContext context) {
-    final _InheritedStateContainer inheritedStateContainer = context.dependOnInheritedWidgetOfExactType<_InheritedStateContainer>();
+    final _InheritedStateContainer inheritedStateContainer =
+        context.dependOnInheritedWidgetOfExactType<_InheritedStateContainer>();
     return inheritedStateContainer.data.state;
   }
 
