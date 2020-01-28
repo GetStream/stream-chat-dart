@@ -135,6 +135,18 @@ class AddModeratorsResponse {
 }
 
 @JsonSerializable(explicitToJson: true)
+class InviteMembersResponse {
+  Channel channel;
+  String duration;
+
+  InviteMembersResponse(this.duration, this.channel);
+
+  static InviteMembersResponse fromJson(Map<String, dynamic> json) =>
+      _$InviteMembersResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$InviteMembersResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
 class AddMembersResponse {
   Channel channel;
   String duration;

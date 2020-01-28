@@ -170,6 +170,23 @@ Map<String, dynamic> _$AddModeratorsResponseToJson(
       'duration': instance.duration,
     };
 
+InviteMembersResponse _$InviteMembersResponseFromJson(
+    Map<String, dynamic> json) {
+  return InviteMembersResponse(
+    json['duration'] as String,
+    json['channel'] == null
+        ? null
+        : Channel.fromJson(json['channel'] as Map<String, dynamic>),
+  );
+}
+
+Map<String, dynamic> _$InviteMembersResponseToJson(
+        InviteMembersResponse instance) =>
+    <String, dynamic>{
+      'channel': instance.channel?.toJson(),
+      'duration': instance.duration,
+    };
+
 AddMembersResponse _$AddMembersResponseFromJson(Map<String, dynamic> json) {
   return AddMembersResponse(
     json['duration'] as String,

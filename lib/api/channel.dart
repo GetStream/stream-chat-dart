@@ -119,19 +119,25 @@ class Channel {
   }
 
   Future<AddModeratorsResponse> addModerators(
-      List<Member> moderators, Message message) {
-    return _client.dioClient.post<String>(channelURL, data: {
+    List<Member> moderators,
+    Message message,
+  ) async {
+    final res = await _client.dioClient.post<String>(channelURL, data: {
       "add_moderators": moderators.map((m) => m.toJson()),
       "message": message.toJson(),
-    }).then((res) => AddModeratorsResponse.fromJson(json.decode(res.data)));
+    });
+    return _client.decode(res.data, AddModeratorsResponse.fromJson);
   }
 
-  // TODO inviteMembers response type
-  Future<EmptyResponse> inviteMembers(List<Member> members, Message message) {
-    return _client.dioClient.post<String>(channelURL, data: {
+  Future<InviteMembersResponse> inviteMembers(
+    List<Member> members,
+    Message message,
+  ) async {
+    final res = await _client.dioClient.post<String>(channelURL, data: {
       "invites": members.map((m) => m.toJson()),
       "message": message.toJson(),
-    }).then((res) => EmptyResponse.fromJson(json.decode(res.data)));
+    });
+    return _client.decode(res.data, InviteMembersResponse.fromJson);
   }
 
   // TODO removeMembers response type
