@@ -30,7 +30,7 @@ class Client {
   }) {
     Logger.root.level = logLevel;
     if (logHandlerFunction == null) {
-      logHandlerFunction = (record) {
+      logHandlerFunction = (LogRecord record) {
         print(
             '(${record.time}) ${record.level.name}: ${record.loggerName} | ${record.message}');
       };
