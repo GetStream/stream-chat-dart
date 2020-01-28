@@ -99,6 +99,18 @@ class UpdateMessageResponse {
 }
 
 @JsonSerializable(explicitToJson: true)
+class SendMessageResponse {
+  Message message;
+  String duration;
+
+  SendMessageResponse(this.duration, this.message);
+
+  static SendMessageResponse fromJson(Map<String, dynamic> json) =>
+      _$SendMessageResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$SendMessageResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
 class GetMessageResponse {
   Message message;
   String duration;

@@ -122,6 +122,22 @@ Map<String, dynamic> _$UpdateMessageResponseToJson(
       'duration': instance.duration,
     };
 
+SendMessageResponse _$SendMessageResponseFromJson(Map<String, dynamic> json) {
+  return SendMessageResponse(
+    json['duration'] as String,
+    json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>),
+  );
+}
+
+Map<String, dynamic> _$SendMessageResponseToJson(
+        SendMessageResponse instance) =>
+    <String, dynamic>{
+      'message': instance.message?.toJson(),
+      'duration': instance.duration,
+    };
+
 GetMessageResponse _$GetMessageResponseFromJson(Map<String, dynamic> json) {
   return GetMessageResponse(
     json['duration'] as String,

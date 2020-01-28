@@ -22,13 +22,12 @@ class Channel {
 
   String get channelURL => "/channels/$type/$id";
 
-  // TODO: sendMessage response type
-  Future<EmptyResponse> sendMessage(Message message) async {
+  Future<SendMessageResponse> sendMessage(Message message) async {
     final response = await _client.dioClient.post<String>(
       "$channelURL/message",
       data: {"message": message.toJson()},
     );
-    return _client.decode(response.data, EmptyResponse.fromJson);
+    return _client.decode(response.data, SendMessageResponse.fromJson);
   }
 
   Future<SendFileResponse> sendFile(MultipartFile file) async {
