@@ -24,6 +24,10 @@ ChannelState _$ChannelStateFromJson(Map<String, dynamic> json) {
         ?.map(
             (e) => e == null ? null : User.fromJson(e as Map<String, dynamic>))
         ?.toList(),
+    (json['read'] as List)
+        ?.map(
+            (e) => e == null ? null : Read.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
   );
 }
 
@@ -34,4 +38,5 @@ Map<String, dynamic> _$ChannelStateToJson(ChannelState instance) =>
       'members': instance.members?.map((e) => e?.toJson())?.toList(),
       'watcher_count': instance.watcherCount,
       'watchers': instance.watchers?.map((e) => e?.toJson())?.toList(),
+      'read': instance.read?.map((e) => e?.toJson())?.toList(),
     };
