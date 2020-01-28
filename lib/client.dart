@@ -34,7 +34,6 @@ class Client {
   String _connectionId;
   WebSocket _ws;
 
-  // TODO: keep-alive, connection timeout, connection pool (HttpClient dart:io)
   Client(
     this.apiKey, {
     this.baseURL = defaultBaseURL,
@@ -44,19 +43,22 @@ class Client {
     Duration receiveTimeout = const Duration(seconds: 6),
   }) {
     _setupLogger(logHandlerFunction);
+    _setupDio(receiveTimeout, connectTimeout);
+  }
 
+  void _setupDio(Duration receiveTimeout, Duration connectTimeout) {
     dioClient.options.baseUrl = 'https://$baseURL';
     dioClient.options.receiveTimeout = receiveTimeout.inMilliseconds;
     dioClient.options.connectTimeout = connectTimeout.inMilliseconds;
     dioClient.interceptors.add(InterceptorsWrapper(
       onRequest: (options) async {
         logger.info('''
-
+    
           method: ${options.method}
           url: ${options.uri} 
           headers: ${options.headers}
           data: ${options.data.toString()}
-
+    
         ''');
         options.queryParameters.addAll(commonQueryParams);
         options.headers.addAll(httpHeaders);
@@ -92,6 +94,17 @@ class Client {
     logger.onRecord.listen(logHandlerFunction);
   }
 
+  void dispose(filename) {
+    dioClient.close();
+    _controller.close();
+  }
+
+  Map<String, String> get httpHeaders => {
+        "Authorization": _token,
+        "stream-auth-type": _getAuthType(),
+        "x-stream-client": getUserAgent(),
+      };
+
   Future<Event> setUser(User user, String token) {
     _user = user;
     _token = token;
@@ -99,21 +112,31 @@ class Client {
     return connect();
   }
 
-  void dispose(filename) {
-    dioClient.close();
-    _controller.close();
-  }
-
   Stream<Event> on(String eventType) =>
       stream.where((event) => eventType == null || event.type == eventType);
 
   void handleEvent(Event event) => _controller.add(event);
 
-  Map<String, String> get httpHeaders => {
-        "Authorization": _token,
-        "stream-auth-type": _getAuthType(),
-        "x-stream-client": getUserAgent(),
-      };
+  Future<Event> connect() async {
+    _ws = WebSocket(
+        baseURL,
+        _user,
+        {
+          "api_key": apiKey,
+          "authorization": _token,
+          "stream-auth-type": _getAuthType(),
+        },
+        {
+          "user_id": _user.id,
+          "server_determines_connection_id": true,
+        },
+        handleEvent);
+
+    var connectionFuture = _ws.connect();
+    var connectEvent = await connectionFuture;
+    _connectionId = connectEvent.connectionID;
+    return connectionFuture;
+  }
 
   Future<QueryChannelsResponse> queryChannels(
     QueryFilter filter,
@@ -173,27 +196,6 @@ class Client {
         "connection_id": _connectionId,
       };
 
-  Future<Event> connect() async {
-    _ws = WebSocket(
-        baseURL,
-        _user,
-        {
-          "api_key": apiKey,
-          "authorization": _token,
-          "stream-auth-type": _getAuthType(),
-        },
-        {
-          "user_id": _user.id,
-          "server_determines_connection_id": true,
-        },
-        handleEvent);
-
-    var connectionFuture = _ws.connect();
-    var connectEvent = await connectionFuture;
-    _connectionId = connectEvent.connectionID;
-    return connectionFuture;
-  }
-
   // TODO
   Future<Response> sendFile() async => null;
 
@@ -231,7 +233,8 @@ class Client {
   Future<dynamic> getDevices() async => null;
 
   Future<EmptyResponse> removeDevice(String id) async {
-    final response = await dioClient.delete<String>("/devices", queryParameters: {
+    final response =
+        await dioClient.delete<String>("/devices", queryParameters: {
       "id": id,
     });
     return decode(response.data, EmptyResponse.fromJson);
@@ -259,7 +262,8 @@ class Client {
       ..addAll({
         "target_user_id": targetUserID,
       });
-    final response = await dioClient.post<String>("/moderation/ban", data: data);
+    final response =
+        await dioClient.post<String>("/moderation/ban", data: data);
     return decode(response.data, EmptyResponse.fromJson);
   }
 
@@ -300,14 +304,16 @@ class Client {
   }
 
   Future<EmptyResponse> markAllRead() async {
-    return dioClient.post<String>("/channels/read").then(
-        (res) => EmptyResponse.fromJson(json.decode(res.data)));
+    return dioClient
+        .post<String>("/channels/read")
+        .then((res) => EmptyResponse.fromJson(json.decode(res.data)));
   }
 
   // TODO updateMessage: parse response correctly
   Future<EmptyResponse> updateMessage(Message message) async {
-    return dioClient.post<String>("/messages/${message.id}").then(
-        (res) => EmptyResponse.fromJson(json.decode(res.data)));
+    return dioClient
+        .post<String>("/messages/${message.id}")
+        .then((res) => EmptyResponse.fromJson(json.decode(res.data)));
   }
 
   Future<EmptyResponse> deleteMessage(String messageID) async {
@@ -317,7 +323,8 @@ class Client {
 
   // TODO getMessage: parse response correctly
   Future<EmptyResponse> getMessage(String messageID) async {
-    return dioClient.get<String>("/messages/$messageID").then(
-        (res) => EmptyResponse.fromJson(json.decode(res.data)));
+    return dioClient
+        .get<String>("/messages/$messageID")
+        .then((res) => EmptyResponse.fromJson(json.decode(res.data)));
   }
 }
