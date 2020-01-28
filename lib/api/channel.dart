@@ -22,13 +22,12 @@ class Channel {
 
   String get channelURL => "/channels/$type/$id";
 
-  // TODO: sendMessage response type
-  Future<EmptyResponse> sendMessage(Message message) async {
+  Future<SendMessageResponse> sendMessage(Message message) async {
     final response = await _client.dioClient.post<String>(
       "$channelURL/message",
       data: {"message": message.toJson()},
     );
-    return _client.decode(response.data, EmptyResponse.fromJson);
+    return _client.decode(response.data, SendMessageResponse.fromJson);
   }
 
   Future<SendFileResponse> sendFile(MultipartFile file) async {
@@ -110,45 +109,53 @@ class Channel {
   // TODO rejectInvite, options??
   Future<EmptyResponse> rejectInvite() async => null;
 
-  // TODO addMembers response type
-  Future<EmptyResponse> addMembers(List<Member> members, Message message) {
-    return _client.dioClient.post<String>(channelURL, data: {
+  Future<AddMembersResponse> addMembers(
+      List<Member> members, Message message) async {
+    final res = await _client.dioClient.post<String>(channelURL, data: {
       "add_members": members.map((m) => m.toJson()),
       "message": message.toJson(),
-    }).then((res) => EmptyResponse.fromJson(json.decode(res.data)));
+    });
+    return _client.decode(res.data, AddMembersResponse.fromJson);
   }
 
   Future<AddModeratorsResponse> addModerators(
-      List<Member> moderators, Message message) {
-    return _client.dioClient.post<String>(channelURL, data: {
+    List<Member> moderators,
+    Message message,
+  ) async {
+    final res = await _client.dioClient.post<String>(channelURL, data: {
       "add_moderators": moderators.map((m) => m.toJson()),
       "message": message.toJson(),
-    }).then((res) => AddModeratorsResponse.fromJson(json.decode(res.data)));
+    });
+    return _client.decode(res.data, AddModeratorsResponse.fromJson);
   }
 
-  // TODO inviteMembers response type
-  Future<EmptyResponse> inviteMembers(List<Member> members, Message message) {
-    return _client.dioClient.post<String>(channelURL, data: {
+  Future<InviteMembersResponse> inviteMembers(
+    List<Member> members,
+    Message message,
+  ) async {
+    final res = await _client.dioClient.post<String>(channelURL, data: {
       "invites": members.map((m) => m.toJson()),
       "message": message.toJson(),
-    }).then((res) => EmptyResponse.fromJson(json.decode(res.data)));
+    });
+    return _client.decode(res.data, InviteMembersResponse.fromJson);
   }
 
-  // TODO removeMembers response type
-  Future<EmptyResponse> removeMembers(List<Member> members, Message message) {
-    return _client.dioClient.post<String>(channelURL, data: {
+  Future<RemoveMembersResponse> removeMembers(
+      List<Member> members, Message message) async {
+    final res = await _client.dioClient.post<String>(channelURL, data: {
       "remove_members": members.map((m) => m.toJson()),
       "message": message.toJson(),
-    }).then((res) => EmptyResponse.fromJson(json.decode(res.data)));
+    });
+    return _client.decode(res.data, RemoveMembersResponse.fromJson);
   }
 
-  // TODO demoteModerators response type
-  Future<EmptyResponse> demoteModerators(
-      List<Member> members, Message message) {
-    return _client.dioClient.post<String>(channelURL, data: {
+  Future<DemoteModeratorsResponse> demoteModerators(
+      List<Member> members, Message message) async {
+    final res = await _client.dioClient.post<String>(channelURL, data: {
       "demote_moderators": members.map((m) => m.toJson()),
       "message": message.toJson(),
-    }).then((res) => EmptyResponse.fromJson(json.decode(res.data)));
+    });
+    return _client.decode(res.data, DemoteModeratorsResponse.fromJson);
   }
 
   // TODO sendAction (see Run Message Action)

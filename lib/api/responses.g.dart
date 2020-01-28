@@ -70,10 +70,96 @@ Map<String, dynamic> _$SendReactionResponseToJson(
       'duration': instance.duration,
     };
 
+SetGuestUserResponse _$SetGuestUserResponseFromJson(Map<String, dynamic> json) {
+  return SetGuestUserResponse(
+    json['duration'] as String,
+    json['access_token'] as String,
+    json['user'] == null
+        ? null
+        : User.fromJson(json['user'] as Map<String, dynamic>),
+  );
+}
+
+Map<String, dynamic> _$SetGuestUserResponseToJson(
+        SetGuestUserResponse instance) =>
+    <String, dynamic>{
+      'access_token': instance.accessToken,
+      'user': instance.user?.toJson(),
+      'duration': instance.duration,
+    };
+
+UpdateUsersResponse _$UpdateUsersResponseFromJson(Map<String, dynamic> json) {
+  return UpdateUsersResponse(
+    json['duration'] as String,
+    (json['users'] as Map<String, dynamic>)?.map(
+      (k, e) => MapEntry(
+          k, e == null ? null : User.fromJson(e as Map<String, dynamic>)),
+    ),
+  );
+}
+
+Map<String, dynamic> _$UpdateUsersResponseToJson(
+        UpdateUsersResponse instance) =>
+    <String, dynamic>{
+      'users': instance.users?.map((k, e) => MapEntry(k, e?.toJson())),
+      'duration': instance.duration,
+    };
+
+UpdateMessageResponse _$UpdateMessageResponseFromJson(
+    Map<String, dynamic> json) {
+  return UpdateMessageResponse(
+    json['duration'] as String,
+    json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>),
+  );
+}
+
+Map<String, dynamic> _$UpdateMessageResponseToJson(
+        UpdateMessageResponse instance) =>
+    <String, dynamic>{
+      'message': instance.message?.toJson(),
+      'duration': instance.duration,
+    };
+
+SendMessageResponse _$SendMessageResponseFromJson(Map<String, dynamic> json) {
+  return SendMessageResponse(
+    json['duration'] as String,
+    json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>),
+  );
+}
+
+Map<String, dynamic> _$SendMessageResponseToJson(
+        SendMessageResponse instance) =>
+    <String, dynamic>{
+      'message': instance.message?.toJson(),
+      'duration': instance.duration,
+    };
+
+GetMessageResponse _$GetMessageResponseFromJson(Map<String, dynamic> json) {
+  return GetMessageResponse(
+    json['duration'] as String,
+    json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>),
+  );
+}
+
+Map<String, dynamic> _$GetMessageResponseToJson(GetMessageResponse instance) =>
+    <String, dynamic>{
+      'message': instance.message?.toJson(),
+      'duration': instance.duration,
+    };
+
 AddModeratorsResponse _$AddModeratorsResponseFromJson(
     Map<String, dynamic> json) {
   return AddModeratorsResponse(
     json['duration'] as String,
+    json['channel'] == null
+        ? null
+        : Channel.fromJson(json['channel'] as Map<String, dynamic>),
     json['message'] == null
         ? null
         : Message.fromJson(json['message'] as Map<String, dynamic>),
@@ -81,18 +167,118 @@ AddModeratorsResponse _$AddModeratorsResponseFromJson(
         ?.map((e) =>
             e == null ? null : Member.fromJson(e as Map<String, dynamic>))
         ?.toList(),
-  )..channel = json['channel'] == null
-      ? null
-      : Channel.fromJson(json['channel'] as Map<String, dynamic>);
+  );
 }
 
 Map<String, dynamic> _$AddModeratorsResponseToJson(
         AddModeratorsResponse instance) =>
     <String, dynamic>{
       'channel': instance.channel?.toJson(),
+      'duration': instance.duration,
       'members': instance.members?.map((e) => e?.toJson())?.toList(),
       'message': instance.message?.toJson(),
+    };
+
+InviteMembersResponse _$InviteMembersResponseFromJson(
+    Map<String, dynamic> json) {
+  return InviteMembersResponse(
+    json['duration'] as String,
+    json['channel'] == null
+        ? null
+        : Channel.fromJson(json['channel'] as Map<String, dynamic>),
+    json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>),
+    (json['members'] as List)
+        ?.map((e) =>
+            e == null ? null : Member.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
+  );
+}
+
+Map<String, dynamic> _$InviteMembersResponseToJson(
+        InviteMembersResponse instance) =>
+    <String, dynamic>{
+      'channel': instance.channel?.toJson(),
       'duration': instance.duration,
+      'members': instance.members?.map((e) => e?.toJson())?.toList(),
+      'message': instance.message?.toJson(),
+    };
+
+RemoveMembersResponse _$RemoveMembersResponseFromJson(
+    Map<String, dynamic> json) {
+  return RemoveMembersResponse(
+    json['duration'] as String,
+    json['channel'] == null
+        ? null
+        : Channel.fromJson(json['channel'] as Map<String, dynamic>),
+    json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>),
+    (json['members'] as List)
+        ?.map((e) =>
+            e == null ? null : Member.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
+  );
+}
+
+Map<String, dynamic> _$RemoveMembersResponseToJson(
+        RemoveMembersResponse instance) =>
+    <String, dynamic>{
+      'channel': instance.channel?.toJson(),
+      'duration': instance.duration,
+      'members': instance.members?.map((e) => e?.toJson())?.toList(),
+      'message': instance.message?.toJson(),
+    };
+
+AddMembersResponse _$AddMembersResponseFromJson(Map<String, dynamic> json) {
+  return AddMembersResponse(
+    json['duration'] as String,
+    json['channel'] == null
+        ? null
+        : Channel.fromJson(json['channel'] as Map<String, dynamic>),
+    json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>),
+    (json['members'] as List)
+        ?.map((e) =>
+            e == null ? null : Member.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
+  );
+}
+
+Map<String, dynamic> _$AddMembersResponseToJson(AddMembersResponse instance) =>
+    <String, dynamic>{
+      'channel': instance.channel?.toJson(),
+      'duration': instance.duration,
+      'members': instance.members?.map((e) => e?.toJson())?.toList(),
+      'message': instance.message?.toJson(),
+    };
+
+DemoteModeratorsResponse _$DemoteModeratorsResponseFromJson(
+    Map<String, dynamic> json) {
+  return DemoteModeratorsResponse(
+    json['duration'] as String,
+    json['channel'] == null
+        ? null
+        : Channel.fromJson(json['channel'] as Map<String, dynamic>),
+    json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>),
+    (json['members'] as List)
+        ?.map((e) =>
+            e == null ? null : Member.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
+  );
+}
+
+Map<String, dynamic> _$DemoteModeratorsResponseToJson(
+        DemoteModeratorsResponse instance) =>
+    <String, dynamic>{
+      'channel': instance.channel?.toJson(),
+      'duration': instance.duration,
+      'members': instance.members?.map((e) => e?.toJson())?.toList(),
+      'message': instance.message?.toJson(),
     };
 
 EmptyResponse _$EmptyResponseFromJson(Map<String, dynamic> json) {

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:dio_flutter_transformer/dio_flutter_transformer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:logging/logging.dart';
 import 'package:stream_chat_dart/api/channel.dart';
@@ -200,14 +199,13 @@ class Client {
   // TODO setAnonymousUser
   Future<Event> setAnonymousUser() async => null;
 
-  // TODO setGuestUser
   Future<Event> setGuestUser(User user) async {
-    var guestUser, guestToken;
     _anonymous = true;
-    var response = await dioClient.post<String>("/guest",
-        data: {"user": user.toJson()}).whenComplete(() => _anonymous = false);
-    // TODO: parse response into guestUser and guestToken
-    return setUser(guestUser, guestToken);
+    final response = await dioClient
+        .post<String>("/guest", data: {"user": user.toJson()})
+        .then((res) => decode(res.data, SetGuestUserResponse.fromJson))
+        .whenComplete(() => _anonymous = false);
+    return setUser(response.user, response.accessToken);
   }
 
   // TODO disconnect
@@ -246,12 +244,11 @@ class Client {
     return Channel(this, type, id, custom);
   }
 
-  // TODO updateUser: parse response
-  Future<EmptyResponse> updateUser(User user) async {
+  Future<UpdateUsersResponse> updateUser(User user) async {
     final response = await dioClient.post<String>("/users", data: {
       "users": {user.id: user.toJson()},
     });
-    return decode(response.data, EmptyResponse.fromJson);
+    return decode(response.data, UpdateUsersResponse.fromJson);
   }
 
   Future<EmptyResponse> banUser(
@@ -302,16 +299,14 @@ class Client {
   }
 
   Future<EmptyResponse> markAllRead() async {
-    return dioClient
-        .post<String>("/channels/read")
-        .then((res) => EmptyResponse.fromJson(json.decode(res.data)));
+    final response = await dioClient.post<String>("/channels/read");
+    return decode(response.data, EmptyResponse.fromJson);
   }
 
-  // TODO updateMessage: parse response correctly
-  Future<EmptyResponse> updateMessage(Message message) async {
+  Future<UpdateMessageResponse> updateMessage(Message message) async {
     return dioClient
         .post<String>("/messages/${message.id}")
-        .then((res) => EmptyResponse.fromJson(json.decode(res.data)));
+        .then((res) => decode(res.data, UpdateMessageResponse.fromJson));
   }
 
   Future<EmptyResponse> deleteMessage(String messageID) async {
@@ -319,10 +314,8 @@ class Client {
     return decode(response.data, EmptyResponse.fromJson);
   }
 
-  // TODO getMessage: parse response correctly
-  Future<EmptyResponse> getMessage(String messageID) async {
-    return dioClient
-        .get<String>("/messages/$messageID")
-        .then((res) => EmptyResponse.fromJson(json.decode(res.data)));
+  Future<GetMessageResponse> getMessage(String messageID) async {
+    final response = await dioClient.get<String>("/messages/$messageID");
+    return decode(response.data, GetMessageResponse.fromJson);
   }
 }
