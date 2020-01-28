@@ -299,9 +299,8 @@ class Client {
   }
 
   Future<EmptyResponse> markAllRead() async {
-    return dioClient
-        .post<String>("/channels/read")
-        .then((res) => EmptyResponse.fromJson(json.decode(res.data)));
+    final response = await dioClient.post<String>("/channels/read");
+    return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<UpdateMessageResponse> updateMessage(Message message) async {
@@ -317,8 +316,7 @@ class Client {
 
   // TODO getMessage: parse response correctly
   Future<EmptyResponse> getMessage(String messageID) async {
-    return dioClient
-        .get<String>("/messages/$messageID")
-        .then((res) => EmptyResponse.fromJson(json.decode(res.data)));
+    final response = await dioClient.get<String>("/messages/$messageID");
+    return decode(response.data, EmptyResponse.fromJson);
   }
 }
