@@ -1,5 +1,7 @@
 # Stream Chat Dart 
 
+![](https://img.shields.io/badge/platform-flutter%20%7C%20flutter%20web-ff69b4.svg?style=flat-square)
+
 stream-chat-dart is the official Dart client for Stream Chat, a service for building chat applications.
 
 You can sign up for a Stream account at https://getstream.io/chat/
@@ -15,11 +17,14 @@ dependencies:
  stream_chat_dart:
    git: git://github.com/GetStream/stream-chat-dart.git
 ```
+
+> This library is currently in active development and it is not yet released on pub.dev
+
 You should then run `flutter packages get`
 
 ## Example Project
 
-There is a detailed example project in the `example` folder. You can directly run and play on it. 
+There is a detailed Flutter example project in the `example` folder. You can directly run and play on it. 
 
 ## Setup API Client
 
