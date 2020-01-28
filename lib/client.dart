@@ -244,12 +244,11 @@ class Client {
     return Channel(this, type, id, custom);
   }
 
-  // TODO updateUser: parse response
-  Future<EmptyResponse> updateUser(User user) async {
+  Future<UpdateUsersResponse> updateUser(User user) async {
     final response = await dioClient.post<String>("/users", data: {
       "users": {user.id: user.toJson()},
     });
-    return decode(response.data, EmptyResponse.fromJson);
+    return decode(response.data, UpdateUsersResponse.fromJson);
   }
 
   Future<EmptyResponse> banUser(

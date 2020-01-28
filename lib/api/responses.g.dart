@@ -88,6 +88,23 @@ Map<String, dynamic> _$SetGuestUserResponseToJson(
       'duration': instance.duration,
     };
 
+UpdateUsersResponse _$UpdateUsersResponseFromJson(Map<String, dynamic> json) {
+  return UpdateUsersResponse(
+    json['duration'] as String,
+    (json['users'] as Map<String, dynamic>)?.map(
+      (k, e) => MapEntry(
+          k, e == null ? null : User.fromJson(e as Map<String, dynamic>)),
+    ),
+  );
+}
+
+Map<String, dynamic> _$UpdateUsersResponseToJson(
+        UpdateUsersResponse instance) =>
+    <String, dynamic>{
+      'users': instance.users?.map((k, e) => MapEntry(k, e?.toJson())),
+      'duration': instance.duration,
+    };
+
 AddModeratorsResponse _$AddModeratorsResponseFromJson(
     Map<String, dynamic> json) {
   return AddModeratorsResponse(

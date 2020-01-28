@@ -75,6 +75,18 @@ class SetGuestUserResponse {
 }
 
 @JsonSerializable(explicitToJson: true)
+class UpdateUsersResponse {
+  Map<String, User> users;
+  String duration;
+
+  UpdateUsersResponse(this.duration, this.users);
+
+  static UpdateUsersResponse fromJson(Map<String, dynamic> json) =>
+      _$UpdateUsersResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$UpdateUsersResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
 class AddModeratorsResponse {
   Channel channel;
   List<Member> members;
