@@ -10,7 +10,7 @@ class Command {
 
   Command(this.name, this.description, this.args);
 
-  factory Command.fromJson(Map<String, dynamic> json) => _$CommandFromJson(json);
+  factory Command.fromJson(Map<String, dynamic> json) =>
+      _$CommandFromJson(json);
   Map<String, dynamic> toJson() => _$CommandToJson(this);
-
 }

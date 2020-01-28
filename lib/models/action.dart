@@ -15,5 +15,4 @@ class Action {
   factory Action.fromJson(Map<String, dynamic> json) => _$ActionFromJson(json);
 
   Map<String, dynamic> toJson() => _$ActionToJson(this);
-
 }

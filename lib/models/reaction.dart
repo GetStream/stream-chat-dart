@@ -6,7 +6,6 @@ part 'reaction.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class Reaction {
-
   @JsonKey(name: 'message_id')
   String messageID;
 
@@ -40,7 +39,7 @@ class Reaction {
   }
 
   Map<String, dynamic> toJson() {
-    return Serialization.moveKeysToMapInPlace(_$ReactionToJson(this), topLevelFields);
+    return Serialization.moveKeysToMapInPlace(
+        _$ReactionToJson(this), topLevelFields);
   }
-
 }

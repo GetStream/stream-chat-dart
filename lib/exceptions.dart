@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 class ApiError implements Exception {
-
   final String body;
   final Map<String, dynamic> parsedError;
   final int statusCode;
@@ -20,5 +19,4 @@ class ApiError implements Exception {
   String toString() {
     return 'ApiError {body: $body, statusCode: $statusCode}';
   }
-
 }

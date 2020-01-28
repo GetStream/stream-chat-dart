@@ -15,7 +15,8 @@ class QueryChannelsResponse {
 
   QueryChannelsResponse(this.duration, this.channels);
 
-  static QueryChannelsResponse fromJson(Map<String, dynamic> json) => _$QueryChannelsResponseFromJson(json);
+  static QueryChannelsResponse fromJson(Map<String, dynamic> json) =>
+      _$QueryChannelsResponseFromJson(json);
   Map<String, dynamic> toJson() => _$QueryChannelsResponseToJson(this);
 }
 
@@ -27,7 +28,8 @@ class SendFileResponse {
 
   SendFileResponse(this.duration, this.file);
 
-  static SendFileResponse fromJson(Map<String, dynamic> json) => _$SendFileResponseFromJson(json);
+  static SendFileResponse fromJson(Map<String, dynamic> json) =>
+      _$SendFileResponseFromJson(json);
   Map<String, dynamic> toJson() => _$SendFileResponseToJson(this);
 }
 
@@ -39,7 +41,8 @@ class SendImageResponse {
 
   SendImageResponse(this.duration, this.file);
 
-  static SendImageResponse fromJson(Map<String, dynamic> json) => _$SendImageResponseFromJson(json);
+  static SendImageResponse fromJson(Map<String, dynamic> json) =>
+      _$SendImageResponseFromJson(json);
   Map<String, dynamic> toJson() => _$SendImageResponseToJson(this);
 }
 
@@ -51,7 +54,8 @@ class SendReactionResponse {
 
   SendReactionResponse(this.duration, this.message, this.reaction);
 
-  static SendReactionResponse fromJson(Map<String, dynamic> json) => _$SendReactionResponseFromJson(json);
+  static SendReactionResponse fromJson(Map<String, dynamic> json) =>
+      _$SendReactionResponseFromJson(json);
   Map<String, dynamic> toJson() => _$SendReactionResponseToJson(this);
 }
 
@@ -64,7 +68,8 @@ class AddModeratorsResponse {
 
   AddModeratorsResponse(this.duration, this.message, this.members);
 
-  static AddModeratorsResponse fromJson(Map<String, dynamic> json) => _$AddModeratorsResponseFromJson(json);
+  static AddModeratorsResponse fromJson(Map<String, dynamic> json) =>
+      _$AddModeratorsResponseFromJson(json);
   Map<String, dynamic> toJson() => _$AddModeratorsResponseToJson(this);
 }
 
@@ -74,6 +79,7 @@ class EmptyResponse {
 
   EmptyResponse(this.duration);
 
-  static EmptyResponse fromJson(Map<String, dynamic> json) => _$EmptyResponseFromJson(json);
+  static EmptyResponse fromJson(Map<String, dynamic> json) =>
+      _$EmptyResponseFromJson(json);
   Map<String, dynamic> toJson() => _$EmptyResponseToJson(this);
 }

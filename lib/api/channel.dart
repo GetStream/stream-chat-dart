@@ -118,7 +118,8 @@ class Channel {
     }).then((res) => EmptyResponse.fromJson(json.decode(res.data)));
   }
 
-  Future<AddModeratorsResponse> addModerators(List<Member> moderators, Message message) {
+  Future<AddModeratorsResponse> addModerators(
+      List<Member> moderators, Message message) {
     return _client.dioClient.post<String>(channelURL, data: {
       "add_moderators": moderators.map((m) => m.toJson()),
       "message": message.toJson(),
@@ -155,8 +156,7 @@ class Channel {
       null;
 
   Future<EmptyResponse> markRead() async {
-    final response =
-        await _client.dioClient.post<String>("$channelURL/read");
+    final response = await _client.dioClient.post<String>("$channelURL/read");
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 

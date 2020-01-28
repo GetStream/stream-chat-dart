@@ -1,6 +1,6 @@
 class Serialization {
-
-  static Map<String, dynamic> moveKeysToRoot(Map<String, dynamic> json, List<String> topLevelFields) {
+  static Map<String, dynamic> moveKeysToRoot(
+      Map<String, dynamic> json, List<String> topLevelFields) {
     if (json == null) {
       return json;
     }
@@ -16,7 +16,8 @@ class Serialization {
     return clone;
   }
 
-  static Map<String, dynamic> moveKeysToMapInPlace(Map<String, dynamic> intermediateMap, List<String> topLevelFields) {
+  static Map<String, dynamic> moveKeysToMapInPlace(
+      Map<String, dynamic> intermediateMap, List<String> topLevelFields) {
     if (intermediateMap == null) {
       return intermediateMap;
     }
@@ -32,5 +33,4 @@ class Serialization {
 
     return clone;
   }
-
 }

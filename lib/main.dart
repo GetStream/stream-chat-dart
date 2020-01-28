@@ -14,20 +14,20 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     var client = new Client("6xjf3dex3n7d");
 
-    return
-      StreamChatContainer(
-        child: MaterialApp(
-          title: 'Stream Chat Example',
-          home: ChatLoader(
-              child: ChannelList(
-                filter: QueryFilter(),
-                sort: [SortOption(field: "last_message_at")],
-                options: {},
-              ),
-              user: User("wild-breeze-7", {}),
-              token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo",
+    return StreamChatContainer(
+      child: MaterialApp(
+        title: 'Stream Chat Example',
+        home: ChatLoader(
+          child: ChannelList(
+            filter: QueryFilter(),
+            sort: [SortOption(field: "last_message_at")],
+            options: {},
           ),
+          user: User("wild-breeze-7", {}),
+          token:
+              "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo",
         ),
+      ),
       client: client,
     );
   }
@@ -45,12 +45,13 @@ class ChatLoader extends StatefulWidget {
 }
 
 class ChatLoaderState extends State<ChatLoader> {
-
   Future<dynamic> setUser;
 
   @override
   void didChangeDependencies() {
-    setUser = StreamChatContainer.of(context).client.setUser(widget.user, widget.token);
+    setUser = StreamChatContainer.of(context)
+        .client
+        .setUser(widget.user, widget.token);
     super.didChangeDependencies();
   }
 
@@ -66,8 +67,6 @@ class ChatLoaderState extends State<ChatLoader> {
             return Text(snapshot.error.toString());
           }
           return CircularProgressIndicator();
-        }
-    );
+        });
   }
-
 }
