@@ -261,7 +261,8 @@ class Client {
 
   Future<ListDevicesResponse> getDevices() async {
     final response = await dioClient.get<String>("/devices");
-    return decode<ListDevicesResponse>(response.data, ListDevicesResponse.fromJson);
+    return decode<ListDevicesResponse>(
+        response.data, ListDevicesResponse.fromJson);
   }
 
   Future<EmptyResponse> removeDevice(String id) async {
@@ -284,7 +285,8 @@ class Client {
     final response = await dioClient.post<String>("/users", data: {
       "users": {user.id: user.toJson()},
     });
-    return decode<UpdateUsersResponse>(response.data, UpdateUsersResponse.fromJson);
+    return decode<UpdateUsersResponse>(
+        response.data, UpdateUsersResponse.fromJson);
   }
 
   Future<EmptyResponse> banUser(

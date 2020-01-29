@@ -11,7 +11,6 @@ class Device {
 
   Device(this.id, this.pushProvider);
 
-  factory Device.fromJson(Map<String, dynamic> json) =>
-      _$DeviceFromJson(json);
+  factory Device.fromJson(Map<String, dynamic> json) => _$DeviceFromJson(json);
   Map<String, dynamic> toJson() => _$DeviceToJson(this);
 }
