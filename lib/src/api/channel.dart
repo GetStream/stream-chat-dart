@@ -85,12 +85,13 @@ class Channel {
             EmptyResponse.fromJson(json.decode(value.data.toString())));
   }
 
-  // TODO update
-  Future<EmptyResponse> update(
-    dynamic channelData,
+  Future<UpdateChannelResponse> update(
+    Map<String, dynamic> channelData,
     Message updateMessage,
-  ) async =>
-      null;
+  ) async {
+    final response = await _client.dioClient.post<String>(channelURL);
+    return _client.decode(response.data, UpdateChannelResponse.fromJson);
+  }
 
   Future<EmptyResponse> delete() async {
     final response = await _client.dioClient.delete<String>(channelURL);
