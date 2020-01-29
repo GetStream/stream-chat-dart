@@ -39,7 +39,7 @@ class Channel {
   @JsonKey(includeIfNull: false)
   Map<String, dynamic> extraData;
 
-  static const topLevelFields = const [
+  static const topLevelFields = [
     'id',
     'type',
     'cid',

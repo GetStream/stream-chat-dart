@@ -320,7 +320,7 @@ packages:
     source: hosted
     version: "1.6.4"
   pedantic:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: pedantic
       url: "https://pub.dartlang.org"
@@ -450,6 +450,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.6"
+  uuid:
+    dependency: "direct main"
+    description:
+      name: uuid
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.4"
   vector_math:
     dependency: transitive
     description:

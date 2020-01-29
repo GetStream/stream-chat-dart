@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'web_socket_channel_stub.dart'
   if (dart.library.html) 'web_socket_channel_html.dart'
   if (dart.library.io) 'web_socket_channel_io.dart';
-
 import '../models/event.dart';
 import '../models/user.dart';
 
@@ -39,7 +38,7 @@ class WebSocket {
   }
 
   Future<Event> connect() {
-    var completer = new Completer<Event>();
+    var completer = Completer<Event>();
     var qs = Map<String, String>.from(connectParams);
 
     var data = Map<String, dynamic>.from(connectPayload);
