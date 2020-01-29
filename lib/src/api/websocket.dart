@@ -59,7 +59,6 @@ class WebSocket {
         completer.complete(event);
       }
     }, onError: (error) {
-      print(error);
       completer.completeError(error);
     });
     return completer.future;
