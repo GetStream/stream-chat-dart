@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:web_socket_channel/html.dart';
+import 'web_socket_channel_stub.dart'
+if (dart.library.html) 'web_socket_channel_html.dart'
+if (dart.library.io) 'web_socket_channel_io.dart';
 
 import '../models/event.dart';
 import '../models/user.dart';
@@ -49,7 +51,7 @@ class WebSocket {
     var uri = Uri.https(baseUrl, "connect", qs);
     var path = uri.toString().replaceFirst("https", "wss");
 
-    var channel = HtmlWebSocketChannel.connect(path);
+    final channel = connectWebSocket(path);
     channel.stream.listen((data) {
       final event = decodeEvent(data);
       if (_resolved) {
