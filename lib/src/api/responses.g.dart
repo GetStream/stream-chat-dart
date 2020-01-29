@@ -24,6 +24,22 @@ Map<String, dynamic> _$QueryChannelsResponseToJson(
       'duration': instance.duration,
     };
 
+QueryUsersResponse _$QueryUsersResponseFromJson(Map<String, dynamic> json) {
+  return QueryUsersResponse(
+    json['duration'] as String,
+    (json['users'] as List)
+        ?.map(
+            (e) => e == null ? null : User.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
+  );
+}
+
+Map<String, dynamic> _$QueryUsersResponseToJson(QueryUsersResponse instance) =>
+    <String, dynamic>{
+      'users': instance.users?.map((e) => e?.toJson())?.toList(),
+      'duration': instance.duration,
+    };
+
 SendFileResponse _$SendFileResponseFromJson(Map<String, dynamic> json) {
   return SendFileResponse(
     json['duration'] as String,

@@ -22,6 +22,18 @@ class QueryChannelsResponse {
 }
 
 @JsonSerializable(explicitToJson: true)
+class QueryUsersResponse {
+  List<User> users;
+  String duration;
+
+  QueryUsersResponse(this.duration, this.users);
+
+  static QueryUsersResponse fromJson(Map<String, dynamic> json) =>
+      _$QueryUsersResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$QueryUsersResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
 class SendFileResponse {
   // the url of the uploaded file
   String file;

@@ -35,6 +35,8 @@ class Client {
   String _connectionId;
   WebSocket _ws;
 
+  bool get hasConnectionId => _connectionId != null;
+
   Client(
     this.apiKey, {
     this.baseURL = defaultBaseURL,
@@ -144,8 +146,6 @@ class Client {
     List<SortOption> sort,
     Map<String, dynamic> options,
   ) async {
-    logger.info(
-        'queryChannels - filter: ${json.encode(filter)} - sort: ${json.encode(sort)} - options: $options');
     final Map<String, dynamic> defaultOptions = {
       "state": true,
       "watch": true,
@@ -216,8 +216,37 @@ class Client {
   // TODO disconnect
   Future<dynamic> disconnect() async => null;
 
-  // TODO queryUsers
-  Future<dynamic> queryUsers() async => null;
+  Future<QueryUsersResponse> queryUsers(
+    QueryFilter filter,
+    List<SortOption> sort,
+    Map<String, dynamic> options,
+  ) async {
+    final Map<String, dynamic> defaultOptions = {
+      "presence": this.hasConnectionId,
+    };
+
+    Map<String, dynamic> payload = {
+      "filter_conditions": filter,
+      "sort": sort,
+    };
+
+    payload.addAll(defaultOptions);
+
+    if (options != null) {
+      payload.addAll(options);
+    }
+
+    final response = await dioClient.get<String>(
+      "/users",
+      queryParameters: {
+        "payload": jsonEncode(payload),
+      },
+    );
+    return decode<QueryUsersResponse>(
+      response.data,
+      QueryUsersResponse.fromJson,
+    );
+  }
 
   // TODO search
   Future<dynamic> search() async => null;
