@@ -1,3 +1,5 @@
+import 'package:stream_chat/src/models/device.dart';
+
 import '../models/channel_state.dart';
 import '../models/message.dart';
 import '../models/user.dart';
@@ -31,6 +33,18 @@ class QueryUsersResponse {
   static QueryUsersResponse fromJson(Map<String, dynamic> json) =>
       _$QueryUsersResponseFromJson(json);
   Map<String, dynamic> toJson() => _$QueryUsersResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class ListDevicesResponse {
+  List<Device> devices;
+  String duration;
+
+  ListDevicesResponse(this.duration, this.devices);
+
+  static ListDevicesResponse fromJson(Map<String, dynamic> json) =>
+      _$ListDevicesResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$ListDevicesResponseToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
