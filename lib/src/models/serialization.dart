@@ -8,7 +8,7 @@ class Serialization {
     clone['extraData'] = Map<String, dynamic>();
 
     json.keys.forEach((key) {
-      if (topLevelFields.contains(key)) {
+      if (!topLevelFields.contains(key)) {
         clone['extraData'][key] = clone.remove(key);
       }
     });
@@ -26,7 +26,7 @@ class Serialization {
     Map<String, dynamic> extraData = clone.remove('extraData');
 
     extraData.keys.forEach((key) {
-      if (topLevelFields.contains(key)) {
+      if (!topLevelFields.contains(key)) {
         clone[key] = extraData[key];
       }
     });
