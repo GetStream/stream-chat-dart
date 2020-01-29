@@ -25,3 +25,10 @@ QueryFilter _$QueryFilterFromJson(Map<String, dynamic> json) {
 
 Map<String, dynamic> _$QueryFilterToJson(QueryFilter instance) =>
     <String, dynamic>{};
+
+PaginationParams _$PaginationParamsFromJson(Map<String, dynamic> json) {
+  return PaginationParams();
+}
+
+Map<String, dynamic> _$PaginationParamsToJson(PaginationParams instance) =>
+    <String, dynamic>{};

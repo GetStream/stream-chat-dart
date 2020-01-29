@@ -36,6 +36,16 @@ class QueryUsersResponse extends BaseResponse {
 }
 
 @JsonSerializable(explicitToJson: true)
+class QueryRepliesResponse extends BaseResponse {
+  List<Message> messages;
+
+  static QueryRepliesResponse fromJson(Map<String, dynamic> json) =>
+      _$QueryRepliesResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$QueryRepliesResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
 class ListDevicesResponse extends BaseResponse {
   List<Device> devices;
 

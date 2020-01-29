@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:json_annotation/json_annotation.dart';
+
 part 'requests.g.dart';
 
 @JsonSerializable(explicitToJson: true)
@@ -12,18 +13,24 @@ class SortOption {
 
   SortOption({@required this.field, this.direction = DESC});
 
-  factory SortOption.fromJson(Map<String, dynamic> json) =>
+  static SortOption fromJson(Map<String, dynamic> json) =>
       _$SortOptionFromJson(json);
+
   Map<String, dynamic> toJson() => _$SortOptionToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
 class QueryFilter {
-  QueryFilter();
-
-  factory QueryFilter.fromJson(Map<String, dynamic> json) =>
+  static QueryFilter fromJson(Map<String, dynamic> json) =>
       _$QueryFilterFromJson(json);
+
   Map<String, dynamic> toJson() => _$QueryFilterToJson(this);
 }
 
-class PaginationParams {}
+@JsonSerializable(explicitToJson: true)
+class PaginationParams {
+  static PaginationParams fromJson(Map<String, dynamic> json) =>
+      _$PaginationParamsFromJson(json);
+
+  Map<String, dynamic> toJson() => _$PaginationParamsToJson(this);
+}
