@@ -151,6 +151,16 @@ class GetMessageResponse extends BaseResponse {
 }
 
 @JsonSerializable(explicitToJson: true)
+class SearchMessagesResponse extends BaseResponse {
+  List<Message> messages;
+
+  static SearchMessagesResponse fromJson(Map<String, dynamic> json) =>
+      _$SearchMessagesResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SearchMessagesResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
 class GetMessagesByIdResponse extends BaseResponse {
   Message message;
 

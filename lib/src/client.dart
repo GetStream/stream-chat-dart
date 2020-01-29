@@ -248,8 +248,25 @@ class Client {
     );
   }
 
-  // TODO search
-  Future<dynamic> search() async => null;
+  Future<SearchMessagesResponse> search(
+    QueryFilter filters,
+    List<SortOption> sort,
+    String query,
+    PaginationParams paginationParams,
+  ) async {
+    final payload = {
+      'filter_conditions': filters,
+      'query': query,
+      'sort': sort,
+    };
+
+    payload.addAll(paginationParams.toJson());
+
+    final response = await dioClient
+        .get<String>("/search", queryParameters: {'payload': payload});
+    return decode<SearchMessagesResponse>(
+        response.data, SearchMessagesResponse.fromJson);
+  }
 
   Future<EmptyResponse> addDevice(String id, String pushProvider) async {
     final response = await dioClient.post<String>("/devices", data: {
