@@ -212,13 +212,28 @@ class Channel {
   // TODO query
   Future<EmptyResponse> query(dynamic options) async => null;
 
-  // TODO banUser
-  Future<EmptyResponse> banUser(String userID, dynamic options) async => null;
+  Future<EmptyResponse> banUser(
+    String userID,
+    Map<String, dynamic> options,
+  ) async {
+    final opts = Map.from(options)
+      ..addAll({
+        'type': type,
+        'id': id,
+      });
+    return _client.banUser(userID, opts);
+  }
+
+  Future<EmptyResponse> unbanUser(String userID) async {
+    return _client.unbanUser(userID, {
+      'type': type,
+      'id': id,
+    });
+  }
 
   Future<EmptyResponse> hide([bool clearHistory = false]) async {
-    final response = await _client.dioClient.post<String>("$_channelURL/hide", data: {
-      'clear_history': clearHistory
-    });
+    final response = await _client.dioClient.post<String>("$_channelURL/hide",
+        data: {'clear_history': clearHistory});
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
@@ -226,9 +241,6 @@ class Channel {
     final response = await _client.dioClient.post<String>("$_channelURL/show");
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
-
-  // TODO unbanUser
-  Future<EmptyResponse> unbanUser(String userID) async => null;
 
   Stream<Event> on(String eventType) => null;
 }

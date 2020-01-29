@@ -307,21 +307,32 @@ class Client {
   }
 
   Future<EmptyResponse> banUser(
-      String targetUserID, Map<String, dynamic> options) async {
+    String targetUserID, [
+    Map<String, dynamic> options = const {},
+  ]) async {
     final data = Map<String, dynamic>.from(options)
       ..addAll({
         "target_user_id": targetUserID,
       });
-    final response =
-        await dioClient.post<String>("/moderation/ban", data: data);
+    final response = await dioClient.post<String>(
+      "/moderation/ban",
+      data: data,
+    );
     return decode(response.data, EmptyResponse.fromJson);
   }
 
-  Future<EmptyResponse> unbanUser(String targetUserID) async {
-    final response =
-        await dioClient.delete<String>("/moderation/ban", queryParameters: {
-      "target_user_id": targetUserID,
-    });
+  Future<EmptyResponse> unbanUser(
+    String targetUserID, [
+    Map<String, dynamic> options = const {},
+  ]) async {
+    final data = Map<String, dynamic>.from(options)
+      ..addAll({
+        "target_user_id": targetUserID,
+      });
+    final response = await dioClient.delete<String>(
+      "/moderation/ban",
+      queryParameters: data,
+    );
     return decode(response.data, EmptyResponse.fromJson);
   }
 
