@@ -215,8 +215,12 @@ class Channel {
   // TODO banUser
   Future<EmptyResponse> banUser(String userID, dynamic options) async => null;
 
-  // TODO hide
-  Future<EmptyResponse> hide(bool clearHistory) async => null;
+  Future<EmptyResponse> hide([bool clearHistory = false]) async {
+    final response = await _client.dioClient.post<String>("$_channelURL/hide", data: {
+      'clear_history': clearHistory
+    });
+    return _client.decode(response.data, EmptyResponse.fromJson);
+  }
 
   // TODO show
   Future<EmptyResponse> show() async => null;
