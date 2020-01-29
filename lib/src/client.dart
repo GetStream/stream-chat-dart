@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:uuid/uuid.dart';
 import 'api/channel.dart';
 import 'exceptions.dart';
 import 'models/event.dart';
@@ -196,8 +197,12 @@ class Client {
         "connection_id": _connectionId,
       };
 
-  // TODO setAnonymousUser
-  Future<Event> setAnonymousUser() async => null;
+  Future<Event> setAnonymousUser() async {
+    this._anonymous = true;
+    final uuid = Uuid();
+    this._user = User(uuid.v4(), null);
+    return connect();
+  }
 
   Future<Event> setGuestUser(User user) async {
     _anonymous = true;
