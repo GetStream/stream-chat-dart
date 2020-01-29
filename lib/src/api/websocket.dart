@@ -2,13 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'web_socket_channel_stub.dart'
-if (dart.library.html) 'web_socket_channel_html.dart'
-if (dart.library.io) 'web_socket_channel_io.dart';
+  if (dart.library.html) 'web_socket_channel_html.dart'
+  if (dart.library.io) 'web_socket_channel_io.dart';
 
 import '../models/event.dart';
 import '../models/user.dart';
 
-// TODO: make this work on web and mobile
 // TODO: improve error path for the connect() method
 // TODO: make sure we pass an error with a stacktrace
 // TODO: parse error even
