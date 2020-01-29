@@ -19,7 +19,7 @@ jobs:
     - name: Pub cache
       uses: actions/cache@v1.1.0
       with:
-        path: ${{ env.FLUTTER_ROOT }}/.pub-cache
+        path: flutter/.pub-cache
         key: pub-${{ hashFiles('**/pubspec.lock') }}
     - name: Flutter action
       uses: subosito/flutter-action@v1.1.1
