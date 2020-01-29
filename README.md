@@ -1,6 +1,7 @@
 # Stream Chat Dart 
 
 ![](https://img.shields.io/badge/platform-flutter%20%7C%20flutter%20web-ff69b4.svg?style=flat-square)
+![CI](https://github.com/GetStream/stream-chat-dart/workflows/CI/badge.svg?branch=master)
 
 stream-chat-dart is the official Dart client for Stream Chat, a service for building chat applications. This library can be used on any Dart project and on both mobile and web apps with Flutter.
 
@@ -42,7 +43,7 @@ By default the Chat Client will write all messages with level Warn or Error to s
 
 During development you might want to enable more logging information, you can change the default log level when constructing the client.
 
-```dart
+```dart 
 var client = Client("stream-chat-api-key", logLevel: Level.INFO);
 ```
 
