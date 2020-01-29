@@ -231,6 +231,30 @@ class AddMembersResponse extends BaseResponse {
 }
 
 @JsonSerializable(explicitToJson: true)
+class AcceptInviteResponse extends BaseResponse {
+  Channel channel;
+  List<Member> members;
+  Message message;
+
+  static AcceptInviteResponse fromJson(Map<String, dynamic> json) =>
+      _$AcceptInviteResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$AcceptInviteResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class RejectInviteResponse extends BaseResponse {
+  Channel channel;
+  List<Member> members;
+  Message message;
+
+  static RejectInviteResponse fromJson(Map<String, dynamic> json) =>
+      _$RejectInviteResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$RejectInviteResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
 class DemoteModeratorsResponse extends BaseResponse {
   Channel channel;
   List<Member> members;

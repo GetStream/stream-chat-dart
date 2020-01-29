@@ -364,6 +364,54 @@ Map<String, dynamic> _$AddMembersResponseToJson(AddMembersResponse instance) =>
       'message': instance.message?.toJson(),
     };
 
+AcceptInviteResponse _$AcceptInviteResponseFromJson(Map<String, dynamic> json) {
+  return AcceptInviteResponse()
+    ..duration = json['duration'] as String
+    ..channel = json['channel'] == null
+        ? null
+        : Channel.fromJson(json['channel'] as Map<String, dynamic>)
+    ..members = (json['members'] as List)
+        ?.map((e) =>
+            e == null ? null : Member.fromJson(e as Map<String, dynamic>))
+        ?.toList()
+    ..message = json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$AcceptInviteResponseToJson(
+        AcceptInviteResponse instance) =>
+    <String, dynamic>{
+      'duration': instance.duration,
+      'channel': instance.channel?.toJson(),
+      'members': instance.members?.map((e) => e?.toJson())?.toList(),
+      'message': instance.message?.toJson(),
+    };
+
+RejectInviteResponse _$RejectInviteResponseFromJson(Map<String, dynamic> json) {
+  return RejectInviteResponse()
+    ..duration = json['duration'] as String
+    ..channel = json['channel'] == null
+        ? null
+        : Channel.fromJson(json['channel'] as Map<String, dynamic>)
+    ..members = (json['members'] as List)
+        ?.map((e) =>
+            e == null ? null : Member.fromJson(e as Map<String, dynamic>))
+        ?.toList()
+    ..message = json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$RejectInviteResponseToJson(
+        RejectInviteResponse instance) =>
+    <String, dynamic>{
+      'duration': instance.duration,
+      'channel': instance.channel?.toJson(),
+      'members': instance.members?.map((e) => e?.toJson())?.toList(),
+      'message': instance.message?.toJson(),
+    };
+
 DemoteModeratorsResponse _$DemoteModeratorsResponseFromJson(
     Map<String, dynamic> json) {
   return DemoteModeratorsResponse()

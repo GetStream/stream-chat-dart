@@ -104,11 +104,21 @@ class Channel {
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
-  // TODO acceptInvite, options??
-  Future<EmptyResponse> acceptInvite() async => null;
+  Future<AcceptInviteResponse> acceptInvite([Message message = null]) async {
+    final res = await _client.dioClient.post<String>(_channelURL, data: {
+      "accept_invite": true,
+      "message": message?.toJson()
+    });
+    return _client.decode(res.data, AcceptInviteResponse.fromJson);
+  }
 
-  // TODO rejectInvite, options??
-  Future<EmptyResponse> rejectInvite() async => null;
+  Future<RejectInviteResponse> rejectInvite([Message message = null]) async {
+    final res = await _client.dioClient.post<String>(_channelURL, data: {
+      "accept_invite": false,
+      "message": message?.toJson()
+    });
+    return _client.decode(res.data, RejectInviteResponse.fromJson);
+  }
 
   Future<AddMembersResponse> addMembers(
       List<Member> members, Message message) async {
