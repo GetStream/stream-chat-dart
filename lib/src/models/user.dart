@@ -11,7 +11,7 @@ class User {
   @JsonKey(includeIfNull: false)
   Map<String, dynamic> extraData;
 
-  static const topLevelFields = const [
+  static const topLevelFields = [
     'id',
   ];
 

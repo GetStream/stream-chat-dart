@@ -38,7 +38,7 @@ class WebSocket {
   }
 
   Future<Event> connect() {
-    var completer = new Completer<Event>();
+    var completer = Completer<Event>();
     var qs = Map<String, String>.from(connectParams);
 
     var data = Map<String, dynamic>.from(connectPayload);

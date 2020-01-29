@@ -181,7 +181,7 @@ class Client {
       return decoderFunction(json.decode(j));
     } catch (error, stacktrace) {
       logger.severe('Error decoding response', error, stacktrace);
-      throw error;
+      rethrow;
     }
   }
 

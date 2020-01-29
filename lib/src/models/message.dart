@@ -53,7 +53,7 @@ class Message {
   @JsonKey(includeIfNull: false)
   Map<String, dynamic> extraData;
 
-  static const topLevelFields = const [
+  static const topLevelFields = [
     'id',
     'text',
     'type',
