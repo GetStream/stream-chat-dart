@@ -43,7 +43,7 @@ class ChannelListState extends State<ChannelList> {
             if (snapshot.hasData) {
               _channels.addAll(snapshot.data.channels);
               return ListView.builder(
-                itemCount: _channels.length,
+                  itemCount: _channels.length,
                   padding: const EdgeInsets.all(16.0),
                   itemBuilder: (context, i) {
                     return ChannelPreview(channel: _channels[i].channel);

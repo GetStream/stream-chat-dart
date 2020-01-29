@@ -177,16 +177,22 @@ class Channel {
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
-  Future<QueryRepliesResponse> getReplies(String parentID, PaginationParams options) async {
-    final response =
-        await _client.dioClient.get<String>("/messages/$parentID/replies", queryParameters: options.toJson());
-    return _client.decode<QueryRepliesResponse>(response.data, QueryRepliesResponse.fromJson);
+  Future<QueryRepliesResponse> getReplies(
+      String parentID, PaginationParams options) async {
+    final response = await _client.dioClient.get<String>(
+        "/messages/$parentID/replies",
+        queryParameters: options.toJson());
+    return _client.decode<QueryRepliesResponse>(
+        response.data, QueryRepliesResponse.fromJson);
   }
 
-  Future<QueryReactionsResponse> getReactions(String messageID, PaginationParams options) async {
-    final response =
-    await _client.dioClient.get<String>("/messages/$messageID/reactions", queryParameters: options.toJson());
-    return _client.decode<QueryReactionsResponse>(response.data, QueryReactionsResponse.fromJson);
+  Future<QueryReactionsResponse> getReactions(
+      String messageID, PaginationParams options) async {
+    final response = await _client.dioClient.get<String>(
+        "/messages/$messageID/reactions",
+        queryParameters: options.toJson());
+    return _client.decode<QueryReactionsResponse>(
+        response.data, QueryReactionsResponse.fromJson);
   }
 
   // TODO getMessagesById
