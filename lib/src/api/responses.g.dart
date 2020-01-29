@@ -38,6 +38,23 @@ Map<String, dynamic> _$QueryUsersResponseToJson(QueryUsersResponse instance) =>
       'users': instance.users?.map((e) => e?.toJson())?.toList(),
     };
 
+QueryReactionsResponse _$QueryReactionsResponseFromJson(
+    Map<String, dynamic> json) {
+  return QueryReactionsResponse()
+    ..duration = json['duration'] as String
+    ..reactions = (json['reactions'] as List)
+        ?.map((e) =>
+            e == null ? null : Reaction.fromJson(e as Map<String, dynamic>))
+        ?.toList();
+}
+
+Map<String, dynamic> _$QueryReactionsResponseToJson(
+        QueryReactionsResponse instance) =>
+    <String, dynamic>{
+      'duration': instance.duration,
+      'reactions': instance.reactions?.map((e) => e?.toJson())?.toList(),
+    };
+
 QueryRepliesResponse _$QueryRepliesResponseFromJson(Map<String, dynamic> json) {
   return QueryRepliesResponse()
     ..duration = json['duration'] as String
