@@ -222,8 +222,10 @@ class Channel {
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
-  // TODO show
-  Future<EmptyResponse> show() async => null;
+  Future<EmptyResponse> show() async {
+    final response = await _client.dioClient.post<String>("$_channelURL/show");
+    return _client.decode(response.data, EmptyResponse.fromJson);
+  }
 
   // TODO unbanUser
   Future<EmptyResponse> unbanUser(String userID) async => null;
