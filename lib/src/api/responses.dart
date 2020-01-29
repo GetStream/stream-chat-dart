@@ -219,6 +219,16 @@ class RemoveMembersResponse extends BaseResponse {
 }
 
 @JsonSerializable(explicitToJson: true)
+class SendActionResponse extends BaseResponse {
+  Message message;
+
+  static SendActionResponse fromJson(Map<String, dynamic> json) =>
+      _$SendActionResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SendActionResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
 class AddMembersResponse extends BaseResponse {
   Channel channel;
   List<Member> members;

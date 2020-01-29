@@ -341,6 +341,20 @@ Map<String, dynamic> _$RemoveMembersResponseToJson(
       'message': instance.message?.toJson(),
     };
 
+SendActionResponse _$SendActionResponseFromJson(Map<String, dynamic> json) {
+  return SendActionResponse()
+    ..duration = json['duration'] as String
+    ..message = json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$SendActionResponseToJson(SendActionResponse instance) =>
+    <String, dynamic>{
+      'duration': instance.duration,
+      'message': instance.message?.toJson(),
+    };
+
 AddMembersResponse _$AddMembersResponseFromJson(Map<String, dynamic> json) {
   return AddMembersResponse()
     ..duration = json['duration'] as String

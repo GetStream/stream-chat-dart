@@ -169,9 +169,14 @@ class Channel {
     return _client.decode(res.data, DemoteModeratorsResponse.fromJson);
   }
 
-  // TODO sendAction (see Run Message Action)
-  Future<EmptyResponse> sendAction(String messageID, dynamic formData) async =>
-      null;
+  Future<SendActionResponse> sendAction(String messageID, Map<String, dynamic> formData) async {
+    final response = await _client.dioClient.post<String>("/messages/$messageID/action", data: {
+      'id': id,
+      'type': type,
+      'form_data': formData
+    });
+    return _client.decode(response.data, SendActionResponse.fromJson);
+  }
 
   Future<EmptyResponse> markRead() async {
     final response = await _client.dioClient.post<String>("$_channelURL/read");
