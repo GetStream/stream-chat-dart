@@ -14,7 +14,7 @@ This library is currently under development: you can subscribe for updates [here
 
 ```yaml
 dependencies:
- stream_chat_dart:
+ stream_chat:
    git: git://github.com/GetStream/stream-chat-dart.git
 ```
 
