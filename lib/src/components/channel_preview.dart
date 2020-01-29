@@ -8,6 +8,6 @@ class ChannelPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(channel.cid).build(context);
+    return Text(channel.cid);
   }
 }

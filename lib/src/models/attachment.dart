@@ -50,7 +50,7 @@ class Attachment {
   @JsonKey(includeIfNull: false)
   Map<String, dynamic> extraData;
 
-  static const topLevelFields = const [
+  static const topLevelFields = [
     'type',
     'title_link',
     'title',

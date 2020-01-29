@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:uuid/uuid.dart';
 import 'api/channel.dart';
 import 'exceptions.dart';
 import 'models/event.dart';
@@ -33,6 +34,8 @@ class Client {
   bool _anonymous;
   String _connectionId;
   WebSocket _ws;
+
+  bool get hasConnectionId => _connectionId != null;
 
   Client(
     this.apiKey, {
@@ -143,8 +146,6 @@ class Client {
     List<SortOption> sort,
     Map<String, dynamic> options,
   ) async {
-    logger.info(
-        'queryChannels - filter: ${json.encode(filter)} - sort: ${json.encode(sort)} - options: $options');
     final Map<String, dynamic> defaultOptions = {
       "state": true,
       "watch": true,
@@ -181,7 +182,7 @@ class Client {
       return decoderFunction(json.decode(j));
     } catch (error, stacktrace) {
       logger.severe('Error decoding response', error, stacktrace);
-      throw error;
+      rethrow;
     }
   }
 
@@ -196,8 +197,12 @@ class Client {
         "connection_id": _connectionId,
       };
 
-  // TODO setAnonymousUser
-  Future<Event> setAnonymousUser() async => null;
+  Future<Event> setAnonymousUser() async {
+    this._anonymous = true;
+    final uuid = Uuid();
+    this._user = User(uuid.v4(), null);
+    return connect();
+  }
 
   Future<Event> setGuestUser(User user) async {
     _anonymous = true;
@@ -211,22 +216,71 @@ class Client {
   // TODO disconnect
   Future<dynamic> disconnect() async => null;
 
-  // TODO queryUsers
-  Future<dynamic> queryUsers() async => null;
+  Future<QueryUsersResponse> queryUsers(
+    QueryFilter filter,
+    List<SortOption> sort,
+    Map<String, dynamic> options,
+  ) async {
+    final Map<String, dynamic> defaultOptions = {
+      "presence": this.hasConnectionId,
+    };
 
-  // TODO search
-  Future<dynamic> search() async => null;
+    Map<String, dynamic> payload = {
+      "filter_conditions": filter,
+      "sort": sort,
+    };
+
+    payload.addAll(defaultOptions);
+
+    if (options != null) {
+      payload.addAll(options);
+    }
+
+    final response = await dioClient.get<String>(
+      "/users",
+      queryParameters: {
+        "payload": jsonEncode(payload),
+      },
+    );
+    return decode<QueryUsersResponse>(
+      response.data,
+      QueryUsersResponse.fromJson,
+    );
+  }
+
+  Future<SearchMessagesResponse> search(
+    QueryFilter filters,
+    List<SortOption> sort,
+    String query,
+    PaginationParams paginationParams,
+  ) async {
+    final payload = {
+      'filter_conditions': filters,
+      'query': query,
+      'sort': sort,
+    };
+
+    payload.addAll(paginationParams.toJson());
+
+    final response = await dioClient
+        .get<String>("/search", queryParameters: {'payload': payload});
+    return decode<SearchMessagesResponse>(
+        response.data, SearchMessagesResponse.fromJson);
+  }
 
   Future<EmptyResponse> addDevice(String id, String pushProvider) async {
     final response = await dioClient.post<String>("/devices", data: {
       "id": id,
       "push_provider": pushProvider,
     });
-    return decode(response.data, EmptyResponse.fromJson);
+    return decode<EmptyResponse>(response.data, EmptyResponse.fromJson);
   }
 
-  // TODO getDevices
-  Future<dynamic> getDevices() async => null;
+  Future<ListDevicesResponse> getDevices() async {
+    final response = await dioClient.get<String>("/devices");
+    return decode<ListDevicesResponse>(
+        response.data, ListDevicesResponse.fromJson);
+  }
 
   Future<EmptyResponse> removeDevice(String id) async {
     final response =
@@ -248,7 +302,8 @@ class Client {
     final response = await dioClient.post<String>("/users", data: {
       "users": {user.id: user.toJson()},
     });
-    return decode(response.data, UpdateUsersResponse.fromJson);
+    return decode<UpdateUsersResponse>(
+        response.data, UpdateUsersResponse.fromJson);
   }
 
   Future<EmptyResponse> banUser(

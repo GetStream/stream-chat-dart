@@ -23,7 +23,7 @@ class Reaction {
   @JsonKey(includeIfNull: false)
   Map<String, dynamic> extraData;
 
-  static const topLevelFields = const [
+  static const topLevelFields = [
     'message_id',
     'created_at',
     'type',

@@ -23,7 +23,7 @@ class StreamChatContainer extends StatefulWidget {
   }
 
   @override
-  _StreamChatContainerState createState() => new _StreamChatContainerState();
+  _StreamChatContainerState createState() => _StreamChatContainerState();
 }
 
 class _StreamChatContainerState extends State<StreamChatContainer> {
@@ -37,7 +37,7 @@ class _StreamChatContainerState extends State<StreamChatContainer> {
 
   @override
   Widget build(BuildContext context) {
-    return new _InheritedStateContainer(
+    return _InheritedStateContainer(
       data: this,
       child: widget.child,
     );
