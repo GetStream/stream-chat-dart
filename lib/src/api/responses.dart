@@ -151,6 +151,16 @@ class GetMessageResponse extends BaseResponse {
 }
 
 @JsonSerializable(explicitToJson: true)
+class GetMessagesByIdResponse extends BaseResponse {
+  Message message;
+
+  static GetMessagesByIdResponse fromJson(Map<String, dynamic> json) =>
+      _$GetMessagesByIdResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$GetMessagesByIdResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
 class AddModeratorsResponse extends BaseResponse {
   Channel channel;
   List<Member> members;

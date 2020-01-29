@@ -20,11 +20,11 @@ class Channel {
 
   Client get client => _client;
 
-  String get channelURL => "/channels/$type/$id";
+  String get _channelURL => "/channels/$type/$id";
 
   Future<SendMessageResponse> sendMessage(Message message) async {
     final response = await _client.dioClient.post<String>(
-      "$channelURL/message",
+      "$_channelURL/message",
       data: {"message": message.toJson()},
     );
     return _client.decode(response.data, SendMessageResponse.fromJson);
@@ -32,7 +32,7 @@ class Channel {
 
   Future<SendFileResponse> sendFile(MultipartFile file) async {
     final response = await _client.dioClient.post<String>(
-      "$channelURL/file",
+      "$_channelURL/file",
       data: FormData.fromMap({'file': file}),
     );
     return _client.decode(response.data, SendFileResponse.fromJson);
@@ -40,7 +40,7 @@ class Channel {
 
   Future<SendImageResponse> sendImage(MultipartFile file) async {
     final response = await _client.dioClient.post<String>(
-      "$channelURL/image",
+      "$_channelURL/image",
       data: FormData.fromMap({'file': file}),
     );
     return _client.decode(response.data, SendImageResponse.fromJson);
@@ -48,19 +48,19 @@ class Channel {
 
   Future<EmptyResponse> deleteFile(String url) async {
     final response = await _client.dioClient
-        .delete("$channelURL/file", queryParameters: {"url": url});
+        .delete("$_channelURL/file", queryParameters: {"url": url});
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> deleteImage(String url) async {
     final response = await _client.dioClient
-        .delete("$channelURL/image", queryParameters: {"url": url});
+        .delete("$_channelURL/image", queryParameters: {"url": url});
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> sendEvent(Event event) {
     return _client.dioClient.post<String>(
-      "$channelURL/event",
+      "$_channelURL/event",
       data: {"event": event.toJson()},
     ).then((res) {
       return EmptyResponse.fromJson(json.decode(res.data.toString()));
@@ -89,18 +89,18 @@ class Channel {
     Map<String, dynamic> channelData,
     Message updateMessage,
   ) async {
-    final response = await _client.dioClient.post<String>(channelURL);
+    final response = await _client.dioClient.post<String>(_channelURL);
     return _client.decode(response.data, UpdateChannelResponse.fromJson);
   }
 
   Future<EmptyResponse> delete() async {
-    final response = await _client.dioClient.delete<String>(channelURL);
+    final response = await _client.dioClient.delete<String>(_channelURL);
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> truncate() async {
     final response =
-        await _client.dioClient.post<String>("$channelURL/truncate");
+        await _client.dioClient.post<String>("$_channelURL/truncate");
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
@@ -112,7 +112,7 @@ class Channel {
 
   Future<AddMembersResponse> addMembers(
       List<Member> members, Message message) async {
-    final res = await _client.dioClient.post<String>(channelURL, data: {
+    final res = await _client.dioClient.post<String>(_channelURL, data: {
       "add_members": members.map((m) => m.toJson()),
       "message": message.toJson(),
     });
@@ -123,7 +123,7 @@ class Channel {
     List<Member> moderators,
     Message message,
   ) async {
-    final res = await _client.dioClient.post<String>(channelURL, data: {
+    final res = await _client.dioClient.post<String>(_channelURL, data: {
       "add_moderators": moderators.map((m) => m.toJson()),
       "message": message.toJson(),
     });
@@ -134,7 +134,7 @@ class Channel {
     List<Member> members,
     Message message,
   ) async {
-    final res = await _client.dioClient.post<String>(channelURL, data: {
+    final res = await _client.dioClient.post<String>(_channelURL, data: {
       "invites": members.map((m) => m.toJson()),
       "message": message.toJson(),
     });
@@ -143,7 +143,7 @@ class Channel {
 
   Future<RemoveMembersResponse> removeMembers(
       List<Member> members, Message message) async {
-    final res = await _client.dioClient.post<String>(channelURL, data: {
+    final res = await _client.dioClient.post<String>(_channelURL, data: {
       "remove_members": members.map((m) => m.toJson()),
       "message": message.toJson(),
     });
@@ -152,7 +152,7 @@ class Channel {
 
   Future<DemoteModeratorsResponse> demoteModerators(
       List<Member> members, Message message) async {
-    final res = await _client.dioClient.post<String>(channelURL, data: {
+    final res = await _client.dioClient.post<String>(_channelURL, data: {
       "demote_moderators": members.map((m) => m.toJson()),
       "message": message.toJson(),
     });
@@ -164,7 +164,7 @@ class Channel {
       null;
 
   Future<EmptyResponse> markRead() async {
-    final response = await _client.dioClient.post<String>("$channelURL/read");
+    final response = await _client.dioClient.post<String>("$_channelURL/read");
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
@@ -173,7 +173,7 @@ class Channel {
 
   Future<EmptyResponse> stopWatching() async {
     final response =
-        await _client.dioClient.post<String>("$channelURL/stop-watching");
+        await _client.dioClient.post<String>("$_channelURL/stop-watching");
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
@@ -189,14 +189,22 @@ class Channel {
   Future<QueryReactionsResponse> getReactions(
       String messageID, PaginationParams options) async {
     final response = await _client.dioClient.get<String>(
-        "/messages/$messageID/reactions",
-        queryParameters: options.toJson());
+      "/messages/$messageID/reactions",
+      queryParameters: options.toJson(),
+    );
     return _client.decode<QueryReactionsResponse>(
         response.data, QueryReactionsResponse.fromJson);
   }
 
-  // TODO getMessagesById
-  Future<EmptyResponse> getMessagesById(List<String> messageIDs) async => null;
+  Future<GetMessagesByIdResponse> getMessagesById(
+      List<String> messageIDs) async {
+    final response = await _client.dioClient.get<String>(
+      "$_channelURL/messages",
+      queryParameters: {'ids': messageIDs.join(',')},
+    );
+    return _client.decode<GetMessagesByIdResponse>(
+        response.data, GetMessagesByIdResponse.fromJson);
+  }
 
   // TODO create
   Future<EmptyResponse> create() async => null;

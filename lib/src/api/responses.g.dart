@@ -208,6 +208,22 @@ Map<String, dynamic> _$GetMessageResponseToJson(GetMessageResponse instance) =>
       'message': instance.message?.toJson(),
     };
 
+GetMessagesByIdResponse _$GetMessagesByIdResponseFromJson(
+    Map<String, dynamic> json) {
+  return GetMessagesByIdResponse()
+    ..duration = json['duration'] as String
+    ..message = json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>);
+}
+
+Map<String, dynamic> _$GetMessagesByIdResponseToJson(
+        GetMessagesByIdResponse instance) =>
+    <String, dynamic>{
+      'duration': instance.duration,
+      'message': instance.message?.toJson(),
+    };
+
 AddModeratorsResponse _$AddModeratorsResponseFromJson(
     Map<String, dynamic> json) {
   return AddModeratorsResponse()
