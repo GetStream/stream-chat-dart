@@ -11,7 +11,7 @@ void main() {
         "name": "giphy",
         "description": "Post a random gif to the channel",
         "args": "[text]"
-      }     
+      }      
       ''';
 
     test('should parse json correctly', () {
