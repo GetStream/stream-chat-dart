@@ -14,7 +14,7 @@ This library is currently under development: you can subscribe for updates [here
 
 ```yaml
 dependencies:
- stream_chat_dart:
+ stream_chat:
    git: git://github.com/GetStream/stream-chat-dart.git
 ```
 
@@ -31,7 +31,7 @@ There is a detailed Flutter example project in the `example` folder. You can dir
 First you need to instantiate a chat client. The Chat client will manage API call, event handling and manage the websocket connection to Stream Chat servers. You should only create the client once and re-use it across your application.
 
 ```dart
-var client = Client("stream-chat-api-key");
+var client = Client("stream-chat-src.api-key");
 ```
 
 ### Logging
@@ -43,7 +43,7 @@ By default the Chat Client will write all messages with level Warn or Error to s
 During development you might want to enable more logging information, you can change the default log level when constructing the client.
 
 ```dart
-var client = Client("stream-chat-api-key", logLevel: Level.INFO);
+var client = Client("stream-chat-src.api-key", logLevel: Level.INFO);
 ```
 
 #### Custom Logger
@@ -55,7 +55,7 @@ myLogHandlerFunction = (LogRecord record) {
   // do something with the record (ie. send it to Sentry or Fabric)
 }
 
-var client = Client("stream-chat-api-key", logHandlerFunction: myLogHandlerFunction);
+var client = Client("stream-chat-src.api-key", logHandlerFunction: myLogHandlerFunction);
 ```
 
 ## Contributing
@@ -71,7 +71,7 @@ var client = Client("stream-chat-api-key", logHandlerFunction: myLogHandlerFunct
 
 TODO: 
 
-### Watch models and generate JSON code
+### Watch src.models and generate JSON code
 
 JSON serialization relies on code generation; make sure to keep that running while you make changes to the library
 

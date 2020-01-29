@@ -21,7 +21,7 @@
 #.vscode/
 
 # Flutter/Dart/Pub related
-**/doc/api/
+**/doc/src.api/
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
@@ -46,7 +46,7 @@ pubspec.lock
 
 # Directory created by dartdoc
 # If you don't generate documentation locally you can remove this line.
-doc/api/
+doc/src.api/
 
 # Avoid committing generated Javascript files:
 *.dart.js
