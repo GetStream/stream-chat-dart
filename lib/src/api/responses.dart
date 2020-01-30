@@ -15,7 +15,7 @@ abstract class BaseResponse {
   String duration;
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class QueryChannelsResponse extends BaseResponse {
   List<ChannelState> channels;
 
@@ -25,7 +25,7 @@ class QueryChannelsResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$QueryChannelsResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class QueryUsersResponse extends BaseResponse {
   List<User> users;
 
@@ -35,7 +35,7 @@ class QueryUsersResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$QueryUsersResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class QueryReactionsResponse extends BaseResponse {
   List<Reaction> reactions;
 
@@ -45,7 +45,7 @@ class QueryReactionsResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$QueryReactionsResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class QueryRepliesResponse extends BaseResponse {
   List<Message> messages;
 
@@ -55,7 +55,7 @@ class QueryRepliesResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$QueryRepliesResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class ListDevicesResponse extends BaseResponse {
   List<Device> devices;
 
@@ -65,7 +65,7 @@ class ListDevicesResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$ListDevicesResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class SendFileResponse extends BaseResponse {
   // the url of the uploaded file
   String file;
@@ -76,7 +76,7 @@ class SendFileResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$SendFileResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class SendImageResponse extends BaseResponse {
   // the url of the uploaded file
   String file;
@@ -87,7 +87,7 @@ class SendImageResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$SendImageResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class SendReactionResponse extends BaseResponse {
   Message message;
   Reaction reaction;
@@ -98,7 +98,7 @@ class SendReactionResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$SendReactionResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class SetGuestUserResponse extends BaseResponse {
   @JsonKey(name: 'access_token')
   String accessToken;
@@ -110,7 +110,7 @@ class SetGuestUserResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$SetGuestUserResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class UpdateUsersResponse extends BaseResponse {
   Map<String, User> users;
 
@@ -120,7 +120,7 @@ class UpdateUsersResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$UpdateUsersResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class UpdateMessageResponse extends BaseResponse {
   Message message;
 
@@ -130,7 +130,7 @@ class UpdateMessageResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$UpdateMessageResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class SendMessageResponse extends BaseResponse {
   Message message;
 
@@ -140,7 +140,7 @@ class SendMessageResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$SendMessageResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class GetMessageResponse extends BaseResponse {
   Message message;
 
@@ -150,7 +150,7 @@ class GetMessageResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$GetMessageResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class SearchMessagesResponse extends BaseResponse {
   List<Message> messages;
 
@@ -160,7 +160,7 @@ class SearchMessagesResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$SearchMessagesResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class GetMessagesByIdResponse extends BaseResponse {
   Message message;
 
@@ -170,7 +170,7 @@ class GetMessagesByIdResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$GetMessagesByIdResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class AddModeratorsResponse extends BaseResponse {
   Channel channel;
   List<Member> members;
@@ -182,7 +182,7 @@ class AddModeratorsResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$AddModeratorsResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class UpdateChannelResponse extends BaseResponse {
   Channel channel;
   List<Member> members;
@@ -194,7 +194,7 @@ class UpdateChannelResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$UpdateChannelResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class InviteMembersResponse extends BaseResponse {
   Channel channel;
   List<Member> members;
@@ -206,7 +206,7 @@ class InviteMembersResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$InviteMembersResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class RemoveMembersResponse extends BaseResponse {
   Channel channel;
   List<Member> members;
@@ -218,7 +218,7 @@ class RemoveMembersResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$RemoveMembersResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class SendActionResponse extends BaseResponse {
   Message message;
 
@@ -228,7 +228,7 @@ class SendActionResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$SendActionResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class AddMembersResponse extends BaseResponse {
   Channel channel;
   List<Member> members;
@@ -240,7 +240,7 @@ class AddMembersResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$AddMembersResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class AcceptInviteResponse extends BaseResponse {
   Channel channel;
   List<Member> members;
@@ -252,7 +252,7 @@ class AcceptInviteResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$AcceptInviteResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class RejectInviteResponse extends BaseResponse {
   Channel channel;
   List<Member> members;
@@ -264,7 +264,7 @@ class RejectInviteResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$RejectInviteResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class DemoteModeratorsResponse extends BaseResponse {
   Channel channel;
   List<Member> members;
@@ -276,7 +276,7 @@ class DemoteModeratorsResponse extends BaseResponse {
   Map<String, dynamic> toJson() => _$DemoteModeratorsResponseToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class EmptyResponse extends BaseResponse {
   static EmptyResponse fromJson(Map<String, dynamic> json) =>
       _$EmptyResponseFromJson(json);
