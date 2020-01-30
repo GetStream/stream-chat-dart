@@ -35,7 +35,7 @@ Channel _$ChannelFromJson(Map<String, dynamic> json) {
         ?.map((e) =>
             e == null ? null : Member.fromJson(e as Map<String, dynamic>))
         ?.toList(),
-    json['extraData'] as Map<String, dynamic>,
+    json['extra_data'] as Map<String, dynamic>,
   );
 }
 
@@ -61,6 +61,6 @@ Map<String, dynamic> _$ChannelToJson(Channel instance) {
     }
   }
 
-  writeNotNull('extraData', instance.extraData);
+  writeNotNull('extra_data', instance.extraData);
   return val;
 }

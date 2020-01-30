@@ -142,7 +142,7 @@ class Client {
     );
 
     final connectEvent = await _ws.connect();
-    _connectionId = connectEvent.connectionID;
+    _connectionId = connectEvent.connectionId;
     return connectEvent;
   }
 

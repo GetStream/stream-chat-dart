@@ -4,7 +4,7 @@ import 'serialization.dart';
 
 part 'user.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class User {
   final String id;
 

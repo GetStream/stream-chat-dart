@@ -5,11 +5,11 @@ class Serialization {
       return json;
     }
     var clone = Map<String, dynamic>.from(json);
-    clone['extraData'] = Map<String, dynamic>();
+    clone['extra_data'] = Map<String, dynamic>();
 
     json?.keys?.forEach((key) {
       if (!topLevelFields.contains(key)) {
-        clone['extraData'][key] = clone.remove(key);
+        clone['extra_data'][key] = clone.remove(key);
       }
     });
 
@@ -23,7 +23,7 @@ class Serialization {
     }
 
     var clone = Map<String, dynamic>.from(intermediateMap);
-    Map<String, dynamic> extraData = clone.remove('extraData');
+    Map<String, dynamic> extraData = clone.remove('extra_data');
 
     extraData?.keys?.forEach((key) {
       if (!topLevelFields.contains(key)) {

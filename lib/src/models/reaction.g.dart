@@ -8,7 +8,7 @@ part of 'reaction.dart';
 
 Reaction _$ReactionFromJson(Map<String, dynamic> json) {
   return Reaction(
-    messageID: json['message_id'] as String,
+    messageId: json['message_id'] as String,
     createdAt: json['created_at'] == null
         ? null
         : DateTime.parse(json['created_at'] as String),
@@ -16,20 +16,20 @@ Reaction _$ReactionFromJson(Map<String, dynamic> json) {
     user: json['user'] == null
         ? null
         : User.fromJson(json['user'] as Map<String, dynamic>),
-    userID: json['user_id'] as String,
+    userId: json['user_id'] as String,
     score: json['score'] as int,
-    extraData: json['extraData'] as Map<String, dynamic>,
+    extraData: json['extra_data'] as Map<String, dynamic>,
   );
 }
 
 Map<String, dynamic> _$ReactionToJson(Reaction instance) {
   final val = <String, dynamic>{
-    'message_id': instance.messageID,
+    'message_id': instance.messageId,
     'created_at': instance.createdAt?.toIso8601String(),
     'type': instance.type,
     'user': instance.user?.toJson(),
     'score': instance.score,
-    'user_id': instance.userID,
+    'user_id': instance.userId,
   };
 
   void writeNotNull(String key, dynamic value) {
@@ -38,6 +38,6 @@ Map<String, dynamic> _$ReactionToJson(Reaction instance) {
     }
   }
 
-  writeNotNull('extraData', instance.extraData);
+  writeNotNull('extra_data', instance.extraData);
   return val;
 }

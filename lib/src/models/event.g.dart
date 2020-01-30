@@ -17,7 +17,7 @@ Event _$EventFromJson(Map<String, dynamic> json) {
         ? null
         : User.fromJson(json['own'] as Map<String, dynamic>),
   )
-    ..connectionID = json['connection_id'] as String
+    ..connectionId = json['connection_id'] as String
     ..user = json['user'] == null
         ? null
         : User.fromJson(json['user'] as Map<String, dynamic>);
@@ -26,7 +26,7 @@ Event _$EventFromJson(Map<String, dynamic> json) {
 Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'type': instance.type,
       'cid': instance.cid,
-      'connection_id': instance.connectionID,
+      'connection_id': instance.connectionId,
       'created_at': instance.createdAt?.toIso8601String(),
       'own': instance.own?.toJson(),
       'user': instance.user?.toJson(),

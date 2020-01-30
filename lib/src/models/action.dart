@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'action.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class Action {
   String name;
   String style;

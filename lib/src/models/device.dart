@@ -2,11 +2,9 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'device.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class Device {
   String id;
-
-  @JsonKey(name: 'push_provider')
   String pushProvider;
 
   Device(this.id, this.pushProvider);

@@ -5,20 +5,14 @@ import 'user.dart';
 
 part 'reaction.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class Reaction {
-  @JsonKey(name: 'message_id')
-  final String messageID;
-
-  @JsonKey(name: 'created_at')
+  final String messageId;
   final DateTime createdAt;
-
   final String type;
   final User user;
   final int score;
-
-  @JsonKey(name: 'user_id')
-  final String userID;
+  final String userId;
 
   @JsonKey(includeIfNull: false)
   final Map<String, dynamic> extraData;
@@ -33,11 +27,11 @@ class Reaction {
   ];
 
   Reaction({
-    this.messageID,
+    this.messageId,
     this.createdAt,
     this.type,
     this.user,
-    this.userID,
+    this.userId,
     this.score,
     this.extraData,
   });

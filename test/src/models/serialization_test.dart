@@ -16,7 +16,7 @@ void main() {
       expect(result, {
         'prop1': 'test',
         'prop2': 123,
-        'extraData': {
+        'extra_data': {
           'prop3': true,
         },
       });
@@ -37,7 +37,7 @@ void main() {
         'prop1': 'test',
         'prop2': 123,
         'prop3': true,
-        'extraData': {},
+        'extra_data': {},
       });
     });
 

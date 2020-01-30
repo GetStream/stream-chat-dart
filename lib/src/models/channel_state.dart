@@ -9,15 +9,12 @@ import 'message.dart';
 
 part 'channel_state.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class ChannelState {
   Channel channel;
   List<Message> messages;
   List<Member> members;
-
-  @JsonKey(name: "watcher_count")
   int watcherCount;
-
   List<User> watchers;
   List<Read> read;
 

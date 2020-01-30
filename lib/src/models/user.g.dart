@@ -9,7 +9,7 @@ part of 'user.dart';
 User _$UserFromJson(Map<String, dynamic> json) {
   return User(
     json['id'] as String,
-    json['extraData'] as Map<String, dynamic>,
+    json['extra_data'] as Map<String, dynamic>,
   );
 }
 
@@ -24,6 +24,6 @@ Map<String, dynamic> _$UserToJson(User instance) {
     }
   }
 
-  writeNotNull('extraData', instance.extraData);
+  writeNotNull('extra_data', instance.extraData);
   return val;
 }
