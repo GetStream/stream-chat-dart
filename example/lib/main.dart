@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 
+import 'components/channel_list.dart';
+import 'components/stream_chat_container.dart';
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -16,7 +19,7 @@ class MyApp extends StatelessWidget {
         home: ChatLoader(
           child: ChannelList(
             filter: QueryFilter(),
-            sort: [SortOption(field: "last_message_at")],
+            sort: [SortOption("last_message_at")],
             options: {},
           ),
           user: User("wild-breeze-7", {}),

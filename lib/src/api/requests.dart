@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'requests.g.dart';
@@ -11,7 +10,7 @@ class SortOption {
   final String field;
   final int direction;
 
-  SortOption({@required this.field, this.direction = DESC});
+  SortOption(this.field, {this.direction = DESC});
 
   static SortOption fromJson(Map<String, dynamic> json) =>
       _$SortOptionFromJson(json);

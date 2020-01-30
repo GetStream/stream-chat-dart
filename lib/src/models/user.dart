@@ -6,16 +6,16 @@ part 'user.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class User {
-  String id;
+  final String id;
 
   @JsonKey(includeIfNull: false)
-  Map<String, dynamic> extraData;
+  final Map<String, dynamic> extraData;
 
   static const topLevelFields = [
     'id',
   ];
 
-  User(this.id, this.extraData);
+  User(this.id, [this.extraData]);
 
   factory User.fromJson(Map<String, dynamic> json) {
     return _$UserFromJson(Serialization.moveKeysToRoot(json, topLevelFields));
