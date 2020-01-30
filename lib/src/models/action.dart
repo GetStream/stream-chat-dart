@@ -4,13 +4,13 @@ part 'action.g.dart';
 
 @JsonSerializable()
 class Action {
-  String name;
-  String style;
-  String text;
-  String type;
-  String value;
+  final String name;
+  final String style;
+  final String text;
+  final String type;
+  final String value;
 
-  Action(this.name, this.style, this.text, this.type, this.value);
+  Action({this.name, this.style, this.text, this.type, this.value});
 
   factory Action.fromJson(Map<String, dynamic> json) => _$ActionFromJson(json);
 
