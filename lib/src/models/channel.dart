@@ -9,35 +9,35 @@ part 'channel.g.dart';
 
 @JsonSerializable(explicitToJson: true)
 class Channel {
-  String id;
-  String type;
-  String cid;
-  ChannelConfig config;
+  final String id;
+  final String type;
+  final String cid;
+  final ChannelConfig config;
 
   @JsonKey(name: 'created_by')
-  User createdBy;
+  final User createdBy;
 
-  bool frozen;
+  final bool frozen;
 
   @JsonKey(name: 'last_message_at')
-  DateTime lastMessageAt;
+  final DateTime lastMessageAt;
 
   @JsonKey(name: 'created_at')
-  DateTime createdAt;
+  final DateTime createdAt;
 
   @JsonKey(name: 'updated_at')
-  DateTime updatedAt;
+  final DateTime updatedAt;
 
   @JsonKey(name: 'deleted_at')
-  DateTime deletedAt;
+  final DateTime deletedAt;
 
   @JsonKey(name: 'member_count')
-  int memberCount;
+  final int memberCount;
 
-  List<Member> members;
+  final List<Member> members;
 
   @JsonKey(includeIfNull: false)
-  Map<String, dynamic> extraData;
+  final Map<String, dynamic> extraData;
 
   static const topLevelFields = [
     'id',
