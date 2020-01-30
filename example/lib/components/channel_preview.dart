@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import '../models/channel.dart';
+import 'package:stream_chat/stream_chat.dart';
 
 class ChannelPreview extends StatelessWidget {
   final Channel channel;

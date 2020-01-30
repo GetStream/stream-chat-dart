@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
-
-import '../client.dart';
+import 'package:stream_chat/stream_chat.dart';
 
 class StreamChatState {
   final Client client;

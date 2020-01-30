@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
 import 'api/channel.dart';
@@ -290,8 +289,8 @@ class Client {
     return decode(response.data, EmptyResponse.fromJson);
   }
 
-  Channel channel({
-    @required String type,
+  Channel channel(
+    String type, {
     String id,
     Map<String, dynamic> custom,
   }) {

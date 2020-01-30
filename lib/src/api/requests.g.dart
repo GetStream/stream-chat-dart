@@ -8,7 +8,7 @@ part of 'requests.dart';
 
 SortOption _$SortOptionFromJson(Map<String, dynamic> json) {
   return SortOption(
-    field: json['field'] as String,
+    json['field'] as String,
     direction: json['direction'] as int,
   );
 }
