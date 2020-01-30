@@ -8,7 +8,7 @@ main() {
     grep SF: $1 | sort > covered
     comm -23 all covered > not_covered
     cat not_covered | awk '{print $0; print "end_of_record"}' > not_covered_report
-    cat cov not_covered_report
+    cat $1 not_covered_report
 }
 
 display_usage() { 
