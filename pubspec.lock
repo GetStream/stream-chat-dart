@@ -170,7 +170,7 @@ packages:
     source: hosted
     version: "0.10.11"
   flutter:
-    dependency: transitive
+    dependency: "direct main"
     description: flutter
     source: sdk
     version: "0.0.0"
@@ -284,6 +284,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.9.6+3"
+  mockito:
+    dependency: "direct dev"
+    description:
+      name: mockito
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.1.1"
   node_interop:
     dependency: transitive
     description:
