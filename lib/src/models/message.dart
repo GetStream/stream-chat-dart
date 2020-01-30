@@ -7,47 +7,25 @@ import 'user.dart';
 
 part 'message.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class Message {
   String id;
   String text;
   String type;
 
   List<Attachment> attachments;
-
-  @JsonKey(name: 'mentioned_users')
   List<User> mentionedUsers;
-
-  @JsonKey(name: 'reaction_counts')
   Map<String, int> reactionCounts;
-
-  @JsonKey(name: 'reaction_scores')
   Map<String, int> reactionScores;
-
-  @JsonKey(name: 'latest_reactions')
   List<Reaction> latestReactions;
-
-  @JsonKey(name: 'own_reactions')
   List<Reaction> ownReactions;
-
-  @JsonKey(name: 'parent_id')
-  String parentID;
-
-  @JsonKey(name: 'reply_count')
+  String parentId;
   int replyCount;
-
-  @JsonKey(name: 'show_in_channel')
   bool showInChannel;
-
   String command;
   String html;
-
-  @JsonKey(name: 'created_at')
   DateTime createdAt;
-
-  @JsonKey(name: 'updated_at')
   DateTime updatedAt;
-
   User user;
 
   @JsonKey(includeIfNull: false)
@@ -77,7 +55,7 @@ class Message {
       this.id,
       this.text,
       this.type,
-      this.parentID,
+      this.parentId,
       this.replyCount,
       this.showInChannel,
       this.command,

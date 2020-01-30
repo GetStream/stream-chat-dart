@@ -4,47 +4,25 @@ import 'serialization.dart';
 
 part 'attachment.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class Attachment {
   String type;
-
-  @JsonKey(name: 'title_link')
   String titleLink;
-
   String title;
-
-  @JsonKey(name: 'thumb_url')
-  String thumbURL;
-
+  String thumbUrl;
   String text;
   String pretext;
-
-  @JsonKey(name: 'og_scrape_url')
-  String ogScrapeURL;
-
-  @JsonKey(name: 'image_url')
+  String ogScrapeUrl;
   String imageURL;
-
-  @JsonKey(name: 'footer_icon')
   String footerIcon;
-
   String footer;
   dynamic fields;
   String fallback;
   String color;
-
-  @JsonKey(name: 'author_name')
   String authorName;
-
-  @JsonKey(name: 'author_link')
   String authorLink;
-
-  @JsonKey(name: 'author_icon')
   String authorIcon;
-
-  @JsonKey(name: 'asset_url')
-  String assetURL;
-
+  String assetUrl;
   List<Action> actions;
 
   @JsonKey(includeIfNull: false)
@@ -75,10 +53,10 @@ class Attachment {
       this.type,
       this.titleLink,
       this.title,
-      this.thumbURL,
+      this.thumbUrl,
       this.text,
       this.pretext,
-      this.ogScrapeURL,
+      this.ogScrapeUrl,
       this.imageURL,
       this.footerIcon,
       this.footer,
@@ -88,7 +66,7 @@ class Attachment {
       this.authorName,
       this.authorLink,
       this.authorIcon,
-      this.assetURL,
+      this.assetUrl,
       this.actions,
       this.extraData);
 

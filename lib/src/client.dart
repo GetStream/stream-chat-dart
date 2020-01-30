@@ -136,7 +136,7 @@ class Client {
 
     var connectionFuture = _ws.connect();
     var connectEvent = await connectionFuture;
-    _connectionId = connectEvent.connectionID;
+    _connectionId = connectEvent.connectionId;
     return connectionFuture;
   }
 

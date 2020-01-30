@@ -15,7 +15,7 @@ Attachment _$AttachmentFromJson(Map<String, dynamic> json) {
     json['text'] as String,
     json['pretext'] as String,
     json['og_scrape_url'] as String,
-    json['image_url'] as String,
+    json['image_u_r_l'] as String,
     json['footer_icon'] as String,
     json['footer'] as String,
     json['fields'],
@@ -29,7 +29,7 @@ Attachment _$AttachmentFromJson(Map<String, dynamic> json) {
         ?.map((e) =>
             e == null ? null : Action.fromJson(e as Map<String, dynamic>))
         ?.toList(),
-    json['extraData'] as Map<String, dynamic>,
+    json['extra_data'] as Map<String, dynamic>,
   );
 }
 
@@ -38,11 +38,11 @@ Map<String, dynamic> _$AttachmentToJson(Attachment instance) {
     'type': instance.type,
     'title_link': instance.titleLink,
     'title': instance.title,
-    'thumb_url': instance.thumbURL,
+    'thumb_url': instance.thumbUrl,
     'text': instance.text,
     'pretext': instance.pretext,
-    'og_scrape_url': instance.ogScrapeURL,
-    'image_url': instance.imageURL,
+    'og_scrape_url': instance.ogScrapeUrl,
+    'image_u_r_l': instance.imageURL,
     'footer_icon': instance.footerIcon,
     'footer': instance.footer,
     'fields': instance.fields,
@@ -51,7 +51,7 @@ Map<String, dynamic> _$AttachmentToJson(Attachment instance) {
     'author_name': instance.authorName,
     'author_link': instance.authorLink,
     'author_icon': instance.authorIcon,
-    'asset_url': instance.assetURL,
+    'asset_url': instance.assetUrl,
     'actions': instance.actions?.map((e) => e?.toJson())?.toList(),
   };
 
@@ -61,6 +61,6 @@ Map<String, dynamic> _$AttachmentToJson(Attachment instance) {
     }
   }
 
-  writeNotNull('extraData', instance.extraData);
+  writeNotNull('extra_data', instance.extraData);
   return val;
 }

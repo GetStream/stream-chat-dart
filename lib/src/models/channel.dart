@@ -7,33 +7,19 @@ import 'user.dart';
 
 part 'channel.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class Channel {
   final String id;
   final String type;
   final String cid;
   final ChannelConfig config;
-
-  @JsonKey(name: 'created_by')
   final User createdBy;
-
   final bool frozen;
-
-  @JsonKey(name: 'last_message_at')
   final DateTime lastMessageAt;
-
-  @JsonKey(name: 'created_at')
   final DateTime createdAt;
-
-  @JsonKey(name: 'updated_at')
   final DateTime updatedAt;
-
-  @JsonKey(name: 'deleted_at')
   final DateTime deletedAt;
-
-  @JsonKey(name: 'member_count')
   final int memberCount;
-
   final List<Member> members;
 
   @JsonKey(includeIfNull: false)

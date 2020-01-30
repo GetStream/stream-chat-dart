@@ -36,7 +36,7 @@ Map<String, dynamic> _$MemberToJson(Member instance) => <String, dynamic>{
       'invite_rejected_at': instance.inviteRejectedAt?.toIso8601String(),
       'invited': instance.invited,
       'role': instance.role,
-      'user_id': instance.userID,
+      'user_id': instance.userId,
       'is_moderator': instance.isModerator,
       'created_at': instance.createdAt?.toIso8601String(),
       'updated_at': instance.updatedAt?.toIso8601String(),

@@ -29,7 +29,7 @@ void main() {
 
     test('should parse json correctly', () {
       final reaction = Reaction.fromJson(json.decode(jsonExample));
-      expect(reaction.messageID, '76cd8c82-b557-4e48-9d12-87995d3a0e04');
+      expect(reaction.messageId, '76cd8c82-b557-4e48-9d12-87995d3a0e04');
       expect(reaction.createdAt, DateTime.parse("2020-01-28T22:17:31.108742Z"));
       expect(reaction.type, 'wow');
       expect(
@@ -45,13 +45,13 @@ void main() {
         }).toJson(),
       );
       expect(reaction.score, 1);
-      expect(reaction.userID, '2de0297c-f3f2-489d-b930-ef77342edccf');
+      expect(reaction.userId, '2de0297c-f3f2-489d-b930-ef77342edccf');
       expect(reaction.extraData, {'updated_at': '2020-01-28T22:17:31.108742Z'});
     });
 
     test('should serialize to json correctly', () {
       final reaction = Reaction(
-        messageID: '76cd8c82-b557-4e48-9d12-87995d3a0e04',
+        messageId: '76cd8c82-b557-4e48-9d12-87995d3a0e04',
         createdAt: DateTime.parse("2020-01-28T22:17:31.108742Z"),
         type: 'wow',
         user: User("2de0297c-f3f2-489d-b930-ef77342edccf", {
@@ -63,7 +63,7 @@ void main() {
           "image": "https://randomuser.me/api/portraits/women/45.jpg",
           "name": "Daisy Morgan"
         }),
-        userID: "2de0297c-f3f2-489d-b930-ef77342edccf",
+        userId: "2de0297c-f3f2-489d-b930-ef77342edccf",
         extraData: {'updated_at': '2020-01-28T22:17:31.108742Z'},
         score: 1
       );

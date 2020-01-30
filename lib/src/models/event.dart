@@ -4,22 +4,16 @@ import 'user.dart';
 
 part 'event.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class Event {
   String type;
   String cid;
-
-  @JsonKey(name: 'connection_id')
-  String connectionID;
-
-  @JsonKey(name: 'created_at')
+  String connectionId;
   DateTime createdAt;
+  User own;
+  User user;
 
   Event(this.type, this.cid, this.createdAt, this.own);
-
-  User own;
-
-  User user;
 
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
   Map<String, dynamic> toJson() => _$EventToJson(this);

@@ -6,7 +6,6 @@ import 'package:stream_chat/src/models/channel_config.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/command.dart';
 import 'package:stream_chat/src/models/user.dart';
-import 'package:stream_chat/src/models/channel.dart';
 
 void main() {
   group('src/models/channel_state', () {

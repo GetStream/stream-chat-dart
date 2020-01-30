@@ -48,7 +48,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) {
         ?.map((e) =>
             e == null ? null : Reaction.fromJson(e as Map<String, dynamic>))
         ?.toList()
-    ..extraData = json['extraData'] as Map<String, dynamic>;
+    ..extraData = json['extra_data'] as Map<String, dynamic>;
 }
 
 Map<String, dynamic> _$MessageToJson(Message instance) {
@@ -64,7 +64,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
     'latest_reactions':
         instance.latestReactions?.map((e) => e?.toJson())?.toList(),
     'own_reactions': instance.ownReactions?.map((e) => e?.toJson())?.toList(),
-    'parent_id': instance.parentID,
+    'parent_id': instance.parentId,
     'reply_count': instance.replyCount,
     'show_in_channel': instance.showInChannel,
     'command': instance.command,
@@ -80,6 +80,6 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
     }
   }
 
-  writeNotNull('extraData', instance.extraData);
+  writeNotNull('extra_data', instance.extraData);
   return val;
 }

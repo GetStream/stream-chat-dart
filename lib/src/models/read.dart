@@ -4,11 +4,9 @@ import 'user.dart';
 
 part 'read.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class Read {
-  @JsonKey(name: "last_read")
   DateTime lastRead;
-
   User user;
   Read(this.lastRead, this.user);
 
