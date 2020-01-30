@@ -5,18 +5,27 @@ part 'member.g.dart';
 
 @JsonSerializable()
 class Member {
-  User user;
-  DateTime inviteAcceptedAt;
-  DateTime inviteRejectedAt;
-  bool invited;
-  String role;
-  String userId;
-  bool isModerator;
-  DateTime createdAt;
-  DateTime updatedAt;
+  final User user;
+  final DateTime inviteAcceptedAt;
+  final DateTime inviteRejectedAt;
+  final bool invited;
+  final String role;
+  final String userId;
+  final bool isModerator;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
-  Member(this.user, this.inviteAcceptedAt, this.inviteRejectedAt, this.invited,
-      this.role, this.userId, this.isModerator, this.createdAt, this.updatedAt);
+  Member({
+    this.user,
+    this.inviteAcceptedAt,
+    this.inviteRejectedAt,
+    this.invited,
+    this.role,
+    this.userId,
+    this.isModerator,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(json);
   Map<String, dynamic> toJson() => _$MemberToJson(this);

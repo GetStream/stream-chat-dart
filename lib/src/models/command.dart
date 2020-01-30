@@ -4,11 +4,15 @@ part 'command.g.dart';
 
 @JsonSerializable()
 class Command {
-  String name;
-  String description;
-  String args;
+  final String name;
+  final String description;
+  final String args;
 
-  Command(this.name, this.description, this.args);
+  Command({
+    this.name,
+    this.description,
+    this.args,
+  });
 
   factory Command.fromJson(Map<String, dynamic> json) =>
       _$CommandFromJson(json);

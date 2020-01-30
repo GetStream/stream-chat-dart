@@ -22,9 +22,9 @@ void main() {
 
     test('should serialize to json correctly', () {
       final command = Command(
-        'giphy',
-        'Post a random gif to the channel',
-        '[text]',
+        name: 'giphy',
+        description: 'Post a random gif to the channel',
+        args: '[text]',
       );
 
       expect(

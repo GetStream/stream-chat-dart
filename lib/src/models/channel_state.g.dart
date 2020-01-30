@@ -8,23 +8,23 @@ part of 'channel_state.dart';
 
 ChannelState _$ChannelStateFromJson(Map<String, dynamic> json) {
   return ChannelState(
-    json['channel'] == null
+    channel: json['channel'] == null
         ? null
         : Channel.fromJson(json['channel'] as Map<String, dynamic>),
-    (json['messages'] as List)
+    messages: (json['messages'] as List)
         ?.map((e) =>
             e == null ? null : Message.fromJson(e as Map<String, dynamic>))
         ?.toList(),
-    (json['members'] as List)
+    members: (json['members'] as List)
         ?.map((e) =>
             e == null ? null : Member.fromJson(e as Map<String, dynamic>))
         ?.toList(),
-    json['watcher_count'] as int,
-    (json['watchers'] as List)
+    watcherCount: json['watcher_count'] as int,
+    watchers: (json['watchers'] as List)
         ?.map(
             (e) => e == null ? null : User.fromJson(e as Map<String, dynamic>))
         ?.toList(),
-    (json['read'] as List)
+    read: (json['read'] as List)
         ?.map(
             (e) => e == null ? null : Read.fromJson(e as Map<String, dynamic>))
         ?.toList(),
