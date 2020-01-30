@@ -20,10 +20,3 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   pedantic: ^1.8.0+1
-
-targets:
-  $default:
-    builders:
-      json_serializable:
-        options:
-          explicit_to_json: true
