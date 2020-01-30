@@ -104,11 +104,21 @@ class Channel {
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
-  // TODO acceptInvite, options??
-  Future<EmptyResponse> acceptInvite() async => null;
+  Future<AcceptInviteResponse> acceptInvite([Message message = null]) async {
+    final res = await _client.dioClient.post<String>(_channelURL, data: {
+      "accept_invite": true,
+      "message": message?.toJson()
+    });
+    return _client.decode(res.data, AcceptInviteResponse.fromJson);
+  }
 
-  // TODO rejectInvite, options??
-  Future<EmptyResponse> rejectInvite() async => null;
+  Future<RejectInviteResponse> rejectInvite([Message message = null]) async {
+    final res = await _client.dioClient.post<String>(_channelURL, data: {
+      "accept_invite": false,
+      "message": message?.toJson()
+    });
+    return _client.decode(res.data, RejectInviteResponse.fromJson);
+  }
 
   Future<AddMembersResponse> addMembers(
       List<Member> members, Message message) async {
@@ -159,9 +169,14 @@ class Channel {
     return _client.decode(res.data, DemoteModeratorsResponse.fromJson);
   }
 
-  // TODO sendAction (see Run Message Action)
-  Future<EmptyResponse> sendAction(String messageID, dynamic formData) async =>
-      null;
+  Future<SendActionResponse> sendAction(String messageID, Map<String, dynamic> formData) async {
+    final response = await _client.dioClient.post<String>("/messages/$messageID/action", data: {
+      'id': id,
+      'type': type,
+      'form_data': formData
+    });
+    return _client.decode(response.data, SendActionResponse.fromJson);
+  }
 
   Future<EmptyResponse> markRead() async {
     final response = await _client.dioClient.post<String>("$_channelURL/read");
@@ -212,13 +227,28 @@ class Channel {
   // TODO query
   Future<EmptyResponse> query(dynamic options) async => null;
 
-  // TODO banUser
-  Future<EmptyResponse> banUser(String userID, dynamic options) async => null;
+  Future<EmptyResponse> banUser(
+    String userID,
+    Map<String, dynamic> options,
+  ) async {
+    final opts = Map.from(options)
+      ..addAll({
+        'type': type,
+        'id': id,
+      });
+    return _client.banUser(userID, opts);
+  }
+
+  Future<EmptyResponse> unbanUser(String userID) async {
+    return _client.unbanUser(userID, {
+      'type': type,
+      'id': id,
+    });
+  }
 
   Future<EmptyResponse> hide([bool clearHistory = false]) async {
-    final response = await _client.dioClient.post<String>("$_channelURL/hide", data: {
-      'clear_history': clearHistory
-    });
+    final response = await _client.dioClient.post<String>("$_channelURL/hide",
+        data: {'clear_history': clearHistory});
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
@@ -226,9 +256,6 @@ class Channel {
     final response = await _client.dioClient.post<String>("$_channelURL/show");
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
-
-  // TODO unbanUser
-  Future<EmptyResponse> unbanUser(String userID) async => null;
 
   Stream<Event> on(String eventType) => null;
 }

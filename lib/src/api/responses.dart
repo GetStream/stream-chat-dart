@@ -219,6 +219,16 @@ class RemoveMembersResponse extends BaseResponse {
 }
 
 @JsonSerializable(explicitToJson: true)
+class SendActionResponse extends BaseResponse {
+  Message message;
+
+  static SendActionResponse fromJson(Map<String, dynamic> json) =>
+      _$SendActionResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SendActionResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
 class AddMembersResponse extends BaseResponse {
   Channel channel;
   List<Member> members;
@@ -228,6 +238,30 @@ class AddMembersResponse extends BaseResponse {
       _$AddMembersResponseFromJson(json);
 
   Map<String, dynamic> toJson() => _$AddMembersResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class AcceptInviteResponse extends BaseResponse {
+  Channel channel;
+  List<Member> members;
+  Message message;
+
+  static AcceptInviteResponse fromJson(Map<String, dynamic> json) =>
+      _$AcceptInviteResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$AcceptInviteResponseToJson(this);
+}
+
+@JsonSerializable(explicitToJson: true)
+class RejectInviteResponse extends BaseResponse {
+  Channel channel;
+  List<Member> members;
+  Message message;
+
+  static RejectInviteResponse fromJson(Map<String, dynamic> json) =>
+      _$RejectInviteResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$RejectInviteResponseToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)
