@@ -13,12 +13,12 @@ on:
 
 jobs:
   test:
-    runs-on: [macos-latest]
+    container:
+      image:  google/dart:latest
+    runs-on: [ubuntu-latest]
     steps:
-    - uses: actions/checkout@v2
-    - name: Flutter action
-      uses: subosito/flutter-action@v1.1.1
+    - uses: actions/checkout@v2      
     - name: Get dependencies
-      run: flutter pub get
+      run: pub get
     - name: Run tests
-      run: flutter test
+      run: pub run test
