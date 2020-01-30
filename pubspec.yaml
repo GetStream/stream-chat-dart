@@ -6,8 +6,6 @@ environment:
   sdk: ">=2.1.0 <3.0.0"
 
 dependencies:
-  flutter:
-    sdk: flutter
   json_annotation: ^3.0.1
   logging: ^0.11.4
   dio: ^3.0.8

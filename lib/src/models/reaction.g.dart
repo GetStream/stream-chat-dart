@@ -8,18 +8,18 @@ part of 'reaction.dart';
 
 Reaction _$ReactionFromJson(Map<String, dynamic> json) {
   return Reaction(
-    json['message_id'] as String,
-    json['created_at'] == null
+    messageID: json['message_id'] as String,
+    createdAt: json['created_at'] == null
         ? null
         : DateTime.parse(json['created_at'] as String),
-    json['type'] as String,
-    json['user'] == null
+    type: json['type'] as String,
+    user: json['user'] == null
         ? null
         : User.fromJson(json['user'] as Map<String, dynamic>),
-    json['user_id'] as String,
-  )
-    ..score = json['score'] as int
-    ..extraData = json['extraData'] as Map<String, dynamic>;
+    userID: json['user_id'] as String,
+    score: json['score'] as int,
+    extraData: json['extraData'] as Map<String, dynamic>,
+  );
 }
 
 Map<String, dynamic> _$ReactionToJson(Reaction instance) {

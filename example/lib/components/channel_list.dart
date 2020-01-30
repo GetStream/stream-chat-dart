@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import '../models/channel_state.dart';
-
-import '../api/requests.dart';
-import '../api/responses.dart';
+import 'package:stream_chat/stream_chat.dart';
 import 'channel_preview.dart';
 import 'stream_chat_container.dart';
 
