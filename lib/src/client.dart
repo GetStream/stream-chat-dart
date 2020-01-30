@@ -13,7 +13,7 @@ import 'models/message.dart';
 import 'models/user.dart';
 import 'api/websocket.dart';
 
-typedef void LogHandlerFunction(LogRecord record);
+typedef LogHandlerFunction = void Function(LogRecord record);
 
 class Client {
   static const defaultBaseURL = "chat-us-east-1.stream-io-api.com";
@@ -23,6 +23,9 @@ class Client {
   final String apiKey;
   final String baseURL;
   final Dio dioClient = Dio();
+
+  LogHandlerFunction _logHandlerFunction;
+  LogHandlerFunction get logHandlerFunction => _logHandlerFunction;
 
   final _controller = StreamController<Event>.broadcast();
 
@@ -49,7 +52,7 @@ class Client {
   }
 
   void _setupDio(Duration receiveTimeout, Duration connectTimeout) {
-    dioClient.options.baseUrl = 'https://$baseURL';
+    dioClient.options.baseUrl = Uri.https(baseURL, '').toString();
     dioClient.options.receiveTimeout = receiveTimeout.inMilliseconds;
     dioClient.options.connectTimeout = connectTimeout.inMilliseconds;
     dioClient.interceptors.add(InterceptorsWrapper(
@@ -84,8 +87,10 @@ class Client {
 
   void _setupLogger(LogHandlerFunction logHandlerFunction) {
     Logger.root.level = logLevel;
-    if (logHandlerFunction == null) {
-      logHandlerFunction = (LogRecord record) {
+
+    _logHandlerFunction = logHandlerFunction;
+    if (_logHandlerFunction == null) {
+      _logHandlerFunction = (LogRecord record) {
         print(
             '(${record.time}) ${record.level.name}: ${record.loggerName} | ${record.message}');
         if (record.stackTrace != null) {
@@ -93,7 +98,7 @@ class Client {
         }
       };
     }
-    logger.onRecord.listen(logHandlerFunction);
+    logger.onRecord.listen(_logHandlerFunction);
   }
 
   void dispose(filename) {
@@ -121,23 +126,24 @@ class Client {
 
   Future<Event> connect() async {
     _ws = WebSocket(
-        baseURL,
-        _user,
-        {
-          "api_key": apiKey,
-          "authorization": _token,
-          "stream-auth-type": _getAuthType(),
-        },
-        {
-          "user_id": _user.id,
-          "server_determines_connection_id": true,
-        },
-        handleEvent);
+      baseUrl: baseURL,
+      user: _user,
+      connectParams: {
+        "api_key": apiKey,
+        "authorization": _token,
+        "stream-auth-type": _getAuthType(),
+      },
+      connectPayload: {
+        "user_id": _user.id,
+        "server_determines_connection_id": true,
+      },
+      handler: handleEvent,
+      logger: Logger('ws')..onRecord.listen(_logHandlerFunction),
+    );
 
-    var connectionFuture = _ws.connect();
-    var connectEvent = await connectionFuture;
+    final connectEvent = await _ws.connect();
     _connectionId = connectEvent.connectionId;
-    return connectionFuture;
+    return connectEvent;
   }
 
   Future<QueryChannelsResponse> queryChannels(
