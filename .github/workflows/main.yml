@@ -42,8 +42,6 @@ jobs:
         cat $file
     - name: Run tests
       run: flutter test --coverage
-    - name: Merge coverage
-      run: ./bin/merge_coverage.sh ./coverage/lcov.info > merged_cov.info
     - name: Codecov
       run: bash <(curl -s https://codecov.io/bash) -c -t ${{ secrets.CODECOV_TOKEN }} -f merged_cov.info -F flutter_tool
 
