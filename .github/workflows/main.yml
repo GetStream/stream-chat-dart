@@ -26,6 +26,8 @@ jobs:
         key: ${{ runner.OS }}-flutter-install-cache-${{ env.flutter_version }}
     - name: Flutter action
       uses: subosito/flutter-action@v1.1.1
+      with:
+        flutter-version: ${{ env.flutter_version }}
     - name: Get dependencies
       run: flutter pub get
     - name: Run tests
