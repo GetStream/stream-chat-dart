@@ -2,6 +2,7 @@
 
 ![](https://img.shields.io/badge/platform-flutter%20%7C%20flutter%20web-ff69b4.svg?style=flat-square)
 ![CI](https://github.com/GetStream/stream-chat-dart/workflows/CI/badge.svg?branch=master)
+[![codecov](https://codecov.io/gh/GetStream/stream-chat-dart/branch/master/graph/badge.svg)](https://codecov.io/gh/GetStream/stream-chat-dart)
 
 stream-chat-dart is the official Dart client for Stream Chat, a service for building chat applications. This library can be used on any Dart project and on both mobile and web apps with Flutter.
 
