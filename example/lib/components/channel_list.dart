@@ -5,7 +5,7 @@ import 'channel_preview.dart';
 import 'stream_chat_container.dart';
 
 class ChannelList extends StatefulWidget {
-  final QueryFilter filter;
+  final Map<String, dynamic> filter;
   final List<SortOption> sort;
   final Map<String, dynamic> options;
 

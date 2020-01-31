@@ -22,9 +22,10 @@ class Client {
   final Level logLevel;
   final String apiKey;
   final String baseURL;
-  final Dio dioClient = Dio();
+  Dio httpClient = Dio();
 
   LogHandlerFunction _logHandlerFunction;
+
   LogHandlerFunction get logHandlerFunction => _logHandlerFunction;
 
   final _controller = StreamController<Event>.broadcast();
@@ -33,7 +34,7 @@ class Client {
 
   String _token;
   User _user;
-  bool _anonymous;
+  bool _anonymous = false;
   String _connectionId;
   WebSocket _ws;
 
@@ -46,18 +47,24 @@ class Client {
     LogHandlerFunction logHandlerFunction,
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
+    Dio httpClient,
   }) {
     _setupLogger(logHandlerFunction);
-    _setupDio(receiveTimeout, connectTimeout);
+    _setupDio(httpClient, receiveTimeout, connectTimeout);
   }
 
-  void _setupDio(Duration receiveTimeout, Duration connectTimeout) {
-    dioClient.options.baseUrl = Uri.https(baseURL, '').toString();
-    dioClient.options.receiveTimeout = receiveTimeout.inMilliseconds;
-    dioClient.options.connectTimeout = connectTimeout.inMilliseconds;
-    dioClient.interceptors.add(InterceptorsWrapper(
-      onRequest: (options) async {
-        logger.info('''
+  void _setupDio(
+    Dio httpClient,
+    Duration receiveTimeout,
+    Duration connectTimeout,
+  ) {
+    this.httpClient = httpClient ?? Dio();
+    this.httpClient.options.baseUrl = Uri.https(baseURL, '').toString();
+    this.httpClient.options.receiveTimeout = receiveTimeout.inMilliseconds;
+    this.httpClient.options.connectTimeout = connectTimeout.inMilliseconds;
+    this.httpClient.interceptors.add(InterceptorsWrapper(
+          onRequest: (options) async {
+            logger.info('''
     
           method: ${options.method}
           url: ${options.uri} 
@@ -65,44 +72,42 @@ class Client {
           data: ${options.data.toString()}
     
         ''');
-        options.queryParameters.addAll(commonQueryParams);
-        options.headers.addAll(httpHeaders);
-        return options;
-      },
-      onError: (error) async {
-        logger.severe(error.message, error);
-        return error;
-      },
-      onResponse: (response) async {
-        if (response.statusCode != 200) {
-          return dioClient.reject(ApiError(
-            response.data,
-            response.statusCode,
-          ));
-        }
-        return response;
-      },
-    ));
+            options.queryParameters.addAll(commonQueryParams);
+            options.headers.addAll(httpHeaders);
+            return options;
+          },
+          onError: (error) async {
+            logger.severe(error.message, error);
+            return error;
+          },
+          onResponse: (response) async {
+            if (response.statusCode != 200) {
+              return this.httpClient.reject(ApiError(
+                    response.data,
+                    response.statusCode,
+                  ));
+            }
+            return response;
+          },
+        ));
   }
 
   void _setupLogger(LogHandlerFunction logHandlerFunction) {
     Logger.root.level = logLevel;
 
-    _logHandlerFunction = logHandlerFunction;
-    if (_logHandlerFunction == null) {
-      _logHandlerFunction = (LogRecord record) {
-        print(
-            '(${record.time}) ${record.level.name}: ${record.loggerName} | ${record.message}');
-        if (record.stackTrace != null) {
-          print(record.stackTrace);
-        }
-      };
-    }
+    _logHandlerFunction = logHandlerFunction ??
+        (LogRecord record) {
+          print(
+              '(${record.time}) ${record.level.name}: ${record.loggerName} | ${record.message}');
+          if (record.stackTrace != null) {
+            print(record.stackTrace);
+          }
+        };
     logger.onRecord.listen(_logHandlerFunction);
   }
 
   void dispose(filename) {
-    dioClient.close();
+    httpClient.close();
     _controller.close();
   }
 
@@ -147,7 +152,7 @@ class Client {
   }
 
   Future<QueryChannelsResponse> queryChannels(
-    QueryFilter filter,
+    Map<String, dynamic> filter,
     List<SortOption> sort,
     Map<String, dynamic> options,
   ) async {
@@ -169,7 +174,7 @@ class Client {
       payload.addAll(options);
     }
 
-    final response = await dioClient.get<String>(
+    final response = await httpClient.get<String>(
       "/channels",
       queryParameters: {
         "payload": jsonEncode(payload),
@@ -197,7 +202,7 @@ class Client {
   getUserAgent() => "stream_chat_dart-client-0.0.1";
 
   Map<String, String> get commonQueryParams => {
-        "user_id": _user.id,
+        "user_id": _user?.id,
         "api_key": apiKey,
         "connection_id": _connectionId,
       };
@@ -211,7 +216,7 @@ class Client {
 
   Future<Event> setGuestUser(User user) async {
     _anonymous = true;
-    final response = await dioClient
+    final response = await httpClient
         .post<String>("/guest", data: {"user": user.toJson()})
         .then((res) => decode(res.data, SetGuestUserResponse.fromJson))
         .whenComplete(() => _anonymous = false);
@@ -222,7 +227,7 @@ class Client {
   Future<dynamic> disconnect() async => null;
 
   Future<QueryUsersResponse> queryUsers(
-    QueryFilter filter,
+    Map<String, dynamic> filter,
     List<SortOption> sort,
     Map<String, dynamic> options,
   ) async {
@@ -241,7 +246,7 @@ class Client {
       payload.addAll(options);
     }
 
-    final response = await dioClient.get<String>(
+    final response = await httpClient.get<String>(
       "/users",
       queryParameters: {
         "payload": jsonEncode(payload),
@@ -254,7 +259,7 @@ class Client {
   }
 
   Future<SearchMessagesResponse> search(
-    QueryFilter filters,
+    Map<String, dynamic> filters,
     List<SortOption> sort,
     String query,
     PaginationParams paginationParams,
@@ -267,14 +272,14 @@ class Client {
 
     payload.addAll(paginationParams.toJson());
 
-    final response = await dioClient
+    final response = await httpClient
         .get<String>("/search", queryParameters: {'payload': payload});
     return decode<SearchMessagesResponse>(
         response.data, SearchMessagesResponse.fromJson);
   }
 
   Future<EmptyResponse> addDevice(String id, String pushProvider) async {
-    final response = await dioClient.post<String>("/devices", data: {
+    final response = await httpClient.post<String>("/devices", data: {
       "id": id,
       "push_provider": pushProvider,
     });
@@ -282,14 +287,14 @@ class Client {
   }
 
   Future<ListDevicesResponse> getDevices() async {
-    final response = await dioClient.get<String>("/devices");
+    final response = await httpClient.get<String>("/devices");
     return decode<ListDevicesResponse>(
         response.data, ListDevicesResponse.fromJson);
   }
 
   Future<EmptyResponse> removeDevice(String id) async {
     final response =
-        await dioClient.delete<String>("/devices", queryParameters: {
+        await httpClient.delete<String>("/devices", queryParameters: {
       "id": id,
     });
     return decode(response.data, EmptyResponse.fromJson);
@@ -304,7 +309,7 @@ class Client {
   }
 
   Future<UpdateUsersResponse> updateUser(User user) async {
-    final response = await dioClient.post<String>("/users", data: {
+    final response = await httpClient.post<String>("/users", data: {
       "users": {user.id: user.toJson()},
     });
     return decode<UpdateUsersResponse>(
@@ -319,7 +324,7 @@ class Client {
       ..addAll({
         "target_user_id": targetUserID,
       });
-    final response = await dioClient.post<String>(
+    final response = await httpClient.post<String>(
       "/moderation/ban",
       data: data,
     );
@@ -334,7 +339,7 @@ class Client {
       ..addAll({
         "target_user_id": targetUserID,
       });
-    final response = await dioClient.delete<String>(
+    final response = await httpClient.delete<String>(
       "/moderation/ban",
       queryParameters: data,
     );
@@ -342,51 +347,51 @@ class Client {
   }
 
   Future<EmptyResponse> muteUser(String targetID) async {
-    final response = await dioClient.post<String>("/moderation/mute", data: {
+    final response = await httpClient.post<String>("/moderation/mute", data: {
       "target_id": targetID,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> unmuteUser(String targetID) async {
-    final response = await dioClient.post<String>("/moderation/unmute", data: {
+    final response = await httpClient.post<String>("/moderation/unmute", data: {
       "target_id": targetID,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> flagMessage(String messageID) async {
-    final response = await dioClient.post<String>("/moderation/flag", data: {
+    final response = await httpClient.post<String>("/moderation/flag", data: {
       "target_message_id": messageID,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> unflagMessage(String messageID) async {
-    final response = await dioClient.post<String>("/moderation/unflag", data: {
+    final response = await httpClient.post<String>("/moderation/unflag", data: {
       "target_message_id": messageID,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> markAllRead() async {
-    final response = await dioClient.post<String>("/channels/read");
+    final response = await httpClient.post<String>("/channels/read");
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<UpdateMessageResponse> updateMessage(Message message) async {
-    return dioClient
+    return httpClient
         .post<String>("/messages/${message.id}")
         .then((res) => decode(res.data, UpdateMessageResponse.fromJson));
   }
 
   Future<EmptyResponse> deleteMessage(String messageID) async {
-    final response = await dioClient.delete<String>("/messages/$messageID");
+    final response = await httpClient.delete<String>("/messages/$messageID");
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<GetMessageResponse> getMessage(String messageID) async {
-    final response = await dioClient.get<String>("/messages/$messageID");
+    final response = await httpClient.get<String>("/messages/$messageID");
     return decode(response.data, GetMessageResponse.fromJson);
   }
 }

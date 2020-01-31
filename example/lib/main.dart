@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
         title: 'Stream Chat Example',
         home: ChatLoader(
           child: ChannelList(
-            filter: QueryFilter(),
+            filter: Map<String, dynamic>(),
             sort: [SortOption("last_message_at")],
             options: {},
           ),
