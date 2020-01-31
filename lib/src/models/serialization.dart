@@ -1,7 +1,6 @@
 readonly(_) => null;
 
 class Serialization {
-
   static const Function readOnly = readonly;
 
   static Map<String, dynamic> moveKeysToRoot(

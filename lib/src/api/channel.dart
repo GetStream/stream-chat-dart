@@ -105,18 +105,14 @@ class Channel {
   }
 
   Future<AcceptInviteResponse> acceptInvite([Message message = null]) async {
-    final res = await _client.httpClient.post<String>(_channelURL, data: {
-      "accept_invite": true,
-      "message": message?.toJson()
-    });
+    final res = await _client.httpClient.post<String>(_channelURL,
+        data: {"accept_invite": true, "message": message?.toJson()});
     return _client.decode(res.data, AcceptInviteResponse.fromJson);
   }
 
   Future<RejectInviteResponse> rejectInvite([Message message = null]) async {
-    final res = await _client.httpClient.post<String>(_channelURL, data: {
-      "accept_invite": false,
-      "message": message?.toJson()
-    });
+    final res = await _client.httpClient.post<String>(_channelURL,
+        data: {"accept_invite": false, "message": message?.toJson()});
     return _client.decode(res.data, RejectInviteResponse.fromJson);
   }
 
@@ -169,12 +165,11 @@ class Channel {
     return _client.decode(res.data, DemoteModeratorsResponse.fromJson);
   }
 
-  Future<SendActionResponse> sendAction(String messageID, Map<String, dynamic> formData) async {
-    final response = await _client.httpClient.post<String>("/messages/$messageID/action", data: {
-      'id': id,
-      'type': type,
-      'form_data': formData
-    });
+  Future<SendActionResponse> sendAction(
+      String messageID, Map<String, dynamic> formData) async {
+    final response = await _client.httpClient.post<String>(
+        "/messages/$messageID/action",
+        data: {'id': id, 'type': type, 'form_data': formData});
     return _client.decode(response.data, SendActionResponse.fromJson);
   }
 

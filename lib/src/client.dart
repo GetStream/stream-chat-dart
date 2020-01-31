@@ -237,7 +237,8 @@ class Client {
     _anonymous = true;
     final response = await httpClient
         .post<String>("/guest", data: {"user": user.toJson()})
-        .then((res) => decode<SetGuestUserResponse>(res.data, SetGuestUserResponse.fromJson))
+        .then((res) => decode<SetGuestUserResponse>(
+            res.data, SetGuestUserResponse.fromJson))
         .whenComplete(() => _anonymous = false);
     return setUser(response.user, response.accessToken);
   }

@@ -18,17 +18,14 @@ class ApiError implements Exception {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is ApiError &&
-              runtimeType == other.runtimeType &&
-              body == other.body &&
-              data == other.data &&
-              statusCode == other.statusCode;
+      other is ApiError &&
+          runtimeType == other.runtimeType &&
+          body == other.body &&
+          data == other.data &&
+          statusCode == other.statusCode;
 
   @override
-  int get hashCode =>
-      body.hashCode ^
-      data.hashCode ^
-      statusCode.hashCode;
+  int get hashCode => body.hashCode ^ data.hashCode ^ statusCode.hashCode;
 
   @override
   String toString() {

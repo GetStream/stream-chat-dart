@@ -149,7 +149,8 @@ void main() {
         when(mockHttpClientAdapter.fetch(any, any, any)).thenAnswer(
             (_) async => ResponseBody.fromString('test error', 400));
 
-        expect(client.queryChannels(null, null, null), throwsA(ApiError('test error', 400)));
+        expect(client.queryChannels(null, null, null),
+            throwsA(ApiError('test error', 400)));
       });
     });
   });

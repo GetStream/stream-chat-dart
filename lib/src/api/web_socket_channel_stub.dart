@@ -7,21 +7,22 @@ import 'package:stream_channel/src/stream_channel_transformer.dart';
 import 'package:stream_channel/stream_channel.dart';
 
 WebSocketChannel connectWebSocket(String url,
-    {Iterable<String> protocols,
-      Map<String, dynamic> headers,
-      Duration pingInterval}) =>
+        {Iterable<String> protocols,
+        Map<String, dynamic> headers,
+        Duration pingInterval}) =>
     ImplWebSocketChannel();
 
 class ImplWebSocketChannel implements WebSocketChannel {
-
   @override
   StreamChannel<S> cast<S>() => throw UnimplementedError();
 
   @override
-  StreamChannel changeSink(StreamSink Function(StreamSink sink) change) => throw UnimplementedError();
+  StreamChannel changeSink(StreamSink Function(StreamSink sink) change) =>
+      throw UnimplementedError();
 
   @override
-  StreamChannel changeStream(Stream Function(Stream stream) change) => throw UnimplementedError();
+  StreamChannel changeStream(Stream Function(Stream stream) change) =>
+      throw UnimplementedError();
 
   @override
   int get closeCode => throw UnimplementedError();
@@ -42,11 +43,15 @@ class ImplWebSocketChannel implements WebSocketChannel {
   Stream get stream => throw UnimplementedError();
 
   @override
-  StreamChannel<S> transform<S>(StreamChannelTransformer<S,dynamic> transformer) => throw UnimplementedError();
+  StreamChannel<S> transform<S>(
+          StreamChannelTransformer<S, dynamic> transformer) =>
+      throw UnimplementedError();
 
   @override
-  StreamChannel transformSink(StreamSinkTransformer transformer) => throw UnimplementedError();
+  StreamChannel transformSink(StreamSinkTransformer transformer) =>
+      throw UnimplementedError();
 
   @override
-  StreamChannel transformStream(StreamTransformer transformer) => throw UnimplementedError();
+  StreamChannel transformStream(StreamTransformer transformer) =>
+      throw UnimplementedError();
 }
