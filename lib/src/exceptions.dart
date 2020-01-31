@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
+
 class ApiError implements Exception {
   final String body;
   final Map<String, dynamic> data;
@@ -14,6 +16,25 @@ class ApiError implements Exception {
   }
 
   ApiError(this.body, this.statusCode) : data = _decode(body);
+
+  factory ApiError.fromDioError(DioError error) {
+    switch (error.type) {
+      case DioErrorType.RESPONSE:
+        return ApiError(error.response.data, error.response.statusCode);
+      case DioErrorType.CONNECT_TIMEOUT:
+      // TODO: Handle this case.
+      case DioErrorType.SEND_TIMEOUT:
+      // TODO: Handle this case.
+      case DioErrorType.RECEIVE_TIMEOUT:
+      // TODO: Handle this case.
+      case DioErrorType.CANCEL:
+      // TODO: Handle this case.
+      case DioErrorType.DEFAULT:
+      // TODO: Handle this case.
+      default:
+        return ApiError(error.response.data, error.response.statusCode);
+    }
+  }
 
   @override
   bool operator ==(Object other) =>

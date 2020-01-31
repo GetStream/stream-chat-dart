@@ -185,23 +185,66 @@ class Client {
       );
       return response;
     } on DioError catch (error) {
-      switch (error.type) {
-        case DioErrorType.RESPONSE:
-          throw ApiError(error.response.data, error.response.statusCode);
-          break;
-        case DioErrorType.CONNECT_TIMEOUT:
-        // TODO: Handle this case.
-        case DioErrorType.SEND_TIMEOUT:
-        // TODO: Handle this case.
-        case DioErrorType.RECEIVE_TIMEOUT:
-        // TODO: Handle this case.
-        case DioErrorType.CANCEL:
-        // TODO: Handle this case.
-        case DioErrorType.DEFAULT:
-        // TODO: Handle this case.
-        default:
-          rethrow;
-      }
+      throw ApiError.fromDioError(error);
+    }
+  }
+
+  Future<Response<String>> post(
+    String path, {
+    dynamic data,
+  }) async {
+    try {
+      final response = await httpClient.post<String>("/channels", data: data);
+      return response;
+    } on DioError catch (error) {
+      throw ApiError.fromDioError(error);
+    }
+  }
+
+  Future<Response<String>> delete(
+    String path, {
+    Map<String, dynamic> queryParameters,
+  }) async {
+    try {
+      final response = await httpClient.delete<String>("/channels",
+          queryParameters: queryParameters);
+      return response;
+    } on DioError catch (error) {
+      throw ApiError.fromDioError(error);
+    }
+  }
+
+  Future<Response<String>> patch(
+    String path, {
+    Map<String, dynamic> queryParameters,
+    dynamic data,
+  }) async {
+    try {
+      final response = await httpClient.delete<String>(
+        "/channels",
+        queryParameters: queryParameters,
+        data: data,
+      );
+      return response;
+    } on DioError catch (error) {
+      throw ApiError.fromDioError(error);
+    }
+  }
+
+  Future<Response<String>> put(
+    String path, {
+    Map<String, dynamic> queryParameters,
+    dynamic data,
+  }) async {
+    try {
+      final response = await httpClient.delete<String>(
+        "/channels",
+        queryParameters: queryParameters,
+        data: data,
+      );
+      return response;
+    } on DioError catch (error) {
+      throw ApiError.fromDioError(error);
     }
   }
 
@@ -235,8 +278,7 @@ class Client {
 
   Future<Event> setGuestUser(User user) async {
     _anonymous = true;
-    final response = await httpClient
-        .post<String>("/guest", data: {"user": user.toJson()})
+    final response = await post("/guest", data: {"user": user.toJson()})
         .then((res) => decode<SetGuestUserResponse>(
             res.data, SetGuestUserResponse.fromJson))
         .whenComplete(() => _anonymous = false);
@@ -266,7 +308,7 @@ class Client {
       payload.addAll(options);
     }
 
-    final response = await httpClient.get<String>(
+    final response = await get(
       "/users",
       queryParameters: {
         "payload": jsonEncode(payload),
@@ -299,7 +341,7 @@ class Client {
   }
 
   Future<EmptyResponse> addDevice(String id, String pushProvider) async {
-    final response = await httpClient.post<String>("/devices", data: {
+    final response = await post("/devices", data: {
       "id": id,
       "push_provider": pushProvider,
     });
@@ -307,14 +349,13 @@ class Client {
   }
 
   Future<ListDevicesResponse> getDevices() async {
-    final response = await httpClient.get<String>("/devices");
+    final response = await get("/devices");
     return decode<ListDevicesResponse>(
         response.data, ListDevicesResponse.fromJson);
   }
 
   Future<EmptyResponse> removeDevice(String id) async {
-    final response =
-        await httpClient.delete<String>("/devices", queryParameters: {
+    final response = await delete("/devices", queryParameters: {
       "id": id,
     });
     return decode(response.data, EmptyResponse.fromJson);
@@ -329,7 +370,7 @@ class Client {
   }
 
   Future<UpdateUsersResponse> updateUser(User user) async {
-    final response = await httpClient.post<String>("/users", data: {
+    final response = await post("/users", data: {
       "users": {user.id: user.toJson()},
     });
     return decode<UpdateUsersResponse>(
@@ -344,7 +385,7 @@ class Client {
       ..addAll({
         "target_user_id": targetUserID,
       });
-    final response = await httpClient.post<String>(
+    final response = await post(
       "/moderation/ban",
       data: data,
     );
@@ -359,7 +400,7 @@ class Client {
       ..addAll({
         "target_user_id": targetUserID,
       });
-    final response = await httpClient.delete<String>(
+    final response = await delete(
       "/moderation/ban",
       queryParameters: data,
     );
@@ -367,51 +408,50 @@ class Client {
   }
 
   Future<EmptyResponse> muteUser(String targetID) async {
-    final response = await httpClient.post<String>("/moderation/mute", data: {
+    final response = await post("/moderation/mute", data: {
       "target_id": targetID,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> unmuteUser(String targetID) async {
-    final response = await httpClient.post<String>("/moderation/unmute", data: {
+    final response = await post("/moderation/unmute", data: {
       "target_id": targetID,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> flagMessage(String messageID) async {
-    final response = await httpClient.post<String>("/moderation/flag", data: {
+    final response = await post("/moderation/flag", data: {
       "target_message_id": messageID,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> unflagMessage(String messageID) async {
-    final response = await httpClient.post<String>("/moderation/unflag", data: {
+    final response = await post("/moderation/unflag", data: {
       "target_message_id": messageID,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<EmptyResponse> markAllRead() async {
-    final response = await httpClient.post<String>("/channels/read");
+    final response = await post("/channels/read");
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<UpdateMessageResponse> updateMessage(Message message) async {
-    return httpClient
-        .post<String>("/messages/${message.id}")
+    return post("/messages/${message.id}")
         .then((res) => decode(res.data, UpdateMessageResponse.fromJson));
   }
 
   Future<EmptyResponse> deleteMessage(String messageID) async {
-    final response = await httpClient.delete<String>("/messages/$messageID");
+    final response = await delete("/messages/$messageID");
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   Future<GetMessageResponse> getMessage(String messageID) async {
-    final response = await httpClient.get<String>("/messages/$messageID");
+    final response = await get("/messages/$messageID");
     return decode(response.data, GetMessageResponse.fromJson);
   }
 }
