@@ -11,15 +11,35 @@ part 'channel.g.dart';
 class Channel {
   final String id;
   final String type;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final String cid;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final ChannelConfig config;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final User createdBy;
+
+  @JsonKey(includeIfNull: false)
   final bool frozen;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final DateTime lastMessageAt;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final DateTime createdAt;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final DateTime updatedAt;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final DateTime deletedAt;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final int memberCount;
+
+  @JsonKey(includeIfNull: false)
   final List<Member> members;
 
   @JsonKey(includeIfNull: false)
@@ -40,7 +60,7 @@ class Channel {
     'members',
   ];
 
-  Channel(
+  Channel({
     this.id,
     this.type,
     this.cid,
@@ -54,7 +74,7 @@ class Channel {
     this.memberCount,
     this.members,
     this.extraData,
-  );
+  });
 
   factory Channel.fromJson(Map<String, dynamic> json) {
     return _$ChannelFromJson(

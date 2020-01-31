@@ -25,26 +25,31 @@ void main() {
     });
 
     test('should serialize to json correctly', () {
-      final channel = Channel("type", "id", "a:a", null, null, true, null, null,
-          null, null, 0, [], {"name": "cool"});
+      final channel = Channel(
+        type: "type",
+        id: "id",
+        cid: "a:a",
+        extraData: {"name": "cool"},
+      );
 
       expect(
         channel.toJson(),
-        {
-          'id': 'type',
-          'type': 'id',
-          'cid': 'a:a',
-          'config': null,
-          'created_by': null,
-          'frozen': true,
-          'last_message_at': null,
-          'created_at': null,
-          'updated_at': null,
-          'deleted_at': null,
-          'member_count': 0,
-          'members': [],
-          'name': 'cool'
-        },
+        {'id': 'id', 'type': 'type', 'name': 'cool'},
+      );
+    });
+
+    test('should serialize to json correctly when frozen is provided', () {
+      final channel = Channel(
+        type: "type",
+        id: "id",
+        cid: "a:a",
+        extraData: {"name": "cool"},
+        frozen: false,
+      );
+
+      expect(
+        channel.toJson(),
+        {'id': 'id', 'type': 'type', 'name': 'cool', 'frozen': false},
       );
     });
   });

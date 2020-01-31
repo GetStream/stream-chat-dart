@@ -8,10 +8,17 @@ part 'reaction.g.dart';
 @JsonSerializable()
 class Reaction {
   final String messageId;
-  final DateTime createdAt;
   final String type;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  final DateTime createdAt;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final User user;
+
   final int score;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final String userId;
 
   @JsonKey(includeIfNull: false)

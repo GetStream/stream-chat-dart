@@ -25,11 +25,7 @@ Reaction _$ReactionFromJson(Map<String, dynamic> json) {
 Map<String, dynamic> _$ReactionToJson(Reaction instance) {
   final val = <String, dynamic>{
     'message_id': instance.messageId,
-    'created_at': instance.createdAt?.toIso8601String(),
     'type': instance.type,
-    'user': instance.user?.toJson(),
-    'score': instance.score,
-    'user_id': instance.userId,
   };
 
   void writeNotNull(String key, dynamic value) {
@@ -38,6 +34,10 @@ Map<String, dynamic> _$ReactionToJson(Reaction instance) {
     }
   }
 
+  writeNotNull('created_at', readonly(instance.createdAt));
+  writeNotNull('user', readonly(instance.user));
+  val['score'] = instance.score;
+  writeNotNull('user_id', readonly(instance.userId));
   writeNotNull('extra_data', instance.extraData);
   return val;
 }

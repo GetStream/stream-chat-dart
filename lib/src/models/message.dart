@@ -11,21 +11,50 @@ part 'message.g.dart';
 class Message {
   final String id;
   final String text;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final String type;
+
+  @JsonKey(includeIfNull: false)
   final List<Attachment> attachments;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final List<User> mentionedUsers;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final Map<String, int> reactionCounts;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final Map<String, int> reactionScores;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final List<Reaction> latestReactions;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final List<Reaction> ownReactions;
+
   final String parentId;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final int replyCount;
+
   final bool showInChannel;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final String command;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final String html;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final DateTime createdAt;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final DateTime updatedAt;
+
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final User user;
+
   @JsonKey(includeIfNull: false)
   final Map<String, dynamic> extraData;
 

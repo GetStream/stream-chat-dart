@@ -55,23 +55,6 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   final val = <String, dynamic>{
     'id': instance.id,
     'text': instance.text,
-    'type': instance.type,
-    'attachments': instance.attachments?.map((e) => e?.toJson())?.toList(),
-    'mentioned_users':
-        instance.mentionedUsers?.map((e) => e?.toJson())?.toList(),
-    'reaction_counts': instance.reactionCounts,
-    'reaction_scores': instance.reactionScores,
-    'latest_reactions':
-        instance.latestReactions?.map((e) => e?.toJson())?.toList(),
-    'own_reactions': instance.ownReactions?.map((e) => e?.toJson())?.toList(),
-    'parent_id': instance.parentId,
-    'reply_count': instance.replyCount,
-    'show_in_channel': instance.showInChannel,
-    'command': instance.command,
-    'html': instance.html,
-    'created_at': instance.createdAt?.toIso8601String(),
-    'updated_at': instance.updatedAt?.toIso8601String(),
-    'user': instance.user?.toJson(),
   };
 
   void writeNotNull(String key, dynamic value) {
@@ -80,6 +63,22 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
     }
   }
 
+  writeNotNull('type', readonly(instance.type));
+  writeNotNull(
+      'attachments', instance.attachments?.map((e) => e?.toJson())?.toList());
+  writeNotNull('mentioned_users', readonly(instance.mentionedUsers));
+  writeNotNull('reaction_counts', readonly(instance.reactionCounts));
+  writeNotNull('reaction_scores', readonly(instance.reactionScores));
+  writeNotNull('latest_reactions', readonly(instance.latestReactions));
+  writeNotNull('own_reactions', readonly(instance.ownReactions));
+  val['parent_id'] = instance.parentId;
+  writeNotNull('reply_count', readonly(instance.replyCount));
+  val['show_in_channel'] = instance.showInChannel;
+  writeNotNull('command', readonly(instance.command));
+  writeNotNull('html', readonly(instance.html));
+  writeNotNull('created_at', readonly(instance.createdAt));
+  writeNotNull('updated_at', readonly(instance.updatedAt));
+  writeNotNull('user', readonly(instance.user));
   writeNotNull('extra_data', instance.extraData);
   return val;
 }
