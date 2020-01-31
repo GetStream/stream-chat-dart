@@ -4,14 +4,15 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
+
 import 'api/channel.dart';
-import 'exceptions.dart';
-import 'models/event.dart';
 import 'api/requests.dart';
 import 'api/responses.dart';
+import 'api/websocket.dart';
+import 'exceptions.dart';
+import 'models/event.dart';
 import 'models/message.dart';
 import 'models/user.dart';
-import 'api/websocket.dart';
 
 typedef LogHandlerFunction = void Function(LogRecord record);
 typedef DecoderFunction<T> = T Function(Map<String, dynamic>);
@@ -298,7 +299,7 @@ class Client {
     };
 
     Map<String, dynamic> payload = {
-      "filter_conditions": filter,
+      "filter_conditions": filter ?? {},
       "sort": sort,
     };
 

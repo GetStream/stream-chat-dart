@@ -214,7 +214,7 @@ void main() {
 
         final queryParams = {
           'payload': json.encode({
-            "filter_conditions": null,
+            "filter_conditions": {},
             "sort": null,
             "presence": false,
           }),

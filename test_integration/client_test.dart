@@ -1,0 +1,20 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:stream_chat/src/client.dart';
+import 'package:stream_chat/stream_chat.dart';
+
+const API_KEY = '6xjf3dex3n7d';
+const TOKEN =
+    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo";
+
+void main() {
+  test('test', () async {
+    final client = Client('6xjf3dex3n7d');
+    final user = User(id: "wild-breeze-7");
+    final setUserEvent = await client.setUser(user, TOKEN);
+    print(setUserEvent.toJson());
+    final queryChannels = await client.queryChannels(null, null, null);
+    final queryUsers = await client.queryUsers(null, null, null);
+    print('queryChannels.channels.length: ${queryChannels.channels.length}');
+    print('queryUsers.users.length: ${queryUsers.users.length}');
+  });
+}
