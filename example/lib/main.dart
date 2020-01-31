@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
             sort: [SortOption("last_message_at")],
             options: {},
           ),
-          user: User("wild-breeze-7", {}),
+          user: User(id: "wild-breeze-7"),
           token:
               "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo",
         ),
