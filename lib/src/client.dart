@@ -14,6 +14,7 @@ import 'models/user.dart';
 import 'api/websocket.dart';
 
 typedef LogHandlerFunction = void Function(LogRecord record);
+typedef DecoderFunction<T> = T Function(Map<String, dynamic>);
 
 class Client {
   static const defaultBaseURL = "chat-us-east-1.stream-io-api.com";
@@ -205,7 +206,7 @@ class Client {
   }
 
   // Used to log errors and stacktrace in case of bad json deserialization
-  T decode<T>(String j, T Function(Map<String, dynamic>) decoderFunction) {
+  T decode<T>(String j, DecoderFunction<T> decoderFunction) {
     try {
       return decoderFunction(json.decode(j));
     } catch (error, stacktrace) {
@@ -236,7 +237,7 @@ class Client {
     _anonymous = true;
     final response = await httpClient
         .post<String>("/guest", data: {"user": user.toJson()})
-        .then((res) => decode(res.data, SetGuestUserResponse.fromJson))
+        .then((res) => decode<SetGuestUserResponse>(res.data, SetGuestUserResponse.fromJson))
         .whenComplete(() => _anonymous = false);
     return setUser(response.user, response.accessToken);
   }
