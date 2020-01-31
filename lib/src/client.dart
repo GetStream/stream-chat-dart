@@ -332,10 +332,12 @@ class Client {
       'sort': sort,
     };
 
-    payload.addAll(paginationParams.toJson());
+    if (paginationParams != null) {
+      payload.addAll(paginationParams.toJson());
+    }
 
-    final response = await httpClient
-        .get<String>("/search", queryParameters: {'payload': payload});
+    final response = await get("/search",
+        queryParameters: {'payload': json.encode(payload)});
     return decode<SearchMessagesResponse>(
         response.data, SearchMessagesResponse.fromJson);
   }

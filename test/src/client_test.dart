@@ -138,6 +138,71 @@ void main() {
       });
     });
 
+    group('search', () {
+      test('should pass right default parameters', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        final queryParams = {
+          'payload': json.encode({
+            "filter_conditions": null,
+            'query': null,
+            'sort': null,
+          }),
+        };
+
+        when(mockDio.get<String>('/search', queryParameters: queryParams))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.search(null, null, null, null);
+
+        verify(mockDio.get<String>('/search', queryParameters: queryParams))
+            .called(1);
+      });
+
+      test('should pass right parameters', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        final filters = {
+          "id": {
+            "\$in": ["test"],
+          },
+        };
+        final sortOptions = [SortOption('name')];
+        final query = 'query';
+
+        final queryParams = {
+          'payload': json.encode({
+            "filter_conditions": filters,
+            'query': query,
+            'sort': sortOptions,
+          }),
+        };
+
+        when(mockDio.get<String>('/search', queryParameters: queryParams))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.search(
+          filters,
+          sortOptions,
+          query,
+          PaginationParams(),
+        );
+
+        verify(mockDio.get<String>('/search', queryParameters: queryParams))
+            .called(1);
+      });
+    });
+
     group('queryUsers', () {
       test('should pass right default parameters', () async {
         final mockDio = MockDio();
