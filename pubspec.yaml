@@ -1,6 +1,6 @@
 name: stream_chat
 homepage: https://github.com/GetStream/stream-chat-dart
-description: A new Flutter package project.
+description: The official Dart client for Stream Chat, a service for building chat applications.
 version: 0.0.1
 
 environment:
