@@ -180,7 +180,7 @@ class Client {
   }) async {
     try {
       final response = await httpClient.get<String>(
-        "/channels",
+        path,
         queryParameters: queryParameters,
       );
       return response;
@@ -194,7 +194,7 @@ class Client {
     dynamic data,
   }) async {
     try {
-      final response = await httpClient.post<String>("/channels", data: data);
+      final response = await httpClient.post<String>(path, data: data);
       return response;
     } on DioError catch (error) {
       throw ApiError.fromDioError(error);
@@ -206,7 +206,7 @@ class Client {
     Map<String, dynamic> queryParameters,
   }) async {
     try {
-      final response = await httpClient.delete<String>("/channels",
+      final response = await httpClient.delete<String>(path,
           queryParameters: queryParameters);
       return response;
     } on DioError catch (error) {
@@ -221,7 +221,7 @@ class Client {
   }) async {
     try {
       final response = await httpClient.delete<String>(
-        "/channels",
+        path,
         queryParameters: queryParameters,
         data: data,
       );
@@ -238,7 +238,7 @@ class Client {
   }) async {
     try {
       final response = await httpClient.delete<String>(
-        "/channels",
+        path,
         queryParameters: queryParameters,
         data: data,
       );

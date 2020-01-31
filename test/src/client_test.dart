@@ -138,6 +138,71 @@ void main() {
       });
     });
 
+    group('queryUsers', () {
+      test('should pass right default parameters', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        final queryParams = {
+          'payload': json.encode({
+            "filter_conditions": null,
+            "sort": null,
+            "presence": false,
+          }),
+        };
+
+        when(mockDio.get<String>('/users', queryParameters: queryParams))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.queryUsers(null, null, null);
+
+        verify(mockDio.get<String>('/users', queryParameters: queryParams))
+            .called(1);
+      });
+
+      test('should pass right parameters', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        final Map<String, dynamic> queryFilter = {
+          "id": {
+            "\$in": ["test"],
+          },
+        };
+        final List<SortOption> sortOptions = [];
+        final options = {"presence": true};
+
+        final Map<String, dynamic> queryParams = {
+          'payload': json.encode({
+            "filter_conditions": queryFilter,
+            "sort": sortOptions,
+          }..addAll(options)),
+        };
+
+        when(mockDio.get<String>('/users', queryParameters: queryParams))
+            .thenAnswer((_) async {
+          return Response(data: '{}', statusCode: 200);
+        });
+
+        await client.queryUsers(
+          queryFilter,
+          sortOptions,
+          options,
+        );
+
+        verify(mockDio.get<String>('/users', queryParameters: queryParams))
+            .called(1);
+      });
+    });
+
     group('error handling', () {
       test('should parse the error correctly', () async {
         final dioHttp = Dio();
