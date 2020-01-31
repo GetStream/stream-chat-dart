@@ -8,8 +8,11 @@ import 'package:logging/logging.dart';
 import 'package:mockito/mockito.dart';
 import 'package:stream_chat/src/api/requests.dart';
 import 'package:stream_chat/src/client.dart';
+import 'package:stream_chat/src/exceptions.dart';
 
 class MockDio extends Mock implements DioForNative {}
+
+class MockHttpClientAdapter extends Mock implements HttpClientAdapter {}
 
 void main() {
   group('src/client', () {
@@ -132,6 +135,21 @@ void main() {
 
         verify(mockDio.get<String>('/channels', queryParameters: queryParams))
             .called(1);
+      });
+    });
+
+    group('error handling', () {
+      test('should parse the error correctly', () async {
+        final dioHttp = Dio();
+        final mockHttpClientAdapter = MockHttpClientAdapter();
+        dioHttp.httpClientAdapter = mockHttpClientAdapter;
+
+        final client = Client('api-key', httpClient: dioHttp);
+
+        when(mockHttpClientAdapter.fetch(any, any, any)).thenAnswer(
+            (_) async => ResponseBody.fromString('test error', 400));
+
+        expect(client.queryChannels(null, null, null), throwsA(ApiError('test error', 400)));
       });
     });
   });

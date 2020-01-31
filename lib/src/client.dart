@@ -63,8 +63,8 @@ class Client {
     this.httpClient.options.receiveTimeout = receiveTimeout.inMilliseconds;
     this.httpClient.options.connectTimeout = connectTimeout.inMilliseconds;
     this.httpClient.interceptors.add(InterceptorsWrapper(
-          onRequest: (options) async {
-            logger.info('''
+      onRequest: (options) async {
+        logger.info('''
     
           method: ${options.method}
           url: ${options.uri} 
@@ -72,24 +72,11 @@ class Client {
           data: ${options.data.toString()}
     
         ''');
-            options.queryParameters.addAll(commonQueryParams);
-            options.headers.addAll(httpHeaders);
-            return options;
-          },
-          onError: (error) async {
-            logger.severe(error.message, error);
-            return error;
-          },
-          onResponse: (response) async {
-            if (response.statusCode != 200) {
-              return this.httpClient.reject(ApiError(
-                    response.data,
-                    response.statusCode,
-                  ));
-            }
-            return response;
-          },
-        ));
+        options.queryParameters.addAll(commonQueryParams);
+        options.headers.addAll(httpHeaders);
+        return options;
+      },
+    ));
   }
 
   void _setupLogger(LogHandlerFunction logHandlerFunction) {
@@ -174,7 +161,7 @@ class Client {
       payload.addAll(options);
     }
 
-    final response = await httpClient.get<String>(
+    final response = await get(
       "/channels",
       queryParameters: {
         "payload": jsonEncode(payload),
@@ -184,6 +171,37 @@ class Client {
       response.data,
       QueryChannelsResponse.fromJson,
     );
+  }
+
+  Future<Response<String>> get(
+    String path, {
+    Map<String, dynamic> queryParameters,
+  }) async {
+    try {
+      final response = await httpClient.get<String>(
+        "/channels",
+        queryParameters: queryParameters,
+      );
+      return response;
+    } on DioError catch (error) {
+      switch (error.type) {
+        case DioErrorType.RESPONSE:
+          throw ApiError(error.response.data, error.response.statusCode);
+          break;
+        case DioErrorType.CONNECT_TIMEOUT:
+        // TODO: Handle this case.
+        case DioErrorType.SEND_TIMEOUT:
+        // TODO: Handle this case.
+        case DioErrorType.RECEIVE_TIMEOUT:
+        // TODO: Handle this case.
+        case DioErrorType.CANCEL:
+        // TODO: Handle this case.
+        case DioErrorType.DEFAULT:
+        // TODO: Handle this case.
+        default:
+          rethrow;
+      }
+    }
   }
 
   // Used to log errors and stacktrace in case of bad json deserialization

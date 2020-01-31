@@ -11,7 +11,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'responses.g.dart';
 
-abstract class BaseResponse {
+class BaseResponse {
   String duration;
 }
 
