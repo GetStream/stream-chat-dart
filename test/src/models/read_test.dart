@@ -24,7 +24,7 @@ void main() {
     test('should serialize to json correctly', () {
       final read = Read(
         DateTime.parse('2020-01-28T22:17:30.966485504Z'),
-        User('bbb19d9a-ee50-45bc-84e5-0584e79d0c9e'),
+        User.init('bbb19d9a-ee50-45bc-84e5-0584e79d0c9e'),
       );
 
       expect(read.toJson(), {
