@@ -8,9 +8,9 @@ part of 'command.dart';
 
 Command _$CommandFromJson(Map<String, dynamic> json) {
   return Command(
-    json['name'] as String,
-    json['description'] as String,
-    json['args'] as String,
+    name: json['name'] as String,
+    description: json['description'] as String,
+    args: json['args'] as String,
   );
 }
 

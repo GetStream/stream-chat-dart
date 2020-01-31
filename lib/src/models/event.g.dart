@@ -8,19 +8,19 @@ part of 'event.dart';
 
 Event _$EventFromJson(Map<String, dynamic> json) {
   return Event(
-    json['type'] as String,
-    json['cid'] as String,
-    json['created_at'] == null
+    type: json['type'] as String,
+    cid: json['cid'] as String,
+    connectionId: json['connection_id'] as String,
+    createdAt: json['created_at'] == null
         ? null
         : DateTime.parse(json['created_at'] as String),
-    json['own'] == null
+    own: json['own'] == null
         ? null
         : User.fromJson(json['own'] as Map<String, dynamic>),
-  )
-    ..connectionId = json['connection_id'] as String
-    ..user = json['user'] == null
+    user: json['user'] == null
         ? null
-        : User.fromJson(json['user'] as Map<String, dynamic>);
+        : User.fromJson(json['user'] as Map<String, dynamic>),
+  );
 }
 
 Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{

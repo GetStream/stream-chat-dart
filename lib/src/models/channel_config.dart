@@ -6,40 +6,41 @@ part 'channel_config.g.dart';
 
 @JsonSerializable()
 class ChannelConfig {
-  String automod;
-  List<Command> commands;
-  bool connectEvents;
-  DateTime createdAt;
-  DateTime updatedAt;
-  int maxMessageLength;
-  String messageRetention;
-  bool mutes;
-  String name;
-  bool reactions;
-  bool readEvents;
-  bool replies;
-  bool search;
-  bool typingEvents;
-  bool uploads;
-  bool urlEnrichment;
+  final String automod;
+  final List<Command> commands;
+  final bool connectEvents;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final int maxMessageLength;
+  final String messageRetention;
+  final bool mutes;
+  final String name;
+  final bool reactions;
+  final bool readEvents;
+  final bool replies;
+  final bool search;
+  final bool typingEvents;
+  final bool uploads;
+  final bool urlEnrichment;
 
-  ChannelConfig(
-      this.automod,
-      this.commands,
-      this.connectEvents,
-      this.createdAt,
-      this.updatedAt,
-      this.maxMessageLength,
-      this.messageRetention,
-      this.mutes,
-      this.name,
-      this.reactions,
-      this.readEvents,
-      this.replies,
-      this.search,
-      this.typingEvents,
-      this.uploads,
-      this.urlEnrichment);
+  ChannelConfig({
+    this.automod,
+    this.commands,
+    this.connectEvents,
+    this.createdAt,
+    this.updatedAt,
+    this.maxMessageLength,
+    this.messageRetention,
+    this.mutes,
+    this.name,
+    this.reactions,
+    this.readEvents,
+    this.replies,
+    this.search,
+    this.typingEvents,
+    this.uploads,
+    this.urlEnrichment,
+  });
 
   factory ChannelConfig.fromJson(Map<String, dynamic> json) =>
       _$ChannelConfigFromJson(json);

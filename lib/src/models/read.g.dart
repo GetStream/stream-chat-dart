@@ -8,10 +8,10 @@ part of 'read.dart';
 
 Read _$ReadFromJson(Map<String, dynamic> json) {
   return Read(
-    json['last_read'] == null
+    lastRead: json['last_read'] == null
         ? null
         : DateTime.parse(json['last_read'] as String),
-    json['user'] == null
+    user: json['user'] == null
         ? null
         : User.fromJson(json['user'] as Map<String, dynamic>),
   );

@@ -8,47 +8,47 @@ part of 'message.dart';
 
 Message _$MessageFromJson(Map<String, dynamic> json) {
   return Message(
-    json['id'] as String,
-    json['text'] as String,
-    json['type'] as String,
-    json['parent_id'] as String,
-    json['reply_count'] as int,
-    json['show_in_channel'] as bool,
-    json['command'] as String,
-    json['html'] as String,
-    json['created_at'] == null
-        ? null
-        : DateTime.parse(json['created_at'] as String),
-    json['updated_at'] == null
-        ? null
-        : DateTime.parse(json['updated_at'] as String),
-    json['user'] == null
-        ? null
-        : User.fromJson(json['user'] as Map<String, dynamic>),
-  )
-    ..attachments = (json['attachments'] as List)
+    id: json['id'] as String,
+    text: json['text'] as String,
+    type: json['type'] as String,
+    attachments: (json['attachments'] as List)
         ?.map((e) =>
             e == null ? null : Attachment.fromJson(e as Map<String, dynamic>))
-        ?.toList()
-    ..mentionedUsers = (json['mentioned_users'] as List)
+        ?.toList(),
+    mentionedUsers: (json['mentioned_users'] as List)
         ?.map(
             (e) => e == null ? null : User.fromJson(e as Map<String, dynamic>))
-        ?.toList()
-    ..reactionCounts = (json['reaction_counts'] as Map<String, dynamic>)?.map(
+        ?.toList(),
+    reactionCounts: (json['reaction_counts'] as Map<String, dynamic>)?.map(
       (k, e) => MapEntry(k, e as int),
-    )
-    ..reactionScores = (json['reaction_scores'] as Map<String, dynamic>)?.map(
+    ),
+    reactionScores: (json['reaction_scores'] as Map<String, dynamic>)?.map(
       (k, e) => MapEntry(k, e as int),
-    )
-    ..latestReactions = (json['latest_reactions'] as List)
+    ),
+    latestReactions: (json['latest_reactions'] as List)
         ?.map((e) =>
             e == null ? null : Reaction.fromJson(e as Map<String, dynamic>))
-        ?.toList()
-    ..ownReactions = (json['own_reactions'] as List)
+        ?.toList(),
+    ownReactions: (json['own_reactions'] as List)
         ?.map((e) =>
             e == null ? null : Reaction.fromJson(e as Map<String, dynamic>))
-        ?.toList()
-    ..extraData = json['extra_data'] as Map<String, dynamic>;
+        ?.toList(),
+    parentId: json['parent_id'] as String,
+    replyCount: json['reply_count'] as int,
+    showInChannel: json['show_in_channel'] as bool,
+    command: json['command'] as String,
+    html: json['html'] as String,
+    createdAt: json['created_at'] == null
+        ? null
+        : DateTime.parse(json['created_at'] as String),
+    updatedAt: json['updated_at'] == null
+        ? null
+        : DateTime.parse(json['updated_at'] as String),
+    user: json['user'] == null
+        ? null
+        : User.fromJson(json['user'] as Map<String, dynamic>),
+    extraData: json['extra_data'] as Map<String, dynamic>,
+  );
 }
 
 Map<String, dynamic> _$MessageToJson(Message instance) {

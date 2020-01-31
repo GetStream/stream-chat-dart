@@ -8,29 +8,29 @@ part of 'channel_config.dart';
 
 ChannelConfig _$ChannelConfigFromJson(Map<String, dynamic> json) {
   return ChannelConfig(
-    json['automod'] as String,
-    (json['commands'] as List)
+    automod: json['automod'] as String,
+    commands: (json['commands'] as List)
         ?.map((e) =>
             e == null ? null : Command.fromJson(e as Map<String, dynamic>))
         ?.toList(),
-    json['connect_events'] as bool,
-    json['created_at'] == null
+    connectEvents: json['connect_events'] as bool,
+    createdAt: json['created_at'] == null
         ? null
         : DateTime.parse(json['created_at'] as String),
-    json['updated_at'] == null
+    updatedAt: json['updated_at'] == null
         ? null
         : DateTime.parse(json['updated_at'] as String),
-    json['max_message_length'] as int,
-    json['message_retention'] as String,
-    json['mutes'] as bool,
-    json['name'] as String,
-    json['reactions'] as bool,
-    json['read_events'] as bool,
-    json['replies'] as bool,
-    json['search'] as bool,
-    json['typing_events'] as bool,
-    json['uploads'] as bool,
-    json['url_enrichment'] as bool,
+    maxMessageLength: json['max_message_length'] as int,
+    messageRetention: json['message_retention'] as String,
+    mutes: json['mutes'] as bool,
+    name: json['name'] as String,
+    reactions: json['reactions'] as bool,
+    readEvents: json['read_events'] as bool,
+    replies: json['replies'] as bool,
+    search: json['search'] as bool,
+    typingEvents: json['typing_events'] as bool,
+    uploads: json['uploads'] as bool,
+    urlEnrichment: json['url_enrichment'] as bool,
   );
 }
 

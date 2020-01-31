@@ -9,27 +9,25 @@ part 'message.g.dart';
 
 @JsonSerializable()
 class Message {
-  String id;
-  String text;
-  String type;
-
-  List<Attachment> attachments;
-  List<User> mentionedUsers;
-  Map<String, int> reactionCounts;
-  Map<String, int> reactionScores;
-  List<Reaction> latestReactions;
-  List<Reaction> ownReactions;
-  String parentId;
-  int replyCount;
-  bool showInChannel;
-  String command;
-  String html;
-  DateTime createdAt;
-  DateTime updatedAt;
-  User user;
-
+  final String id;
+  final String text;
+  final String type;
+  final List<Attachment> attachments;
+  final List<User> mentionedUsers;
+  final Map<String, int> reactionCounts;
+  final Map<String, int> reactionScores;
+  final List<Reaction> latestReactions;
+  final List<Reaction> ownReactions;
+  final String parentId;
+  final int replyCount;
+  final bool showInChannel;
+  final String command;
+  final String html;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final User user;
   @JsonKey(includeIfNull: false)
-  Map<String, dynamic> extraData;
+  final Map<String, dynamic> extraData;
 
   static const topLevelFields = [
     'id',
@@ -51,18 +49,26 @@ class Message {
     'user',
   ];
 
-  Message(
-      this.id,
-      this.text,
-      this.type,
-      this.parentId,
-      this.replyCount,
-      this.showInChannel,
-      this.command,
-      this.html,
-      this.createdAt,
-      this.updatedAt,
-      this.user);
+  Message({
+    this.id,
+    this.text,
+    this.type,
+    this.attachments,
+    this.mentionedUsers,
+    this.reactionCounts,
+    this.reactionScores,
+    this.latestReactions,
+    this.ownReactions,
+    this.parentId,
+    this.replyCount,
+    this.showInChannel,
+    this.command,
+    this.html,
+    this.createdAt,
+    this.updatedAt,
+    this.user,
+    this.extraData,
+  });
 
   factory Message.fromJson(Map<String, dynamic> json) =>
       _$MessageFromJson(Serialization.moveKeysToRoot(json, topLevelFields));

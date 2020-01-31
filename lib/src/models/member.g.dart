@@ -8,23 +8,23 @@ part of 'member.dart';
 
 Member _$MemberFromJson(Map<String, dynamic> json) {
   return Member(
-    json['user'] == null
+    user: json['user'] == null
         ? null
         : User.fromJson(json['user'] as Map<String, dynamic>),
-    json['invite_accepted_at'] == null
+    inviteAcceptedAt: json['invite_accepted_at'] == null
         ? null
         : DateTime.parse(json['invite_accepted_at'] as String),
-    json['invite_rejected_at'] == null
+    inviteRejectedAt: json['invite_rejected_at'] == null
         ? null
         : DateTime.parse(json['invite_rejected_at'] as String),
-    json['invited'] as bool,
-    json['role'] as String,
-    json['user_id'] as String,
-    json['is_moderator'] as bool,
-    json['created_at'] == null
+    invited: json['invited'] as bool,
+    role: json['role'] as String,
+    userId: json['user_id'] as String,
+    isModerator: json['is_moderator'] as bool,
+    createdAt: json['created_at'] == null
         ? null
         : DateTime.parse(json['created_at'] as String),
-    json['updated_at'] == null
+    updatedAt: json['updated_at'] == null
         ? null
         : DateTime.parse(json['updated_at'] as String),
   );

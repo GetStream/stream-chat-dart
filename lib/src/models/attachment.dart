@@ -6,27 +6,27 @@ part 'attachment.g.dart';
 
 @JsonSerializable(includeIfNull: false)
 class Attachment {
-  String type;
-  String titleLink;
-  String title;
-  String thumbUrl;
-  String text;
-  String pretext;
-  String ogScrapeUrl;
-  String imageUrl;
-  String footerIcon;
-  String footer;
-  dynamic fields;
-  String fallback;
-  String color;
-  String authorName;
-  String authorLink;
-  String authorIcon;
-  String assetUrl;
-  List<Action> actions;
+  final String type;
+  final String titleLink;
+  final String title;
+  final String thumbUrl;
+  final String text;
+  final String pretext;
+  final String ogScrapeUrl;
+  final String imageUrl;
+  final String footerIcon;
+  final String footer;
+  final dynamic fields;
+  final String fallback;
+  final String color;
+  final String authorName;
+  final String authorLink;
+  final String authorIcon;
+  final String assetUrl;
+  final List<Action> actions;
 
   @JsonKey(includeIfNull: false)
-  Map<String, dynamic> extraData;
+  final Map<String, dynamic> extraData;
 
   static const topLevelFields = [
     'type',
