@@ -1,9 +1,8 @@
 import 'dart:async';
 
+import 'package:async/async.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import 'package:async/src/stream_sink_transformer.dart';
-import 'package:stream_channel/src/stream_channel_transformer.dart';
 import 'package:stream_channel/stream_channel.dart';
 
 WebSocketChannel connectWebSocket(String url,

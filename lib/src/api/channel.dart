@@ -104,13 +104,13 @@ class Channel {
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
-  Future<AcceptInviteResponse> acceptInvite([Message message = null]) async {
+  Future<AcceptInviteResponse> acceptInvite([Message message]) async {
     final res = await _client.httpClient.post<String>(_channelURL,
         data: {"accept_invite": true, "message": message?.toJson()});
     return _client.decode(res.data, AcceptInviteResponse.fromJson);
   }
 
-  Future<RejectInviteResponse> rejectInvite([Message message = null]) async {
+  Future<RejectInviteResponse> rejectInvite([Message message]) async {
     final res = await _client.httpClient.post<String>(_channelURL,
         data: {"accept_invite": false, "message": message?.toJson()});
     return _client.decode(res.data, RejectInviteResponse.fromJson);

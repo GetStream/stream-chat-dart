@@ -39,7 +39,7 @@ class User {
     'banned',
   ];
 
-  User.init(this.id, {this.online = null, this.extraData})
+  User.init(this.id, {this.online, this.extraData})
       : this.createdAt = null,
         this.updatedAt = null,
         this.lastActive = null,
