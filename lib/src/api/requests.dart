@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'requests.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class SortOption {
   static const ASC = 1;
   static const DESC = -1;
@@ -18,7 +18,7 @@ class SortOption {
   Map<String, dynamic> toJson() => _$SortOptionToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class QueryFilter {
   static QueryFilter fromJson(Map<String, dynamic> json) =>
       _$QueryFilterFromJson(json);
@@ -26,7 +26,7 @@ class QueryFilter {
   Map<String, dynamic> toJson() => _$QueryFilterToJson(this);
 }
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable()
 class PaginationParams {
   static PaginationParams fromJson(Map<String, dynamic> json) =>
       _$PaginationParamsFromJson(json);

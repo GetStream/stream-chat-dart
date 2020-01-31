@@ -205,7 +205,7 @@ class Client {
   Future<Event> setAnonymousUser() async {
     this._anonymous = true;
     final uuid = Uuid();
-    this._user = User(uuid.v4());
+    this._user = User(id: uuid.v4());
     return connect();
   }
 
