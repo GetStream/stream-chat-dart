@@ -87,7 +87,7 @@ class Client {
     _logHandlerFunction = logHandlerFunction ??
         (LogRecord record) {
           print(
-              '(${record.time}) ${record.level.name}: ${record.loggerName} | ${record.message}');
+              '(${record.time}) ${record.level.name}: <${record.loggerName}> ${record.message}');
           if (record.stackTrace != null) {
             print(record.stackTrace);
           }
@@ -132,7 +132,7 @@ class Client {
         "server_determines_connection_id": true,
       },
       handler: handleEvent,
-      logger: Logger('ws')..onRecord.listen(_logHandlerFunction),
+      logger: Logger('WS'),
     );
 
     final connectEvent = await _ws.connect();
