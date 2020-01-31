@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:logging/logging.dart';
 import 'package:stream_chat/src/client.dart';
 import 'package:stream_chat/stream_chat.dart';
 
@@ -8,13 +9,28 @@ const TOKEN =
 
 void main() {
   test('test', () async {
-    final client = Client('6xjf3dex3n7d');
+    final client = Client('6xjf3dex3n7d', logLevel: Level.INFO);
     final user = User(id: "wild-breeze-7");
+
     final setUserEvent = await client.setUser(user, TOKEN);
     print(setUserEvent.toJson());
+
     final queryChannels = await client.queryChannels(null, null, null);
-    final queryUsers = await client.queryUsers(null, null, null);
     print('queryChannels.channels.length: ${queryChannels.channels.length}');
+
+    final queryUsers = await client.queryUsers(
+        null, [SortOption('created_at', direction: SortOption.DESC)], null);
     print('queryUsers.users.length: ${queryUsers.users.length}');
+    expect(queryUsers.users.length, greaterThan(1));
+
+    queryUsers.users.forEach((u) => print(u.createdAt));
+
+    final queryCurrentUser = await client.queryUsers({
+      'id': {
+        '\$in': [user.id],
+      }
+    }, null, null);
+    print('queryCurrentUser.users.length: ${queryCurrentUser.users.length}');
+    expect(queryCurrentUser.users.length, 1);
   });
 }
