@@ -283,5 +283,116 @@ void main() {
             throwsA(ApiError('test error', 400)));
       });
     });
+
+    group('api methods', () {
+      test('get', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        final Map<String, dynamic> queryParams = {
+          'test': 1,
+        };
+
+        when(mockDio.get<String>('/test', queryParameters: queryParams))
+            .thenAnswer((_) async {
+          return Response(data: '{}', statusCode: 200);
+        });
+
+        await client.get('/test', queryParameters: queryParams);
+
+        verify(mockDio.get<String>('/test', queryParameters: queryParams))
+            .called(1);
+      });
+
+      test('post', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        final Map<String, dynamic> data = {
+          'test': 1,
+        };
+
+        when(mockDio.post<String>('/test', data: data)).thenAnswer((_) async {
+          return Response(data: '{}', statusCode: 200);
+        });
+
+        await client.post('/test', data: data);
+
+        verify(mockDio.post<String>('/test', data: data)).called(1);
+      });
+
+      test('put', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        final Map<String, dynamic> data = {
+          'test': 1,
+        };
+
+        when(mockDio.put<String>('/test', data: data)).thenAnswer((_) async {
+          return Response(data: '{}', statusCode: 200);
+        });
+
+        await client.put('/test', data: data);
+
+        verify(mockDio.put<String>('/test', data: data)).called(1);
+      });
+
+      test('patch', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        final Map<String, dynamic> data = {
+          'test': 1,
+        };
+
+        when(mockDio.patch<String>('/test', data: data)).thenAnswer((_) async {
+          return Response(data: '{}', statusCode: 200);
+        });
+
+        await client.patch('/test', data: data);
+
+        verify(mockDio.patch<String>('/test', data: data)).called(1);
+      });
+
+      test('delete', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        final Map<String, dynamic> queryParams = {
+          'test': 1,
+        };
+
+        when(mockDio.delete<String>('/test', queryParameters: queryParams))
+            .thenAnswer((_) async {
+          return Response(data: '{}', statusCode: 200);
+        });
+
+        await client.delete('/test', queryParameters: queryParams);
+
+        verify(mockDio.delete<String>('/test', queryParameters: queryParams))
+            .called(1);
+      });
+    });
   });
 }

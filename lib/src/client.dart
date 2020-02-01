@@ -221,7 +221,7 @@ class Client {
     dynamic data,
   }) async {
     try {
-      final response = await httpClient.delete<String>(
+      final response = await httpClient.patch<String>(
         path,
         queryParameters: queryParameters,
         data: data,
@@ -238,7 +238,7 @@ class Client {
     dynamic data,
   }) async {
     try {
-      final response = await httpClient.delete<String>(
+      final response = await httpClient.put<String>(
         path,
         queryParameters: queryParameters,
         data: data,
