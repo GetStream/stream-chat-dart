@@ -431,6 +431,60 @@ void main() {
       });
     });
 
+    group('message', () {
+      test('flagMessage', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        when(mockDio.post<String>('/moderation/flag',
+                data: {'target_message_id': 'test-id'}))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.flagMessage('test-id');
+
+        verify(mockDio.post<String>('/moderation/flag',
+            data: {'target_message_id': 'test-id'})).called(1);
+      });
+
+      test('unflagMessage', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        when(mockDio.post<String>('/moderation/unflag',
+                data: {'target_message_id': 'test-id'}))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.unflagMessage('test-id');
+
+        verify(mockDio.post<String>('/moderation/unflag',
+            data: {'target_message_id': 'test-id'})).called(1);
+      });
+
+      test('markAllRead', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        when(mockDio.post<String>('/channels/read'))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.markAllRead();
+
+        verify(mockDio.post<String>('/channels/read')).called(1);
+      });
+    });
+
     group('error handling', () {
       test('should parse the error correctly', () async {
         final dioHttp = Dio();
