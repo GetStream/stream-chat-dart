@@ -9,6 +9,7 @@ import 'package:mockito/mockito.dart';
 import 'package:stream_chat/src/api/requests.dart';
 import 'package:stream_chat/src/client.dart';
 import 'package:stream_chat/src/exceptions.dart';
+import 'package:stream_chat/src/models/user.dart';
 
 class MockDio extends Mock implements DioForNative {}
 
@@ -330,6 +331,103 @@ void main() {
 
         verify(mockDio.get<String>('/users', queryParameters: queryParams))
             .called(1);
+      });
+    });
+
+    group('user', () {
+      test('updateUser', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        final user = User(id: 'test-id');
+
+        final data = {
+          'users': {user.id: user.toJson()},
+        };
+
+        when(mockDio.post<String>('/users', data: data))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.updateUser(user);
+
+        verify(mockDio.post<String>('/users', data: data)).called(1);
+      });
+
+      test('banUser', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        when(mockDio.post<String>('/moderation/ban',
+                data: {'test': true, 'target_user_id': 'test-id'}))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.banUser('test-id', {'test': true});
+
+        verify(mockDio.post<String>('/moderation/ban',
+            data: {'test': true, 'target_user_id': 'test-id'})).called(1);
+      });
+
+      test('unbanUser', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        when(mockDio.delete<String>('/moderation/ban',
+                queryParameters: {'test': true, 'target_user_id': 'test-id'}))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.unbanUser('test-id', {'test': true});
+
+        verify(mockDio.delete<String>('/moderation/ban',
+                queryParameters: {'test': true, 'target_user_id': 'test-id'}))
+            .called(1);
+      });
+
+      test('muteUser', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        when(mockDio.post<String>('/moderation/mute',
+                data: {'target_id': 'test-id'}))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.muteUser('test-id');
+
+        verify(mockDio.post<String>('/moderation/mute',
+            data: {'target_id': 'test-id'})).called(1);
+      });
+
+      test('unmuteUser', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        when(mockDio.post<String>('/moderation/unmute',
+                data: {'target_id': 'test-id'}))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.unmuteUser('test-id');
+
+        verify(mockDio.post<String>('/moderation/unmute',
+            data: {'target_id': 'test-id'})).called(1);
       });
     });
 
