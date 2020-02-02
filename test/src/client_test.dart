@@ -203,6 +203,61 @@ void main() {
       });
     });
 
+    group('devices', () {
+      test('addDevice', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        when(mockDio.post<String>('/devices', data: {
+          'id': 'test-id',
+          'push_provider': 'test',
+        })).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.addDevice('test-id', 'test');
+
+        verify(mockDio.post<String>('/devices',
+            data: {'id': 'test-id', 'push_provider': 'test'})).called(1);
+      });
+
+      test('getDevices', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        when(mockDio.get<String>('/devices'))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.getDevices();
+
+        verify(mockDio.get<String>('/devices')).called(1);
+      });
+
+      test('removeDevice', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        when(mockDio
+                .delete<String>('/devices', queryParameters: {'id': 'test-id'}))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.removeDevice('test-id');
+
+        verify(mockDio.delete<String>('/devices',
+            queryParameters: {'id': 'test-id'})).called(1);
+      });
+    });
+
     group('queryUsers', () {
       test('should pass right default parameters', () async {
         final mockDio = MockDio();

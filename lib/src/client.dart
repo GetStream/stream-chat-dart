@@ -28,9 +28,8 @@ class Client {
 
   LogHandlerFunction _logHandlerFunction;
 
-  LogHandlerFunction get logHandlerFunction => _logHandlerFunction;
-
-  final _controller = StreamController<Event>.broadcast();
+  final StreamController<Event> _controller =
+      StreamController<Event>.broadcast();
 
   Stream get stream => _controller.stream;
 
@@ -95,7 +94,7 @@ class Client {
     logger.onRecord.listen(_logHandlerFunction);
   }
 
-  void dispose(filename) {
+  void dispose() {
     httpClient.close();
     _controller.close();
   }
