@@ -459,3 +459,40 @@ Map<String, dynamic> _$EmptyResponseToJson(EmptyResponse instance) =>
     <String, dynamic>{
       'duration': instance.duration,
     };
+
+ChannelStateResponse _$ChannelStateResponseFromJson(Map<String, dynamic> json) {
+  return ChannelStateResponse(
+    json['channel'] == null
+        ? null
+        : Channel.fromJson(json['channel'] as Map<String, dynamic>),
+    (json['messages'] as List)
+        ?.map((e) =>
+            e == null ? null : Message.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
+    (json['members'] as List)
+        ?.map((e) =>
+            e == null ? null : Member.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
+    json['watcher_count'] as int,
+    (json['watchers'] as List)
+        ?.map(
+            (e) => e == null ? null : User.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
+    (json['read'] as List)
+        ?.map(
+            (e) => e == null ? null : Read.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
+  )..duration = json['duration'] as String;
+}
+
+Map<String, dynamic> _$ChannelStateResponseToJson(
+        ChannelStateResponse instance) =>
+    <String, dynamic>{
+      'duration': instance.duration,
+      'channel': instance.channel?.toJson(),
+      'messages': instance.messages?.map((e) => e?.toJson())?.toList(),
+      'members': instance.members?.map((e) => e?.toJson())?.toList(),
+      'watcher_count': instance.watcherCount,
+      'watchers': instance.watchers?.map((e) => e?.toJson())?.toList(),
+      'read': instance.read?.map((e) => e?.toJson())?.toList(),
+    };

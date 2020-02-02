@@ -6,6 +6,7 @@ import '../models/user.dart';
 import '../models/channel.dart';
 import '../models/member.dart';
 import '../models/reaction.dart';
+import '../models/read.dart';
 
 import 'package:json_annotation/json_annotation.dart';
 
@@ -282,4 +283,22 @@ class EmptyResponse extends BaseResponse {
       _$EmptyResponseFromJson(json);
 
   Map<String, dynamic> toJson() => _$EmptyResponseToJson(this);
+}
+
+@JsonSerializable()
+class ChannelStateResponse extends BaseResponse {
+  final Channel channel;
+  final List<Message> messages;
+  final List<Member> members;
+  final int watcherCount;
+  final List<User> watchers;
+  final List<Read> read;
+
+  ChannelStateResponse(this.channel, this.messages, this.members,
+      this.watcherCount, this.watchers, this.read);
+
+  static ChannelStateResponse fromJson(Map<String, dynamic> json) =>
+      _$ChannelStateResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ChannelStateResponseToJson(this);
 }

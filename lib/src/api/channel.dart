@@ -14,9 +14,11 @@ class Channel {
   Client _client;
   String type;
   String id;
+  String cid;
   Map<String, dynamic> data;
 
-  Channel(this._client, this.type, this.id, this.data);
+  Channel(this._client, this.type, this.id, this.data)
+      : cid = id != null ? "$type:$id" : null;
 
   Client get client => _client;
 
@@ -176,8 +178,15 @@ class Channel {
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
-  // TODO watch
-  Future<EmptyResponse> watch(dynamic options) async => null;
+  Future<ChannelStateResponse> watch(Map<String, dynamic> options) async {
+    var watchOptions = Map<String, dynamic>.from({
+      "state": true,
+      "watch": true,
+      "presence": false,
+    })
+      ..addAll(options);
+    return query(watchOptions);
+  }
 
   Future<EmptyResponse> stopWatching() async {
     final response = await _client.post("$_channelURL/stop-watching");
@@ -212,11 +221,27 @@ class Channel {
         response.data, GetMessagesByIdResponse.fromJson);
   }
 
-  // TODO create
-  Future<EmptyResponse> create() async => null;
+  Future<ChannelStateResponse> create() async {
+    return query({
+      "watch": false,
+      "state": false,
+      "presence": false,
+    });
+  }
 
-  // TODO query
-  Future<EmptyResponse> query(dynamic options) async => null;
+  Future<ChannelStateResponse> query(Map<String, dynamic> options) async {
+    var path = "/channels/$type";
+    if (id != null) {
+      path = "$path/$id";
+    }
+    final response = await _client.post(path);
+    final state = _client.decode(response.data, ChannelStateResponse.fromJson);
+    if (id != null) {
+      id = state.channel.id;
+      cid = state.channel.id;
+    }
+    return state;
+  }
 
   Future<EmptyResponse> banUser(
     String userID,
