@@ -258,6 +258,16 @@ void main() {
       });
     });
 
+    test('devToken', () {
+      final client = Client('api-key');
+      final token = client.devToken('test');
+
+      expect(
+        token,
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGVzdCJ9.devtoken',
+      );
+    });
+
     group('queryUsers', () {
       test('should pass right default parameters', () async {
         final mockDio = MockDio();
