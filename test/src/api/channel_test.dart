@@ -306,6 +306,48 @@ void main() {
         })).called(1);
       });
 
+      test('acceptInvite', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+        final channelClient = client.channel('messaging', id: 'testid');
+        final message = Message(text: 'test');
+
+        when(mockDio.post<String>('/channels/messaging/testid',
+                data: {'accept_invite': true, 'message': message.toJson()}))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await channelClient.acceptInvite(message);
+
+        verify(mockDio.post<String>('/channels/messaging/testid',
+                data: {'accept_invite': true, 'message': message.toJson()}))
+            .called(1);
+      });
+
+      test('rejectInvite', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+        final channelClient = client.channel('messaging', id: 'testid');
+        final message = Message(text: 'test');
+
+        when(mockDio.post<String>('/channels/messaging/testid',
+                data: {'accept_invite': false, 'message': message.toJson()}))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await channelClient.rejectInvite(message);
+
+        verify(mockDio.post<String>('/channels/messaging/testid',
+                data: {'accept_invite': false, 'message': message.toJson()}))
+            .called(1);
+      });
+
       test('addModerators', () async {
         final mockDio = MockDio();
 
