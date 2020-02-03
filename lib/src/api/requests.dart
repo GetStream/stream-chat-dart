@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'requests.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(createFactory: false)
 class SortOption {
   static const ASC = 1;
   static const DESC = -1;
@@ -12,24 +12,15 @@ class SortOption {
 
   SortOption(this.field, {this.direction = DESC});
 
-  static SortOption fromJson(Map<String, dynamic> json) =>
-      _$SortOptionFromJson(json);
-
   Map<String, dynamic> toJson() => _$SortOptionToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(createFactory: false)
 class QueryFilter {
-  static QueryFilter fromJson(Map<String, dynamic> json) =>
-      _$QueryFilterFromJson(json);
-
   Map<String, dynamic> toJson() => _$QueryFilterToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(createFactory: false)
 class PaginationParams {
-  static PaginationParams fromJson(Map<String, dynamic> json) =>
-      _$PaginationParamsFromJson(json);
-
   Map<String, dynamic> toJson() => _$PaginationParamsToJson(this);
 }

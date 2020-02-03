@@ -6,29 +6,14 @@ part of 'requests.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-SortOption _$SortOptionFromJson(Map<String, dynamic> json) {
-  return SortOption(
-    json['field'] as String,
-    direction: json['direction'] as int,
-  );
-}
-
 Map<String, dynamic> _$SortOptionToJson(SortOption instance) =>
     <String, dynamic>{
       'field': instance.field,
       'direction': instance.direction,
     };
 
-QueryFilter _$QueryFilterFromJson(Map<String, dynamic> json) {
-  return QueryFilter();
-}
-
 Map<String, dynamic> _$QueryFilterToJson(QueryFilter instance) =>
     <String, dynamic>{};
-
-PaginationParams _$PaginationParamsFromJson(Map<String, dynamic> json) {
-  return PaginationParams();
-}
 
 Map<String, dynamic> _$PaginationParamsToJson(PaginationParams instance) =>
     <String, dynamic>{};
