@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:async/async.dart';
+import 'package:stream_channel/stream_channel.dart';
+import 'package:stream_chat/src/api/websocket.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import 'package:stream_channel/stream_channel.dart';
-
-WebSocketChannel connectWebSocket(String url,
+final ConnectWebSocket connectWebSocket = (String url,
         {Iterable<String> protocols,
         Map<String, dynamic> headers,
         Duration pingInterval}) =>

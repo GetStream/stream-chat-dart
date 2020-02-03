@@ -1,7 +1,7 @@
+import 'package:stream_chat/src/api/websocket.dart';
 import 'package:web_socket_channel/html.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 
-WebSocketChannel connectWebSocket(
+final ConnectWebSocket connectWebSocket = (
   String url, {
   Iterable<String> protocols,
   Map<String, dynamic> headers,

@@ -1,15 +1,21 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
+import '../models/event.dart';
+import '../models/user.dart';
 import 'web_socket_channel_stub.dart'
     if (dart.library.html) 'web_socket_channel_html.dart'
     if (dart.library.io) 'web_socket_channel_io.dart';
-import '../models/event.dart';
-import '../models/user.dart';
 
 typedef EventHandler = void Function(Event);
+typedef ConnectWebSocket = WebSocketChannel Function(String url,
+    {Iterable<String> protocols,
+    Map<String, dynamic> headers,
+    Duration pingInterval});
 
 // TODO: improve error path for the connect() method
 // TODO: make sure we pass an error with a stacktrace
@@ -26,7 +32,7 @@ class WebSocket {
   final Logger logger;
 
   WebSocket({
-    this.baseUrl,
+    @required this.baseUrl,
     this.user,
     this.connectParams,
     this.connectPayload,
@@ -36,7 +42,7 @@ class WebSocket {
 
   Event decodeEvent(String source) => Event.fromJson(json.decode(source));
 
-  Future<Event> connect() {
+  Future<Event> connect([ConnectWebSocket connect]) {
     final completer = Completer<Event>();
     final qs = Map<String, String>.from(connectParams);
 
@@ -52,11 +58,13 @@ class WebSocket {
 
     bool resolved = false;
 
-    final channel = connectWebSocket(path);
+    ConnectWebSocket connectFunction = connect ?? connectWebSocket;
+    final channel = connectFunction(path);
     channel.stream.listen((data) {
       final event = decodeEvent(data);
       if (resolved) {
         handler(event);
+        print('data: ${event}');
       } else {
         resolved = true;
         logger.info('connection estabilished');
