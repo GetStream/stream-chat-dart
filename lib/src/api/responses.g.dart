@@ -289,10 +289,6 @@ ChannelStateResponse _$ChannelStateResponseFromJson(Map<String, dynamic> json) {
             e == null ? null : Member.fromJson(e as Map<String, dynamic>))
         ?.toList(),
     json['watcher_count'] as int,
-    (json['watchers'] as List)
-        ?.map(
-            (e) => e == null ? null : User.fromJson(e as Map<String, dynamic>))
-        ?.toList(),
     (json['read'] as List)
         ?.map(
             (e) => e == null ? null : Read.fromJson(e as Map<String, dynamic>))

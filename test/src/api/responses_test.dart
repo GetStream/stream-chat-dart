@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat/src/api/responses.dart';
 import 'package:stream_chat/src/models/device.dart';
+import 'package:stream_chat/src/models/member.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/reaction.dart';
+import 'package:stream_chat/src/models/read.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 void main() {
@@ -2977,6 +2979,302 @@ void main() {
       expect(response.channels, isA<List<ChannelState>>());
     });
 
+    test('ChannelStateResponse', () {
+      const jsonExample = r'''
+      {
+            "channel": {
+                "id": "!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
+                "type": "messaging",
+                "cid": "messaging:!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
+                "last_message_at": "2020-01-28T22:17:31.204287Z",
+                "created_at": "2020-01-28T22:17:31.00187Z",
+                "updated_at": "2020-01-28T22:17:31.00187Z",
+                "created_by": {
+                    "id": "spring-voice-7",
+                    "role": "user",
+                    "created_at": "2020-01-28T22:17:30.834135Z",
+                    "updated_at": "2020-01-28T22:17:31.186771Z",
+                    "banned": false,
+                    "online": false,
+                    "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                    "name": "Spring voice"
+                },
+                "frozen": false,
+                "member_count": 2,
+                "config": {
+                    "created_at": "2020-01-29T12:59:14.291912835Z",
+                    "updated_at": "2020-01-29T12:59:14.291912991Z",
+                    "name": "messaging",
+                    "typing_events": true,
+                    "read_events": true,
+                    "connect_events": true,
+                    "search": true,
+                    "reactions": true,
+                    "replies": true,
+                    "mutes": true,
+                    "uploads": true,
+                    "url_enrichment": true,
+                    "message_retention": "infinite",
+                    "max_message_length": 5000,
+                    "automod": "disabled",
+                    "automod_behavior": "flag",
+                    "commands": [
+                        {
+                            "name": "giphy",
+                            "description": "Post a random gif to the channel",
+                            "args": "[text]",
+                            "set": "fun_set"
+                        }
+                    ]
+                },
+                "name": "Mia Denys",
+                "image": "https://randomuser.me/api/portraits/women/2.jpg"
+            },
+            "messages": [
+                {
+                    "id": "4637f7e4-a06b-42db-ba5a-8d8270dd926f",
+                    "text": "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
+                    "html": "\u003cp\u003e\u003ca href=\"https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA\" rel=\"nofollow\"\u003ehttps://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA\u003c/a\u003e\u003c/p\u003e\n",
+                    "type": "regular",
+                    "user": {
+                        "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.83015Z",
+                        "updated_at": "2020-01-28T22:17:31.19435Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://randomuser.me/api/portraits/women/2.jpg",
+                        "name": "Mia Denys"
+                    },
+                    "attachments": [
+                        {
+                            "type": "video",
+                            "author_name": "GIPHY",
+                            "title": "The Lion King Disney GIF - Find \u0026 Share on GIPHY",
+                            "title_link": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif",
+                            "text": "Discover \u0026 share this Lion King Live Action GIF with everyone you know. GIPHY is how you search, share, discover, and create GIFs.",
+                            "image_url": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif",
+                            "thumb_url": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif",
+                            "asset_url": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.mp4",
+                            "og_scrape_url": "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA"
+                        }
+                    ],
+                    "latest_reactions": [
+                        {
+                            "message_id": "4637f7e4-a06b-42db-ba5a-8d8270dd926f",
+                            "user_id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+                            "user": {
+                                "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+                                "role": "user",
+                                "created_at": "2020-01-28T22:17:30.83015Z",
+                                "updated_at": "2020-01-28T22:17:31.19435Z",
+                                "banned": false,
+                                "online": false,
+                                "image": "https://randomuser.me/api/portraits/women/2.jpg",
+                                "name": "Mia Denys"
+                            },
+                            "type": "love",
+                            "score": 1,
+                            "created_at": "2020-01-28T22:17:31.128376Z",
+                            "updated_at": "2020-01-28T22:17:31.128376Z"
+                        }
+                    ],
+                    "own_reactions": [],
+                    "reaction_counts": {
+                        "love": 1
+                    },
+                    "reaction_scores": {
+                        "love": 1
+                    },
+                    "reply_count": 0,
+                    "created_at": "2020-01-28T22:17:31.107978Z",
+                    "updated_at": "2020-01-28T22:17:31.130506Z",
+                    "mentioned_users": []
+                },
+                {
+                    "id": "16e19c46-fb96-4f89-8031-d5bd2ce3bd64",
+                    "text": "Few can name a topfull mother that isn't a breezeless damage.",
+                    "html": "\u003cp\u003eFew can name a topfull mother that isn’t a breezeless damage.\u003c/p\u003e\n",
+                    "type": "regular",
+                    "user": {
+                        "id": "spring-voice-7",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.834135Z",
+                        "updated_at": "2020-01-28T22:17:31.186771Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                        "name": "Spring voice"
+                    },
+                    "attachments": [],
+                    "latest_reactions": [],
+                    "own_reactions": [],
+                    "reaction_counts": {},
+                    "reaction_scores": {},
+                    "reply_count": 0,
+                    "created_at": "2020-01-28T22:17:31.153518Z",
+                    "updated_at": "2020-01-28T22:17:31.153518Z",
+                    "mentioned_users": []
+                },
+                {
+                    "id": "38b1b252-c9a6-4aea-a39e-8de3b7f7604b",
+                    "text": "https://giphy.com/gifs/beard-muscle-73Sjhw0N4hyog",
+                    "html": "\u003cp\u003e\u003ca href=\"https://giphy.com/gifs/beard-muscle-73Sjhw0N4hyog\" rel=\"nofollow\"\u003ehttps://giphy.com/gifs/beard-muscle-73Sjhw0N4hyog\u003c/a\u003e\u003c/p\u003e\n",
+                    "type": "regular",
+                    "user": {
+                        "id": "spring-voice-7",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.834135Z",
+                        "updated_at": "2020-01-28T22:17:31.186771Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                        "name": "Spring voice"
+                    },
+                    "attachments": [
+                        {
+                            "type": "video",
+                            "author_name": "GIPHY",
+                            "title": "Moustache Thumbs Up GIF - Find \u0026 Share on GIPHY",
+                            "title_link": "https://media.giphy.com/media/73Sjhw0N4hyog/giphy.gif",
+                            "text": "Discover \u0026 share this Pouce Leve GIF with everyone you know. GIPHY is how you search, share, discover, and create GIFs.",
+                            "image_url": "https://media.giphy.com/media/73Sjhw0N4hyog/giphy.gif",
+                            "thumb_url": "https://media.giphy.com/media/73Sjhw0N4hyog/giphy.gif",
+                            "asset_url": "https://media.giphy.com/media/73Sjhw0N4hyog/giphy.mp4",
+                            "og_scrape_url": "https://giphy.com/gifs/beard-muscle-73Sjhw0N4hyog"
+                        }
+                    ],
+                    "latest_reactions": [],
+                    "own_reactions": [],
+                    "reaction_counts": {},
+                    "reaction_scores": {},
+                    "reply_count": 0,
+                    "created_at": "2020-01-28T22:17:31.155428Z",
+                    "updated_at": "2020-01-28T22:17:31.155428Z",
+                    "mentioned_users": []
+                },
+                {
+                    "id": "5c7d0c68-72d5-4027-b6b7-711b342d0fc4",
+                    "text": "The carbons could be said to resemble smartish hoods.",
+                    "html": "\u003cp\u003eThe carbons could be said to resemble smartish hoods.\u003c/p\u003e\n",
+                    "type": "regular",
+                    "user": {
+                        "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.83015Z",
+                        "updated_at": "2020-01-28T22:17:31.19435Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://randomuser.me/api/portraits/women/2.jpg",
+                        "name": "Mia Denys"
+                    },
+                    "attachments": [],
+                    "latest_reactions": [],
+                    "own_reactions": [],
+                    "reaction_counts": {},
+                    "reaction_scores": {},
+                    "reply_count": 1,
+                    "created_at": "2020-01-28T22:17:31.157811Z",
+                    "updated_at": "2020-01-28T22:17:31.157811Z",
+                    "mentioned_users": []
+                },
+                {
+                    "id": "5b02535a-0c3c-45fa-9cf8-16f840c5123f",
+                    "text": "Their software was, in this moment, a prolix feature.",
+                    "html": "\u003cp\u003eTheir software was, in this moment, a prolix feature.\u003c/p\u003e\n",
+                    "type": "regular",
+                    "user": {
+                        "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.83015Z",
+                        "updated_at": "2020-01-28T22:17:31.19435Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://randomuser.me/api/portraits/women/2.jpg",
+                        "name": "Mia Denys"
+                    },
+                    "attachments": [],
+                    "latest_reactions": [],
+                    "own_reactions": [],
+                    "reaction_counts": {},
+                    "reaction_scores": {},
+                    "reply_count": 1,
+                    "created_at": "2020-01-28T22:17:31.158391Z",
+                    "updated_at": "2020-01-28T22:17:31.158391Z",
+                    "mentioned_users": []
+                }
+            ],
+            "watcher_count": 1,
+            "read": [
+                {
+                    "user": {
+                        "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.83015Z",
+                        "updated_at": "2020-01-28T22:17:31.19435Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://randomuser.me/api/portraits/women/2.jpg",
+                        "name": "Mia Denys"
+                    },
+                    "last_read": "2020-01-28T22:17:31.016937728Z"
+                },
+                {
+                    "user": {
+                        "id": "spring-voice-7",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.834135Z",
+                        "updated_at": "2020-01-28T22:17:31.186771Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                        "name": "Spring voice"
+                    },
+                    "last_read": "2020-01-28T22:17:31.018856448Z"
+                }
+            ],
+            "members": [
+                {
+                    "user": {
+                        "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.83015Z",
+                        "updated_at": "2020-01-28T22:17:31.19435Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://randomuser.me/api/portraits/women/2.jpg",
+                        "name": "Mia Denys"
+                    },
+                    "role": "member",
+                    "created_at": "2020-01-28T22:17:31.005135Z",
+                    "updated_at": "2020-01-28T22:17:31.005135Z"
+                },
+                {
+                    "user": {
+                        "id": "spring-voice-7",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.834135Z",
+                        "updated_at": "2020-01-28T22:17:31.186771Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                        "name": "Spring voice"
+                    },
+                    "role": "owner",
+                    "created_at": "2020-01-28T22:17:31.005135Z",
+                    "updated_at": "2020-01-28T22:17:31.005135Z"
+                }
+            ]
+        }
+      ''';
+      final response = ChannelStateResponse.fromJson(json.decode(jsonExample));
+      expect(response.channel, isA<Channel>());
+      expect(response.watcherCount, isA<int>());
+      expect(response.members, isA<List<Member>>());
+      expect(response.messages, isA<List<Message>>());
+      expect(response.read, isA<List<Read>>());
+    });
+
     test('QueryUsersResponse', () {
       const jsonExample = r'''
       {"users":[{"id":"wild-breeze-7","role":"user","created_at":"2020-01-12T12:03:19.102029Z","updated_at":"2020-02-03T08:58:33.971562Z","last_active":"2020-02-03T08:58:33.965072Z","banned":false,"online":true,"name":"Wild breeze","image":"https://getstream.io/random_svg/?id=wild-breeze-7\u0026amp;name=Wild+breeze"}],"duration":"2.44ms"}
@@ -3065,6 +3363,78 @@ void main() {
       expect(response.messages, isA<List<Message>>());
     });
 
+    test('SearchMessagesResponse', () {
+      const jsonExample = r'''
+      { "messages": [
+          {
+              "id": "9db3ef01-e779-4279-8c54-ffd021eccec4",
+              "text": "A lustred seal is an alto of the mind.",
+              "html": "\u003cp\u003eA lustred seal is an alto of the mind.\u003c/p\u003e\n",
+              "type": "regular",
+              "user": {
+                  "id": "spring-voice-7",
+                  "role": "user",
+                  "created_at": "2020-01-28T22:17:30.834135Z",
+                  "updated_at": "2020-01-28T22:17:31.186771Z",
+                  "banned": false,
+                  "online": false,
+                  "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                  "name": "Spring voice"
+              },
+              "attachments": [],
+              "latest_reactions": [],
+              "own_reactions": [],
+              "reaction_counts": {},
+              "reaction_scores": {},
+              "reply_count": 0,
+              "created_at": "2020-01-28T22:17:31.167579Z",
+              "updated_at": "2020-01-28T22:17:31.167579Z",
+              "mentioned_users": []
+          },
+          {
+              "id": "3232e92f-a96f-4b5e-bacb-3565e7155dc4",
+              "text": "https://giphy.com/gifs/netflix-marvel-the-punisher-l3mZsRS7ZfftbdLdS",
+              "html": "\u003cp\u003e\u003ca href=\"https://giphy.com/gifs/netflix-marvel-the-punisher-l3mZsRS7ZfftbdLdS\" rel=\"nofollow\"\u003ehttps://giphy.com/gifs/netflix-marvel-the-punisher-l3mZsRS7ZfftbdLdS\u003c/a\u003e\u003c/p\u003e\n",
+              "type": "regular",
+              "user": {
+                  "id": "spring-voice-7",
+                  "role": "user",
+                  "created_at": "2020-01-28T22:17:30.834135Z",
+                  "updated_at": "2020-01-28T22:17:31.186771Z",
+                  "banned": false,
+                  "online": false,
+                  "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                  "name": "Spring voice"
+              },
+              "attachments": [
+                  {
+                      "type": "video",
+                      "author_name": "GIPHY",
+                      "title": "The Punisher Marvel GIF by NETFLIX - Find \u0026 Share on GIPHY",
+                      "title_link": "https://media.giphy.com/media/l3mZsRS7ZfftbdLdS/giphy.gif",
+                      "text": "See What's Next in entertainment and Netflix original series, movies, TV, docs, and comedies. You can stream Netflix anytime, anywhere, on any device.",
+                      "image_url": "https://media.giphy.com/media/l3mZsRS7ZfftbdLdS/giphy.gif",
+                      "thumb_url": "https://media.giphy.com/media/l3mZsRS7ZfftbdLdS/giphy.gif",
+                      "asset_url": "https://media.giphy.com/media/l3mZsRS7ZfftbdLdS/giphy.mp4",
+                      "og_scrape_url": "https://giphy.com/gifs/netflix-marvel-the-punisher-l3mZsRS7ZfftbdLdS"
+                  }
+              ],
+              "latest_reactions": [],
+              "own_reactions": [],
+              "reaction_counts": {},
+              "reaction_scores": {},
+              "reply_count": 1,
+              "created_at": "2020-01-28T22:17:31.168454Z",
+              "updated_at": "2020-01-28T22:17:31.168454Z",
+              "mentioned_users": []
+          }
+      ]}
+      ''';
+      final response =
+          SearchMessagesResponse.fromJson(json.decode(jsonExample));
+      expect(response.messages, isA<List<Message>>());
+    });
+
     test('ListDevicesResponse', () {
       const jsonExample =
           r'''{"devices":[{"push_provider":"firebase","id":"test"}],"duration":"0.35ms"}''';
@@ -3145,12 +3515,1084 @@ void main() {
       expect(response.reaction, isA<Reaction>());
     });
 
+    test('UpdateUsersResponse', () {
+      const jsonExample =
+          r'''{"users": {"bbb19d9a-ee50-45bc-84e5-0584e79d0c9e":{
+                        "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.826259Z",
+                        "updated_at": "2020-01-28T22:17:31.101222Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://pbs.twimg.com/profile_images/669512187778498560/L7wQctBt.jpg",
+                        "name": "Robin Papa"
+                    }},"duration":"0.35ms"}''';
+      final response = UpdateUsersResponse.fromJson(json.decode(jsonExample));
+      expect(response.users, isA<Map<String, User>>());
+    });
+
     test('SetGuestUserResponse', () {
       const jsonExample =
           r'{"user":{"id":"guest-ac612aee-25fe-49fb-b1af-969e41f452a0-wild-breeze-7","role":"guest","created_at":"2020-02-03T10:19:01.538434Z","updated_at":"2020-02-03T10:19:01.539543Z","banned":false,"online":false},"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZ3Vlc3QtYWM2MTJhZWUtMjVmZS00OWZiLWIxYWYtOTY5ZTQxZjQ1MmEwLXdpbGQtYnJlZXplLTcifQ.mmoFGu7oJjpFsp7nFN78UbIpO7gowbuIbyoppsuvbXA","duration":"4.66ms"}';
       final response = SetGuestUserResponse.fromJson(json.decode(jsonExample));
       expect(response.user, isA<User>());
       expect(response.accessToken, isA<String>());
+    });
+
+    test('GetMessagesByIdResponse', () {
+      const jsonExample = r'''{"message":{
+                    "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
+                    "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
+                    "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
+                    "type": "regular",
+                    "user": {
+                        "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.826259Z",
+                        "updated_at": "2020-01-28T22:17:31.101222Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://pbs.twimg.com/profile_images/669512187778498560/L7wQctBt.jpg",
+                        "name": "Robin Papa"
+                    },
+                    "attachments": [],
+                    "latest_reactions": [],
+                    "own_reactions": [],
+                    "reaction_counts": {},
+                    "reaction_scores": {},
+                    "reply_count": 1,
+                    "created_at": "2020-01-28T22:17:31.092262Z",
+                    "updated_at": "2020-01-28T22:17:31.092262Z",
+                    "mentioned_users": []
+                },"duration":"4.66ms"}''';
+      final response =
+          GetMessagesByIdResponse.fromJson(json.decode(jsonExample));
+      expect(response.message, isA<Message>());
+    });
+
+    test('SendActionResponse', () {
+      const jsonExample = r'''{"message":{
+                    "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
+                    "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
+                    "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
+                    "type": "regular",
+                    "user": {
+                        "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.826259Z",
+                        "updated_at": "2020-01-28T22:17:31.101222Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://pbs.twimg.com/profile_images/669512187778498560/L7wQctBt.jpg",
+                        "name": "Robin Papa"
+                    },
+                    "attachments": [],
+                    "latest_reactions": [],
+                    "own_reactions": [],
+                    "reaction_counts": {},
+                    "reaction_scores": {},
+                    "reply_count": 1,
+                    "created_at": "2020-01-28T22:17:31.092262Z",
+                    "updated_at": "2020-01-28T22:17:31.092262Z",
+                    "mentioned_users": []
+                },"duration":"4.66ms"}''';
+      final response = SendActionResponse.fromJson(json.decode(jsonExample));
+      expect(response.message, isA<Message>());
+    });
+
+    test('UpdateMessageResponse', () {
+      const jsonExample = r'''{"message":{
+                    "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
+                    "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
+                    "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
+                    "type": "regular",
+                    "user": {
+                        "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.826259Z",
+                        "updated_at": "2020-01-28T22:17:31.101222Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://pbs.twimg.com/profile_images/669512187778498560/L7wQctBt.jpg",
+                        "name": "Robin Papa"
+                    },
+                    "attachments": [],
+                    "latest_reactions": [],
+                    "own_reactions": [],
+                    "reaction_counts": {},
+                    "reaction_scores": {},
+                    "reply_count": 1,
+                    "created_at": "2020-01-28T22:17:31.092262Z",
+                    "updated_at": "2020-01-28T22:17:31.092262Z",
+                    "mentioned_users": []
+                },"duration":"4.66ms"}''';
+      final response = UpdateMessageResponse.fromJson(json.decode(jsonExample));
+      expect(response.message, isA<Message>());
+    });
+
+    test('SendMessageResponse', () {
+      const jsonExample = r'''{"message":{
+                    "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
+                    "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
+                    "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
+                    "type": "regular",
+                    "user": {
+                        "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.826259Z",
+                        "updated_at": "2020-01-28T22:17:31.101222Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://pbs.twimg.com/profile_images/669512187778498560/L7wQctBt.jpg",
+                        "name": "Robin Papa"
+                    },
+                    "attachments": [],
+                    "latest_reactions": [],
+                    "own_reactions": [],
+                    "reaction_counts": {},
+                    "reaction_scores": {},
+                    "reply_count": 1,
+                    "created_at": "2020-01-28T22:17:31.092262Z",
+                    "updated_at": "2020-01-28T22:17:31.092262Z",
+                    "mentioned_users": []
+                },"duration":"4.66ms"}''';
+      final response = SendMessageResponse.fromJson(json.decode(jsonExample));
+      expect(response.message, isA<Message>());
+    });
+
+    test('GetMessageResponse', () {
+      const jsonExample = r'''{"message":{
+                    "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
+                    "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
+                    "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
+                    "type": "regular",
+                    "user": {
+                        "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.826259Z",
+                        "updated_at": "2020-01-28T22:17:31.101222Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://pbs.twimg.com/profile_images/669512187778498560/L7wQctBt.jpg",
+                        "name": "Robin Papa"
+                    },
+                    "attachments": [],
+                    "latest_reactions": [],
+                    "own_reactions": [],
+                    "reaction_counts": {},
+                    "reaction_scores": {},
+                    "reply_count": 1,
+                    "created_at": "2020-01-28T22:17:31.092262Z",
+                    "updated_at": "2020-01-28T22:17:31.092262Z",
+                    "mentioned_users": []
+                },"duration":"4.66ms"}''';
+      final response = GetMessageResponse.fromJson(json.decode(jsonExample));
+      expect(response.message, isA<Message>());
+    });
+
+    test('AddModeratorsResponse', () {
+      const jsonExample = r'''{"message":{
+                    "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
+                    "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
+                    "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
+                    "type": "regular",
+                    "user": {
+                        "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.826259Z",
+                        "updated_at": "2020-01-28T22:17:31.101222Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://pbs.twimg.com/profile_images/669512187778498560/L7wQctBt.jpg",
+                        "name": "Robin Papa"
+                    },
+                    "attachments": [],
+                    "latest_reactions": [],
+                    "own_reactions": [],
+                    "reaction_counts": {},
+                    "reaction_scores": {},
+                    "reply_count": 1,
+                    "created_at": "2020-01-28T22:17:31.092262Z",
+                    "updated_at": "2020-01-28T22:17:31.092262Z",
+                    "mentioned_users": []
+                },
+            "members": [
+                {
+                    "user": {
+                        "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.83015Z",
+                        "updated_at": "2020-01-28T22:17:31.19435Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://randomuser.me/api/portraits/women/2.jpg",
+                        "name": "Mia Denys"
+                    },
+                    "role": "member",
+                    "created_at": "2020-01-28T22:17:31.005135Z",
+                    "updated_at": "2020-01-28T22:17:31.005135Z"
+                },
+                {
+                    "user": {
+                        "id": "spring-voice-7",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.834135Z",
+                        "updated_at": "2020-01-28T22:17:31.186771Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                        "name": "Spring voice"
+                    },
+                    "role": "owner",
+                    "created_at": "2020-01-28T22:17:31.005135Z",
+                    "updated_at": "2020-01-28T22:17:31.005135Z"
+                }
+            ],
+            "channel": {
+                "id": "!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
+                "type": "messaging",
+                "cid": "messaging:!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
+                "last_message_at": "2020-01-28T22:17:31.204287Z",
+                "created_at": "2020-01-28T22:17:31.00187Z",
+                "updated_at": "2020-01-28T22:17:31.00187Z",
+                "created_by": {
+                    "id": "spring-voice-7",
+                    "role": "user",
+                    "created_at": "2020-01-28T22:17:30.834135Z",
+                    "updated_at": "2020-01-28T22:17:31.186771Z",
+                    "banned": false,
+                    "online": false,
+                    "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                    "name": "Spring voice"
+                },
+                "frozen": false,
+                "member_count": 2,
+                "config": {
+                    "created_at": "2020-01-29T12:59:14.291912835Z",
+                    "updated_at": "2020-01-29T12:59:14.291912991Z",
+                    "name": "messaging",
+                    "typing_events": true,
+                    "read_events": true,
+                    "connect_events": true,
+                    "search": true,
+                    "reactions": true,
+                    "replies": true,
+                    "mutes": true,
+                    "uploads": true,
+                    "url_enrichment": true,
+                    "message_retention": "infinite",
+                    "max_message_length": 5000,
+                    "automod": "disabled",
+                    "automod_behavior": "flag",
+                    "commands": [
+                        {
+                            "name": "giphy",
+                            "description": "Post a random gif to the channel",
+                            "args": "[text]",
+                            "set": "fun_set"
+                        }
+                    ]
+                },
+                "name": "Mia Denys",
+                "image": "https://randomuser.me/api/portraits/women/2.jpg"
+            },
+                "duration":"4.66ms"}''';
+      final response = AddModeratorsResponse.fromJson(json.decode(jsonExample));
+      expect(response.channel, isA<Channel>());
+      expect(response.members, isA<List<Member>>());
+      expect(response.message, isA<Message>());
+    });
+
+    test('UpdateChannelResponse', () {
+      const jsonExample = r'''{"message":{
+                    "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
+                    "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
+                    "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
+                    "type": "regular",
+                    "user": {
+                        "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.826259Z",
+                        "updated_at": "2020-01-28T22:17:31.101222Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://pbs.twimg.com/profile_images/669512187778498560/L7wQctBt.jpg",
+                        "name": "Robin Papa"
+                    },
+                    "attachments": [],
+                    "latest_reactions": [],
+                    "own_reactions": [],
+                    "reaction_counts": {},
+                    "reaction_scores": {},
+                    "reply_count": 1,
+                    "created_at": "2020-01-28T22:17:31.092262Z",
+                    "updated_at": "2020-01-28T22:17:31.092262Z",
+                    "mentioned_users": []
+                },
+            "members": [
+                {
+                    "user": {
+                        "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.83015Z",
+                        "updated_at": "2020-01-28T22:17:31.19435Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://randomuser.me/api/portraits/women/2.jpg",
+                        "name": "Mia Denys"
+                    },
+                    "role": "member",
+                    "created_at": "2020-01-28T22:17:31.005135Z",
+                    "updated_at": "2020-01-28T22:17:31.005135Z"
+                },
+                {
+                    "user": {
+                        "id": "spring-voice-7",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.834135Z",
+                        "updated_at": "2020-01-28T22:17:31.186771Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                        "name": "Spring voice"
+                    },
+                    "role": "owner",
+                    "created_at": "2020-01-28T22:17:31.005135Z",
+                    "updated_at": "2020-01-28T22:17:31.005135Z"
+                }
+            ],
+            "channel": {
+                "id": "!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
+                "type": "messaging",
+                "cid": "messaging:!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
+                "last_message_at": "2020-01-28T22:17:31.204287Z",
+                "created_at": "2020-01-28T22:17:31.00187Z",
+                "updated_at": "2020-01-28T22:17:31.00187Z",
+                "created_by": {
+                    "id": "spring-voice-7",
+                    "role": "user",
+                    "created_at": "2020-01-28T22:17:30.834135Z",
+                    "updated_at": "2020-01-28T22:17:31.186771Z",
+                    "banned": false,
+                    "online": false,
+                    "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                    "name": "Spring voice"
+                },
+                "frozen": false,
+                "member_count": 2,
+                "config": {
+                    "created_at": "2020-01-29T12:59:14.291912835Z",
+                    "updated_at": "2020-01-29T12:59:14.291912991Z",
+                    "name": "messaging",
+                    "typing_events": true,
+                    "read_events": true,
+                    "connect_events": true,
+                    "search": true,
+                    "reactions": true,
+                    "replies": true,
+                    "mutes": true,
+                    "uploads": true,
+                    "url_enrichment": true,
+                    "message_retention": "infinite",
+                    "max_message_length": 5000,
+                    "automod": "disabled",
+                    "automod_behavior": "flag",
+                    "commands": [
+                        {
+                            "name": "giphy",
+                            "description": "Post a random gif to the channel",
+                            "args": "[text]",
+                            "set": "fun_set"
+                        }
+                    ]
+                },
+                "name": "Mia Denys",
+                "image": "https://randomuser.me/api/portraits/women/2.jpg"
+            },
+                "duration":"4.66ms"}''';
+      final response = UpdateChannelResponse.fromJson(json.decode(jsonExample));
+      expect(response.channel, isA<Channel>());
+      expect(response.members, isA<List<Member>>());
+      expect(response.message, isA<Message>());
+    });
+
+    test('InviteMembersResponse', () {
+      const jsonExample = r'''{"message":{
+                    "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
+                    "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
+                    "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
+                    "type": "regular",
+                    "user": {
+                        "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.826259Z",
+                        "updated_at": "2020-01-28T22:17:31.101222Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://pbs.twimg.com/profile_images/669512187778498560/L7wQctBt.jpg",
+                        "name": "Robin Papa"
+                    },
+                    "attachments": [],
+                    "latest_reactions": [],
+                    "own_reactions": [],
+                    "reaction_counts": {},
+                    "reaction_scores": {},
+                    "reply_count": 1,
+                    "created_at": "2020-01-28T22:17:31.092262Z",
+                    "updated_at": "2020-01-28T22:17:31.092262Z",
+                    "mentioned_users": []
+                },
+            "members": [
+                {
+                    "user": {
+                        "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.83015Z",
+                        "updated_at": "2020-01-28T22:17:31.19435Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://randomuser.me/api/portraits/women/2.jpg",
+                        "name": "Mia Denys"
+                    },
+                    "role": "member",
+                    "created_at": "2020-01-28T22:17:31.005135Z",
+                    "updated_at": "2020-01-28T22:17:31.005135Z"
+                },
+                {
+                    "user": {
+                        "id": "spring-voice-7",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.834135Z",
+                        "updated_at": "2020-01-28T22:17:31.186771Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                        "name": "Spring voice"
+                    },
+                    "role": "owner",
+                    "created_at": "2020-01-28T22:17:31.005135Z",
+                    "updated_at": "2020-01-28T22:17:31.005135Z"
+                }
+            ],
+            "channel": {
+                "id": "!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
+                "type": "messaging",
+                "cid": "messaging:!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
+                "last_message_at": "2020-01-28T22:17:31.204287Z",
+                "created_at": "2020-01-28T22:17:31.00187Z",
+                "updated_at": "2020-01-28T22:17:31.00187Z",
+                "created_by": {
+                    "id": "spring-voice-7",
+                    "role": "user",
+                    "created_at": "2020-01-28T22:17:30.834135Z",
+                    "updated_at": "2020-01-28T22:17:31.186771Z",
+                    "banned": false,
+                    "online": false,
+                    "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                    "name": "Spring voice"
+                },
+                "frozen": false,
+                "member_count": 2,
+                "config": {
+                    "created_at": "2020-01-29T12:59:14.291912835Z",
+                    "updated_at": "2020-01-29T12:59:14.291912991Z",
+                    "name": "messaging",
+                    "typing_events": true,
+                    "read_events": true,
+                    "connect_events": true,
+                    "search": true,
+                    "reactions": true,
+                    "replies": true,
+                    "mutes": true,
+                    "uploads": true,
+                    "url_enrichment": true,
+                    "message_retention": "infinite",
+                    "max_message_length": 5000,
+                    "automod": "disabled",
+                    "automod_behavior": "flag",
+                    "commands": [
+                        {
+                            "name": "giphy",
+                            "description": "Post a random gif to the channel",
+                            "args": "[text]",
+                            "set": "fun_set"
+                        }
+                    ]
+                },
+                "name": "Mia Denys",
+                "image": "https://randomuser.me/api/portraits/women/2.jpg"
+            },
+                "duration":"4.66ms"}''';
+      final response = InviteMembersResponse.fromJson(json.decode(jsonExample));
+      expect(response.channel, isA<Channel>());
+      expect(response.members, isA<List<Member>>());
+      expect(response.message, isA<Message>());
+    });
+
+    test('RemoveMembersResponse', () {
+      const jsonExample = r'''{"message":{
+                    "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
+                    "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
+                    "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
+                    "type": "regular",
+                    "user": {
+                        "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.826259Z",
+                        "updated_at": "2020-01-28T22:17:31.101222Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://pbs.twimg.com/profile_images/669512187778498560/L7wQctBt.jpg",
+                        "name": "Robin Papa"
+                    },
+                    "attachments": [],
+                    "latest_reactions": [],
+                    "own_reactions": [],
+                    "reaction_counts": {},
+                    "reaction_scores": {},
+                    "reply_count": 1,
+                    "created_at": "2020-01-28T22:17:31.092262Z",
+                    "updated_at": "2020-01-28T22:17:31.092262Z",
+                    "mentioned_users": []
+                },
+            "members": [
+                {
+                    "user": {
+                        "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.83015Z",
+                        "updated_at": "2020-01-28T22:17:31.19435Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://randomuser.me/api/portraits/women/2.jpg",
+                        "name": "Mia Denys"
+                    },
+                    "role": "member",
+                    "created_at": "2020-01-28T22:17:31.005135Z",
+                    "updated_at": "2020-01-28T22:17:31.005135Z"
+                },
+                {
+                    "user": {
+                        "id": "spring-voice-7",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.834135Z",
+                        "updated_at": "2020-01-28T22:17:31.186771Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                        "name": "Spring voice"
+                    },
+                    "role": "owner",
+                    "created_at": "2020-01-28T22:17:31.005135Z",
+                    "updated_at": "2020-01-28T22:17:31.005135Z"
+                }
+            ],
+            "channel": {
+                "id": "!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
+                "type": "messaging",
+                "cid": "messaging:!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
+                "last_message_at": "2020-01-28T22:17:31.204287Z",
+                "created_at": "2020-01-28T22:17:31.00187Z",
+                "updated_at": "2020-01-28T22:17:31.00187Z",
+                "created_by": {
+                    "id": "spring-voice-7",
+                    "role": "user",
+                    "created_at": "2020-01-28T22:17:30.834135Z",
+                    "updated_at": "2020-01-28T22:17:31.186771Z",
+                    "banned": false,
+                    "online": false,
+                    "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                    "name": "Spring voice"
+                },
+                "frozen": false,
+                "member_count": 2,
+                "config": {
+                    "created_at": "2020-01-29T12:59:14.291912835Z",
+                    "updated_at": "2020-01-29T12:59:14.291912991Z",
+                    "name": "messaging",
+                    "typing_events": true,
+                    "read_events": true,
+                    "connect_events": true,
+                    "search": true,
+                    "reactions": true,
+                    "replies": true,
+                    "mutes": true,
+                    "uploads": true,
+                    "url_enrichment": true,
+                    "message_retention": "infinite",
+                    "max_message_length": 5000,
+                    "automod": "disabled",
+                    "automod_behavior": "flag",
+                    "commands": [
+                        {
+                            "name": "giphy",
+                            "description": "Post a random gif to the channel",
+                            "args": "[text]",
+                            "set": "fun_set"
+                        }
+                    ]
+                },
+                "name": "Mia Denys",
+                "image": "https://randomuser.me/api/portraits/women/2.jpg"
+            },
+                "duration":"4.66ms"}''';
+      final response = RemoveMembersResponse.fromJson(json.decode(jsonExample));
+      expect(response.channel, isA<Channel>());
+      expect(response.members, isA<List<Member>>());
+      expect(response.message, isA<Message>());
+    });
+
+    test('AddMembersResponse', () {
+      const jsonExample = r'''{"message":{
+                    "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
+                    "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
+                    "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
+                    "type": "regular",
+                    "user": {
+                        "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.826259Z",
+                        "updated_at": "2020-01-28T22:17:31.101222Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://pbs.twimg.com/profile_images/669512187778498560/L7wQctBt.jpg",
+                        "name": "Robin Papa"
+                    },
+                    "attachments": [],
+                    "latest_reactions": [],
+                    "own_reactions": [],
+                    "reaction_counts": {},
+                    "reaction_scores": {},
+                    "reply_count": 1,
+                    "created_at": "2020-01-28T22:17:31.092262Z",
+                    "updated_at": "2020-01-28T22:17:31.092262Z",
+                    "mentioned_users": []
+                },
+            "members": [
+                {
+                    "user": {
+                        "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.83015Z",
+                        "updated_at": "2020-01-28T22:17:31.19435Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://randomuser.me/api/portraits/women/2.jpg",
+                        "name": "Mia Denys"
+                    },
+                    "role": "member",
+                    "created_at": "2020-01-28T22:17:31.005135Z",
+                    "updated_at": "2020-01-28T22:17:31.005135Z"
+                },
+                {
+                    "user": {
+                        "id": "spring-voice-7",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.834135Z",
+                        "updated_at": "2020-01-28T22:17:31.186771Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                        "name": "Spring voice"
+                    },
+                    "role": "owner",
+                    "created_at": "2020-01-28T22:17:31.005135Z",
+                    "updated_at": "2020-01-28T22:17:31.005135Z"
+                }
+            ],
+            "channel": {
+                "id": "!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
+                "type": "messaging",
+                "cid": "messaging:!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
+                "last_message_at": "2020-01-28T22:17:31.204287Z",
+                "created_at": "2020-01-28T22:17:31.00187Z",
+                "updated_at": "2020-01-28T22:17:31.00187Z",
+                "created_by": {
+                    "id": "spring-voice-7",
+                    "role": "user",
+                    "created_at": "2020-01-28T22:17:30.834135Z",
+                    "updated_at": "2020-01-28T22:17:31.186771Z",
+                    "banned": false,
+                    "online": false,
+                    "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                    "name": "Spring voice"
+                },
+                "frozen": false,
+                "member_count": 2,
+                "config": {
+                    "created_at": "2020-01-29T12:59:14.291912835Z",
+                    "updated_at": "2020-01-29T12:59:14.291912991Z",
+                    "name": "messaging",
+                    "typing_events": true,
+                    "read_events": true,
+                    "connect_events": true,
+                    "search": true,
+                    "reactions": true,
+                    "replies": true,
+                    "mutes": true,
+                    "uploads": true,
+                    "url_enrichment": true,
+                    "message_retention": "infinite",
+                    "max_message_length": 5000,
+                    "automod": "disabled",
+                    "automod_behavior": "flag",
+                    "commands": [
+                        {
+                            "name": "giphy",
+                            "description": "Post a random gif to the channel",
+                            "args": "[text]",
+                            "set": "fun_set"
+                        }
+                    ]
+                },
+                "name": "Mia Denys",
+                "image": "https://randomuser.me/api/portraits/women/2.jpg"
+            },
+                "duration":"4.66ms"}''';
+      final response = AddMembersResponse.fromJson(json.decode(jsonExample));
+      expect(response.channel, isA<Channel>());
+      expect(response.members, isA<List<Member>>());
+      expect(response.message, isA<Message>());
+    });
+
+    test('AcceptInviteResponse', () {
+      const jsonExample = r'''{"message":{
+                    "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
+                    "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
+                    "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
+                    "type": "regular",
+                    "user": {
+                        "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.826259Z",
+                        "updated_at": "2020-01-28T22:17:31.101222Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://pbs.twimg.com/profile_images/669512187778498560/L7wQctBt.jpg",
+                        "name": "Robin Papa"
+                    },
+                    "attachments": [],
+                    "latest_reactions": [],
+                    "own_reactions": [],
+                    "reaction_counts": {},
+                    "reaction_scores": {},
+                    "reply_count": 1,
+                    "created_at": "2020-01-28T22:17:31.092262Z",
+                    "updated_at": "2020-01-28T22:17:31.092262Z",
+                    "mentioned_users": []
+                },
+            "members": [
+                {
+                    "user": {
+                        "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.83015Z",
+                        "updated_at": "2020-01-28T22:17:31.19435Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://randomuser.me/api/portraits/women/2.jpg",
+                        "name": "Mia Denys"
+                    },
+                    "role": "member",
+                    "created_at": "2020-01-28T22:17:31.005135Z",
+                    "updated_at": "2020-01-28T22:17:31.005135Z"
+                },
+                {
+                    "user": {
+                        "id": "spring-voice-7",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.834135Z",
+                        "updated_at": "2020-01-28T22:17:31.186771Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                        "name": "Spring voice"
+                    },
+                    "role": "owner",
+                    "created_at": "2020-01-28T22:17:31.005135Z",
+                    "updated_at": "2020-01-28T22:17:31.005135Z"
+                }
+            ],
+            "channel": {
+                "id": "!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
+                "type": "messaging",
+                "cid": "messaging:!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
+                "last_message_at": "2020-01-28T22:17:31.204287Z",
+                "created_at": "2020-01-28T22:17:31.00187Z",
+                "updated_at": "2020-01-28T22:17:31.00187Z",
+                "created_by": {
+                    "id": "spring-voice-7",
+                    "role": "user",
+                    "created_at": "2020-01-28T22:17:30.834135Z",
+                    "updated_at": "2020-01-28T22:17:31.186771Z",
+                    "banned": false,
+                    "online": false,
+                    "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                    "name": "Spring voice"
+                },
+                "frozen": false,
+                "member_count": 2,
+                "config": {
+                    "created_at": "2020-01-29T12:59:14.291912835Z",
+                    "updated_at": "2020-01-29T12:59:14.291912991Z",
+                    "name": "messaging",
+                    "typing_events": true,
+                    "read_events": true,
+                    "connect_events": true,
+                    "search": true,
+                    "reactions": true,
+                    "replies": true,
+                    "mutes": true,
+                    "uploads": true,
+                    "url_enrichment": true,
+                    "message_retention": "infinite",
+                    "max_message_length": 5000,
+                    "automod": "disabled",
+                    "automod_behavior": "flag",
+                    "commands": [
+                        {
+                            "name": "giphy",
+                            "description": "Post a random gif to the channel",
+                            "args": "[text]",
+                            "set": "fun_set"
+                        }
+                    ]
+                },
+                "name": "Mia Denys",
+                "image": "https://randomuser.me/api/portraits/women/2.jpg"
+            },
+                "duration":"4.66ms"}''';
+      final response = AcceptInviteResponse.fromJson(json.decode(jsonExample));
+      expect(response.channel, isA<Channel>());
+      expect(response.members, isA<List<Member>>());
+      expect(response.message, isA<Message>());
+    });
+
+    test('RejectInviteResponse', () {
+      const jsonExample = r'''{"message":{
+                    "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
+                    "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
+                    "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
+                    "type": "regular",
+                    "user": {
+                        "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.826259Z",
+                        "updated_at": "2020-01-28T22:17:31.101222Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://pbs.twimg.com/profile_images/669512187778498560/L7wQctBt.jpg",
+                        "name": "Robin Papa"
+                    },
+                    "attachments": [],
+                    "latest_reactions": [],
+                    "own_reactions": [],
+                    "reaction_counts": {},
+                    "reaction_scores": {},
+                    "reply_count": 1,
+                    "created_at": "2020-01-28T22:17:31.092262Z",
+                    "updated_at": "2020-01-28T22:17:31.092262Z",
+                    "mentioned_users": []
+                },
+            "members": [
+                {
+                    "user": {
+                        "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.83015Z",
+                        "updated_at": "2020-01-28T22:17:31.19435Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://randomuser.me/api/portraits/women/2.jpg",
+                        "name": "Mia Denys"
+                    },
+                    "role": "member",
+                    "created_at": "2020-01-28T22:17:31.005135Z",
+                    "updated_at": "2020-01-28T22:17:31.005135Z"
+                },
+                {
+                    "user": {
+                        "id": "spring-voice-7",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.834135Z",
+                        "updated_at": "2020-01-28T22:17:31.186771Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                        "name": "Spring voice"
+                    },
+                    "role": "owner",
+                    "created_at": "2020-01-28T22:17:31.005135Z",
+                    "updated_at": "2020-01-28T22:17:31.005135Z"
+                }
+            ],
+            "channel": {
+                "id": "!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
+                "type": "messaging",
+                "cid": "messaging:!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
+                "last_message_at": "2020-01-28T22:17:31.204287Z",
+                "created_at": "2020-01-28T22:17:31.00187Z",
+                "updated_at": "2020-01-28T22:17:31.00187Z",
+                "created_by": {
+                    "id": "spring-voice-7",
+                    "role": "user",
+                    "created_at": "2020-01-28T22:17:30.834135Z",
+                    "updated_at": "2020-01-28T22:17:31.186771Z",
+                    "banned": false,
+                    "online": false,
+                    "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                    "name": "Spring voice"
+                },
+                "frozen": false,
+                "member_count": 2,
+                "config": {
+                    "created_at": "2020-01-29T12:59:14.291912835Z",
+                    "updated_at": "2020-01-29T12:59:14.291912991Z",
+                    "name": "messaging",
+                    "typing_events": true,
+                    "read_events": true,
+                    "connect_events": true,
+                    "search": true,
+                    "reactions": true,
+                    "replies": true,
+                    "mutes": true,
+                    "uploads": true,
+                    "url_enrichment": true,
+                    "message_retention": "infinite",
+                    "max_message_length": 5000,
+                    "automod": "disabled",
+                    "automod_behavior": "flag",
+                    "commands": [
+                        {
+                            "name": "giphy",
+                            "description": "Post a random gif to the channel",
+                            "args": "[text]",
+                            "set": "fun_set"
+                        }
+                    ]
+                },
+                "name": "Mia Denys",
+                "image": "https://randomuser.me/api/portraits/women/2.jpg"
+            },
+                "duration":"4.66ms"}''';
+      final response = RejectInviteResponse.fromJson(json.decode(jsonExample));
+      expect(response.channel, isA<Channel>());
+      expect(response.members, isA<List<Member>>());
+      expect(response.message, isA<Message>());
+    });
+
+    test('DemoteModeratorsResponse', () {
+      const jsonExample = r'''{"message":{
+                    "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
+                    "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
+                    "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
+                    "type": "regular",
+                    "user": {
+                        "id": "bbb19d9a-ee50-45bc-84e5-0584e79d0c9e",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.826259Z",
+                        "updated_at": "2020-01-28T22:17:31.101222Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://pbs.twimg.com/profile_images/669512187778498560/L7wQctBt.jpg",
+                        "name": "Robin Papa"
+                    },
+                    "attachments": [],
+                    "latest_reactions": [],
+                    "own_reactions": [],
+                    "reaction_counts": {},
+                    "reaction_scores": {},
+                    "reply_count": 1,
+                    "created_at": "2020-01-28T22:17:31.092262Z",
+                    "updated_at": "2020-01-28T22:17:31.092262Z",
+                    "mentioned_users": []
+                },
+            "members": [
+                {
+                    "user": {
+                        "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.83015Z",
+                        "updated_at": "2020-01-28T22:17:31.19435Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://randomuser.me/api/portraits/women/2.jpg",
+                        "name": "Mia Denys"
+                    },
+                    "role": "member",
+                    "created_at": "2020-01-28T22:17:31.005135Z",
+                    "updated_at": "2020-01-28T22:17:31.005135Z"
+                },
+                {
+                    "user": {
+                        "id": "spring-voice-7",
+                        "role": "user",
+                        "created_at": "2020-01-28T22:17:30.834135Z",
+                        "updated_at": "2020-01-28T22:17:31.186771Z",
+                        "banned": false,
+                        "online": false,
+                        "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                        "name": "Spring voice"
+                    },
+                    "role": "owner",
+                    "created_at": "2020-01-28T22:17:31.005135Z",
+                    "updated_at": "2020-01-28T22:17:31.005135Z"
+                }
+            ],
+            "channel": {
+                "id": "!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
+                "type": "messaging",
+                "cid": "messaging:!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
+                "last_message_at": "2020-01-28T22:17:31.204287Z",
+                "created_at": "2020-01-28T22:17:31.00187Z",
+                "updated_at": "2020-01-28T22:17:31.00187Z",
+                "created_by": {
+                    "id": "spring-voice-7",
+                    "role": "user",
+                    "created_at": "2020-01-28T22:17:30.834135Z",
+                    "updated_at": "2020-01-28T22:17:31.186771Z",
+                    "banned": false,
+                    "online": false,
+                    "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
+                    "name": "Spring voice"
+                },
+                "frozen": false,
+                "member_count": 2,
+                "config": {
+                    "created_at": "2020-01-29T12:59:14.291912835Z",
+                    "updated_at": "2020-01-29T12:59:14.291912991Z",
+                    "name": "messaging",
+                    "typing_events": true,
+                    "read_events": true,
+                    "connect_events": true,
+                    "search": true,
+                    "reactions": true,
+                    "replies": true,
+                    "mutes": true,
+                    "uploads": true,
+                    "url_enrichment": true,
+                    "message_retention": "infinite",
+                    "max_message_length": 5000,
+                    "automod": "disabled",
+                    "automod_behavior": "flag",
+                    "commands": [
+                        {
+                            "name": "giphy",
+                            "description": "Post a random gif to the channel",
+                            "args": "[text]",
+                            "set": "fun_set"
+                        }
+                    ]
+                },
+                "name": "Mia Denys",
+                "image": "https://randomuser.me/api/portraits/women/2.jpg"
+            },
+                "duration":"4.66ms"}''';
+      final response =
+          DemoteModeratorsResponse.fromJson(json.decode(jsonExample));
+      expect(response.channel, isA<Channel>());
+      expect(response.members, isA<List<Member>>());
+      expect(response.message, isA<Message>());
     });
   });
 }

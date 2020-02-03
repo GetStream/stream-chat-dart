@@ -239,11 +239,10 @@ class ChannelStateResponse extends BaseResponse {
   final List<Message> messages;
   final List<Member> members;
   final int watcherCount;
-  final List<User> watchers;
   final List<Read> read;
 
-  ChannelStateResponse(this.channel, this.messages, this.members,
-      this.watcherCount, this.watchers, this.read);
+  ChannelStateResponse(
+      this.channel, this.messages, this.members, this.watcherCount, this.read);
 
   static ChannelStateResponse fromJson(Map<String, dynamic> json) =>
       _$ChannelStateResponseFromJson(json);
