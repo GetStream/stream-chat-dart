@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 
 import '../client.dart';
@@ -65,7 +63,7 @@ class Channel {
       "$_channelURL/event",
       data: {"event": event.toJson()},
     ).then((res) {
-      return EmptyResponse.fromJson(json.decode(res.data.toString()));
+      return _client.decode(res.data, EmptyResponse.fromJson);
     });
   }
 
@@ -82,9 +80,8 @@ class Channel {
 
   Future<EmptyResponse> deleteReaction(String messageID, String reactionType) {
     return client
-        .delete("${client.baseURL}/messages/$messageID/reaction/$reactionType")
-        .then((value) =>
-            EmptyResponse.fromJson(json.decode(value.data.toString())));
+        .delete("/messages/$messageID/reaction/$reactionType")
+        .then((res) => _client.decode(res.data, EmptyResponse.fromJson));
   }
 
   Future<UpdateChannelResponse> update(
@@ -179,7 +176,7 @@ class Channel {
   }
 
   Future<ChannelStateResponse> watch(Map<String, dynamic> options) async {
-    var watchOptions = Map<String, dynamic>.from({
+    final watchOptions = Map<String, dynamic>.from({
       "state": true,
       "watch": true,
       "presence": false,
@@ -247,7 +244,7 @@ class Channel {
     String userID,
     Map<String, dynamic> options,
   ) async {
-    final opts = Map.from(options)
+    final opts = Map<String, dynamic>.from(options)
       ..addAll({
         'type': type,
         'id': id,

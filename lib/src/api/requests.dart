@@ -20,6 +20,7 @@ class QueryFilter {
   Map<String, dynamic> toJson() => _$QueryFilterToJson(this);
 }
 
+//TODO
 @JsonSerializable(createFactory: false)
 class PaginationParams {
   Map<String, dynamic> toJson() => _$PaginationParamsToJson(this);
