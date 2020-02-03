@@ -31,7 +31,7 @@ class Client {
   final StreamController<Event> _controller =
       StreamController<Event>.broadcast();
 
-  Stream get stream => _controller.stream;
+  Stream<Event> get stream => _controller.stream;
 
   String _token;
   User _user;

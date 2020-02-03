@@ -9,11 +9,12 @@ import 'components/stream_chat_container.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+  final client = Client("6xjf3dex3n7d");
+
   @override
   Widget build(BuildContext context) {
-    var client = Client("6xjf3dex3n7d");
-
-    return StreamChatContainer(
+    return StreamChat(
+      client: client,
       child: MaterialApp(
         title: 'Stream Chat Example',
         home: ChatLoader(
@@ -27,7 +28,6 @@ class MyApp extends StatelessWidget {
               "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo",
         ),
       ),
-      client: client,
     );
   }
 }
@@ -48,10 +48,8 @@ class ChatLoaderState extends State<ChatLoader> {
 
   @override
   void didChangeDependencies() {
-    setUser = StreamChatContainer.of(context)
-        .client
-        .setUser(widget.user, widget.token);
     super.didChangeDependencies();
+    setUser = StreamChat.of(context).client.setUser(widget.user, widget.token);
   }
 
   @override
@@ -65,7 +63,7 @@ class ChatLoaderState extends State<ChatLoader> {
           if (snapshot.hasError) {
             return Text(snapshot.error.toString());
           }
-          return CircularProgressIndicator();
+          return Center(child: CircularProgressIndicator());
         });
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
+
 import 'channel_preview.dart';
 import 'stream_chat_container.dart';
 
@@ -23,7 +24,7 @@ class ChannelListState extends State<ChannelList> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    channels = StreamChatContainer.of(context)
+    channels = StreamChat.of(context)
         .client
         .queryChannels(widget.filter, widget.sort, widget.options);
   }

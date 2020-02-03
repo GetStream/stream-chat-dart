@@ -1,57 +1,21 @@
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-class StreamChatState {
-  final Client client;
-  StreamChatState(this.client);
-}
-
-class StreamChatContainer extends StatefulWidget {
-  final StreamChatState state;
+class StreamChat extends InheritedWidget {
   final Widget child;
+  final Client client;
 
-  StreamChatContainer({
-    @required this.child,
-    @required Client client,
-  }) : state = StreamChatState(client);
+  StreamChat({
+    @required this.client,
+    this.child,
+  });
 
-  static StreamChatState of(BuildContext context) {
-    final _InheritedStateContainer inheritedStateContainer =
-        context.dependOnInheritedWidgetOfExactType<_InheritedStateContainer>();
-    return inheritedStateContainer.data.state;
+  static StreamChat of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<StreamChat>();
   }
 
   @override
-  _StreamChatContainerState createState() => _StreamChatContainerState();
-}
-
-class _StreamChatContainerState extends State<StreamChatContainer> {
-  StreamChatState state;
-
-  @override
-  void initState() {
-    state = widget.state;
-    super.initState();
+  bool updateShouldNotify(StreamChat oldWidget) {
+    return this.client != oldWidget.client;
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return _InheritedStateContainer(
-      data: this,
-      child: widget.child,
-    );
-  }
-}
-
-class _InheritedStateContainer extends InheritedWidget {
-  final _StreamChatContainerState data;
-
-  _InheritedStateContainer({
-    Key key,
-    @required this.data,
-    @required Widget child,
-  }) : super(key: key, child: child);
-
-  @override
-  bool updateShouldNotify(_InheritedStateContainer old) => true;
 }
