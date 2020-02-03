@@ -88,7 +88,10 @@ class Channel {
     Map<String, dynamic> channelData,
     Message updateMessage,
   ) async {
-    final response = await _client.post(_channelURL);
+    final response = await _client.post(_channelURL, data: {
+      'message': updateMessage.toJson(),
+      'data': channelData,
+    });
     return _client.decode(response.data, UpdateChannelResponse.fromJson);
   }
 
@@ -231,9 +234,9 @@ class Channel {
     if (id != null) {
       path = "$path/$id";
     }
-    final response = await _client.post(path);
+    final response = await _client.post(path, data: options);
     final state = _client.decode(response.data, ChannelStateResponse.fromJson);
-    if (id != null) {
+    if (id == null) {
       id = state.channel.id;
       cid = state.channel.id;
     }
