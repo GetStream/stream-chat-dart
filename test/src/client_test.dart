@@ -9,6 +9,7 @@ import 'package:mockito/mockito.dart';
 import 'package:stream_chat/src/api/requests.dart';
 import 'package:stream_chat/src/client.dart';
 import 'package:stream_chat/src/exceptions.dart';
+import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/user.dart';
 
 class MockDio extends Mock implements DioForNative {}
@@ -475,6 +476,62 @@ void main() {
 
         verify(mockDio.post<String>('/moderation/unflag',
             data: {'target_message_id': 'test-id'})).called(1);
+      });
+
+      test('updateMessage', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        final message = Message(id: 'test');
+
+        when(mockDio.post<String>('/messages/${message.id}',
+                data: {'message': message}))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.updateMessage(message);
+
+        verify(mockDio.post<String>('/messages/${message.id}',
+            data: {'message': message})).called(1);
+      });
+
+      test('deleteMessage', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        final messageId = 'test';
+
+        when(mockDio.delete<String>('/messages/$messageId'))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.deleteMessage(messageId);
+
+        verify(mockDio.delete<String>('/messages/$messageId')).called(1);
+      });
+
+      test('getMessage', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client('api-key', httpClient: mockDio);
+
+        final messageId = 'test';
+
+        when(mockDio.get<String>('/messages/$messageId'))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.getMessage(messageId);
+
+        verify(mockDio.get<String>('/messages/$messageId')).called(1);
       });
 
       test('markAllRead', () async {

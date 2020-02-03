@@ -437,9 +437,9 @@ class Client {
     return decode(response.data, EmptyResponse.fromJson);
   }
 
-  Future<EmptyResponse> unflagMessage(String messageID) async {
+  Future<EmptyResponse> unflagMessage(String messageId) async {
     final response = await post("/moderation/unflag", data: {
-      "target_message_id": messageID,
+      "target_message_id": messageId,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
@@ -450,17 +450,17 @@ class Client {
   }
 
   Future<UpdateMessageResponse> updateMessage(Message message) async {
-    return post("/messages/${message.id}")
+    return post("/messages/${message.id}", data: {'message': message})
         .then((res) => decode(res.data, UpdateMessageResponse.fromJson));
   }
 
-  Future<EmptyResponse> deleteMessage(String messageID) async {
-    final response = await delete("/messages/$messageID");
+  Future<EmptyResponse> deleteMessage(String messageId) async {
+    final response = await delete("/messages/$messageId");
     return decode(response.data, EmptyResponse.fromJson);
   }
 
-  Future<GetMessageResponse> getMessage(String messageID) async {
-    final response = await get("/messages/$messageID");
+  Future<GetMessageResponse> getMessage(String messageId) async {
+    final response = await get("/messages/$messageId");
     return decode(response.data, GetMessageResponse.fromJson);
   }
 }
