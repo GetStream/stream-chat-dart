@@ -485,130 +485,190 @@ void main() {
       });
     });
 
-    group('error handling', () {
-      test('should parse the error correctly', () async {
-        final dioHttp = Dio();
-        final mockHttpClientAdapter = MockHttpClientAdapter();
-        dioHttp.httpClientAdapter = mockHttpClientAdapter;
-
-        final client = Client('api-key', httpClient: dioHttp);
-
-        when(mockHttpClientAdapter.fetch(any, any, any)).thenAnswer(
-            (_) async => ResponseBody.fromString('test error', 400));
-
-        expect(client.queryChannels(null, null, null),
-            throwsA(ApiError('test error', 400)));
-      });
-    });
-
     group('api methods', () {
-      test('get', () async {
-        final mockDio = MockDio();
+      group('get', () {
+        test('should put the correct parameters', () async {
+          final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+          when(mockDio.options).thenReturn(BaseOptions());
+          when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+          final client = Client('api-key', httpClient: mockDio);
 
-        final Map<String, dynamic> queryParams = {
-          'test': 1,
-        };
+          final Map<String, dynamic> queryParams = {
+            'test': 1,
+          };
 
-        when(mockDio.get<String>('/test', queryParameters: queryParams))
-            .thenAnswer((_) async {
-          return Response(data: '{}', statusCode: 200);
+          when(mockDio.get<String>('/test', queryParameters: queryParams))
+              .thenAnswer((_) async {
+            return Response(data: '{}', statusCode: 200);
+          });
+
+          await client.get('/test', queryParameters: queryParams);
+
+          verify(mockDio.get<String>('/test', queryParameters: queryParams))
+              .called(1);
         });
 
-        await client.get('/test', queryParameters: queryParams);
+        test('should catch the error', () async {
+          final dioHttp = Dio();
+          final mockHttpClientAdapter = MockHttpClientAdapter();
+          dioHttp.httpClientAdapter = mockHttpClientAdapter;
 
-        verify(mockDio.get<String>('/test', queryParameters: queryParams))
-            .called(1);
+          final client = Client('api-key', httpClient: dioHttp);
+
+          when(mockHttpClientAdapter.fetch(any, any, any)).thenAnswer(
+              (_) async => ResponseBody.fromString('test error', 400));
+
+          expect(client.get('/test'), throwsA(ApiError('test error', 400)));
+        });
       });
 
-      test('post', () async {
-        final mockDio = MockDio();
+      group('post', () {
+        test('should put the correct parameters', () async {
+          final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+          when(mockDio.options).thenReturn(BaseOptions());
+          when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+          final client = Client('api-key', httpClient: mockDio);
 
-        final Map<String, dynamic> data = {
-          'test': 1,
-        };
+          final Map<String, dynamic> data = {
+            'test': 1,
+          };
 
-        when(mockDio.post<String>('/test', data: data)).thenAnswer((_) async {
-          return Response(data: '{}', statusCode: 200);
+          when(mockDio.post<String>('/test', data: data)).thenAnswer((_) async {
+            return Response(data: '{}', statusCode: 200);
+          });
+
+          await client.post('/test', data: data);
+
+          verify(mockDio.post<String>('/test', data: data)).called(1);
         });
 
-        await client.post('/test', data: data);
+        test('should catch the error', () async {
+          final dioHttp = Dio();
+          final mockHttpClientAdapter = MockHttpClientAdapter();
+          dioHttp.httpClientAdapter = mockHttpClientAdapter;
 
-        verify(mockDio.post<String>('/test', data: data)).called(1);
+          final client = Client('api-key', httpClient: dioHttp);
+
+          when(mockHttpClientAdapter.fetch(any, any, any)).thenAnswer(
+              (_) async => ResponseBody.fromString('test error', 400));
+
+          expect(client.post('/test'), throwsA(ApiError('test error', 400)));
+        });
       });
 
-      test('put', () async {
-        final mockDio = MockDio();
+      group('put', () {
+        test('should put the correct parameters', () async {
+          final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+          when(mockDio.options).thenReturn(BaseOptions());
+          when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+          final client = Client('api-key', httpClient: mockDio);
 
-        final Map<String, dynamic> data = {
-          'test': 1,
-        };
+          final Map<String, dynamic> data = {
+            'test': 1,
+          };
 
-        when(mockDio.put<String>('/test', data: data)).thenAnswer((_) async {
-          return Response(data: '{}', statusCode: 200);
+          when(mockDio.put<String>('/test', data: data)).thenAnswer((_) async {
+            return Response(data: '{}', statusCode: 200);
+          });
+
+          await client.put('/test', data: data);
+
+          verify(mockDio.put<String>('/test', data: data)).called(1);
         });
 
-        await client.put('/test', data: data);
+        test('should catch the error', () async {
+          final dioHttp = Dio();
+          final mockHttpClientAdapter = MockHttpClientAdapter();
+          dioHttp.httpClientAdapter = mockHttpClientAdapter;
 
-        verify(mockDio.put<String>('/test', data: data)).called(1);
+          final client = Client('api-key', httpClient: dioHttp);
+
+          when(mockHttpClientAdapter.fetch(any, any, any)).thenAnswer(
+              (_) async => ResponseBody.fromString('test error', 400));
+
+          expect(client.put('/test'), throwsA(ApiError('test error', 400)));
+        });
       });
 
-      test('patch', () async {
-        final mockDio = MockDio();
+      group('patch', () {
+        test('should put the correct parameters', () async {
+          final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+          when(mockDio.options).thenReturn(BaseOptions());
+          when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+          final client = Client('api-key', httpClient: mockDio);
 
-        final Map<String, dynamic> data = {
-          'test': 1,
-        };
+          final Map<String, dynamic> data = {
+            'test': 1,
+          };
 
-        when(mockDio.patch<String>('/test', data: data)).thenAnswer((_) async {
-          return Response(data: '{}', statusCode: 200);
+          when(mockDio.patch<String>('/test', data: data))
+              .thenAnswer((_) async {
+            return Response(data: '{}', statusCode: 200);
+          });
+
+          await client.patch('/test', data: data);
+
+          verify(mockDio.patch<String>('/test', data: data)).called(1);
         });
 
-        await client.patch('/test', data: data);
+        test('should catch the error', () async {
+          final dioHttp = Dio();
+          final mockHttpClientAdapter = MockHttpClientAdapter();
+          dioHttp.httpClientAdapter = mockHttpClientAdapter;
 
-        verify(mockDio.patch<String>('/test', data: data)).called(1);
+          final client = Client('api-key', httpClient: dioHttp);
+
+          when(mockHttpClientAdapter.fetch(any, any, any)).thenAnswer(
+              (_) async => ResponseBody.fromString('test error', 400));
+
+          expect(client.patch('/test'), throwsA(ApiError('test error', 400)));
+        });
       });
 
-      test('delete', () async {
-        final mockDio = MockDio();
+      group('delete', () {
+        test('should put the correct parameters', () async {
+          final mockDio = MockDio();
 
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
+          when(mockDio.options).thenReturn(BaseOptions());
+          when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+          final client = Client('api-key', httpClient: mockDio);
 
-        final Map<String, dynamic> queryParams = {
-          'test': 1,
-        };
+          final Map<String, dynamic> queryParams = {
+            'test': 1,
+          };
 
-        when(mockDio.delete<String>('/test', queryParameters: queryParams))
-            .thenAnswer((_) async {
-          return Response(data: '{}', statusCode: 200);
+          when(mockDio.delete<String>('/test', queryParameters: queryParams))
+              .thenAnswer((_) async {
+            return Response(data: '{}', statusCode: 200);
+          });
+
+          await client.delete('/test', queryParameters: queryParams);
+
+          verify(mockDio.delete<String>('/test', queryParameters: queryParams))
+              .called(1);
         });
 
-        await client.delete('/test', queryParameters: queryParams);
+        test('should catch the error', () async {
+          final dioHttp = Dio();
+          final mockHttpClientAdapter = MockHttpClientAdapter();
+          dioHttp.httpClientAdapter = mockHttpClientAdapter;
 
-        verify(mockDio.delete<String>('/test', queryParameters: queryParams))
-            .called(1);
+          final client = Client('api-key', httpClient: dioHttp);
+
+          when(mockHttpClientAdapter.fetch(any, any, any)).thenAnswer(
+              (_) async => ResponseBody.fromString('test error', 400));
+
+          expect(client.delete('/test'), throwsA(ApiError('test error', 400)));
+        });
       });
     });
   });
