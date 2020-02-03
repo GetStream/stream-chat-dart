@@ -3,12 +3,12 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 
 import '../client.dart';
+import '../models/event.dart';
+import '../models/member.dart';
+import '../models/message.dart';
+import '../models/reaction.dart';
 import 'requests.dart';
 import 'responses.dart';
-import '../models/message.dart';
-import '../models/event.dart';
-import '../models/reaction.dart';
-import '../models/member.dart';
 
 class Channel {
   Client _client;

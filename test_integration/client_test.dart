@@ -12,7 +12,7 @@ void main() {
     final client = Client('6xjf3dex3n7d', logLevel: Level.INFO);
     final user = User(id: "wild-breeze-7");
 
-    final setUserEvent = await client.setUser(user, TOKEN);
+    final setUserEvent = await client.setGuestUser(user);
     print(setUserEvent.toJson());
 
     final queryChannels = await client.queryChannels(null, null, null);

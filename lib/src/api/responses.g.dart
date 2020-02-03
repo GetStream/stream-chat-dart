@@ -16,13 +16,6 @@ QueryChannelsResponse _$QueryChannelsResponseFromJson(
         ?.toList();
 }
 
-Map<String, dynamic> _$QueryChannelsResponseToJson(
-        QueryChannelsResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'channels': instance.channels?.map((e) => e?.toJson())?.toList(),
-    };
-
 QueryUsersResponse _$QueryUsersResponseFromJson(Map<String, dynamic> json) {
   return QueryUsersResponse()
     ..duration = json['duration'] as String
@@ -31,12 +24,6 @@ QueryUsersResponse _$QueryUsersResponseFromJson(Map<String, dynamic> json) {
             (e) => e == null ? null : User.fromJson(e as Map<String, dynamic>))
         ?.toList();
 }
-
-Map<String, dynamic> _$QueryUsersResponseToJson(QueryUsersResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'users': instance.users?.map((e) => e?.toJson())?.toList(),
-    };
 
 QueryReactionsResponse _$QueryReactionsResponseFromJson(
     Map<String, dynamic> json) {
@@ -48,13 +35,6 @@ QueryReactionsResponse _$QueryReactionsResponseFromJson(
         ?.toList();
 }
 
-Map<String, dynamic> _$QueryReactionsResponseToJson(
-        QueryReactionsResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'reactions': instance.reactions?.map((e) => e?.toJson())?.toList(),
-    };
-
 QueryRepliesResponse _$QueryRepliesResponseFromJson(Map<String, dynamic> json) {
   return QueryRepliesResponse()
     ..duration = json['duration'] as String
@@ -63,13 +43,6 @@ QueryRepliesResponse _$QueryRepliesResponseFromJson(Map<String, dynamic> json) {
             e == null ? null : Message.fromJson(e as Map<String, dynamic>))
         ?.toList();
 }
-
-Map<String, dynamic> _$QueryRepliesResponseToJson(
-        QueryRepliesResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'messages': instance.messages?.map((e) => e?.toJson())?.toList(),
-    };
 
 ListDevicesResponse _$ListDevicesResponseFromJson(Map<String, dynamic> json) {
   return ListDevicesResponse()
@@ -80,36 +53,17 @@ ListDevicesResponse _$ListDevicesResponseFromJson(Map<String, dynamic> json) {
         ?.toList();
 }
 
-Map<String, dynamic> _$ListDevicesResponseToJson(
-        ListDevicesResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'devices': instance.devices?.map((e) => e?.toJson())?.toList(),
-    };
-
 SendFileResponse _$SendFileResponseFromJson(Map<String, dynamic> json) {
   return SendFileResponse()
     ..duration = json['duration'] as String
     ..file = json['file'] as String;
 }
 
-Map<String, dynamic> _$SendFileResponseToJson(SendFileResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'file': instance.file,
-    };
-
 SendImageResponse _$SendImageResponseFromJson(Map<String, dynamic> json) {
   return SendImageResponse()
     ..duration = json['duration'] as String
     ..file = json['file'] as String;
 }
-
-Map<String, dynamic> _$SendImageResponseToJson(SendImageResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'file': instance.file,
-    };
 
 SendReactionResponse _$SendReactionResponseFromJson(Map<String, dynamic> json) {
   return SendReactionResponse()
@@ -122,14 +76,6 @@ SendReactionResponse _$SendReactionResponseFromJson(Map<String, dynamic> json) {
         : Reaction.fromJson(json['reaction'] as Map<String, dynamic>);
 }
 
-Map<String, dynamic> _$SendReactionResponseToJson(
-        SendReactionResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'message': instance.message?.toJson(),
-      'reaction': instance.reaction?.toJson(),
-    };
-
 SetGuestUserResponse _$SetGuestUserResponseFromJson(Map<String, dynamic> json) {
   return SetGuestUserResponse()
     ..duration = json['duration'] as String
@@ -138,14 +84,6 @@ SetGuestUserResponse _$SetGuestUserResponseFromJson(Map<String, dynamic> json) {
         ? null
         : User.fromJson(json['user'] as Map<String, dynamic>);
 }
-
-Map<String, dynamic> _$SetGuestUserResponseToJson(
-        SetGuestUserResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'access_token': instance.accessToken,
-      'user': instance.user?.toJson(),
-    };
 
 UpdateUsersResponse _$UpdateUsersResponseFromJson(Map<String, dynamic> json) {
   return UpdateUsersResponse()
@@ -156,13 +94,6 @@ UpdateUsersResponse _$UpdateUsersResponseFromJson(Map<String, dynamic> json) {
     );
 }
 
-Map<String, dynamic> _$UpdateUsersResponseToJson(
-        UpdateUsersResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'users': instance.users?.map((k, e) => MapEntry(k, e?.toJson())),
-    };
-
 UpdateMessageResponse _$UpdateMessageResponseFromJson(
     Map<String, dynamic> json) {
   return UpdateMessageResponse()
@@ -172,13 +103,6 @@ UpdateMessageResponse _$UpdateMessageResponseFromJson(
         : Message.fromJson(json['message'] as Map<String, dynamic>);
 }
 
-Map<String, dynamic> _$UpdateMessageResponseToJson(
-        UpdateMessageResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'message': instance.message?.toJson(),
-    };
-
 SendMessageResponse _$SendMessageResponseFromJson(Map<String, dynamic> json) {
   return SendMessageResponse()
     ..duration = json['duration'] as String
@@ -187,13 +111,6 @@ SendMessageResponse _$SendMessageResponseFromJson(Map<String, dynamic> json) {
         : Message.fromJson(json['message'] as Map<String, dynamic>);
 }
 
-Map<String, dynamic> _$SendMessageResponseToJson(
-        SendMessageResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'message': instance.message?.toJson(),
-    };
-
 GetMessageResponse _$GetMessageResponseFromJson(Map<String, dynamic> json) {
   return GetMessageResponse()
     ..duration = json['duration'] as String
@@ -201,12 +118,6 @@ GetMessageResponse _$GetMessageResponseFromJson(Map<String, dynamic> json) {
         ? null
         : Message.fromJson(json['message'] as Map<String, dynamic>);
 }
-
-Map<String, dynamic> _$GetMessageResponseToJson(GetMessageResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'message': instance.message?.toJson(),
-    };
 
 SearchMessagesResponse _$SearchMessagesResponseFromJson(
     Map<String, dynamic> json) {
@@ -218,13 +129,6 @@ SearchMessagesResponse _$SearchMessagesResponseFromJson(
         ?.toList();
 }
 
-Map<String, dynamic> _$SearchMessagesResponseToJson(
-        SearchMessagesResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'messages': instance.messages?.map((e) => e?.toJson())?.toList(),
-    };
-
 GetMessagesByIdResponse _$GetMessagesByIdResponseFromJson(
     Map<String, dynamic> json) {
   return GetMessagesByIdResponse()
@@ -233,13 +137,6 @@ GetMessagesByIdResponse _$GetMessagesByIdResponseFromJson(
         ? null
         : Message.fromJson(json['message'] as Map<String, dynamic>);
 }
-
-Map<String, dynamic> _$GetMessagesByIdResponseToJson(
-        GetMessagesByIdResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'message': instance.message?.toJson(),
-    };
 
 AddModeratorsResponse _$AddModeratorsResponseFromJson(
     Map<String, dynamic> json) {
@@ -257,15 +154,6 @@ AddModeratorsResponse _$AddModeratorsResponseFromJson(
         : Message.fromJson(json['message'] as Map<String, dynamic>);
 }
 
-Map<String, dynamic> _$AddModeratorsResponseToJson(
-        AddModeratorsResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'channel': instance.channel?.toJson(),
-      'members': instance.members?.map((e) => e?.toJson())?.toList(),
-      'message': instance.message?.toJson(),
-    };
-
 UpdateChannelResponse _$UpdateChannelResponseFromJson(
     Map<String, dynamic> json) {
   return UpdateChannelResponse()
@@ -281,15 +169,6 @@ UpdateChannelResponse _$UpdateChannelResponseFromJson(
         ? null
         : Message.fromJson(json['message'] as Map<String, dynamic>);
 }
-
-Map<String, dynamic> _$UpdateChannelResponseToJson(
-        UpdateChannelResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'channel': instance.channel?.toJson(),
-      'members': instance.members?.map((e) => e?.toJson())?.toList(),
-      'message': instance.message?.toJson(),
-    };
 
 InviteMembersResponse _$InviteMembersResponseFromJson(
     Map<String, dynamic> json) {
@@ -307,15 +186,6 @@ InviteMembersResponse _$InviteMembersResponseFromJson(
         : Message.fromJson(json['message'] as Map<String, dynamic>);
 }
 
-Map<String, dynamic> _$InviteMembersResponseToJson(
-        InviteMembersResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'channel': instance.channel?.toJson(),
-      'members': instance.members?.map((e) => e?.toJson())?.toList(),
-      'message': instance.message?.toJson(),
-    };
-
 RemoveMembersResponse _$RemoveMembersResponseFromJson(
     Map<String, dynamic> json) {
   return RemoveMembersResponse()
@@ -332,15 +202,6 @@ RemoveMembersResponse _$RemoveMembersResponseFromJson(
         : Message.fromJson(json['message'] as Map<String, dynamic>);
 }
 
-Map<String, dynamic> _$RemoveMembersResponseToJson(
-        RemoveMembersResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'channel': instance.channel?.toJson(),
-      'members': instance.members?.map((e) => e?.toJson())?.toList(),
-      'message': instance.message?.toJson(),
-    };
-
 SendActionResponse _$SendActionResponseFromJson(Map<String, dynamic> json) {
   return SendActionResponse()
     ..duration = json['duration'] as String
@@ -348,12 +209,6 @@ SendActionResponse _$SendActionResponseFromJson(Map<String, dynamic> json) {
         ? null
         : Message.fromJson(json['message'] as Map<String, dynamic>);
 }
-
-Map<String, dynamic> _$SendActionResponseToJson(SendActionResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'message': instance.message?.toJson(),
-    };
 
 AddMembersResponse _$AddMembersResponseFromJson(Map<String, dynamic> json) {
   return AddMembersResponse()
@@ -370,14 +225,6 @@ AddMembersResponse _$AddMembersResponseFromJson(Map<String, dynamic> json) {
         : Message.fromJson(json['message'] as Map<String, dynamic>);
 }
 
-Map<String, dynamic> _$AddMembersResponseToJson(AddMembersResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'channel': instance.channel?.toJson(),
-      'members': instance.members?.map((e) => e?.toJson())?.toList(),
-      'message': instance.message?.toJson(),
-    };
-
 AcceptInviteResponse _$AcceptInviteResponseFromJson(Map<String, dynamic> json) {
   return AcceptInviteResponse()
     ..duration = json['duration'] as String
@@ -393,15 +240,6 @@ AcceptInviteResponse _$AcceptInviteResponseFromJson(Map<String, dynamic> json) {
         : Message.fromJson(json['message'] as Map<String, dynamic>);
 }
 
-Map<String, dynamic> _$AcceptInviteResponseToJson(
-        AcceptInviteResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'channel': instance.channel?.toJson(),
-      'members': instance.members?.map((e) => e?.toJson())?.toList(),
-      'message': instance.message?.toJson(),
-    };
-
 RejectInviteResponse _$RejectInviteResponseFromJson(Map<String, dynamic> json) {
   return RejectInviteResponse()
     ..duration = json['duration'] as String
@@ -416,15 +254,6 @@ RejectInviteResponse _$RejectInviteResponseFromJson(Map<String, dynamic> json) {
         ? null
         : Message.fromJson(json['message'] as Map<String, dynamic>);
 }
-
-Map<String, dynamic> _$RejectInviteResponseToJson(
-        RejectInviteResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'channel': instance.channel?.toJson(),
-      'members': instance.members?.map((e) => e?.toJson())?.toList(),
-      'message': instance.message?.toJson(),
-    };
 
 DemoteModeratorsResponse _$DemoteModeratorsResponseFromJson(
     Map<String, dynamic> json) {
@@ -442,23 +271,9 @@ DemoteModeratorsResponse _$DemoteModeratorsResponseFromJson(
         : Message.fromJson(json['message'] as Map<String, dynamic>);
 }
 
-Map<String, dynamic> _$DemoteModeratorsResponseToJson(
-        DemoteModeratorsResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'channel': instance.channel?.toJson(),
-      'members': instance.members?.map((e) => e?.toJson())?.toList(),
-      'message': instance.message?.toJson(),
-    };
-
 EmptyResponse _$EmptyResponseFromJson(Map<String, dynamic> json) {
   return EmptyResponse()..duration = json['duration'] as String;
 }
-
-Map<String, dynamic> _$EmptyResponseToJson(EmptyResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-    };
 
 ChannelStateResponse _$ChannelStateResponseFromJson(Map<String, dynamic> json) {
   return ChannelStateResponse(
@@ -484,15 +299,3 @@ ChannelStateResponse _$ChannelStateResponseFromJson(Map<String, dynamic> json) {
         ?.toList(),
   )..duration = json['duration'] as String;
 }
-
-Map<String, dynamic> _$ChannelStateResponseToJson(
-        ChannelStateResponse instance) =>
-    <String, dynamic>{
-      'duration': instance.duration,
-      'channel': instance.channel?.toJson(),
-      'messages': instance.messages?.map((e) => e?.toJson())?.toList(),
-      'members': instance.members?.map((e) => e?.toJson())?.toList(),
-      'watcher_count': instance.watcherCount,
-      'watchers': instance.watchers?.map((e) => e?.toJson())?.toList(),
-      'read': instance.read?.map((e) => e?.toJson())?.toList(),
-    };
