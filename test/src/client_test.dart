@@ -68,6 +68,15 @@ void main() {
 
         expect(log, ['test']);
       }));
+
+      test('Channel', () {
+        final client = Client('test');
+        final Map<String, dynamic> data = {'test': 1};
+        final channelClient = client.channel('type', id: 'id', data: data);
+        expect(channelClient.type, 'type');
+        expect(channelClient.id, 'id');
+        expect(channelClient.data, data);
+      });
     });
 
     group('queryChannels', () {
