@@ -144,7 +144,7 @@ void main() {
       );
 
       try {
-        expect(await ws.connect(connectFunc), throwsA(String));
+        expect(await ws.connect(connectFunc), throwsA(isA<String>()));
       } catch (_) {}
 
       verify(connectFunc(computedUrl)).called(1);
