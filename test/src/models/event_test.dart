@@ -65,7 +65,8 @@ void main() {
           'connection_id': 'connectionId',
           'created_at': '2020-01-29T03:22:47.636130Z',
           'own': {'id': 'id2'},
-          'user': {'id': 'id'}
+          'user': {'id': 'id'},
+          'message': null
         },
       );
     });

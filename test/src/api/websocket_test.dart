@@ -149,11 +149,8 @@ void main() {
         verify(connectFunc(computedUrl)).called(1);
         verify(handleFunc(any)).called(greaterThan(0));
 
-        await ws.disconnect();
-
-        expect(streamController.isClosed, true);
-
         timer.cancel();
+        await streamController.close();
       });
     });
 

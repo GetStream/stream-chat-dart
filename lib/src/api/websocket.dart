@@ -72,6 +72,7 @@ class WebSocket {
           resolved = true;
           logger.info('connection estabilished');
           completer.complete(event);
+
           Timer.periodic(Duration(seconds: 25), (_) {
             _channel.sink.add("{'type': 'health.check'}");
             logger.info('sending health.check');
