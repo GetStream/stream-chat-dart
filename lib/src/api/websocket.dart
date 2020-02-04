@@ -13,9 +13,7 @@ import 'web_socket_channel_stub.dart'
 
 typedef EventHandler = void Function(Event);
 typedef ConnectWebSocket = WebSocketChannel Function(String url,
-    {Iterable<String> protocols,
-    Map<String, dynamic> headers,
-    Duration pingInterval});
+    {Iterable<String> protocols});
 
 // TODO: improve error path for the connect() method
 // TODO: make sure we pass an error with a stacktrace
