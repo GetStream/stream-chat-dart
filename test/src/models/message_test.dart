@@ -87,7 +87,61 @@ void main() {
       expect(message.updatedAt, DateTime.parse("2020-01-28T22:17:31.130506Z"));
       expect(message.mentionedUsers, isA<List<User>>());
     });
-  });
 
-  // TODO: test toJson ?
+    test('should serialize to json correctly', () {
+      final message = Message(
+        id: "4637f7e4-a06b-42db-ba5a-8d8270dd926f",
+        text:
+            "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
+        attachments: [
+          Attachment.fromJson({
+            "type": "video",
+            "author_name": "GIPHY",
+            "title": "The Lion King Disney GIF - Find \u0026 Share on GIPHY",
+            "title_link":
+                "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif",
+            "text":
+                "Discover \u0026 share this Lion King Live Action GIF with everyone you know. GIPHY is how you search, share, discover, and create GIFs.",
+            "image_url":
+                "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif",
+            "thumb_url":
+                "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif",
+            "asset_url":
+                "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.mp4",
+            "og_scrape_url":
+                "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA"
+          })
+        ],
+        showInChannel: true,
+        parentId: 'parentId',
+        extraData: {'hey': 'test'},
+      );
+
+      expect(
+        message.toJson(),
+        json.decode(r'''
+        {
+            "id": "4637f7e4-a06b-42db-ba5a-8d8270dd926f",
+            "text": "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
+            "attachments": [
+              {
+                "type": "video",
+                "title_link": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif",
+                "title": "The Lion King Disney GIF - Find & Share on GIPHY",
+                "thumb_url": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif",
+                "text": "Discover & share this Lion King Live Action GIF with everyone you know. GIPHY is how you search, share, discover, and create GIFs.",
+                "og_scrape_url": "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
+                "image_url": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.gif",
+                "author_name": "GIPHY",
+                "asset_url": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.mp4"
+              }
+            ],
+            "parent_id": "parentId",
+            "show_in_channel": true,
+            "hey": "test"
+          }
+        '''),
+      );
+    });
+  });
 }
