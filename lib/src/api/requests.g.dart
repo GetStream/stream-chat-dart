@@ -15,5 +15,20 @@ Map<String, dynamic> _$SortOptionToJson(SortOption instance) =>
 Map<String, dynamic> _$QueryFilterToJson(QueryFilter instance) =>
     <String, dynamic>{};
 
-Map<String, dynamic> _$PaginationParamsToJson(PaginationParams instance) =>
-    <String, dynamic>{};
+Map<String, dynamic> _$PaginationParamsToJson(PaginationParams instance) {
+  final val = <String, dynamic>{};
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('limit', instance.limit);
+  writeNotNull('offset', instance.offset);
+  writeNotNull('id_gt', instance.greaterThan);
+  writeNotNull('id_gte', instance.greaterThanOrEqual);
+  writeNotNull('id_lt', instance.lessThan);
+  writeNotNull('id_lte', instance.lessThanOrEqual);
+  return val;
+}
