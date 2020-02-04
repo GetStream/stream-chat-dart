@@ -1,11 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_chat/src/models/channel_state.dart';
 import 'package:stream_chat/src/models/channel_config.dart';
-import 'package:stream_chat/src/models/message.dart';
+import 'package:stream_chat/src/models/channel_state.dart';
 import 'package:stream_chat/src/models/command.dart';
+import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/user.dart';
+import 'package:stream_chat/stream_chat.dart';
 
 void main() {
   group('src/models/channel_state', () {
@@ -741,6 +742,217 @@ void main() {
           DateTime.parse("2020-01-29T03:23:02.843948Z"));
       expect(channelState.messages[0].user, isA<User>());
       expect(channelState.watcherCount, 5);
+    });
+
+    test('should serialize to json correctly', () {
+      const toJsonExample = r'''
+      {
+            "channel": {
+              "id": "dev",
+              "type": "team",
+              "frozen": true,
+              "name": "#dev",
+              "image": "https://cdn.chrisshort.net/testing-certificate-chains-in-go/GOPHER_MIC_DROP.png",
+              "example": 1
+            },
+            "watchers": null,
+            "read": null,
+            "messages": [
+              {
+                "id": "dry-meadow-0-2b73cc8b-cd86-4a01-8d40-bd82ad07a030",
+                "text": "fasdfa",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "dry-meadow-0-e8e74482-b4cd-48db-9d1e-30e6c191786f",
+                "text": "test message",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "dry-meadow-0-53e6299f-9b97-4a9c-a27e-7e2dde49b7e0",
+                "text": "test message",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "dry-meadow-0-80925be0-786e-40a5-b225-486518dafd35",
+                "text": "asdfadf",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "dry-meadow-0-64d7970f-ede8-4b31-9738-1bc1756d2bfe",
+                "text": "test",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "withered-cell-0-84cbd760-cf55-4f7e-9207-c5f66cccc6dc",
+                "text": "hi",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "dry-meadow-0-e9203588-43c3-40b1-91f7-f217fc42aa53",
+                "text": "fantastic",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "withered-cell-0-7e3552d7-7a0d-45f2-a856-e91b23a7e240",
+                "text": "nice to meet you",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "dry-meadow-0-1ffeafd4-e4fc-4c84-9394-9d7cb10fff42",
+                "text": "hey",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "dry-meadow-0-3f147324-12c8-4b41-9fb5-2db88d065efa",
+                "text": "hello, everyone",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "dry-meadow-0-51a348ae-0c0a-44de-a556-eac7891c0cf0",
+                "text": "who is there?",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "icy-recipe-7-a29e237b-8d81-4a97-9bc8-d42bca3f1356",
+                "text": "하이",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "icy-recipe-7-935c396e-ddf8-4a9a-951c-0a12fa5bf055",
+                "text": "what are you doing?",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "throbbing-boat-5-1e4d5730-5ff0-4d25-9948-9f34ffda43e4",
+                "text": "👍",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "snowy-credit-3-3e0c1a0d-d22f-42ee-b2a1-f9f49477bf21",
+                "text": "sdasas",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "snowy-credit-3-3319537e-2d0e-4876-8170-a54f046e4b7d",
+                "text": "cjshsa",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "snowy-credit-3-cfaf0b46-1daa-49c5-947c-b16d6697487d",
+                "text": "nhisagdhsadz",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "snowy-credit-3-cebe25a7-a3a3-49fc-9919-91c6725e81f3",
+                "text": "hvadhsahzd",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "divine-glade-9-0cea9262-5766-48e9-8b22-311870aed3bf",
+                "text": "hello",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "red-firefly-9-c4e9007b-bb7d-4238-ae08-5f8e3cd03d73",
+                "text": "hello",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "bitter-glade-2-02aee4eb-4093-4736-808b-2de75820e854",
+                "text": "hello",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "morning-sea-1-0c700bcb-46dd-4224-b590-e77bdbccc480",
+                "text": "http://jaeger.ui.gtstrm.com/",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "ancient-salad-0-53e8b4e6-5b7b-43ad-aeee-8bfb6a9ed0be",
+                "text": "hi",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "ancient-salad-0-8c225075-bd4c-42e2-8024-530aae13cd40",
+                "text": "hi",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              },
+              {
+                "id": "proud-sea-7-17802096-cbf8-4e3c-addd-4ee31f4c8b5c",
+                "text": "😃",
+                "attachments": [],
+                "parent_id": null,
+                "show_in_channel": null
+              }
+            ],
+            "members": [],
+            "watcher_count": 5
+          }
+      ''';
+      final j = jsonDecode(jsonExample);
+      final channelState = ChannelState(
+        channel: Channel.fromJson(j['channel']),
+        members: [],
+        messages:
+            (j['messages'] as List).map((m) => Message.fromJson(m)).toList(),
+        read: null,
+        watcherCount: 5,
+        watchers: null,
+      );
+
+      expect(
+        channelState.toJson(),
+        jsonDecode(toJsonExample),
+      );
     });
   });
 }

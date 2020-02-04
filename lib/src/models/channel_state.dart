@@ -1,9 +1,8 @@
-import '../models/read.dart';
-import '../models/user.dart';
-
-import 'channel.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import '../models/read.dart';
+import '../models/user.dart';
+import 'channel.dart';
 import 'member.dart';
 import 'message.dart';
 
