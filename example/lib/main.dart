@@ -1,69 +1,74 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
-
+import 'package:stream_chat_example/chat.bloc.dart';
 import 'components/channel_list.dart';
-import 'components/stream_chat_container.dart';
 
 void main() => runApp(MyApp());
 
-class MyApp extends StatelessWidget {
-  final client = Client("6xjf3dex3n7d");
+class MyApp extends StatefulWidget {
+  final client = Client("qk4nn7rpcn75", logLevel: Level.INFO);
 
   @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
   Widget build(BuildContext context) {
-    return StreamChat(
-      client: client,
+    return ChangeNotifierProvider(
+      create: (_) => ChatBloc(widget.client),
       child: MaterialApp(
         title: 'Stream Chat Example',
-        home: ChatLoader(
-          child: ChannelList(
-            filter: Map<String, dynamic>(),
-            sort: [SortOption("last_message_at")],
-            options: {},
-          ),
-          user: User(id: "wild-breeze-7"),
-          token:
-              "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo",
-        ),
+        home: ChatLoader(),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 }
 
 class ChatLoader extends StatefulWidget {
-  final Widget child;
-  final String token;
-  final User user;
-
-  ChatLoader({@required this.child, @required this.user, @required this.token});
-
   @override
-  State createState() => ChatLoaderState();
+  _ChatLoaderState createState() => _ChatLoaderState();
 }
 
-class ChatLoaderState extends State<ChatLoader> {
-  Future<dynamic> setUser;
-
+class _ChatLoaderState extends State<ChatLoader> {
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    setUser = StreamChat.of(context).client.setUser(widget.user, widget.token);
+  Widget build(BuildContext context) {
+    return StreamBuilder<bool>(
+      stream: Provider.of<ChatBloc>(context).setUserLoading,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(snapshot.error.toString()),
+          );
+        } else if (!snapshot.hasData || snapshot.data) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        } else {
+          return ChannelList(
+            filter: Map<String, dynamic>(),
+            sort: [SortOption("last_message_at")],
+            pagination: PaginationParams(
+              limit: 20,
+            ),
+            options: {'subscribe': true},
+          );
+        }
+      },
+    );
   }
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<dynamic>(
-        future: setUser,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return widget.child;
-          }
-          if (snapshot.hasError) {
-            return Text(snapshot.error.toString());
-          }
-          return Center(child: CircularProgressIndicator());
-        });
+  void initState() {
+    super.initState();
+    Provider.of<ChatBloc>(context, listen: false).setUser(
+        User(id: "wild-breeze-7"),
+        "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo");
   }
 }
