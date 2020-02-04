@@ -52,6 +52,7 @@ class Client {
   }) {
     _setupLogger(logHandlerFunction);
     _setupDio(httpClient, receiveTimeout, connectTimeout);
+    logger.info('instantiating new client');
   }
 
   void _setupDio(
@@ -139,11 +140,12 @@ class Client {
     return connectEvent;
   }
 
-  Future<QueryChannelsResponse> queryChannels(
+  Future<QueryChannelsResponse> queryChannels({
     Map<String, dynamic> filter,
     List<SortOption> sort,
     Map<String, dynamic> options,
-  ) async {
+    PaginationParams paginationParams,
+  }) async {
     final Map<String, dynamic> defaultOptions = {
       "state": true,
       "watch": true,
@@ -160,6 +162,10 @@ class Client {
 
     if (options != null) {
       payload.addAll(options);
+    }
+
+    if (paginationParams != null) {
+      payload.addAll(paginationParams.toJson());
     }
 
     final response = await get(

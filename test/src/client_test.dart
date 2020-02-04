@@ -103,7 +103,7 @@ void main() {
         when(mockDio.get<String>('/channels', queryParameters: queryParams))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
-        await client.queryChannels(null, null, null);
+        await client.queryChannels();
 
         verify(mockDio.get<String>('/channels', queryParameters: queryParams))
             .called(1);
@@ -139,9 +139,9 @@ void main() {
         });
 
         await client.queryChannels(
-          queryFilter,
-          sortOptions,
-          options,
+          filter: queryFilter,
+          sort: sortOptions,
+          options: options,
         );
 
         verify(mockDio.get<String>('/channels', queryParameters: queryParams))

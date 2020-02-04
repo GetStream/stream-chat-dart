@@ -15,7 +15,7 @@ void main() {
     final setUserEvent = await client.setGuestUser(user);
     print(setUserEvent.toJson());
 
-    final queryChannels = await client.queryChannels(null, null, null);
+    final queryChannels = await client.queryChannels();
     print('queryChannels.channels.length: ${queryChannels.channels.length}');
 
     final queryUsers = await client.queryUsers(

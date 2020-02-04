@@ -39,9 +39,12 @@ class WebSocket {
     this.logger,
   });
 
-  Event decodeEvent(String source) => Event.fromJson(json.decode(source));
+  Event decodeEvent(String source) {
+    print('new event: $source');
+    return Event.fromJson(json.decode(source));
+  }
 
-  Future<Event> connect([ConnectWebSocket connect]) {
+  Future<Event> connect([ConnectWebSocket connectFunc]) {
     final completer = Completer<Event>();
     final qs = Map<String, String>.from(connectParams);
 
@@ -57,25 +60,38 @@ class WebSocket {
 
     bool resolved = false;
 
-    ConnectWebSocket connectFunction = connect ?? connectWebSocket;
+    ConnectWebSocket connectFunction = connectFunc ?? connectWebSocket;
     _channel = connectFunction(path);
-    _channel.stream.listen((data) {
-      final event = decodeEvent(data);
-      if (resolved) {
-        handler(event);
-      } else {
-        resolved = true;
-        logger.info('connection estabilished');
-        completer.complete(event);
-      }
-    }, onError: (error) {
-      logger.severe('error connecting');
-      completer.completeError(error);
-    });
+    _channel.stream.listen(
+      (data) {
+        logger.info('new data: $data');
+        final event = decodeEvent(data);
+        if (resolved) {
+          handler(event);
+        } else {
+          resolved = true;
+          logger.info('connection estabilished');
+          completer.complete(event);
+          Timer.periodic(Duration(seconds: 25), (_) {
+            _channel.sink.add("{'type': 'health.check'}");
+            logger.info('sending health.check');
+          });
+        }
+      },
+      onError: (error) {
+        logger.severe('error connecting');
+        completer.completeError(error);
+      },
+      onDone: () {
+        logger.info(
+            'connection closed | closeCode: ${_channel.closeCode} | closedReason: ${_channel.closeReason}');
+      },
+    );
     return completer.future;
   }
 
   Future<void> disconnect() {
+    logger.info('disconnecting');
     return _channel.sink.close();
   }
 }
