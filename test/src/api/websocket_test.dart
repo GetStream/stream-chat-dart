@@ -111,6 +111,52 @@ void main() {
       });
     });
 
+    test('should close correctly the controller', () async {
+      final handleFunc = MockFunctions().handleFunc;
+
+      final ws = WebSocket(
+        baseUrl: 'baseurl',
+        user: User(id: 'testid'),
+        logger: Logger('ws'),
+        connectParams: {'test': 'true'},
+        connectPayload: {'payload': 'test'},
+        handler: handleFunc,
+      );
+
+      final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
+
+      final mockWSChannel = MockWSChannel();
+
+      final StreamController<String> streamController =
+          StreamController<String>.broadcast();
+
+      final computedUrl =
+          'wss://baseurl/connect?test=true&json=%7B%22payload%22%3A%22test%22%2C%22user_details%22%3A%7B%22id%22%3A%22testid%22%7D%7D';
+
+      when(connectFunc(computedUrl)).thenAnswer((_) => mockWSChannel);
+      when(mockWSChannel.stream).thenAnswer((_) {
+        return streamController.stream;
+      });
+
+      final timer = Timer.periodic(
+        Duration(milliseconds: 100),
+        (_) => streamController.sink.add('{}'),
+      );
+
+      await ws.connect(connectFunc);
+
+      when(handleFunc(any)).thenAnswer((_) async {
+        verify(connectFunc(computedUrl)).called(1);
+        verify(handleFunc(any)).called(greaterThan(0));
+
+        await ws.disconnect();
+
+        expect(streamController.isClosed, true);
+
+        timer.cancel();
+      });
+    });
+
     test('should throw an error', () async {
       final ws = WebSocket(
         baseUrl: 'baseurl',

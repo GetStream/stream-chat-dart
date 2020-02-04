@@ -28,6 +28,7 @@ class WebSocket {
   final Map<String, dynamic> connectPayload;
   final EventHandler handler;
   final Logger logger;
+  WebSocketChannel _channel;
 
   WebSocket({
     @required this.baseUrl,
@@ -57,12 +58,11 @@ class WebSocket {
     bool resolved = false;
 
     ConnectWebSocket connectFunction = connect ?? connectWebSocket;
-    final channel = connectFunction(path);
-    channel.stream.listen((data) {
+    _channel = connectFunction(path);
+    _channel.stream.listen((data) {
       final event = decodeEvent(data);
       if (resolved) {
         handler(event);
-        print('data: ${event}');
       } else {
         resolved = true;
         logger.info('connection estabilished');
@@ -73,5 +73,9 @@ class WebSocket {
       completer.completeError(error);
     });
     return completer.future;
+  }
+
+  Future<void> disconnect() {
+    return _channel.sink.close();
   }
 }

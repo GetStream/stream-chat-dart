@@ -286,7 +286,11 @@ class Client {
   }
 
   // TODO disconnect
-  Future<dynamic> disconnect() async => null;
+  Future<void> disconnect() async {
+    this._anonymous = false;
+    this._connectionId = null;
+    await this._ws.disconnect();
+  }
 
   Future<QueryUsersResponse> queryUsers(
     Map<String, dynamic> filter,
