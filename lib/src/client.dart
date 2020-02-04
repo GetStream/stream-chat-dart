@@ -290,6 +290,8 @@ class Client {
     this._anonymous = false;
     this._connectionId = null;
     await this._ws.disconnect();
+    this._token = null;
+    this._user = null;
   }
 
   Future<QueryUsersResponse> queryUsers(
