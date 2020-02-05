@@ -126,17 +126,6 @@ class ChannelClient {
     return _client.decode(res.data, AddMembersResponse.fromJson);
   }
 
-  Future<AddModeratorsResponse> addModerators(
-    List<Member> moderators,
-    Message message,
-  ) async {
-    final res = await _client.post(_channelURL, data: {
-      "add_moderators": moderators.map((m) => m.toJson()),
-      "message": message.toJson(),
-    });
-    return _client.decode(res.data, AddModeratorsResponse.fromJson);
-  }
-
   Future<InviteMembersResponse> inviteMembers(
     List<Member> members,
     Message message,
@@ -155,15 +144,6 @@ class ChannelClient {
       "message": message.toJson(),
     });
     return _client.decode(res.data, RemoveMembersResponse.fromJson);
-  }
-
-  Future<DemoteModeratorsResponse> demoteModerators(
-      List<Member> members, Message message) async {
-    final res = await _client.post(_channelURL, data: {
-      "demote_moderators": members.map((m) => m.toJson()),
-      "message": message.toJson(),
-    });
-    return _client.decode(res.data, DemoteModeratorsResponse.fromJson);
   }
 
   Future<SendActionResponse> sendAction(
@@ -229,12 +209,33 @@ class ChannelClient {
     });
   }
 
-  Future<ChannelStateResponse> query(Map<String, dynamic> options) async {
+  Future<ChannelStateResponse> query(
+    Map<String, dynamic> options, {
+    PaginationParams messagesPagination,
+    PaginationParams membersPagination,
+    PaginationParams watchersPagination,
+  }) async {
     var path = "/channels/$type";
     if (id != null) {
-      path = "$path/$id";
+      path = "$path/$id/query";
     }
-    final response = await _client.post(path, data: options);
+
+    final data = Map<String, dynamic>.from({
+      "state": true,
+    })
+      ..addAll(options);
+
+    if (messagesPagination != null) {
+      data['messages'] = messagesPagination.toJson();
+    }
+    if (membersPagination != null) {
+      data['members'] = membersPagination.toJson();
+    }
+    if (watchersPagination != null) {
+      data['watchers'] = watchersPagination.toJson();
+    }
+
+    final response = await _client.post(path, data: data);
     final state = _client.decode(response.data, ChannelStateResponse.fromJson);
     if (id == null) {
       id = state.channel.id;

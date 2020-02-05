@@ -398,6 +398,15 @@ class Client {
         response.data, UpdateUsersResponse.fromJson);
   }
 
+  // TODO
+//  Future<UpdateUsersResponse> updateUsers(User user) async {
+//    final response = await post("/users", data: {
+//      "users": {user.id: user.toJson()},
+//    });
+//    return decode<UpdateUsersResponse>(
+//        response.data, UpdateUsersResponse.fromJson);
+//  }
+
   Future<EmptyResponse> banUser(
     String targetUserID, [
     Map<String, dynamic> options = const {},

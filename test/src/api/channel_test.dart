@@ -648,12 +648,10 @@ void main() {
           final client = Client('api-key', httpClient: mockDio);
           final channelClient = client.channel('messaging', id: 'testid');
           final Map<String, dynamic> options = {
-            'watch': true,
             'state': false,
-            'presence': true,
           };
 
-          when(mockDio.post<String>('/channels/messaging/testid',
+          when(mockDio.post<String>('/channels/messaging/testid/query',
                   data: options))
               .thenAnswer((_) async => Response(data: r'''
             {
@@ -945,7 +943,7 @@ void main() {
 
           await channelClient.query(options);
 
-          verify(mockDio.post<String>('/channels/messaging/testid',
+          verify(mockDio.post<String>('/channels/messaging/testid/query',
                   data: options))
               .called(1);
         });
@@ -1670,30 +1668,6 @@ void main() {
             .called(1);
       });
 
-      test('addModerators', () async {
-        final mockDio = MockDio();
-
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
-
-        final client = Client('api-key', httpClient: mockDio);
-        final channelClient = client.channel('messaging', id: 'testid');
-        final List<Member> members = [Member(invited: true)];
-        final message = Message(text: 'test');
-
-        when(mockDio.post<String>('/channels/messaging/testid', data: {
-          'add_moderators': members.map((m) => m.toJson()),
-          'message': message.toJson()
-        })).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
-
-        await channelClient.addModerators(members, message);
-
-        verify(mockDio.post<String>('/channels/messaging/testid', data: {
-          'add_moderators': members.map((m) => m.toJson()),
-          'message': message.toJson()
-        })).called(1);
-      });
-
       test('inviteMembers', () async {
         final mockDio = MockDio();
 
@@ -1738,30 +1712,6 @@ void main() {
 
         verify(mockDio.post<String>('/channels/messaging/testid', data: {
           'remove_members': members.map((m) => m.toJson()),
-          'message': message.toJson()
-        })).called(1);
-      });
-
-      test('demoteModerators', () async {
-        final mockDio = MockDio();
-
-        when(mockDio.options).thenReturn(BaseOptions());
-        when(mockDio.interceptors).thenReturn(Interceptors());
-
-        final client = Client('api-key', httpClient: mockDio);
-        final channelClient = client.channel('messaging', id: 'testid');
-        final List<Member> members = [Member(invited: true)];
-        final message = Message(text: 'test');
-
-        when(mockDio.post<String>('/channels/messaging/testid', data: {
-          'demote_moderators': members.map((m) => m.toJson()),
-          'message': message.toJson()
-        })).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
-
-        await channelClient.demoteModerators(members, message);
-
-        verify(mockDio.post<String>('/channels/messaging/testid', data: {
-          'demote_moderators': members.map((m) => m.toJson()),
           'message': message.toJson()
         })).called(1);
       });
