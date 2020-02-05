@@ -382,12 +382,12 @@ class Client {
     return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.$payloadB64.devtoken";
   }
 
-  Channel channel(
+  ChannelClient channel(
     String type, {
     String id,
     Map<String, dynamic> data,
   }) {
-    return Channel(this, type, id, data);
+    return ChannelClient(this, type, id, data);
   }
 
   Future<UpdateUsersResponse> updateUser(User user) async {

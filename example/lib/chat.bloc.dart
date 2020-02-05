@@ -1,25 +1,29 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_example/channel.bloc.dart';
 
 class ChatBloc with ChangeNotifier {
   final Client client;
+  final List<StreamSubscription> subscriptions = [];
+  final Map<String, ChannelBloc> channelBlocs = {};
 
   ChatBloc(this.client) {
-    client.stream.listen((Event e) {
+    subscriptions.add(client.stream.listen((Event e) {
       if (e.type == 'message.new') {
         final index = channels.indexWhere((c) => c.channel.cid == e.cid);
         final channel = channels.removeAt(index);
-        channel.messages.add(e.message);
+        print(index);
         channels.insert(0, channel);
-        _channelsController.sink.add(channels);
+        _channelsController.add(channels);
       }
-    });
+    }));
   }
 
-  final StreamController<bool> _setUserLoadingController =
-      StreamController.broadcast()..add(false);
+  final BehaviorSubject<bool> _setUserLoadingController =
+      BehaviorSubject.seeded(false);
 
   Stream<bool> get setUserLoading => _setUserLoadingController.stream;
 
@@ -36,13 +40,13 @@ class ChatBloc with ChangeNotifier {
 
   final List<ChannelState> channels = [];
 
-  final StreamController<List<ChannelState>> _channelsController =
-      StreamController.broadcast()..add(null);
+  final BehaviorSubject<List<ChannelState>> _channelsController =
+      BehaviorSubject();
 
   Stream<List<ChannelState>> get channelsStream => _channelsController.stream;
 
-  final StreamController<bool> _queryChannelsLoadingController =
-      StreamController.broadcast()..add(false);
+  final BehaviorSubject<bool> _queryChannelsLoadingController =
+      BehaviorSubject.seeded(false);
 
   Stream<bool> get queryChannelsLoading =>
       _queryChannelsLoadingController.stream;
@@ -63,6 +67,9 @@ class ChatBloc with ChangeNotifier {
         paginationParams: paginationParams,
       );
       channels.addAll(res.channels);
+      channels.forEach((c) {
+        channelBlocs[c.channel.id] = ChannelBloc(client, c);
+      });
       _channelsController.sink.add(channels);
     } catch (e) {
       _channelsController.sink.addError(e);
@@ -79,6 +86,7 @@ class ChatBloc with ChangeNotifier {
   void dispose() {
     super.dispose();
     client.dispose();
+    subscriptions.forEach((s) => s.cancel());
     _setUserLoadingController.close();
     _queryChannelsLoadingController.close();
     _channelsController.close();

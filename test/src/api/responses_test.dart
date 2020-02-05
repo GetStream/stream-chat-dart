@@ -3268,7 +3268,7 @@ void main() {
         }
       ''';
       final response = ChannelStateResponse.fromJson(json.decode(jsonExample));
-      expect(response.channel, isA<Channel>());
+      expect(response.channel, isA<ChannelClient>());
       expect(response.watcherCount, isA<int>());
       expect(response.members, isA<List<Member>>());
       expect(response.messages, isA<List<Message>>());
@@ -3798,7 +3798,7 @@ void main() {
             },
                 "duration":"4.66ms"}''';
       final response = AddModeratorsResponse.fromJson(json.decode(jsonExample));
-      expect(response.channel, isA<Channel>());
+      expect(response.channel, isA<ChannelClient>());
       expect(response.members, isA<List<Member>>());
       expect(response.message, isA<Message>());
     });
@@ -3911,7 +3911,7 @@ void main() {
             },
                 "duration":"4.66ms"}''';
       final response = UpdateChannelResponse.fromJson(json.decode(jsonExample));
-      expect(response.channel, isA<Channel>());
+      expect(response.channel, isA<ChannelClient>());
       expect(response.members, isA<List<Member>>());
       expect(response.message, isA<Message>());
     });
@@ -4024,7 +4024,7 @@ void main() {
             },
                 "duration":"4.66ms"}''';
       final response = InviteMembersResponse.fromJson(json.decode(jsonExample));
-      expect(response.channel, isA<Channel>());
+      expect(response.channel, isA<ChannelClient>());
       expect(response.members, isA<List<Member>>());
       expect(response.message, isA<Message>());
     });
@@ -4137,7 +4137,7 @@ void main() {
             },
                 "duration":"4.66ms"}''';
       final response = RemoveMembersResponse.fromJson(json.decode(jsonExample));
-      expect(response.channel, isA<Channel>());
+      expect(response.channel, isA<ChannelClient>());
       expect(response.members, isA<List<Member>>());
       expect(response.message, isA<Message>());
     });
@@ -4250,7 +4250,7 @@ void main() {
             },
                 "duration":"4.66ms"}''';
       final response = AddMembersResponse.fromJson(json.decode(jsonExample));
-      expect(response.channel, isA<Channel>());
+      expect(response.channel, isA<ChannelClient>());
       expect(response.members, isA<List<Member>>());
       expect(response.message, isA<Message>());
     });
@@ -4363,7 +4363,7 @@ void main() {
             },
                 "duration":"4.66ms"}''';
       final response = AcceptInviteResponse.fromJson(json.decode(jsonExample));
-      expect(response.channel, isA<Channel>());
+      expect(response.channel, isA<ChannelClient>());
       expect(response.members, isA<List<Member>>());
       expect(response.message, isA<Message>());
     });
@@ -4476,7 +4476,7 @@ void main() {
             },
                 "duration":"4.66ms"}''';
       final response = RejectInviteResponse.fromJson(json.decode(jsonExample));
-      expect(response.channel, isA<Channel>());
+      expect(response.channel, isA<ChannelClient>());
       expect(response.members, isA<List<Member>>());
       expect(response.message, isA<Message>());
     });
@@ -4590,7 +4590,7 @@ void main() {
                 "duration":"4.66ms"}''';
       final response =
           DemoteModeratorsResponse.fromJson(json.decode(jsonExample));
-      expect(response.channel, isA<Channel>());
+      expect(response.channel, isA<ChannelClient>());
       expect(response.members, isA<List<Member>>());
       expect(response.message, isA<Message>());
     });

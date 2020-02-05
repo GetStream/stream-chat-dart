@@ -40,7 +40,6 @@ class WebSocket {
   });
 
   Event decodeEvent(String source) {
-    print('new event: $source');
     return Event.fromJson(json.decode(source));
   }
 
@@ -73,7 +72,7 @@ class WebSocket {
           logger.info('connection estabilished');
           completer.complete(event);
 
-          Timer.periodic(Duration(seconds: 25), (_) {
+          Timer.periodic(Duration(seconds: 20), (_) {
             _channel.sink.add("{'type': 'health.check'}");
             logger.info('sending health.check');
           });

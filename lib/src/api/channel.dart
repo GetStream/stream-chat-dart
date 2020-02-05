@@ -8,14 +8,14 @@ import '../models/reaction.dart';
 import 'requests.dart';
 import 'responses.dart';
 
-class Channel {
+class ChannelClient {
   Client _client;
   String type;
   String id;
   String cid;
   Map<String, dynamic> data;
 
-  Channel(this._client, this.type, this.id, this.data)
+  ChannelClient(this._client, this.type, this.id, this.data)
       : cid = id != null ? "$type:$id" : null;
 
   Client get client => _client;
@@ -273,5 +273,6 @@ class Channel {
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
-  Stream<Event> on(String eventType) => null;
+  Stream<Event> on(String eventType) =>
+      _client.on(eventType).where((e) => e.cid == cid);
 }
