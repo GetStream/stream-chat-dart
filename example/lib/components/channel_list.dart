@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_example/channel.bloc.dart';
+import '../channel.bloc.dart';
 
 import '../chat.bloc.dart';
 import 'channel_preview.dart';
@@ -30,7 +30,7 @@ class ChannelListState extends State<ChannelList> {
   @override
   Widget build(BuildContext context) {
     return Consumer<ChatBloc>(
-      builder: (context, chatBloc, _) => Scaffold(
+      builder: (context, ChatBloc chatBloc, _) => Scaffold(
         appBar: AppBar(
           title: Text('Channels List'),
         ),
@@ -44,44 +44,43 @@ class ChannelListState extends State<ChannelList> {
               widget.options,
             );
           },
-          child: StreamBuilder<bool>(
-            stream: chatBloc.queryChannelsLoading,
+          child: StreamBuilder<List<ChannelState>>(
+            stream: chatBloc.channelsStream,
             builder: (context, snapshot) {
-              final queryLoading = snapshot.data;
-              return StreamBuilder<List<ChannelState>>(
-                stream: chatBloc.channelsStream,
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text(snapshot.error.toString()),
-                    );
-                  } else if (!snapshot.hasData) {
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else {
-                    return ListView.builder(
-                      controller: _scrollController,
-                      itemCount: snapshot.data.length + (queryLoading ? 1 : 0),
-                      itemBuilder: (context, i) {
-                        if (i < snapshot.data.length) {
-                          return ChangeNotifierProvider<ChannelBloc>.value(
-                            value: chatBloc
-                                .channelBlocs[snapshot.data[i].channel.id],
-                            child: ChannelPreview(),
-                          );
-                        } else {
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(snapshot.error.toString()),
+                );
+              } else if (!snapshot.hasData) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else {
+                return ListView.builder(
+                  controller: _scrollController,
+                  itemCount: snapshot.data.length + 1,
+                  itemBuilder: (context, i) {
+                    if (i < snapshot.data.length) {
+                      return ChangeNotifierProvider<ChannelBloc>.value(
+                        value:
+                            chatBloc.channelBlocs[snapshot.data[i].channel.id],
+                        child: ChannelPreview(),
+                      );
+                    } else {
+                      return StreamBuilder<bool>(
+                        stream: chatBloc.queryChannelsLoading,
+                        builder: (context, snapshot) {
                           return Center(
-                            child: snapshot.data.isNotEmpty
+                            child: (snapshot.hasData && snapshot.data)
                                 ? CircularProgressIndicator()
                                 : Container(),
                           );
-                        }
-                      },
-                    );
-                  }
-                },
-              );
+                        },
+                      );
+                    }
+                  },
+                );
+              }
             },
           ),
         ),

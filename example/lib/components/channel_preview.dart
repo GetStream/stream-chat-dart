@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_example/chat.bloc.dart';
 import 'package:stream_chat_example/components/channel.dart';
 
 import '../channel.bloc.dart';
 
-class ChannelPreview extends StatelessWidget {
+class ChannelPreview extends StatefulWidget {
+  @override
+  _ChannelPreviewState createState() => _ChannelPreviewState();
+}
+
+class _ChannelPreviewState extends State<ChannelPreview>
+    with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     return Consumer<ChannelBloc>(
@@ -15,9 +20,7 @@ class ChannelPreview extends StatelessWidget {
           stream: channelBloc.channelState,
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
+              return Container();
             }
             final channelState = snapshot.data;
             return StreamBuilder<bool>(
@@ -53,32 +56,34 @@ class ChannelPreview extends StatelessWidget {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) {
-                            return MultiProvider(
-                              providers: [
-                                ChangeNotifierProvider.value(
-                                    value: channelBloc),
-                                ChangeNotifierProvider.value(
-                                    value: Provider.of<ChatBloc>(context)),
-                              ],
+                            return ChangeNotifierProvider.value(
+                              value: channelBloc,
                               child: ChannelWidget(),
                             );
                           },
                         ),
                       );
                     },
-                    leading: CircleAvatar(
-                      backgroundImage: channelState.channel.extraData
-                              .containsKey('image')
-                          ? NetworkImage(
-                              channelState.channel.extraData['image'] as String)
-                          : null,
-                      child: channelState.channel.extraData.containsKey('image')
-                          ? null
-                          : Text(channelState.channel.config.name[0]),
+                    leading: Hero(
+                      tag: channelState.channel.id,
+                      child: CircleAvatar(
+                        backgroundImage:
+                            channelState.channel.extraData.containsKey('image')
+                                ? NetworkImage(channelState
+                                    .channel.extraData['image'] as String)
+                                : null,
+                        child:
+                            channelState.channel.extraData.containsKey('image')
+                                ? null
+                                : Text(channelState.channel.config.name[0]),
+                      ),
                     ),
                   );
                 });
           }),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 
+import 'chat.bloc.dart';
+
 class ChannelBloc with ChangeNotifier {
   final BehaviorSubject<ChannelState> _channelStateController =
       BehaviorSubject();
@@ -27,8 +29,9 @@ class ChannelBloc with ChangeNotifier {
   final ChannelState _channelState;
   final ChannelClient channelClient;
   final List<StreamSubscription> subscriptions = [];
+  final ChatBloc chatBloc;
 
-  ChannelBloc(Client client, ChannelState channelState)
+  ChannelBloc(Client client, ChannelState channelState, this.chatBloc)
       : channelClient = ChannelClient(
           client,
           channelState.channel.type,
@@ -45,7 +48,9 @@ class ChannelBloc with ChangeNotifier {
     }));
 
     subscriptions.add(channelClient.on('message.read').listen((Event e) {
-      _newMessageController.add(false);
+      if (e.user.id == chatBloc.user.id) {
+        _newMessageController.add(false);
+      }
     }));
 
     subscriptions.add(channelClient.on('typing.start').listen((Event e) {
@@ -55,6 +60,18 @@ class ChannelBloc with ChangeNotifier {
     subscriptions.add(channelClient.on('typing.stop').listen((Event e) {
       _typingStateController.add(false);
     }));
+  }
+
+  void queryMessages() async {
+    final res = await channelClient.query(
+      {},
+      messagesPagination: PaginationParams(
+          lessThan: _channelState.messages.first.id, limit: 10),
+    );
+
+    _channelState.messages.insertAll(0, res.messages);
+
+    _messagesController.add(_channelState.messages);
   }
 
   @override

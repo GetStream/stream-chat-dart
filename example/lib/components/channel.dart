@@ -4,29 +4,61 @@ import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import '../channel.bloc.dart';
-import '../chat.bloc.dart';
+import 'channel_header.dart';
 
-class ChannelWidget extends StatelessWidget {
+class ChannelWidget extends StatefulWidget {
+  @override
+  _ChannelWidgetState createState() => _ChannelWidgetState();
+}
+
+class _ChannelWidgetState extends State<ChannelWidget> {
+  final _scrollController = ScrollController();
+  double scrollPosition = 0;
+  double maxScroll = 0;
+
   @override
   Widget build(BuildContext context) {
-    return Consumer2<ChannelBloc, ChatBloc>(
-      builder: (context, channelBloc, chatBloc, _) {
+    return Consumer<ChannelBloc>(
+      builder: (context, channelBloc, _) {
         return Scaffold(
+          appBar: ChannelHeader(),
           body: StreamBuilder<List<Message>>(
             stream: channelBloc.messages,
+            initialData: [],
             builder: (context, snapshot) {
+              final messages = snapshot.data.reversed.toList();
+              if (scrollPosition != 0) {
+                Future.microtask(() {
+                  final diff =
+                      _scrollController.position.maxScrollExtent - maxScroll;
+                  print('diff: ${diff}');
+                  _scrollController.jumpTo(scrollPosition + diff);
+                });
+              }
               return ListView.builder(
-                itemCount: snapshot.data.length,
+                controller: _scrollController,
+                reverse: true,
+                itemCount: messages.length,
                 itemBuilder: (context, i) {
-                  final message = snapshot.data[i];
+                  final message = messages[i];
+                  final isMyMessage =
+                      message.user.id == channelBloc.chatBloc.user.id;
                   return Align(
-                    alignment: message.user.id == chatBloc.user.id
+                    alignment: isMyMessage
                         ? Alignment.centerRight
                         : Alignment.centerLeft,
                     child: Container(
-                      padding: EdgeInsets.all(16),
+                      color: isMyMessage
+                          ? Colors.lightGreen
+                          : Theme.of(context).primaryColorLight,
+                      margin: EdgeInsets.all(8),
                       constraints: BoxConstraints(maxWidth: 300),
-                      child: Text('${message.user.id} - ${message.text}'),
+                      child: ListTile(
+                        subtitle: Text(
+                            message.user.extraData['name'] ?? message.user.id),
+                        title: Text(message.text),
+                        dense: true,
+                      ),
                     ),
                   );
                 },
@@ -36,5 +68,28 @@ class ChannelWidget extends StatelessWidget {
         );
       },
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    final ChannelBloc channelBloc =
+        Provider.of<ChannelBloc>(context, listen: false);
+
+    _scrollController.addListener(() {
+      maxScroll = _scrollController.position.maxScrollExtent;
+      scrollPosition = _scrollController.offset;
+      if (_scrollController.position.maxScrollExtent ==
+          _scrollController.position.pixels) {
+        channelBloc.queryMessages();
+      }
+    });
+
+    channelBloc.newMessage.first.then((b) {
+      if (b) {
+        channelBloc.channelClient.markRead();
+      }
+    });
   }
 }

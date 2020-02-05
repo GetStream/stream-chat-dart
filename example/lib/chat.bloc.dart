@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_example/channel.bloc.dart';
+
+import 'channel.bloc.dart';
 
 class ChatBloc with ChangeNotifier {
   final Client client;
@@ -15,7 +16,6 @@ class ChatBloc with ChangeNotifier {
       if (e.type == 'message.new') {
         final index = channels.indexWhere((c) => c.channel.cid == e.cid);
         final channel = channels.removeAt(index);
-        print(index);
         channels.insert(0, channel);
         _channelsController.add(channels);
       }
@@ -36,7 +36,6 @@ class ChatBloc with ChangeNotifier {
       await client.setUser(newUser, token);
       user = newUser;
       _userController.sink.add(user);
-      print(newUser.id);
     } catch (e, stack) {
       _userController.sink.addError(e, stack);
     }
@@ -72,8 +71,9 @@ class ChatBloc with ChangeNotifier {
       );
       channels.addAll(res.channels);
       channels.forEach((c) {
-        channelBlocs[c.channel.id] = ChannelBloc(client, c);
+        channelBlocs[c.channel.id] = ChannelBloc(client, c, this);
       });
+      print(channels.length);
       _channelsController.sink.add(channels);
       _queryChannelsLoadingController.sink.add(false);
     } catch (e) {

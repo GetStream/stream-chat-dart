@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_example/chat.bloc.dart';
+import 'chat.bloc.dart';
 import 'components/channel_list.dart';
 
 void main() => runApp(MyApp());
@@ -10,14 +10,17 @@ class MyApp extends StatefulWidget {
   final client = Client("qk4nn7rpcn75", logLevel: Level.INFO);
 
   @override
-  _MyAppState createState() => _MyAppState();
+  _MyAppState createState() => _MyAppState(ChatBloc(client));
 }
 
 class _MyAppState extends State<MyApp> {
+  final ChatBloc chatBloc;
+  _MyAppState(this.chatBloc);
+
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ChatBloc(widget.client),
+    return ChangeNotifierProvider<ChatBloc>.value(
+      value: chatBloc,
       child: MaterialApp(
         title: 'Stream Chat Example',
         home: ChatLoader(),
@@ -48,7 +51,6 @@ class _ChatLoaderState extends State<ChatLoader> {
               child: Text(snapshot.error.toString()),
             );
           } else if (!snapshot.hasData) {
-            print('snap nodata');
             return Center(
               child: CircularProgressIndicator(),
             );
