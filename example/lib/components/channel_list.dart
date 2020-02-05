@@ -49,37 +49,39 @@ class ChannelListState extends State<ChannelList> {
             builder: (context, snapshot) {
               final queryLoading = snapshot.data;
               return StreamBuilder<List<ChannelState>>(
-                  stream: chatBloc.channelsStream,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return Center(
-                        child: Text(snapshot.error.toString()),
-                      );
-                    } else if (!snapshot.hasData) {
-                      return Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    } else {
-                      return ListView.builder(
-                        controller: _scrollController,
-                        itemCount:
-                            snapshot.data.length + (queryLoading ? 1 : 0),
-                        itemBuilder: (context, i) {
-                          if (i != snapshot.data.length) {
-                            return ChangeNotifierProvider<ChannelBloc>.value(
-                              value: chatBloc
-                                  .channelBlocs[snapshot.data[i].channel.id],
-                              child: ChannelPreview(),
-                            );
-                          } else {
-                            return Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-                        },
-                      );
-                    }
-                  });
+                stream: chatBloc.channelsStream,
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text(snapshot.error.toString()),
+                    );
+                  } else if (!snapshot.hasData) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else {
+                    return ListView.builder(
+                      controller: _scrollController,
+                      itemCount: snapshot.data.length + (queryLoading ? 1 : 0),
+                      itemBuilder: (context, i) {
+                        if (i < snapshot.data.length) {
+                          return ChangeNotifierProvider<ChannelBloc>.value(
+                            value: chatBloc
+                                .channelBlocs[snapshot.data[i].channel.id],
+                            child: ChannelPreview(),
+                          );
+                        } else {
+                          return Center(
+                            child: snapshot.data.isNotEmpty
+                                ? CircularProgressIndicator()
+                                : Container(),
+                          );
+                        }
+                      },
+                    );
+                  }
+                },
+              );
             },
           ),
         ),

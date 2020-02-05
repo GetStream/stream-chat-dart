@@ -16,7 +16,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return Provider(
+    return ChangeNotifierProvider(
       create: (_) => ChatBloc(widget.client),
       child: MaterialApp(
         title: 'Stream Chat Example',
@@ -39,28 +39,31 @@ class ChatLoader extends StatefulWidget {
 class _ChatLoaderState extends State<ChatLoader> {
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<bool>(
-      stream: Provider.of<ChatBloc>(context).setUserLoading,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Center(
-            child: Text(snapshot.error.toString()),
-          );
-        } else if (!snapshot.hasData || snapshot.data) {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        } else {
-          return ChannelList(
-            filter: Map<String, dynamic>(),
-            sort: [SortOption("last_message_at")],
-            pagination: PaginationParams(
-              limit: 20,
-            ),
-            options: {'subscribe': true},
-          );
-        }
-      },
+    return Consumer<ChatBloc>(
+      builder: (context, chatBloc, _) => StreamBuilder<User>(
+        stream: chatBloc.userStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(snapshot.error.toString()),
+            );
+          } else if (!snapshot.hasData) {
+            print('snap nodata');
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          } else {
+            return ChannelList(
+              filter: Map<String, dynamic>(),
+              sort: [SortOption("last_message_at")],
+              pagination: PaginationParams(
+                limit: 20,
+              ),
+              options: {'subscribe': true},
+            );
+          }
+        },
+      ),
     );
   }
 

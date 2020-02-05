@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_example/chat.bloc.dart';
+import 'package:stream_chat_example/components/channel.dart';
 
 import '../channel.bloc.dart';
 
@@ -47,7 +49,23 @@ class ChannelPreview extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           );
                         }),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return MultiProvider(
+                              providers: [
+                                ChangeNotifierProvider.value(
+                                    value: channelBloc),
+                                ChangeNotifierProvider.value(
+                                    value: Provider.of<ChatBloc>(context)),
+                              ],
+                              child: ChannelWidget(),
+                            );
+                          },
+                        ),
+                      );
+                    },
                     leading: CircleAvatar(
                       backgroundImage: channelState.channel.extraData
                               .containsKey('image')

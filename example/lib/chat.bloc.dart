@@ -22,19 +22,23 @@ class ChatBloc with ChangeNotifier {
     }));
   }
 
-  final BehaviorSubject<bool> _setUserLoadingController =
-      BehaviorSubject.seeded(false);
+  final BehaviorSubject<User> _userController = BehaviorSubject();
 
-  Stream<bool> get setUserLoading => _setUserLoadingController.stream;
+  Stream<User> get userStream => _userController.stream;
 
-  void setUser(User user, String token) async {
-    _setUserLoadingController.sink.add(true);
+  User user;
+
+  void setUser(User newUser, String token) async {
+    _userController.sink.add(null);
+    user = null;
 
     try {
-      await client.setUser(user, token);
-      _setUserLoadingController.sink.add(false);
-    } catch (e) {
-      _setUserLoadingController.sink.addError(e);
+      await client.setUser(newUser, token);
+      user = newUser;
+      _userController.sink.add(user);
+      print(newUser.id);
+    } catch (e, stack) {
+      _userController.sink.addError(e, stack);
     }
   }
 
@@ -71,10 +75,9 @@ class ChatBloc with ChangeNotifier {
         channelBlocs[c.channel.id] = ChannelBloc(client, c);
       });
       _channelsController.sink.add(channels);
+      _queryChannelsLoadingController.sink.add(false);
     } catch (e) {
       _channelsController.sink.addError(e);
-    } finally {
-      _queryChannelsLoadingController.sink.add(false);
     }
   }
 
@@ -87,7 +90,7 @@ class ChatBloc with ChangeNotifier {
     super.dispose();
     client.dispose();
     subscriptions.forEach((s) => s.cancel());
-    _setUserLoadingController.close();
+    _userController.close();
     _queryChannelsLoadingController.close();
     _channelsController.close();
   }

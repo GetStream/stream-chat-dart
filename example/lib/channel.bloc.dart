@@ -20,6 +20,10 @@ class ChannelBloc with ChangeNotifier {
 
   Stream<bool> get newMessage => _newMessageController.stream;
 
+  final BehaviorSubject<List<Message>> _messagesController = BehaviorSubject();
+
+  Stream<List<Message>> get messages => _messagesController.stream;
+
   final ChannelState _channelState;
   final ChannelClient channelClient;
   final List<StreamSubscription> subscriptions = [];
@@ -33,8 +37,10 @@ class ChannelBloc with ChangeNotifier {
         ),
         _channelState = channelState {
     _channelStateController.sink.add(_channelState);
+    _messagesController.add(_channelState.messages);
     subscriptions.add(channelClient.on('message.new').listen((Event e) {
       channelState.messages.add(e.message);
+      _messagesController.add(channelState.messages);
       _newMessageController.add(true);
     }));
 
@@ -58,5 +64,6 @@ class ChannelBloc with ChangeNotifier {
     _newMessageController.close();
     _typingStateController.close();
     _channelStateController.close();
+    _messagesController.close();
   }
 }
