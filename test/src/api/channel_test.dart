@@ -46,13 +46,13 @@ void main() {
         final client = Client('api-key', httpClient: mockDio);
         final channelClient = client.channel('messaging', id: 'testid');
 
-        when(mockDio.post<String>('/channels/messaging/testid/read'))
+        when(mockDio.post<String>('/channels/messaging/testid/read', data: {}))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await channelClient.markRead();
 
-        verify(mockDio.post<String>('/channels/messaging/testid/read'))
-            .called(1);
+        verify(mockDio.post<String>('/channels/messaging/testid/read',
+            data: {})).called(1);
       });
 
       test('getReplies', () async {

@@ -154,7 +154,7 @@ class ChannelClient {
   }
 
   Future<EmptyResponse> markRead() async {
-    final response = await _client.post("$_channelURL/read");
+    final response = await _client.post("$_channelURL/read", data: {});
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
