@@ -15,6 +15,7 @@ class _ChannelPreviewState extends State<ChannelPreview>
     with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Consumer<ChannelBloc>(
       builder: (context, channelBloc, _) => StreamBuilder<ChannelState>(
           stream: channelBloc.channelState,
@@ -23,14 +24,15 @@ class _ChannelPreviewState extends State<ChannelPreview>
               return Container();
             }
             final channelState = snapshot.data;
-            return StreamBuilder<bool>(
-                stream: channelBloc.newMessage,
-                initialData: false,
+            return StreamBuilder<Event>(
+                stream: channelBloc.newMessage
+                    .where((e) => e.user.id != channelBloc.chatBloc.user.id),
                 builder: (context, snapshot) {
                   final newMessage = snapshot.data;
                   final textStyle = TextStyle(
-                      fontWeight:
-                          newMessage ? FontWeight.bold : FontWeight.normal);
+                      fontWeight: (newMessage != null)
+                          ? FontWeight.bold
+                          : FontWeight.normal);
                   return ListTile(
                     title: Text(
                       channelState.channel.extraData['name'] as String ??

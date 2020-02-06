@@ -17,10 +17,11 @@ class ChannelBloc with ChangeNotifier {
 
   Stream<bool> get typing => _typingStateController.stream;
 
-  final BehaviorSubject<bool> _newMessageController =
-      BehaviorSubject.seeded(false);
+  final BehaviorSubject<Event> _newMessageController = BehaviorSubject();
 
-  Stream<bool> get newMessage => _newMessageController.stream;
+  Stream<Event> get newMessage => _newMessageController.stream;
+
+  Event get hasNewMessage => _newMessageController.value;
 
   final BehaviorSubject<List<Message>> _messagesController = BehaviorSubject();
 
@@ -44,12 +45,12 @@ class ChannelBloc with ChangeNotifier {
     subscriptions.add(channelClient.on('message.new').listen((Event e) {
       channelState.messages.add(e.message);
       _messagesController.add(channelState.messages);
-      _newMessageController.add(true);
+      _newMessageController.add(e);
     }));
 
     subscriptions.add(channelClient.on('message.read').listen((Event e) {
       if (e.user.id == chatBloc.user.id) {
-        _newMessageController.add(false);
+        _newMessageController.add(null);
       }
     }));
 
@@ -62,16 +63,24 @@ class ChannelBloc with ChangeNotifier {
     }));
   }
 
-  void queryMessages() async {
-    final res = await channelClient.query(
+  final BehaviorSubject<bool> _queryMessageController = BehaviorSubject();
+
+  Stream<bool> get queryMessage => _queryMessageController.stream;
+
+  void queryMessages() {
+    _queryMessageController.add(true);
+    channelClient.query(
       {},
       messagesPagination: PaginationParams(
           lessThan: _channelState.messages.first.id, limit: 10),
-    );
+    ).then((res) {
+      _channelState.messages.insertAll(0, res.messages);
 
-    _channelState.messages.insertAll(0, res.messages);
-
-    _messagesController.add(_channelState.messages);
+      _messagesController.add(_channelState.messages);
+      _queryMessageController.add(false);
+    }).catchError((e, stack) {
+      _queryMessageController.addError(e, stack);
+    });
   }
 
   @override
@@ -82,5 +91,6 @@ class ChannelBloc with ChangeNotifier {
     _typingStateController.close();
     _channelStateController.close();
     _messagesController.close();
+    _queryMessageController.close();
   }
 }

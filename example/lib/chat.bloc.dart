@@ -15,27 +15,30 @@ class ChatBloc with ChangeNotifier {
     subscriptions.add(client.stream.listen((Event e) {
       if (e.type == 'message.new') {
         final index = channels.indexWhere((c) => c.channel.cid == e.cid);
-        final channel = channels.removeAt(index);
-        channels.insert(0, channel);
-        _channelsController.add(channels);
+        if (index > 0) {
+          final channel = channels.removeAt(index);
+          channels.insert(0, channel);
+          _channelsController.add(channels);
+        }
       }
     }));
+
+    setUser(User(id: "wild-breeze-7"),
+        "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo");
   }
 
   final BehaviorSubject<User> _userController = BehaviorSubject();
 
   Stream<User> get userStream => _userController.stream;
 
-  User user;
+  User get user => _userController.value;
 
   void setUser(User newUser, String token) async {
     _userController.sink.add(null);
-    user = null;
 
     try {
       await client.setUser(newUser, token);
-      user = newUser;
-      _userController.sink.add(user);
+      _userController.sink.add(newUser);
     } catch (e, stack) {
       _userController.sink.addError(e, stack);
     }
@@ -71,9 +74,10 @@ class ChatBloc with ChangeNotifier {
       );
       channels.addAll(res.channels);
       channels.forEach((c) {
-        channelBlocs[c.channel.id] = ChannelBloc(client, c, this);
+        if (!channelBlocs.containsKey(c.channel.id)) {
+          channelBlocs[c.channel.id] = ChannelBloc(client, c, this);
+        }
       });
-      print(channels.length);
       _channelsController.sink.add(channels);
       _queryChannelsLoadingController.sink.add(false);
     } catch (e) {

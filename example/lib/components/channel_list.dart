@@ -56,35 +56,43 @@ class ChannelListState extends State<ChannelList> {
                   child: CircularProgressIndicator(),
                 );
               } else {
-                return ListView.builder(
-                  controller: _scrollController,
-                  itemCount: snapshot.data.length + 1,
-                  itemBuilder: (context, i) {
-                    if (i < snapshot.data.length) {
-                      return ChangeNotifierProvider<ChannelBloc>.value(
-                        value:
-                            chatBloc.channelBlocs[snapshot.data[i].channel.id],
-                        child: ChannelPreview(),
-                      );
-                    } else {
-                      return StreamBuilder<bool>(
-                        stream: chatBloc.queryChannelsLoading,
-                        builder: (context, snapshot) {
-                          return Center(
-                            child: (snapshot.hasData && snapshot.data)
-                                ? CircularProgressIndicator()
-                                : Container(),
-                          );
-                        },
-                      );
-                    }
-                  },
-                );
+                return _buildListView(snapshot, chatBloc);
               }
             },
           ),
         ),
       ),
+    );
+  }
+
+  ListView _buildListView(
+    AsyncSnapshot<List<ChannelState>> snapshot,
+    ChatBloc chatBloc,
+  ) {
+    return ListView.builder(
+      itemExtent: 80,
+      controller: _scrollController,
+      itemCount: snapshot.data.length + 1,
+      itemBuilder: (context, i) {
+        if (i < snapshot.data.length) {
+          return ChangeNotifierProvider<ChannelBloc>.value(
+            key: Key(snapshot.data[i].channel.id),
+            value: chatBloc.channelBlocs[snapshot.data[i].channel.id],
+            child: ChannelPreview(),
+          );
+        } else {
+          return StreamBuilder<bool>(
+            stream: chatBloc.queryChannelsLoading,
+            builder: (context, snapshot) {
+              return Center(
+                child: (snapshot.hasData && snapshot.data)
+                    ? CircularProgressIndicator()
+                    : Container(),
+              );
+            },
+          );
+        }
+      },
     );
   }
 

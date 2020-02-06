@@ -6,40 +6,22 @@ import 'components/channel_list.dart';
 
 void main() => runApp(MyApp());
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   final client = Client("qk4nn7rpcn75", logLevel: Level.INFO);
 
   @override
-  _MyAppState createState() => _MyAppState(ChatBloc(client));
-}
-
-class _MyAppState extends State<MyApp> {
-  final ChatBloc chatBloc;
-  _MyAppState(this.chatBloc);
-
-  @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<ChatBloc>.value(
-      value: chatBloc,
+    return ChangeNotifierProvider<ChatBloc>(
+      create: (_) => ChatBloc(client),
       child: MaterialApp(
         title: 'Stream Chat Example',
         home: ChatLoader(),
       ),
     );
   }
-
-  @override
-  void initState() {
-    super.initState();
-  }
 }
 
-class ChatLoader extends StatefulWidget {
-  @override
-  _ChatLoaderState createState() => _ChatLoaderState();
-}
-
-class _ChatLoaderState extends State<ChatLoader> {
+class ChatLoader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<ChatBloc>(
@@ -61,19 +43,10 @@ class _ChatLoaderState extends State<ChatLoader> {
               pagination: PaginationParams(
                 limit: 20,
               ),
-              options: {'subscribe': true},
             );
           }
         },
       ),
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    Provider.of<ChatBloc>(context, listen: false).setUser(
-        User(id: "wild-breeze-7"),
-        "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo");
   }
 }
