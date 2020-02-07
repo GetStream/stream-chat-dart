@@ -16,7 +16,7 @@ This library is currently under development: you can subscribe for updates [here
 
 ```yaml
 dependencies:
- stream_chat: ^0.0.1
+ stream_chat: ^0.1.0
 ```
 
 > This library is currently in active development and it is not yet released on pub.dev
