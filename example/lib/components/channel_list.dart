@@ -55,6 +55,7 @@ class ChannelListState extends State<ChannelList> {
                                     color: Colors.black.withOpacity(0.5),
                                     fontSize: 14,
                                   ),
+                                  autofocus: false,
                                   decoration: InputDecoration(
                                     hintText: 'Search',
                                     prefixText: '   ',
@@ -66,12 +67,22 @@ class ChannelListState extends State<ChannelList> {
                           ),
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () {},
-                        child: CircleAvatar(
-                          backgroundColor: Colors.white,
-                          radius: 20,
-                          child: Icon(Icons.send),
+                      RawMaterialButton(
+                        onPressed: () {},
+                        constraints:
+                            BoxConstraints.tightFor(height: 40, width: 40),
+                        elevation: 0,
+                        hoverElevation: 0,
+                        disabledElevation: 0,
+                        focusElevation: 0,
+                        highlightElevation: 0,
+                        fillColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(32),
+                        ),
+                        child: Icon(
+                          Icons.send,
+                          color: Color(0xff006bff),
                         ),
                       ),
                     ],

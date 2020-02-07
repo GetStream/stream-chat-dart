@@ -80,52 +80,50 @@ class _ChannelWidgetState extends State<ChannelWidget> {
                   },
                 ),
               ),
-              Material(
-                color: Colors.black12,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20.0),
-                          child: Container(
-                            color: Colors.white,
-                            child: Row(
-                              children: <Widget>[
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(left: 8.0),
-                                    child: TextField(
-                                      onSubmitted: (_) {
-                                        _sendMessage(context, channelBloc);
-                                      },
-                                      controller: _textController,
-                                      decoration: InputDecoration(
-                                        hintText: 'Type a message ..',
-                                        border: InputBorder.none,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.black.withAlpha(5),
+                            borderRadius: BorderRadius.circular(10.0),
+                            border:
+                                Border.all(color: Colors.black.withAlpha(80))),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: TextField(
+                            onSubmitted: (_) {
+                              _sendMessage(context, channelBloc);
+                            },
+                            controller: _textController,
+                            style: TextStyle(
+                              color: Colors.black.withOpacity(0.6),
+                              fontSize: 15,
+                            ),
+                            autofocus: false,
+                            decoration: InputDecoration(
+                              hintText: 'Write a message',
+                              prefixText: '   ',
+                              border: InputBorder.none,
                             ),
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 8.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            _sendMessage(context, channelBloc);
-                          },
-                          child: CircleAvatar(
-                            child: Icon(Icons.send),
-                          ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          _sendMessage(context, channelBloc);
+                        },
+                        child: CircleAvatar(
+                          child: Icon(Icons.send),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -226,7 +224,7 @@ class _ChannelWidgetState extends State<ChannelWidget> {
     });
   }
 
-  Align _buildMessage(
+  Widget _buildMessage(
     Message previousMessage,
     Message message,
     Message nextMessage,
@@ -237,35 +235,85 @@ class _ChannelWidgetState extends State<ChannelWidget> {
     final messageUserId = message.user.id;
     final previousUserId = previousMessage?.user?.id;
     final nextUserId = nextMessage?.user?.id;
-    final isMyMessage = messageUserId == currentUserId;
+    final bool isMyMessage = messageUserId == currentUserId;
     final isLastUser = previousUserId == messageUserId;
     final isNextUser = nextUserId == messageUserId;
-    return Align(
-      alignment: isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular((isMyMessage || !isLastUser) ? 32 : 0),
-            bottomLeft: Radius.circular(isMyMessage ? 32 : 0),
-            topRight: Radius.circular((isMyMessage && isLastUser) ? 0 : 32),
-            bottomRight: Radius.circular(isMyMessage ? 0 : 32),
-          ),
-          color: isMyMessage
-              ? Colors.lightGreen
-              : Theme.of(context).primaryColorLight,
+    List<Widget> row = <Widget>[
+      Container(
+        width: MediaQuery.of(context).size.width - 60,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Align(
+              alignment:
+                  isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: isMyMessage ? null : Border.all(color: Colors.white),
+                  borderRadius: BorderRadius.only(
+                    topLeft:
+                        Radius.circular((isMyMessage || !isLastUser) ? 16 : 2),
+                    bottomLeft: Radius.circular(isMyMessage ? 16 : 2),
+                    topRight:
+                        Radius.circular((isMyMessage && isLastUser) ? 2 : 16),
+                    bottomRight: Radius.circular(isMyMessage ? 2 : 16),
+                  ),
+                  color: isMyMessage ? Color(0xffebebeb) : Colors.white,
+                ),
+                padding: EdgeInsets.all(10),
+                constraints: BoxConstraints.loose(Size.fromWidth(300)),
+                child: Text(
+                  message.text,
+                  style: TextStyle(
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+            isNextUser
+                ? Container()
+                : Align(
+                    alignment: isMyMessage
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
+                    child: Text(
+                      '${message.createdAt.hour}:${message.createdAt.minute.toString().padRight(2, '0')}',
+                    ),
+                  ),
+          ],
         ),
-        margin: EdgeInsets.only(
-          top: isLastUser ? 2 : 10,
-          bottom: isNextUser ? 2 : 10,
-          left: 8,
-          right: 8,
-        ),
-        constraints: BoxConstraints(maxWidth: 300),
-        child: ListTile(
-          subtitle: Text(message.user.extraData['name'] ?? messageUserId),
-          title: Text(message.text),
-          dense: true,
-        ),
+      ),
+      isNextUser
+          ? Container(
+              width: 40,
+            )
+          : Padding(
+              padding: EdgeInsets.only(
+                  left: isMyMessage ? 8.0 : 0, right: isMyMessage ? 0 : 8.0),
+              child: CircleAvatar(
+                radius: 16,
+                backgroundImage: message.user.extraData.containsKey('image')
+                    ? NetworkImage(message.user.extraData['image'] as String)
+                    : null,
+                child: message.user.extraData.containsKey('image')
+                    ? null
+                    : Text(message.user.extraData['name'][0]),
+              ),
+            ),
+    ];
+    if (!isMyMessage) {
+      row = row.reversed.toList();
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+      margin: EdgeInsets.only(
+        top: isLastUser ? 5 : 24,
+        bottom: nextMessage == null ? 30 : 0,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisSize: MainAxisSize.max,
+        children: row,
       ),
     );
   }

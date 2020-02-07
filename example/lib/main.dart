@@ -14,9 +14,10 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider<ChatBloc>(
       create: (_) => ChatBloc(client),
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Stream Chat Example',
         home: ChatLoader(),
-        theme: ThemeData(scaffoldBackgroundColor: Color(0xF1F1F3FF)),
+        theme: ThemeData(scaffoldBackgroundColor: Color(0xfff1f1f3)),
       ),
     );
   }
