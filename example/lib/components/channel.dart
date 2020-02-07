@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_example/chat.bloc.dart';
 
 import '../channel.bloc.dart';
 import 'channel_header.dart';
@@ -50,9 +48,13 @@ class _ChannelWidgetState extends State<ChannelWidget> {
                           return _buildLoadingIndicator(channelBloc);
                         } else {
                           final message = messages[i];
-                          if (i == messages.length - 2) {
+                          final previousMessage =
+                              i < messages.length - 1 ? messages[i + 1] : null;
+                          final nextMessage = i > 0 ? messages[i - 1] : null;
+                          if (i == messages.length - 1) {
                             return _buildTopMessage(
                               message,
+                              nextMessage,
                               channelBloc,
                               context,
                             );
@@ -60,12 +62,15 @@ class _ChannelWidgetState extends State<ChannelWidget> {
                           if (i == 0) {
                             return _buildBottomMessage(
                               channelBloc,
+                              previousMessage,
                               message,
                               context,
                             );
                           }
                           return _buildMessage(
+                            previousMessage,
                             message,
+                            nextMessage,
                             channelBloc,
                             context,
                           );
@@ -140,6 +145,7 @@ class _ChannelWidgetState extends State<ChannelWidget> {
 
   VisibilityDetector _buildBottomMessage(
     ChannelBloc channelBloc,
+    Message previousMessage,
     Message message,
     BuildContext context,
   ) {
@@ -154,7 +160,9 @@ class _ChannelWidgetState extends State<ChannelWidget> {
         }
       },
       child: _buildMessage(
+        previousMessage,
         message,
+        null,
         channelBloc,
         context,
       ),
@@ -183,12 +191,15 @@ class _ChannelWidgetState extends State<ChannelWidget> {
 
   VisibilityDetector _buildTopMessage(
     Message message,
+    Message nextMessage,
     ChannelBloc channelBloc,
     BuildContext context,
   ) {
     return VisibilityDetector(
       child: _buildMessage(
+        null,
         message,
+        nextMessage,
         channelBloc,
         context,
       ),
@@ -205,27 +216,53 @@ class _ChannelWidgetState extends State<ChannelWidget> {
     final text = _textController.text;
     _textController.clear();
     FocusScope.of(context).unfocus();
-    channelBloc.channelClient.sendMessage(
+    channelBloc.channelClient
+        .sendMessage(
       Message(text: text),
-    );
+    )
+        .then((_) {
+      _scrollController.scrollTo(
+          index: 0, duration: Duration(milliseconds: 300));
+    });
   }
 
   Align _buildMessage(
+    Message previousMessage,
     Message message,
+    Message nextMessage,
     ChannelBloc channelBloc,
     BuildContext context,
   ) {
-    final isMyMessage = message.user.id == channelBloc.chatBloc.user.id;
+    final currentUserId = channelBloc.chatBloc.user.id;
+    final messageUserId = message.user.id;
+    final previousUserId = previousMessage?.user?.id;
+    final nextUserId = nextMessage?.user?.id;
+    final isMyMessage = messageUserId == currentUserId;
+    final isLastUser = previousUserId == messageUserId;
+    final isNextUser = nextUserId == messageUserId;
     return Align(
       alignment: isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        color: isMyMessage
-            ? Colors.lightGreen
-            : Theme.of(context).primaryColorLight,
-        margin: EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular((isMyMessage || !isLastUser) ? 32 : 0),
+            bottomLeft: Radius.circular(isMyMessage ? 32 : 0),
+            topRight: Radius.circular((isMyMessage && isLastUser) ? 0 : 32),
+            bottomRight: Radius.circular(isMyMessage ? 0 : 32),
+          ),
+          color: isMyMessage
+              ? Colors.lightGreen
+              : Theme.of(context).primaryColorLight,
+        ),
+        margin: EdgeInsets.only(
+          top: isLastUser ? 2 : 10,
+          bottom: isNextUser ? 2 : 10,
+          left: 8,
+          right: 8,
+        ),
         constraints: BoxConstraints(maxWidth: 300),
         child: ListTile(
-          subtitle: Text(message.user.extraData['name'] ?? message.user.id),
+          subtitle: Text(message.user.extraData['name'] ?? messageUserId),
           title: Text(message.text),
           dense: true,
         ),
