@@ -27,6 +27,8 @@ class ChannelBloc with ChangeNotifier {
 
   Stream<List<Message>> get messages => _messagesController.stream;
 
+  List<Message> get messageList => _messagesController.value;
+
   final ChannelState _channelState;
   final ChannelClient channelClient;
   final List<StreamSubscription> subscriptions = [];

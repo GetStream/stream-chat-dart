@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_widgets/flutter_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_example/chat.bloc.dart';
 
 import '../channel.bloc.dart';
 import 'channel_header.dart';
@@ -13,8 +15,12 @@ class ChannelWidget extends StatefulWidget {
 }
 
 class _ChannelWidgetState extends State<ChannelWidget> {
-  final _scrollController = ScrollController();
+  final ItemPositionsListener _itemPositionsListener =
+      ItemPositionsListener.create();
+  final ItemScrollController _scrollController = ItemScrollController();
   final _textController = TextEditingController();
+  bool isBottom = true;
+  ItemPosition _lastBottomPosition;
 
   @override
   Widget build(BuildContext context) {
@@ -28,36 +34,40 @@ class _ChannelWidgetState extends State<ChannelWidget> {
               Expanded(
                 child: StreamBuilder<List<Message>>(
                   stream: channelBloc.messages,
-                  initialData: [],
                   builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Container();
+                    }
                     final messages = snapshot.data.reversed.toList();
-                    return ListView.builder(
-                      controller: _scrollController,
-                      reverse: true,
+                    _handleScrollingOnNewMessage(channelBloc);
+                    return ScrollablePositionedList.builder(
                       itemCount: messages.length + 1,
+                      itemPositionsListener: _itemPositionsListener,
+                      itemScrollController: _scrollController,
+                      reverse: true,
                       itemBuilder: (context, i) {
-                        print(
-                            'context.findRenderObject().paintBounds.height: ${context.findRenderObject().paintBounds.height}');
-                        if (i < messages.length) {
-                          final message = messages[i];
-                          return _buildMessage(message, channelBloc, context);
+                        if (i == messages.length) {
+                          return _buildLoadingIndicator(channelBloc);
                         } else {
-                          return Container(
-                            height: 100,
-                            child: StreamBuilder<bool>(
-                                stream: channelBloc.queryMessage,
-                                initialData: false,
-                                builder: (context, snapshot) {
-                                  if (!snapshot.data) {
-                                    return Container();
-                                  }
-                                  return Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  );
-                                }),
+                          final message = messages[i];
+                          if (i == messages.length - 2) {
+                            return _buildTopMessage(
+                              message,
+                              channelBloc,
+                              context,
+                            );
+                          }
+                          if (i == 0) {
+                            return _buildBottomMessage(
+                              channelBloc,
+                              message,
+                              context,
+                            );
+                          }
+                          return _buildMessage(
+                            message,
+                            channelBloc,
+                            context,
                           );
                         }
                       },
@@ -83,7 +93,7 @@ class _ChannelWidgetState extends State<ChannelWidget> {
                                     padding: const EdgeInsets.only(left: 8.0),
                                     child: TextField(
                                       onSubmitted: (_) {
-                                        _sendMessage(channelBloc);
+                                        _sendMessage(context, channelBloc);
                                       },
                                       controller: _textController,
                                       decoration: InputDecoration(
@@ -102,7 +112,7 @@ class _ChannelWidgetState extends State<ChannelWidget> {
                         padding: const EdgeInsets.only(left: 8.0),
                         child: GestureDetector(
                           onTap: () {
-                            _sendMessage(channelBloc);
+                            _sendMessage(context, channelBloc);
                           },
                           child: CircleAvatar(
                             child: Icon(Icons.send),
@@ -120,14 +130,84 @@ class _ChannelWidgetState extends State<ChannelWidget> {
     );
   }
 
-  void _sendMessage(ChannelBloc channelBloc) {
-    channelBloc.channelClient
-        .sendMessage(
-      Message(text: _textController.text),
-    )
-        .then((_) {
-      _textController.clear();
-    });
+  void _handleScrollingOnNewMessage(ChannelBloc channelBloc) {
+    if (channelBloc.hasNewMessage != null && !this.isBottom) {
+      _scrollController.jumpTo(
+          index: _lastBottomPosition.index + 1,
+          alignment: _lastBottomPosition.itemLeadingEdge);
+    }
+  }
+
+  VisibilityDetector _buildBottomMessage(
+    ChannelBloc channelBloc,
+    Message message,
+    BuildContext context,
+  ) {
+    return VisibilityDetector(
+      key: ValueKey<String>('bottom message'),
+      onVisibilityChanged: (visibility) {
+        this.isBottom = visibility.visibleBounds != Rect.zero;
+        if (this.isBottom) {
+          if (channelBloc.hasNewMessage != null) {
+            channelBloc.channelClient.markRead();
+          }
+        }
+      },
+      child: _buildMessage(
+        message,
+        channelBloc,
+        context,
+      ),
+    );
+  }
+
+  Container _buildLoadingIndicator(ChannelBloc channelBloc) {
+    return Container(
+      height: 100,
+      child: StreamBuilder<bool>(
+          stream: channelBloc.queryMessage,
+          initialData: false,
+          builder: (context, snapshot) {
+            if (!snapshot.data) {
+              return Container();
+            }
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }),
+    );
+  }
+
+  VisibilityDetector _buildTopMessage(
+    Message message,
+    ChannelBloc channelBloc,
+    BuildContext context,
+  ) {
+    return VisibilityDetector(
+      child: _buildMessage(
+        message,
+        channelBloc,
+        context,
+      ),
+      key: ValueKey<String>('top message'),
+      onVisibilityChanged: (visibility) {
+        if (visibility.visibleBounds != Rect.zero) {
+          channelBloc.queryMessages();
+        }
+      },
+    );
+  }
+
+  void _sendMessage(BuildContext context, ChannelBloc channelBloc) {
+    final text = _textController.text;
+    _textController.clear();
+    FocusScope.of(context).unfocus();
+    channelBloc.channelClient.sendMessage(
+      Message(text: text),
+    );
   }
 
   Align _buildMessage(
@@ -157,32 +237,8 @@ class _ChannelWidgetState extends State<ChannelWidget> {
   void initState() {
     super.initState();
 
-    final ChannelBloc channelBloc =
-        Provider.of<ChannelBloc>(context, listen: false);
-
-    _scrollController.addListener(() {
-      if (_scrollController.position.maxScrollExtent ==
-          _scrollController.position.pixels) {
-        channelBloc.queryMessages();
-      } else if (_scrollController.offset == 0) {
-        channelBloc.newMessage.first.then((b) {
-          if (b != null) {
-            channelBloc.channelClient.markRead();
-          }
-        });
-      }
+    _itemPositionsListener.itemPositions.addListener(() {
+      _lastBottomPosition = _itemPositionsListener.itemPositions.value.first;
     });
-
-    channelBloc.newMessage.first.then((b) {
-      if (b != null) {
-        channelBloc.channelClient.markRead();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _scrollController.dispose();
   }
 }
