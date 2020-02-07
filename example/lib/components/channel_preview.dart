@@ -29,55 +29,93 @@ class _ChannelPreviewState extends State<ChannelPreview>
                     .where((e) => e.user.id != channelBloc.chatBloc.user.id),
                 builder: (context, snapshot) {
                   final newMessage = snapshot.data;
-                  final textStyle = TextStyle(
-                      fontWeight: (newMessage != null)
-                          ? FontWeight.bold
-                          : FontWeight.normal);
-                  return ListTile(
-                    title: Text(
-                      channelState.channel.extraData['name'] as String ??
-                          channelState.channel.config.name,
-                      style: textStyle,
-                    ),
-                    isThreeLine: true,
-                    subtitle: StreamBuilder<bool>(
-                        stream: channelBloc.typing,
-                        initialData: false,
-                        builder: (context, snapshot) {
-                          final typing = snapshot.data;
-                          return Text(
-                            typing
-                                ? 'Typing...'
-                                : channelState.messages?.last?.text ?? '',
-                            maxLines: 2,
-                            style: textStyle,
-                            overflow: TextOverflow.ellipsis,
-                          );
-                        }),
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return ChangeNotifierProvider.value(
-                              value: channelBloc,
-                              child: ChannelWidget(),
-                            );
-                          },
+                  return Material(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return ChangeNotifierProvider.value(
+                                value: channelBloc,
+                                child: ChannelWidget(),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        height: 60,
+                        child: Row(
+                          children: <Widget>[
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundImage: channelState.channel.extraData
+                                      .containsKey('image')
+                                  ? NetworkImage(channelState
+                                      .channel.extraData['image'] as String)
+                                  : null,
+                              child: channelState.channel.extraData
+                                      .containsKey('image')
+                                  ? null
+                                  : Text(channelState.channel.config.name[0]),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text(
+                                      channelState.channel.extraData['name']
+                                              as String ??
+                                          channelState.channel.config.name,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    StreamBuilder<bool>(
+                                        stream: channelBloc.typing,
+                                        initialData: false,
+                                        builder: (context, snapshot) {
+                                          final typing = snapshot.data;
+                                          return Text(
+                                            typing
+                                                ? 'Typing...'
+                                                : channelState
+                                                        .messages?.last?.text ??
+                                                    '',
+                                            maxLines: 1,
+                                            style: TextStyle(
+                                              color: Colors.black.withOpacity(
+                                                  newMessage != null ? 1 : 0.5),
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          );
+                                        }),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: <Widget>[
+                                Text(
+                                  '12/12/2020',
+                                  style: TextStyle(
+                                    color: Colors.black.withOpacity(0.5),
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      );
-                    },
-                    leading: Hero(
-                      tag: channelState.channel.id,
-                      child: CircleAvatar(
-                        backgroundImage:
-                            channelState.channel.extraData.containsKey('image')
-                                ? NetworkImage(channelState
-                                    .channel.extraData['image'] as String)
-                                : null,
-                        child:
-                            channelState.channel.extraData.containsKey('image')
-                                ? null
-                                : Text(channelState.channel.config.name[0]),
                       ),
                     ),
                   );

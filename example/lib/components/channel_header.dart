@@ -22,19 +22,15 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
                 final channelState = snapshot.data;
                 return AppBar(
                   title: ListTile(
-                    leading: Hero(
-                      tag: channelState.channel.id,
-                      child: CircleAvatar(
-                        backgroundImage:
-                            channelState.channel.extraData.containsKey('image')
-                                ? NetworkImage(channelState
-                                    .channel.extraData['image'] as String)
-                                : null,
-                        child:
-                            channelState.channel.extraData.containsKey('image')
-                                ? null
-                                : Text(channelState.channel.config.name[0]),
-                      ),
+                    leading: CircleAvatar(
+                      backgroundImage: channelState.channel.extraData
+                              .containsKey('image')
+                          ? NetworkImage(
+                              channelState.channel.extraData['image'] as String)
+                          : null,
+                      child: channelState.channel.extraData.containsKey('image')
+                          ? null
+                          : Text(channelState.channel.config.name[0]),
                     ),
                     title: Text(
                       channelState.channel.extraData['name'] as String ??

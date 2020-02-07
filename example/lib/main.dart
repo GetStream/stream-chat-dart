@@ -16,6 +16,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Stream Chat Example',
         home: ChatLoader(),
+        theme: ThemeData(scaffoldBackgroundColor: Color(0xF1F1F3FF)),
       ),
     );
   }

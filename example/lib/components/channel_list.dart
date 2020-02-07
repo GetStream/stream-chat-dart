@@ -31,34 +31,83 @@ class ChannelListState extends State<ChannelList> {
   Widget build(BuildContext context) {
     return Consumer<ChatBloc>(
       builder: (context, ChatBloc chatBloc, _) => Scaffold(
-        appBar: AppBar(
-          title: Text('Channels List'),
-        ),
-        body: RefreshIndicator(
-          onRefresh: () async {
-            chatBloc.clearChannels();
-            return chatBloc.queryChannels(
-              widget.filter,
-              widget.sort,
-              widget.pagination,
-              widget.options,
-            );
-          },
-          child: StreamBuilder<List<ChannelState>>(
-            stream: chatBloc.channelsStream,
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return Center(
-                  child: Text(snapshot.error.toString()),
-                );
-              } else if (!snapshot.hasData) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              } else {
-                return _buildListView(snapshot, chatBloc);
-              }
-            },
+        body: SafeArea(
+          child: Column(
+            children: <Widget>[
+              Container(
+                height: 50,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Padding(
+                          padding:
+                              EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20.0),
+                            child: Container(
+                              color: Colors.black12,
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 8.0),
+                                child: TextField(
+                                  style: TextStyle(
+                                    color: Colors.black.withOpacity(0.5),
+                                    fontSize: 14,
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: 'Search',
+                                    prefixText: '   ',
+                                    border: InputBorder.none,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {},
+                        child: CircleAvatar(
+                          backgroundColor: Colors.white,
+                          radius: 20,
+                          child: Icon(Icons.send),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    chatBloc.clearChannels();
+                    return chatBloc.queryChannels(
+                      widget.filter,
+                      widget.sort,
+                      widget.pagination,
+                      widget.options,
+                    );
+                  },
+                  child: StreamBuilder<List<ChannelState>>(
+                    stream: chatBloc.channelsStream,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Center(
+                          child: Text(snapshot.error.toString()),
+                        );
+                      } else if (!snapshot.hasData) {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      } else {
+                        return _buildListView(snapshot, chatBloc);
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -69,8 +118,17 @@ class ChannelListState extends State<ChannelList> {
     AsyncSnapshot<List<ChannelState>> snapshot,
     ChatBloc chatBloc,
   ) {
-    return ListView.builder(
-      itemExtent: 80,
+    return ListView.separated(
+      separatorBuilder: (context, i) {
+        if (i >= snapshot.data.length) {
+          return Container();
+        }
+        return Container(
+          height: 1,
+          color: Colors.black.withOpacity(0.1),
+          margin: EdgeInsets.symmetric(horizontal: 16),
+        );
+      },
       controller: _scrollController,
       itemCount: snapshot.data.length + 1,
       itemBuilder: (context, i) {
@@ -84,10 +142,14 @@ class ChannelListState extends State<ChannelList> {
           return StreamBuilder<bool>(
             stream: chatBloc.queryChannelsLoading,
             builder: (context, snapshot) {
-              return Center(
-                child: (snapshot.hasData && snapshot.data)
-                    ? CircularProgressIndicator()
-                    : Container(),
+              return Container(
+                height: 100,
+                padding: EdgeInsets.all(32),
+                child: Center(
+                  child: (snapshot.hasData && snapshot.data)
+                      ? CircularProgressIndicator()
+                      : Container(),
+                ),
               );
             },
           );
