@@ -44,23 +44,24 @@ class ChannelListState extends State<ChannelList> {
                         child: Padding(
                           padding:
                               EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20.0),
-                            child: Container(
-                              color: Colors.black12,
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 8.0),
-                                child: TextField(
-                                  style: TextStyle(
-                                    color: Colors.black.withOpacity(0.5),
-                                    fontSize: 14,
-                                  ),
-                                  autofocus: false,
-                                  decoration: InputDecoration(
-                                    hintText: 'Search',
-                                    prefixText: '   ',
-                                    border: InputBorder.none,
-                                  ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: Colors.black.withAlpha(5),
+                                borderRadius: BorderRadius.circular(32.0),
+                                border: Border.all(
+                                    color: Colors.black.withOpacity(.2))),
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: TextField(
+                                style: TextStyle(
+                                  color: Colors.black.withOpacity(.5),
+                                  fontSize: 15,
+                                ),
+                                autofocus: false,
+                                decoration: InputDecoration(
+                                  hintText: 'Search',
+                                  prefixText: '   ',
+                                  border: InputBorder.none,
                                 ),
                               ),
                             ),
@@ -69,13 +70,11 @@ class ChannelListState extends State<ChannelList> {
                       ),
                       RawMaterialButton(
                         onPressed: () {},
-                        constraints:
-                            BoxConstraints.tightFor(height: 40, width: 40),
-                        elevation: 0,
-                        hoverElevation: 0,
-                        disabledElevation: 0,
-                        focusElevation: 0,
-                        highlightElevation: 0,
+                        constraints: BoxConstraints.tightFor(
+                          height: 40,
+                          width: 40,
+                        ),
+                        elevation: 1,
                         fillColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(32),

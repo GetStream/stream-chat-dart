@@ -19,6 +19,7 @@ class _ChannelWidgetState extends State<ChannelWidget> {
   final _textController = TextEditingController();
   bool isBottom = true;
   ItemPosition _lastBottomPosition;
+  bool _messageIsPresent = false;
 
   @override
   Widget build(BuildContext context) {
@@ -82,48 +83,67 @@ class _ChannelWidgetState extends State<ChannelWidget> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            color: Colors.black.withAlpha(5),
-                            borderRadius: BorderRadius.circular(10.0),
-                            border:
-                                Border.all(color: Colors.black.withAlpha(80))),
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: TextField(
-                            onSubmitted: (_) {
-                              _sendMessage(context, channelBloc);
-                            },
-                            controller: _textController,
-                            style: TextStyle(
-                              color: Colors.black.withOpacity(0.6),
-                              fontSize: 15,
-                            ),
-                            autofocus: false,
-                            decoration: InputDecoration(
-                              hintText: 'Write a message',
-                              prefixText: '   ',
-                              border: InputBorder.none,
-                            ),
+                child: Container(
+                  decoration: BoxDecoration(
+                      color: Colors.black.withAlpha(5),
+                      borderRadius: BorderRadius.circular(10.0),
+                      border: Border.all(color: Colors.black.withOpacity(.2))),
+                  child: Flex(
+                    direction: Axis.horizontal,
+                    children: <Widget>[
+                      Expanded(
+                        child: TextField(
+                          onSubmitted: (_) {
+                            _sendMessage(context, channelBloc);
+                          },
+                          controller: _textController,
+                          onChanged: (s) {
+                            setState(() {
+                              _messageIsPresent = s.isNotEmpty;
+                            });
+                          },
+                          style: TextStyle(
+                            color: Colors.black.withOpacity(.5),
+                            fontSize: 15,
+                          ),
+                          autofocus: false,
+                          decoration: InputDecoration(
+                            hintText: 'Write a message',
+                            prefixText: '   ',
+                            border: InputBorder.none,
                           ),
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: GestureDetector(
-                        onTap: () {
-                          _sendMessage(context, channelBloc);
-                        },
-                        child: CircleAvatar(
-                          child: Icon(Icons.send),
+                      AnimatedCrossFade(
+                        crossFadeState: _messageIsPresent
+                            ? CrossFadeState.showFirst
+                            : CrossFadeState.showSecond,
+                        firstChild: IconButton(
+                          onPressed: () {
+                            _sendMessage(context, channelBloc);
+                          },
+                          icon: RawMaterialButton(
+                            onPressed: () {
+                              _sendMessage(context, channelBloc);
+                            },
+                            constraints: BoxConstraints.tightFor(
+                              height: 40,
+                              width: 40,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(32),
+                            ),
+                            child: Icon(
+                              Icons.send,
+                              color: Color(0xff006bff),
+                            ),
+                          ),
                         ),
+                        secondChild: Container(),
+                        duration: Duration(milliseconds: 500),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -212,7 +232,14 @@ class _ChannelWidgetState extends State<ChannelWidget> {
 
   void _sendMessage(BuildContext context, ChannelBloc channelBloc) {
     final text = _textController.text;
+    if (text.trim().isEmpty) {
+      return;
+    }
+
     _textController.clear();
+    setState(() {
+      _messageIsPresent = false;
+    });
     FocusScope.of(context).unfocus();
     channelBloc.channelClient
         .sendMessage(
@@ -249,7 +276,9 @@ class _ChannelWidgetState extends State<ChannelWidget> {
                   isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
               child: Container(
                 decoration: BoxDecoration(
-                  border: isMyMessage ? null : Border.all(color: Colors.white),
+                  border: isMyMessage
+                      ? null
+                      : Border.all(color: Colors.black.withAlpha(8)),
                   borderRadius: BorderRadius.only(
                     topLeft:
                         Radius.circular((isMyMessage || !isLastUser) ? 16 : 2),
