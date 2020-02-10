@@ -26,14 +26,19 @@ jobs:
         channel: 'beta'
     - name: Activate web
       run: flutter config --enable-web
+    - name: Github pages branch 
+      run: |
+        git checkout gh-pages
+        git pull origin gh-pages
+        git checkout master
     - name: Get dependencies
       run: flutter pub get
     - name: Activate peanut
       run: flutter pub global activate peanut
     - name: Set Github user
       run: |
-        git config --global user.email "deployer@getstream.io"
-        git config --global user.name "Deployer"
+        git config --global user.email "actions@getstream.io"
+        git config --global user.name "Github actions"
     - name: Build
       run: flutter pub global run peanut:peanut
     - name: Publish
