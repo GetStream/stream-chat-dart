@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:stream_chat/src/event_type.dart';
 
@@ -16,8 +18,14 @@ class ChannelClient {
   String cid;
   Map<String, dynamic> data;
 
-  ChannelClient(this._client, this.type, this.id, this.data)
-      : cid = id != null ? "$type:$id" : null;
+  ChannelClient(
+    this._client,
+    this.type,
+    this.id,
+    this.data,
+  ) : cid = id != null ? "$type:$id" : null {
+    startCleaning();
+  }
 
   Client get client => _client;
 
@@ -281,6 +289,7 @@ class ChannelClient {
   DateTime _lastTypingEvent;
 
   Future<void> keyStroke() async {
+    client.logger.info('start typing');
     final now = DateTime.now();
 
     if (_lastTypingEvent == null ||
@@ -291,7 +300,23 @@ class ChannelClient {
   }
 
   Future<void> stopTyping() async {
+    client.logger.info('stop typing');
     _lastTypingEvent = null;
-    await sendEvent(Event(type: EventType.typingEnd));
+    await sendEvent(Event(
+      type: EventType.typingStop,
+      connectionId: cid,
+      user: client.user,
+    ));
+  }
+
+  void startCleaning() {
+    Timer.periodic(Duration(milliseconds: 500), (_) {
+      final now = DateTime.now();
+
+      if (_lastTypingEvent != null &&
+          now.difference(_lastTypingEvent).inSeconds > 1) {
+        stopTyping();
+      }
+    });
   }
 }

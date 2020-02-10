@@ -57,6 +57,9 @@ class _MessageInputState extends State<MessageInput> {
                     },
                     controller: _textController,
                     onChanged: (s) {
+                      Provider.of<ChannelBloc>(context, listen: false)
+                          .channelClient
+                          .keyStroke();
                       setState(() {
                         _messageIsPresent = s.isNotEmpty;
                       });

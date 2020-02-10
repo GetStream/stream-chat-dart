@@ -34,7 +34,7 @@ class Client {
   Stream<Event> get stream => _controller.stream;
 
   String _token;
-  User _user;
+  User user;
   bool _anonymous = false;
   String _connectionId;
   WebSocket _ws;
@@ -107,7 +107,7 @@ class Client {
       };
 
   Future<Event> setUser(User user, String token) {
-    _user = user;
+    this.user = user;
     _token = token;
     _anonymous = false;
     return connect();
@@ -121,14 +121,14 @@ class Client {
   Future<Event> connect() async {
     _ws = WebSocket(
       baseUrl: baseURL,
-      user: _user,
+      user: user,
       connectParams: {
         "api_key": apiKey,
         "authorization": _token,
         "stream-auth-type": authType,
       },
       connectPayload: {
-        "user_id": _user.id,
+        "user_id": user.id,
         "server_determines_connection_id": true,
       },
       handler: handleEvent,
@@ -155,7 +155,7 @@ class Client {
     Map<String, dynamic> payload = {
       "filter_conditions": filter,
       "sort": sort,
-      "user_details": this._user,
+      "user_details": this.user,
     };
 
     payload.addAll(defaultOptions);
@@ -270,7 +270,7 @@ class Client {
   String get userAgent => "stream_chat_dart-client-0.0.1";
 
   Map<String, String> get commonQueryParams => {
-        "user_id": _user?.id,
+        "user_id": user?.id,
         "api_key": apiKey,
         "connection_id": _connectionId,
       };
@@ -278,7 +278,7 @@ class Client {
   Future<Event> setAnonymousUser() async {
     this._anonymous = true;
     final uuid = Uuid();
-    this._user = User(id: uuid.v4());
+    this.user = User(id: uuid.v4());
     return connect();
   }
 
@@ -297,7 +297,7 @@ class Client {
     this._connectionId = null;
     await this._ws.disconnect();
     this._token = null;
-    this._user = null;
+    this.user = null;
   }
 
   Future<QueryUsersResponse> queryUsers(

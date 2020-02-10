@@ -248,7 +248,7 @@ void main() {
 
       final client = Client('api-key', httpClient: mockDio);
       final channelClient = client.channel('messaging', id: 'testid');
-      final event = Event(type: EventType.typingEnd);
+      final event = Event(type: EventType.typingStop);
 
       when(mockDio.post<String>('/channels/messaging/testid/event',
               data: {'event': event.toJson()}))
