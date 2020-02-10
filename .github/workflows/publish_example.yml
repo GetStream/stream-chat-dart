@@ -27,10 +27,7 @@ jobs:
     - name: Activate web
       run: flutter config --enable-web
     - name: Github pages branch 
-      run: |
-        git checkout gh-pages
-        git pull origin gh-pages
-        git checkout master
+      run: git fetch origin gh-pages:gh-pages
     - name: Get dependencies
       run: flutter pub get
     - name: Activate peanut
