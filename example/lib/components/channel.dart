@@ -140,7 +140,9 @@ class _ChannelWidgetState extends State<ChannelWidget> {
                           ),
                         ),
                         secondChild: Container(),
-                        duration: Duration(milliseconds: 500),
+                        duration: Duration(milliseconds: 300),
+                        firstCurve: Curves.ease,
+                        alignment: Alignment.center,
                       ),
                     ],
                   ),
@@ -247,7 +249,9 @@ class _ChannelWidgetState extends State<ChannelWidget> {
     )
         .then((_) {
       _scrollController.scrollTo(
-          index: 0, duration: Duration(milliseconds: 300));
+        index: 0,
+        duration: Duration(milliseconds: 300),
+      );
     });
   }
 
