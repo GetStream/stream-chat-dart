@@ -27,6 +27,8 @@ You should then run `flutter packages get`
 
 There is a detailed Flutter example project in the `example` folder. You can directly run and play on it. 
 
+At [this link](https://getstream.github.io/stream-chat-dart/#/) you can find the example compiled with Hummingbird
+
 ## Setup API Client
 
 First you need to instantiate a chat client. The Chat client will manage API call, event handling and manage the websocket connection to Stream Chat servers. You should only create the client once and re-use it across your application.
