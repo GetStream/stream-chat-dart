@@ -117,18 +117,18 @@ class _ChannelPreviewState extends State<ChannelPreview>
     );
   }
 
-  StreamBuilder<bool> _buildSubtitle(
+  Widget _buildSubtitle(
     ChannelBloc channelBloc,
     bool read,
   ) {
-    return StreamBuilder<bool>(
-        stream: channelBloc.typing,
-        initialData: false,
+    return StreamBuilder<List<User>>(
+        stream: channelBloc.channelClient.typingEvents,
+        initialData: [],
         builder: (context, snapshot) {
-          final typing = snapshot.data;
-          return typing
+          final typings = snapshot.data;
+          return typings.isNotEmpty
               ? Text(
-                  'Typing...',
+                  '${typings.map((u) => u.extraData.containsKey('name') ? u.extraData['name'] : u.id).join(',')} ${typings.length == 1 ? 'is' : 'are'} typing...',
                   maxLines: 1,
                   style: TextStyle(
                     color: Colors.black.withOpacity(!read ? 1 : 0.5),

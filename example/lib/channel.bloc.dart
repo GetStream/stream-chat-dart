@@ -12,11 +12,6 @@ class ChannelBloc with ChangeNotifier {
 
   Stream<ChannelState> get channelState => _channelStateController.stream;
 
-  final BehaviorSubject<bool> _typingStateController =
-      BehaviorSubject.seeded(false);
-
-  Stream<bool> get typing => _typingStateController.stream;
-
   final BehaviorSubject<bool> _readController = BehaviorSubject.seeded(true);
 
   Stream<bool> get read => _readController.stream;
@@ -66,14 +61,6 @@ class ChannelBloc with ChangeNotifier {
         _readController.add(true);
       }
     }));
-
-    subscriptions.add(channelClient.on('typing.start').listen((Event e) {
-      _typingStateController.add(true);
-    }));
-
-    subscriptions.add(channelClient.on('typing.stop').listen((Event e) {
-      _typingStateController.add(false);
-    }));
   }
 
   final BehaviorSubject<bool> _queryMessageController = BehaviorSubject();
@@ -101,9 +88,9 @@ class ChannelBloc with ChangeNotifier {
     super.dispose();
     subscriptions.forEach((s) => s.cancel());
     _readController.close();
-    _typingStateController.close();
     _channelStateController.close();
     _messagesController.close();
     _queryMessageController.close();
+    channelClient.dispose();
   }
 }

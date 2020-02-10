@@ -62,6 +62,14 @@ class ChannelListState extends State<ChannelList> {
             },
           ),
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {},
+          backgroundColor: Colors.white,
+          child: Icon(
+            Icons.send,
+            color: Color(0xff006bff),
+          ),
+        ),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:stream_chat/src/event_type.dart';
+import 'package:stream_chat/src/models/user.dart';
 
 import '../client.dart';
 import '../models/event.dart';
@@ -25,6 +26,7 @@ class ChannelClient {
     this.data,
   ) : cid = id != null ? "$type:$id" : null {
     startCleaning();
+    _listenTypingEvents();
   }
 
   Client get client => _client;
@@ -302,11 +304,30 @@ class ChannelClient {
   Future<void> stopTyping() async {
     client.logger.info('stop typing');
     _lastTypingEvent = null;
-    await sendEvent(Event(
-      type: EventType.typingStop,
-      connectionId: cid,
-      user: client.user,
-    ));
+    await sendEvent(Event(type: EventType.typingStop));
+  }
+
+  StreamController<List<User>> _typingEventsController =
+      StreamController.broadcast();
+
+  Stream<List<User>> get typingEvents => _typingEventsController.stream;
+
+  final Map<User, DateTime> _typings = {};
+
+  void _listenTypingEvents() {
+    this.on(EventType.typingStart).listen((event) {
+      if (event.user != client.user) {
+        _typings[event.user] = DateTime.now();
+        _typingEventsController.add(_typings.keys.toList());
+      }
+    });
+
+    this.on(EventType.typingStop).listen((event) {
+      if (event.user != client.user) {
+        _typings.remove(event.user);
+        _typingEventsController.add(_typings.keys.toList());
+      }
+    });
   }
 
   void startCleaning() {
@@ -317,6 +338,21 @@ class ChannelClient {
           now.difference(_lastTypingEvent).inSeconds > 1) {
         stopTyping();
       }
+
+      _typings.forEach((user, lastTypingEvent) {
+        if (now.difference(lastTypingEvent).inSeconds > 7) {
+          this.client.handleEvent(Event(
+                type: EventType.typingStop,
+                user: user,
+                cid: cid,
+              ));
+        }
+      });
+      _typingEventsController.add(_typings.keys.toList());
     });
+  }
+
+  void dispose() {
+    _typingEventsController.close();
   }
 }

@@ -21,6 +21,7 @@ class ChannelListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
+      physics: AlwaysScrollableScrollPhysics(),
       separatorBuilder: _separatorBuilder,
       controller: _scrollController,
       itemCount: channelsStates.length + 1,
