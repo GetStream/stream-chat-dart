@@ -330,8 +330,10 @@ class ChannelClient {
     });
   }
 
+  Timer _cleaningTimer;
+
   void startCleaning() {
-    Timer.periodic(Duration(milliseconds: 500), (_) {
+    _cleaningTimer = Timer.periodic(Duration(milliseconds: 500), (_) {
       final now = DateTime.now();
 
       if (_lastTypingEvent != null &&
@@ -354,5 +356,6 @@ class ChannelClient {
 
   void dispose() {
     _typingEventsController.close();
+    _cleaningTimer.cancel();
   }
 }
