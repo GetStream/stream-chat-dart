@@ -34,5 +34,9 @@ jobs:
       run: |
         git config --global user.email "deployer@getstream.io"
         git config --global user.name "Deployer"
-    - name: Publish
+    - name: Build
       run: flutter pub global run peanut:peanut
+    - name: Publish
+      run: |
+        git checkout gh-pages
+        git push origin gh-pages
