@@ -7,10 +7,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'chat.bloc.dart';
 
 class ChannelBloc with ChangeNotifier {
-  final BehaviorSubject<ChannelState> _channelStateController =
-      BehaviorSubject();
-
-  Stream<ChannelState> get channelState => _channelStateController.stream;
+  final ChannelState channelState;
 
   final BehaviorSubject<bool> _readController = BehaviorSubject.seeded(true);
 
@@ -24,21 +21,18 @@ class ChannelBloc with ChangeNotifier {
 
   List<Message> get messageList => _messagesController.value;
 
-  final ChannelState _channelState;
   final ChannelClient channelClient;
   final List<StreamSubscription> subscriptions = [];
   final ChatBloc chatBloc;
 
-  ChannelBloc(Client client, ChannelState channelState, this.chatBloc)
+  ChannelBloc(Client client, this.channelState, this.chatBloc)
       : channelClient = ChannelClient(
           client,
           channelState.channel.type,
           channelState.channel.id,
           null,
-        ),
-        _channelState = channelState {
-    _channelStateController.sink.add(_channelState);
-    _messagesController.add(_channelState.messages);
+        ) {
+    _messagesController.add(channelState.messages);
     subscriptions.add(channelClient.on('message.new').listen((Event e) {
       channelState.messages.add(e.message);
       _messagesController.add(channelState.messages);
@@ -71,12 +65,12 @@ class ChannelBloc with ChangeNotifier {
     _queryMessageController.add(true);
     channelClient.query(
       {},
-      messagesPagination: PaginationParams(
-          lessThan: _channelState.messages.first.id, limit: 10),
+      messagesPagination:
+          PaginationParams(lessThan: channelState.messages.first.id, limit: 10),
     ).then((res) {
-      _channelState.messages.insertAll(0, res.messages);
+      channelState.messages.insertAll(0, res.messages);
 
-      _messagesController.add(_channelState.messages);
+      _messagesController.add(channelState.messages);
       _queryMessageController.add(false);
     }).catchError((e, stack) {
       _queryMessageController.addError(e, stack);
@@ -88,7 +82,6 @@ class ChannelBloc with ChangeNotifier {
     super.dispose();
     subscriptions.forEach((s) => s.cancel());
     _readController.close();
-    _channelStateController.close();
     _messagesController.close();
     _queryMessageController.close();
     channelClient.dispose();

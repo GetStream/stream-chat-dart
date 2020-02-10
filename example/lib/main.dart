@@ -31,12 +31,16 @@ class ChatLoader extends StatelessWidget {
         stream: chatBloc.userStream,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return Center(
-              child: Text('${snapshot.error}'),
+            return Scaffold(
+              body: Center(
+                child: Text('${snapshot.error}'),
+              ),
             );
           } else if (!snapshot.hasData) {
-            return Center(
-              child: CircularProgressIndicator(),
+            return Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
             );
           } else {
             return ChannelList(

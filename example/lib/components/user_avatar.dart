@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 
@@ -16,7 +17,7 @@ class UserAvatar extends StatelessWidget {
     return CircleAvatar(
       radius: this.radius,
       backgroundImage: user.extraData.containsKey('image')
-          ? NetworkImage(user.extraData['image'] as String)
+          ? CachedNetworkImageProvider(user.extraData['image'] as String)
           : null,
       child: user.extraData.containsKey('image')
           ? null

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 
@@ -15,7 +16,7 @@ class ChannelImage extends StatelessWidget {
       child: CircleAvatar(
         radius: 20,
         backgroundImage: channel.extraData.containsKey('image')
-            ? NetworkImage(channel.extraData['image'] as String)
+            ? CachedNetworkImageProvider(channel.extraData['image'] as String)
             : null,
         child: channel.extraData.containsKey('image')
             ? null

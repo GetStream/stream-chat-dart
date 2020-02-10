@@ -16,55 +16,48 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<ChannelBloc>(
-      builder: (context, ChannelBloc channelBloc, _) =>
-          StreamBuilder<ChannelState>(
-              stream: channelBloc.channelState,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Container();
-                }
-                final channelState = snapshot.data;
-                return AppBar(
-                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                  leading: _buildBackButton(context),
-                  actions: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(right: 10.0),
-                      child: Stack(
-                        children: <Widget>[
-                          ChannelImage(channel: channelState.channel),
-                          (channelState.members.isNotEmpty &&
-                                  channelState.members.first.user.online)
-                              ? Positioned(
-                                  right: 0,
-                                  top: 5,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.green,
-                                    ),
-                                    height: 8,
-                                    width: 8,
-                                  ),
-                                )
-                              : Container(),
-                        ],
-                      ),
-                    ),
-                  ],
-                  centerTitle: true,
-                  title: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      ChannelNameText(
-                        channel: channelState.channel,
-                      ),
-                      _buildLastActive(channelState),
-                    ],
-                  ),
-                );
-              }),
-    );
+        builder: (context, ChannelBloc channelBloc, _) {
+      final channelState = channelBloc.channelState;
+      return AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        leading: _buildBackButton(context),
+        actions: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(right: 10.0),
+            child: Stack(
+              children: <Widget>[
+                ChannelImage(channel: channelState.channel),
+                (channelState.members.isNotEmpty &&
+                        channelState.members.first.user.online)
+                    ? Positioned(
+                        right: 0,
+                        top: 5,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.green,
+                          ),
+                          height: 8,
+                          width: 8,
+                        ),
+                      )
+                    : Container(),
+              ],
+            ),
+          ),
+        ],
+        centerTitle: true,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            ChannelNameText(
+              channel: channelState.channel,
+            ),
+            _buildLastActive(channelState),
+          ],
+        ),
+      );
+    });
   }
 
   StatelessWidget _buildLastActive(ChannelState channelState) {
