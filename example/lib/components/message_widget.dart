@@ -60,7 +60,9 @@ class MessageWidget extends StatelessWidget {
             )
           : Padding(
               padding: EdgeInsets.only(
-                  left: isMyMessage ? 8.0 : 0, right: isMyMessage ? 0 : 8.0),
+                left: isMyMessage ? 8.0 : 0,
+                right: isMyMessage ? 0 : 8.0,
+              ),
               child: UserAvatar(user: message.user),
             ),
     ];

@@ -5,14 +5,16 @@ class UserAvatar extends StatelessWidget {
   const UserAvatar({
     Key key,
     @required this.user,
+    this.radius = 16,
   }) : super(key: key);
 
   final User user;
+  final double radius;
 
   @override
   Widget build(BuildContext context) {
     return CircleAvatar(
-      radius: 16,
+      radius: this.radius,
       backgroundImage: user.extraData.containsKey('image')
           ? NetworkImage(user.extraData['image'] as String)
           : null,
