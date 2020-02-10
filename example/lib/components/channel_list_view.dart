@@ -4,6 +4,7 @@ import 'package:stream_chat/stream_chat.dart';
 
 import '../channel.bloc.dart';
 import '../chat.bloc.dart';
+import 'channel.dart';
 import 'channel_preview.dart';
 
 class ChannelListView extends StatelessWidget {
@@ -29,15 +30,33 @@ class ChannelListView extends StatelessWidget {
 
   Widget _itemBuilder(context, i) {
     if (i < channelsStates.length) {
+      final channelBloc = Provider.of<ChatBloc>(context)
+          .channelBlocs[channelsStates[i].channel.id];
       return ChangeNotifierProvider<ChannelBloc>.value(
         key: Key(channelsStates[i].channel.id),
-        value: Provider.of<ChatBloc>(context)
-            .channelBlocs[channelsStates[i].channel.id],
-        child: ChannelPreview(),
+        value: channelBloc,
+        child: ChannelPreview(
+          onTap: (channelState) {
+            _navigateToChannel(context, channelBloc);
+          },
+        ),
       );
     } else {
       return _buildQueryProgressIndicator(context);
     }
+  }
+
+  void _navigateToChannel(BuildContext context, ChannelBloc channelBloc) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return ChangeNotifierProvider.value(
+            value: channelBloc,
+            child: ChannelWidget(),
+          );
+        },
+      ),
+    );
   }
 
   StreamBuilder<bool> _buildQueryProgressIndicator(context) {

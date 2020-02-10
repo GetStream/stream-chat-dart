@@ -10,6 +10,10 @@ import '../channel.bloc.dart';
 import 'channel_name_text.dart';
 
 class ChannelPreview extends StatefulWidget {
+  final void Function(ChannelState channel) onTap;
+
+  const ChannelPreview({Key key, this.onTap}) : super(key: key);
+
   @override
   _ChannelPreviewState createState() => _ChannelPreviewState();
 }
@@ -38,7 +42,7 @@ class _ChannelPreviewState extends State<ChannelPreview>
                     elevation: 0,
                     fillColor: Theme.of(context).scaffoldBackgroundColor,
                     onPressed: () {
-                      _navigateToChannel(context, channelBloc);
+                      widget.onTap(channelState);
                     },
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 10),
@@ -146,19 +150,6 @@ class _ChannelPreviewState extends State<ChannelPreview>
                   },
                 );
         });
-  }
-
-  void _navigateToChannel(BuildContext context, ChannelBloc channelBloc) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) {
-          return ChangeNotifierProvider.value(
-            value: channelBloc,
-            child: ChannelWidget(),
-          );
-        },
-      ),
-    );
   }
 
   @override
