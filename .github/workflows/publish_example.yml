@@ -30,5 +30,9 @@ jobs:
       run: flutter pub get
     - name: Activate peanut
       run: flutter pub global activate peanut
+    - name: Set Github user
+      run: |
+        git config --global user.email "deployer@getstream.io"
+        git config --global user.name "Deployer"
     - name: Publish
       run: flutter pub global run peanut:peanut
