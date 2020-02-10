@@ -17,11 +17,11 @@ class ChannelBloc with ChangeNotifier {
 
   Stream<bool> get typing => _typingStateController.stream;
 
-  final BehaviorSubject<Event> _newMessageController = BehaviorSubject();
+  final BehaviorSubject<bool> _readController = BehaviorSubject.seeded(true);
 
-  Stream<Event> get newMessage => _newMessageController.stream;
+  Stream<bool> get read => _readController.stream;
 
-  Event get newMessageValue => _newMessageController.value;
+  bool get readValue => _readController.value;
 
   final BehaviorSubject<List<Message>> _messagesController = BehaviorSubject();
 
@@ -47,12 +47,23 @@ class ChannelBloc with ChangeNotifier {
     subscriptions.add(channelClient.on('message.new').listen((Event e) {
       channelState.messages.add(e.message);
       _messagesController.add(channelState.messages);
-      _newMessageController.add(e);
+
+      if (e.user.id != chatBloc.user.id) {
+        _readController.add(false);
+      }
     }));
+
+    final userRead = channelState.read
+        ?.lastWhere((r) => r.user.id == chatBloc.user.id, orElse: () => null);
+    if (channelState.messages.last.user.id != chatBloc.user.id &&
+        (userRead == null ||
+            userRead.lastRead.isBefore(channelState.channel.lastMessageAt))) {
+      _readController.add(false);
+    }
 
     subscriptions.add(channelClient.on('message.read').listen((Event e) {
       if (e.user.id == chatBloc.user.id) {
-        _newMessageController.add(null);
+        _readController.add(true);
       }
     }));
 
@@ -89,7 +100,7 @@ class ChannelBloc with ChangeNotifier {
   void dispose() {
     super.dispose();
     subscriptions.forEach((s) => s.cancel());
-    _newMessageController.close();
+    _readController.close();
     _typingStateController.close();
     _channelStateController.close();
     _messagesController.close();

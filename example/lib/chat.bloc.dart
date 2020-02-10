@@ -12,14 +12,12 @@ class ChatBloc with ChangeNotifier {
   final Map<String, ChannelBloc> channelBlocs = {};
 
   ChatBloc(this.client) {
-    subscriptions.add(client.stream.listen((Event e) {
-      if (e.type == 'message.new') {
-        final index = channels.indexWhere((c) => c.channel.cid == e.cid);
-        if (index > 0) {
-          final channel = channels.removeAt(index);
-          channels.insert(0, channel);
-          _channelsController.add(channels);
-        }
+    subscriptions.add(client.on('message.new').listen((Event e) {
+      final index = channels.indexWhere((c) => c.channel.cid == e.cid);
+      if (index > 0) {
+        final channel = channels.removeAt(index);
+        channels.insert(0, channel);
+        _channelsController.add(channels);
       }
     }));
 

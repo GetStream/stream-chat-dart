@@ -27,11 +27,13 @@ class _ChannelPreviewState extends State<ChannelPreview>
               return Container();
             }
             final channelState = snapshot.data;
-            return StreamBuilder<Event>(
-                stream: channelBloc.newMessage
-                    .where((e) => e.user.id != channelBloc.chatBloc.user.id),
+            return StreamBuilder<bool>(
+                stream: channelBloc.read,
                 builder: (context, snapshot) {
-                  final newMessage = snapshot.data;
+                  if (!snapshot.hasData) {
+                    return Container();
+                  }
+                  final read = snapshot.data;
                   return RawMaterialButton(
                     elevation: 0,
                     fillColor: Theme.of(context).scaffoldBackgroundColor,
@@ -59,8 +61,7 @@ class _ChannelPreviewState extends State<ChannelPreview>
                                   ),
                                   _buildSubtitle(
                                     channelBloc,
-                                    channelState,
-                                    newMessage,
+                                    read,
                                   ),
                                 ],
                               ),
@@ -70,8 +71,15 @@ class _ChannelPreviewState extends State<ChannelPreview>
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: <Widget>[
-                              _buildDate(
-                                  channelState.channel.lastMessageAt.toLocal()),
+                              StreamBuilder<DateTime>(
+                                  stream: channelBloc.messages
+                                      .map((message) => message.last.createdAt),
+                                  builder: (context, snapshot) {
+                                    if (!snapshot.hasData) {
+                                      return Container();
+                                    }
+                                    return _buildDate(snapshot.data.toLocal());
+                                  }),
                             ],
                           ),
                         ],
@@ -107,23 +115,36 @@ class _ChannelPreviewState extends State<ChannelPreview>
 
   StreamBuilder<bool> _buildSubtitle(
     ChannelBloc channelBloc,
-    ChannelState channelState,
-    Event newMessage,
+    bool read,
   ) {
     return StreamBuilder<bool>(
         stream: channelBloc.typing,
         initialData: false,
         builder: (context, snapshot) {
           final typing = snapshot.data;
-          return Text(
-            typing ? 'Typing...' : channelState.messages?.last?.text ?? '',
-            maxLines: 1,
-            style: TextStyle(
-              color: Colors.black.withOpacity(newMessage != null ? 1 : 0.5),
-              fontSize: 13,
-            ),
-            overflow: TextOverflow.ellipsis,
-          );
+          return typing
+              ? Text(
+                  'Typing...',
+                  maxLines: 1,
+                  style: TextStyle(
+                    color: Colors.black.withOpacity(!read ? 1 : 0.5),
+                    fontSize: 13,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                )
+              : StreamBuilder<Message>(
+                  stream: channelBloc.messages.map((event) => event.last),
+                  builder: (context, snapshot) {
+                    return Text(
+                      snapshot.data?.text ?? '',
+                      maxLines: 1,
+                      style: TextStyle(
+                        color: Colors.black.withOpacity(!read ? 1 : 0.5),
+                        fontSize: 13,
+                      ),
+                    );
+                  },
+                );
         });
   }
 

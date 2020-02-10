@@ -32,7 +32,7 @@ class ChatLoader extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(
-              child: Text(snapshot.error.toString()),
+              child: Text('${snapshot.error}'),
             );
           } else if (!snapshot.hasData) {
             return Center(
@@ -40,7 +40,11 @@ class ChatLoader extends StatelessWidget {
             );
           } else {
             return ChannelList(
-              filter: Map<String, dynamic>(),
+              filter: {
+                'members': {
+                  '\$in': [snapshot.data.id],
+                }
+              },
               sort: [SortOption("last_message_at")],
               pagination: PaginationParams(
                 limit: 20,

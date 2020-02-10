@@ -102,8 +102,8 @@ class Client {
 
   Map<String, String> get httpHeaders => {
         "Authorization": _token,
-        "stream-auth-type": _getAuthType(),
-        "x-stream-client": getUserAgent(),
+        "stream-auth-type": authType,
+        "x-stream-client": userAgent,
       };
 
   Future<Event> setUser(User user, String token) {
@@ -125,7 +125,7 @@ class Client {
       connectParams: {
         "api_key": apiKey,
         "authorization": _token,
-        "stream-auth-type": _getAuthType(),
+        "stream-auth-type": authType,
       },
       connectPayload: {
         "user_id": _user.id,
@@ -264,10 +264,10 @@ class Client {
     }
   }
 
-  _getAuthType() => _anonymous ? 'anonymous' : 'jwt';
+  String get authType => _anonymous ? 'anonymous' : 'jwt';
 
   // TODO: get the right version of the lib from the build toolchain
-  getUserAgent() => "stream_chat_dart-client-0.0.1";
+  String get userAgent => "stream_chat_dart-client-0.0.1";
 
   Map<String, String> get commonQueryParams => {
         "user_id": _user?.id,

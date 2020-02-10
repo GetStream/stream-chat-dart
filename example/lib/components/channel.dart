@@ -6,6 +6,7 @@ import 'package:stream_chat/stream_chat.dart';
 
 import '../channel.bloc.dart';
 import 'channel_header.dart';
+import 'message_input.dart';
 import 'message_widget.dart';
 
 class ChannelWidget extends StatefulWidget {
@@ -17,10 +18,8 @@ class _ChannelWidgetState extends State<ChannelWidget> {
   final ItemPositionsListener _itemPositionsListener =
       ItemPositionsListener.create();
   final ItemScrollController _scrollController = ItemScrollController();
-  final _textController = TextEditingController();
   bool isBottom = true;
   ItemPosition _lastBottomPosition;
-  bool _messageIsPresent = false;
 
   @override
   Widget build(BuildContext context) {
@@ -80,72 +79,13 @@ class _ChannelWidgetState extends State<ChannelWidget> {
                   },
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: Colors.black.withAlpha(5),
-                      borderRadius: BorderRadius.circular(10.0),
-                      border: Border.all(color: Colors.black.withOpacity(.2))),
-                  child: Flex(
-                    direction: Axis.horizontal,
-                    children: <Widget>[
-                      Expanded(
-                        child: TextField(
-                          onSubmitted: (_) {
-                            _sendMessage(context, channelBloc);
-                          },
-                          controller: _textController,
-                          onChanged: (s) {
-                            setState(() {
-                              _messageIsPresent = s.isNotEmpty;
-                            });
-                          },
-                          style: TextStyle(
-                            color: Colors.black.withOpacity(.5),
-                            fontSize: 15,
-                          ),
-                          autofocus: false,
-                          decoration: InputDecoration(
-                            hintText: 'Write a message',
-                            prefixText: '   ',
-                            border: InputBorder.none,
-                          ),
-                        ),
-                      ),
-                      AnimatedCrossFade(
-                        crossFadeState: _messageIsPresent
-                            ? CrossFadeState.showFirst
-                            : CrossFadeState.showSecond,
-                        firstChild: IconButton(
-                          onPressed: () {
-                            _sendMessage(context, channelBloc);
-                          },
-                          icon: RawMaterialButton(
-                            onPressed: () {
-                              _sendMessage(context, channelBloc);
-                            },
-                            constraints: BoxConstraints.tightFor(
-                              height: 40,
-                              width: 40,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(32),
-                            ),
-                            child: Icon(
-                              Icons.send,
-                              color: Color(0xff006bff),
-                            ),
-                          ),
-                        ),
-                        secondChild: Container(),
-                        duration: Duration(milliseconds: 300),
-                        firstCurve: Curves.ease,
-                        alignment: Alignment.center,
-                      ),
-                    ],
-                  ),
-                ),
+              MessageInput(
+                onMessageSent: (_) {
+                  _scrollController.scrollTo(
+                    index: 0,
+                    duration: Duration(milliseconds: 300),
+                  );
+                },
               ),
             ],
           ),
@@ -155,7 +95,7 @@ class _ChannelWidgetState extends State<ChannelWidget> {
   }
 
   void _handleScrollingOnNewMessage(ChannelBloc channelBloc) {
-    if (channelBloc.newMessageValue != null && !this.isBottom) {
+    if (!channelBloc.readValue && !this.isBottom) {
       _scrollController.jumpTo(
           index: _lastBottomPosition.index + 1,
           alignment: _lastBottomPosition.itemLeadingEdge);
@@ -173,7 +113,7 @@ class _ChannelWidgetState extends State<ChannelWidget> {
       onVisibilityChanged: (visibility) {
         this.isBottom = visibility.visibleBounds != Rect.zero;
         if (this.isBottom) {
-          if (channelBloc.newMessageValue != null) {
+          if (!channelBloc.readValue) {
             channelBloc.channelClient.markRead();
           }
         }
@@ -225,29 +165,6 @@ class _ChannelWidgetState extends State<ChannelWidget> {
         }
       },
     );
-  }
-
-  void _sendMessage(BuildContext context, ChannelBloc channelBloc) {
-    final text = _textController.text;
-    if (text.trim().isEmpty) {
-      return;
-    }
-
-    _textController.clear();
-    setState(() {
-      _messageIsPresent = false;
-    });
-    FocusScope.of(context).unfocus();
-    channelBloc.channelClient
-        .sendMessage(
-      Message(text: text),
-    )
-        .then((_) {
-      _scrollController.scrollTo(
-        index: 0,
-        duration: Duration(milliseconds: 300),
-      );
-    });
   }
 
   @override
