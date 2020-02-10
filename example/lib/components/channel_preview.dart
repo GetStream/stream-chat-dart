@@ -1,10 +1,13 @@
+import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_example/components/channel.dart';
+import 'package:stream_chat_example/components/channel_image.dart';
 
 import '../channel.bloc.dart';
+import 'channel_name_text.dart';
 
 class ChannelPreview extends StatefulWidget {
   @override
@@ -33,33 +36,15 @@ class _ChannelPreviewState extends State<ChannelPreview>
                     elevation: 0,
                     fillColor: Theme.of(context).scaffoldBackgroundColor,
                     onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return ChangeNotifierProvider.value(
-                              value: channelBloc,
-                              child: ChannelWidget(),
-                            );
-                          },
-                        ),
-                      );
+                      _navigateToChannel(context, channelBloc);
                     },
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 10),
                       height: 60,
                       child: Row(
                         children: <Widget>[
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundImage: channelState.channel.extraData
-                                    .containsKey('image')
-                                ? NetworkImage(channelState
-                                    .channel.extraData['image'] as String)
-                                : null,
-                            child: channelState.channel.extraData
-                                    .containsKey('image')
-                                ? null
-                                : Text(channelState.channel.config.name[0]),
+                          ChannelImage(
+                            channel: channelState.channel,
                           ),
                           Expanded(
                             child: Padding(
@@ -69,35 +54,14 @@ class _ChannelPreviewState extends State<ChannelPreview>
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
-                                  Text(
-                                    channelState.channel.extraData['name']
-                                            as String ??
-                                        channelState.channel.config.name,
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 14,
-                                    ),
+                                  ChannelNameText(
+                                    channel: channelState.channel,
                                   ),
-                                  StreamBuilder<bool>(
-                                      stream: channelBloc.typing,
-                                      initialData: false,
-                                      builder: (context, snapshot) {
-                                        final typing = snapshot.data;
-                                        return Text(
-                                          typing
-                                              ? 'Typing...'
-                                              : channelState
-                                                      .messages?.last?.text ??
-                                                  '',
-                                          maxLines: 1,
-                                          style: TextStyle(
-                                            color: Colors.black.withOpacity(
-                                                newMessage != null ? 1 : 0.5),
-                                            fontSize: 13,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        );
-                                      }),
+                                  _buildSubtitle(
+                                    channelBloc,
+                                    channelState,
+                                    newMessage,
+                                  ),
                                 ],
                               ),
                             ),
@@ -106,13 +70,8 @@ class _ChannelPreviewState extends State<ChannelPreview>
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: <Widget>[
-                              Text(
-                                '12/12/2020',
-                                style: TextStyle(
-                                  color: Colors.black.withOpacity(0.5),
-                                  fontSize: 11,
-                                ),
-                              ),
+                              _buildDate(
+                                  channelState.channel.lastMessageAt.toLocal()),
                             ],
                           ),
                         ],
@@ -121,6 +80,63 @@ class _ChannelPreviewState extends State<ChannelPreview>
                   );
                 });
           }),
+    );
+  }
+
+  Text _buildDate(DateTime lastMessageAt) {
+    String stringDate;
+    final now = DateTime.now();
+
+    if (now.difference(lastMessageAt).inDays > 0) {
+      stringDate =
+          '${lastMessageAt.day}/${lastMessageAt.month}/${lastMessageAt.year}';
+      stringDate = formatDate(lastMessageAt, [dd, '/', mm, '/', yyyy]);
+    } else {
+      stringDate = '${lastMessageAt.hour}:${lastMessageAt.minute}';
+      stringDate = formatDate(lastMessageAt, [HH, ':', nn]);
+    }
+
+    return Text(
+      stringDate,
+      style: TextStyle(
+        color: Colors.black.withOpacity(0.5),
+        fontSize: 11,
+      ),
+    );
+  }
+
+  StreamBuilder<bool> _buildSubtitle(
+    ChannelBloc channelBloc,
+    ChannelState channelState,
+    Event newMessage,
+  ) {
+    return StreamBuilder<bool>(
+        stream: channelBloc.typing,
+        initialData: false,
+        builder: (context, snapshot) {
+          final typing = snapshot.data;
+          return Text(
+            typing ? 'Typing...' : channelState.messages?.last?.text ?? '',
+            maxLines: 1,
+            style: TextStyle(
+              color: Colors.black.withOpacity(newMessage != null ? 1 : 0.5),
+              fontSize: 13,
+            ),
+            overflow: TextOverflow.ellipsis,
+          );
+        });
+  }
+
+  void _navigateToChannel(BuildContext context, ChannelBloc channelBloc) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return ChangeNotifierProvider.value(
+            value: channelBloc,
+            child: ChannelWidget(),
+          );
+        },
+      ),
     );
   }
 

@@ -21,7 +21,7 @@ class ChannelBloc with ChangeNotifier {
 
   Stream<Event> get newMessage => _newMessageController.stream;
 
-  Event get hasNewMessage => _newMessageController.value;
+  Event get newMessageValue => _newMessageController.value;
 
   final BehaviorSubject<List<Message>> _messagesController = BehaviorSubject();
 

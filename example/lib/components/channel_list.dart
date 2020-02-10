@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
-import '../channel.bloc.dart';
 
 import '../chat.bloc.dart';
-import 'channel_preview.dart';
+import 'channel_list_app_bar.dart';
+import 'channel_list_view.dart';
 
 class ChannelList extends StatefulWidget {
   final Map<String, dynamic> filter;
@@ -31,146 +31,45 @@ class ChannelListState extends State<ChannelList> {
   Widget build(BuildContext context) {
     return Consumer<ChatBloc>(
       builder: (context, ChatBloc chatBloc, _) => Scaffold(
-        body: SafeArea(
-          child: Column(
-            children: <Widget>[
-              Container(
-                height: 50,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Padding(
-                          padding:
-                              EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                          child: Container(
-                            decoration: BoxDecoration(
-                                color: Colors.black.withAlpha(5),
-                                borderRadius: BorderRadius.circular(32.0),
-                                border: Border.all(
-                                    color: Colors.black.withOpacity(.2))),
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 8.0),
-                              child: TextField(
-                                style: TextStyle(
-                                  color: Colors.black.withOpacity(.5),
-                                  fontSize: 15,
-                                ),
-                                autofocus: false,
-                                decoration: InputDecoration(
-                                  hintText: 'Search',
-                                  prefixText: '   ',
-                                  border: InputBorder.none,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      RawMaterialButton(
-                        onPressed: () {},
-                        constraints: BoxConstraints.tightFor(
-                          height: 40,
-                          width: 40,
-                        ),
-                        elevation: 1,
-                        fillColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(32),
-                        ),
-                        child: Icon(
-                          Icons.send,
-                          color: Color(0xff006bff),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: () async {
-                    chatBloc.clearChannels();
-                    return chatBloc.queryChannels(
-                      widget.filter,
-                      widget.sort,
-                      widget.pagination,
-                      widget.options,
-                    );
-                  },
-                  child: StreamBuilder<List<ChannelState>>(
-                    stream: chatBloc.channelsStream,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        return Center(
-                          child: Text(snapshot.error.toString()),
-                        );
-                      } else if (!snapshot.hasData) {
-                        return Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      } else {
-                        return _buildListView(snapshot, chatBloc);
-                      }
-                    },
-                  ),
-                ),
-              ),
-            ],
+        appBar: ChannelListAppBar(),
+        body: RefreshIndicator(
+          onRefresh: () async {
+            chatBloc.clearChannels();
+            return chatBloc.queryChannels(
+              widget.filter,
+              widget.sort,
+              widget.pagination,
+              widget.options,
+            );
+          },
+          child: StreamBuilder<List<ChannelState>>(
+            stream: chatBloc.channelsStream,
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(snapshot.error.toString()),
+                );
+              } else if (!snapshot.hasData) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else {
+                return ChannelListView(
+                  scrollController: _scrollController,
+                  channelsStates: snapshot.data,
+                );
+              }
+            },
           ),
         ),
       ),
     );
   }
 
-  ListView _buildListView(
-    AsyncSnapshot<List<ChannelState>> snapshot,
-    ChatBloc chatBloc,
-  ) {
-    return ListView.separated(
-      separatorBuilder: (context, i) {
-        if (i >= snapshot.data.length) {
-          return Container();
-        }
-        return Container(
-          height: 1,
-          color: Colors.black.withOpacity(0.1),
-          margin: EdgeInsets.symmetric(horizontal: 16),
-        );
-      },
-      controller: _scrollController,
-      itemCount: snapshot.data.length + 1,
-      itemBuilder: (context, i) {
-        if (i < snapshot.data.length) {
-          return ChangeNotifierProvider<ChannelBloc>.value(
-            key: Key(snapshot.data[i].channel.id),
-            value: chatBloc.channelBlocs[snapshot.data[i].channel.id],
-            child: ChannelPreview(),
-          );
-        } else {
-          return StreamBuilder<bool>(
-            stream: chatBloc.queryChannelsLoading,
-            builder: (context, snapshot) {
-              return Container(
-                height: 100,
-                padding: EdgeInsets.all(32),
-                child: Center(
-                  child: (snapshot.hasData && snapshot.data)
-                      ? CircularProgressIndicator()
-                      : Container(),
-                ),
-              );
-            },
-          );
-        }
-      },
-    );
-  }
-
   @override
   void initState() {
     super.initState();
+
     final chatBloc = Provider.of<ChatBloc>(context, listen: false);
     chatBloc.queryChannels(
       widget.filter,
@@ -180,17 +79,21 @@ class ChannelListState extends State<ChannelList> {
     );
 
     _scrollController.addListener(() {
-      if (_scrollController.position.maxScrollExtent ==
-          _scrollController.position.pixels) {
-        chatBloc.queryChannels(
-          widget.filter,
-          widget.sort,
-          widget.pagination.copyWith(
-            offset: chatBloc.channels.length,
-          ),
-          widget.options,
-        );
-      }
+      _listenChannelPagination(chatBloc);
     });
+  }
+
+  void _listenChannelPagination(ChatBloc chatBloc) {
+    if (_scrollController.position.maxScrollExtent ==
+        _scrollController.position.pixels) {
+      chatBloc.queryChannels(
+        widget.filter,
+        widget.sort,
+        widget.pagination.copyWith(
+          offset: chatBloc.channels.length,
+        ),
+        widget.options,
+      );
+    }
   }
 }

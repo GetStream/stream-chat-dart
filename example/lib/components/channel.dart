@@ -6,6 +6,7 @@ import 'package:stream_chat/stream_chat.dart';
 
 import '../channel.bloc.dart';
 import 'channel_header.dart';
+import 'message_widget.dart';
 
 class ChannelWidget extends StatefulWidget {
   @override
@@ -68,12 +69,11 @@ class _ChannelWidgetState extends State<ChannelWidget> {
                               context,
                             );
                           }
-                          return _buildMessage(
-                            previousMessage,
-                            message,
-                            nextMessage,
-                            channelBloc,
-                            context,
+                          return MessageWidget(
+                            previousMessage: previousMessage,
+                            message: message,
+                            nextMessage: nextMessage,
+                            channelBloc: channelBloc,
                           );
                         }
                       },
@@ -156,7 +156,7 @@ class _ChannelWidgetState extends State<ChannelWidget> {
   }
 
   void _handleScrollingOnNewMessage(ChannelBloc channelBloc) {
-    if (channelBloc.hasNewMessage != null && !this.isBottom) {
+    if (channelBloc.newMessageValue != null && !this.isBottom) {
       _scrollController.jumpTo(
           index: _lastBottomPosition.index + 1,
           alignment: _lastBottomPosition.itemLeadingEdge);
@@ -174,17 +174,15 @@ class _ChannelWidgetState extends State<ChannelWidget> {
       onVisibilityChanged: (visibility) {
         this.isBottom = visibility.visibleBounds != Rect.zero;
         if (this.isBottom) {
-          if (channelBloc.hasNewMessage != null) {
+          if (channelBloc.newMessageValue != null) {
             channelBloc.channelClient.markRead();
           }
         }
       },
-      child: _buildMessage(
-        previousMessage,
-        message,
-        null,
-        channelBloc,
-        context,
+      child: MessageWidget(
+        previousMessage: previousMessage,
+        message: message,
+        nextMessage: null,
       ),
     );
   }
@@ -216,12 +214,10 @@ class _ChannelWidgetState extends State<ChannelWidget> {
     BuildContext context,
   ) {
     return VisibilityDetector(
-      child: _buildMessage(
-        null,
-        message,
-        nextMessage,
-        channelBloc,
-        context,
+      child: MessageWidget(
+        previousMessage: null,
+        message: message,
+        nextMessage: nextMessage,
       ),
       key: ValueKey<String>('top message'),
       onVisibilityChanged: (visibility) {
@@ -253,102 +249,6 @@ class _ChannelWidgetState extends State<ChannelWidget> {
         duration: Duration(milliseconds: 300),
       );
     });
-  }
-
-  Widget _buildMessage(
-    Message previousMessage,
-    Message message,
-    Message nextMessage,
-    ChannelBloc channelBloc,
-    BuildContext context,
-  ) {
-    final currentUserId = channelBloc.chatBloc.user.id;
-    final messageUserId = message.user.id;
-    final previousUserId = previousMessage?.user?.id;
-    final nextUserId = nextMessage?.user?.id;
-    final bool isMyMessage = messageUserId == currentUserId;
-    final isLastUser = previousUserId == messageUserId;
-    final isNextUser = nextUserId == messageUserId;
-    List<Widget> row = <Widget>[
-      Container(
-        width: MediaQuery.of(context).size.width - 60,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Align(
-              alignment:
-                  isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
-              child: Container(
-                decoration: BoxDecoration(
-                  border: isMyMessage
-                      ? null
-                      : Border.all(color: Colors.black.withAlpha(8)),
-                  borderRadius: BorderRadius.only(
-                    topLeft:
-                        Radius.circular((isMyMessage || !isLastUser) ? 16 : 2),
-                    bottomLeft: Radius.circular(isMyMessage ? 16 : 2),
-                    topRight:
-                        Radius.circular((isMyMessage && isLastUser) ? 2 : 16),
-                    bottomRight: Radius.circular(isMyMessage ? 2 : 16),
-                  ),
-                  color: isMyMessage ? Color(0xffebebeb) : Colors.white,
-                ),
-                padding: EdgeInsets.all(10),
-                constraints: BoxConstraints.loose(Size.fromWidth(300)),
-                child: Text(
-                  message.text,
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ),
-            isNextUser
-                ? Container()
-                : Align(
-                    alignment: isMyMessage
-                        ? Alignment.centerRight
-                        : Alignment.centerLeft,
-                    child: Text(
-                      '${message.createdAt.hour}:${message.createdAt.minute.toString().padRight(2, '0')}',
-                    ),
-                  ),
-          ],
-        ),
-      ),
-      isNextUser
-          ? Container(
-              width: 40,
-            )
-          : Padding(
-              padding: EdgeInsets.only(
-                  left: isMyMessage ? 8.0 : 0, right: isMyMessage ? 0 : 8.0),
-              child: CircleAvatar(
-                radius: 16,
-                backgroundImage: message.user.extraData.containsKey('image')
-                    ? NetworkImage(message.user.extraData['image'] as String)
-                    : null,
-                child: message.user.extraData.containsKey('image')
-                    ? null
-                    : Text(message.user.extraData['name'][0]),
-              ),
-            ),
-    ];
-    if (!isMyMessage) {
-      row = row.reversed.toList();
-    }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-      margin: EdgeInsets.only(
-        top: isLastUser ? 5 : 24,
-        bottom: nextMessage == null ? 30 : 0,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisSize: MainAxisSize.max,
-        children: row,
-      ),
-    );
   }
 
   @override
