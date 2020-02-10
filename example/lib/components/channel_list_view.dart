@@ -4,7 +4,7 @@ import 'package:stream_chat/stream_chat.dart';
 
 import '../channel.bloc.dart';
 import '../chat.bloc.dart';
-import 'channel.dart';
+import 'channel_widget.dart';
 
 typedef ChannelPreviewBuilder = Widget Function(BuildContext, ChannelState);
 

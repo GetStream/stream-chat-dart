@@ -36,7 +36,7 @@ class MessageWidget extends StatelessWidget {
         crossAxisAlignment:
             isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: <Widget>[
-          _buildBubble(isMyMessage, isLastUser),
+          _buildBubble(context, isMyMessage, isLastUser),
           isNextUser ? Container() : _buildTimestamp(isMyMessage, alignment),
         ],
       ),
@@ -73,16 +73,15 @@ class MessageWidget extends StatelessWidget {
     );
   }
 
-  Container _buildBubble(bool isMyMessage, bool isLastUser) {
+  Container _buildBubble(
+      BuildContext context, bool isMyMessage, bool isLastUser) {
     return Container(
       decoration: _buildBoxDecoration(isMyMessage, isLastUser),
       padding: EdgeInsets.all(10),
       constraints: BoxConstraints.loose(Size.fromWidth(300)),
       child: Text(
         message.text,
-        style: TextStyle(
-          color: Colors.black,
-        ),
+        style: Theme.of(context).textTheme.bodyText1,
       ),
     );
   }

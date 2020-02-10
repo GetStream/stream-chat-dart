@@ -3,9 +3,10 @@ import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_example/channel.bloc.dart';
-import 'package:stream_chat_example/components/channel.dart';
+import 'package:stream_chat_example/components/channel_widget.dart';
 
 import '../chat.bloc.dart';
+import 'channel_header.dart';
 import 'channel_list_app_bar.dart';
 import 'channel_list_view.dart';
 import 'channel_preview.dart';
@@ -35,7 +36,6 @@ class ChannelListPageState extends State<ChannelListPage> {
   @override
   Widget build(BuildContext context) {
     showSplit = MediaQuery.of(context).size.width > 1000;
-    print('WIDTH: ${MediaQuery.of(context).size.width}');
     return Consumer<ChatBloc>(
       builder: (context, ChatBloc chatBloc, _) => Flex(
         direction: Axis.horizontal,
@@ -89,7 +89,6 @@ class ChannelListPageState extends State<ChannelListPage> {
                 backgroundColor: Colors.white,
                 child: Icon(
                   Icons.send,
-                  color: Color(0xff006bff),
                 ),
               ),
             ),
@@ -108,7 +107,11 @@ class ChannelListPageState extends State<ChannelListPage> {
                         )
                       : ChangeNotifierProvider<ChannelBloc>.value(
                           value: chatBloc.channelBlocs[_selectedChannelId],
-                          child: ChannelWidget(),
+                          child: ChannelWidget(
+                            channelHeader: ChannelHeader(
+                              showBackButton: false,
+                            ),
+                          ),
                         ),
                 )
               : Container(),
@@ -128,7 +131,9 @@ class ChannelListPageState extends State<ChannelListPage> {
           builder: (context) {
             return ChangeNotifierProvider.value(
               value: channelBloc,
-              child: ChannelWidget(),
+              child: ChannelWidget(
+                channelHeader: ChannelHeader(),
+              ),
             );
           },
         ),

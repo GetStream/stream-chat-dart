@@ -35,7 +35,7 @@ class _MessageInputState extends State<MessageInput> {
         ),
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
+            color: Theme.of(context).canvasColor,
             borderRadius: BorderRadius.circular(10.0),
           ),
           child: Container(
@@ -49,7 +49,6 @@ class _MessageInputState extends State<MessageInput> {
               children: <Widget>[
                 Expanded(
                   child: TextField(
-//                    expands: true,
                     minLines: null,
                     maxLines: null,
                     onSubmitted: (_) {
@@ -69,10 +68,7 @@ class _MessageInputState extends State<MessageInput> {
                         _typingStarted = true;
                       });
                     },
-                    style: TextStyle(
-                      color: Colors.black.withOpacity(.5),
-                      fontSize: 15,
-                    ),
+                    style: Theme.of(context).textTheme.bodyText1,
                     autofocus: false,
                     decoration: InputDecoration(
                       hintText: 'Write a message',
@@ -116,7 +112,6 @@ class _MessageInputState extends State<MessageInput> {
         ),
         child: Icon(
           Icons.send,
-          color: Color(0xff006bff),
         ),
       ),
     );

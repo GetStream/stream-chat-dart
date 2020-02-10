@@ -9,8 +9,12 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'channel_image.dart';
 
 class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
-  ChannelHeader({Key key})
-      : preferredSize = Size.fromHeight(kToolbarHeight),
+  final bool showBackButton;
+
+  ChannelHeader({
+    Key key,
+    this.showBackButton = true,
+  })  : preferredSize = Size.fromHeight(kToolbarHeight),
         super(key: key);
 
   @override
@@ -19,8 +23,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
         builder: (context, ChannelBloc channelBloc, _) {
       final channelState = channelBloc.channelState;
       return AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        leading: _buildBackButton(context),
+        leading: showBackButton ? _buildBackButton(context) : Container(),
         actions: <Widget>[
           Padding(
             padding: const EdgeInsets.only(right: 10.0),
@@ -53,21 +56,19 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
             ChannelNameText(
               channel: channelState.channel,
             ),
-            _buildLastActive(channelState),
+            _buildLastActive(context, channelState),
           ],
         ),
       );
     });
   }
 
-  StatelessWidget _buildLastActive(ChannelState channelState) {
+  StatelessWidget _buildLastActive(
+      BuildContext context, ChannelState channelState) {
     return (channelState.channel.lastMessageAt != null)
         ? Text(
             'Active ${timeago.format(channelState.channel.lastMessageAt)}',
-            style: TextStyle(
-              color: Colors.black.withOpacity(.5),
-              fontSize: 13,
-            ),
+            style: Theme.of(context).textTheme.caption,
           )
         : Container();
   }

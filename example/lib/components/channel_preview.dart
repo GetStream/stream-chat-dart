@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_example/components/channel.dart';
+import 'package:stream_chat_example/components/channel_widget.dart';
 import 'package:stream_chat_example/components/channel_image.dart';
 
 import '../channel.bloc.dart';
@@ -31,7 +31,6 @@ class _ChannelPreviewState extends State<ChannelPreview>
         final channelState = channelBloc.channelState;
         return RawMaterialButton(
           elevation: 0,
-          fillColor: Theme.of(context).scaffoldBackgroundColor,
           onPressed: () {
             widget.onTap();
           },
@@ -99,10 +98,7 @@ class _ChannelPreviewState extends State<ChannelPreview>
 
     return Text(
       stringDate,
-      style: TextStyle(
-        color: Colors.black.withOpacity(0.5),
-        fontSize: 11,
-      ),
+      style: Theme.of(context).textTheme.caption,
     );
   }
 
@@ -125,11 +121,9 @@ class _ChannelPreviewState extends State<ChannelPreview>
                   ? Text(
                       '${typings.map((u) => u.extraData.containsKey('name') ? u.extraData['name'] : u.id).join(',')} ${typings.length == 1 ? 'is' : 'are'} typing...',
                       maxLines: 1,
-                      style: TextStyle(
-                        color: Colors.black.withOpacity(!read ? 1 : 0.5),
-                        fontSize: 13,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.caption.copyWith(
+                            color: Colors.black.withOpacity(!read ? 1 : 0.5),
+                          ),
                     )
                   : StreamBuilder<Message>(
                       stream: channelBloc.messages.map((event) => event.last),
@@ -137,10 +131,11 @@ class _ChannelPreviewState extends State<ChannelPreview>
                         return Text(
                           snapshot.data?.text ?? '',
                           maxLines: 1,
-                          style: TextStyle(
-                            color: Colors.black.withOpacity(!read ? 1 : 0.5),
-                            fontSize: 13,
-                          ),
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.caption.copyWith(
+                                color:
+                                    Colors.black.withOpacity(!read ? 1 : 0.5),
+                              ),
                         );
                       },
                     );

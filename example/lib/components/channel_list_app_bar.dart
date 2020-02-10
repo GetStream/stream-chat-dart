@@ -10,7 +10,6 @@ class ChannelListAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Material(
-        color: Theme.of(context).scaffoldBackgroundColor,
         elevation: 4,
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 5, horizontal: 30),
@@ -22,10 +21,7 @@ class ChannelListAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: Padding(
               padding: const EdgeInsets.only(left: 8.0),
               child: TextField(
-                style: TextStyle(
-                  color: Colors.black.withOpacity(.5),
-                  fontSize: 15,
-                ),
+                style: Theme.of(context).textTheme.bodyText1,
                 autofocus: false,
                 decoration: InputDecoration(
                   hintText: 'Search',

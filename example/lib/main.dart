@@ -17,7 +17,19 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Stream Chat Example',
         home: ChatLoader(),
-        theme: ThemeData(scaffoldBackgroundColor: Color(0xfff1f1f3)),
+        theme: ThemeData(
+          scaffoldBackgroundColor: Color(0xfff1f1f3),
+          primaryColor: Color(0xfff1f1f3),
+          accentColor: Color(0xff006bff),
+          iconTheme: IconThemeData(
+            color: Color(0xff006bff),
+          ),
+          floatingActionButtonTheme: FloatingActionButtonThemeData(
+            foregroundColor: Color(0xff006bff),
+          ),
+          backgroundColor: Color(0xfff1f1f3),
+          canvasColor: Color(0xfff1f1f3),
+        ),
       ),
     );
   }

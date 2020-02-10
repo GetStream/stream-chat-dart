@@ -10,6 +10,14 @@ import 'message_input.dart';
 import 'message_widget.dart';
 
 class ChannelWidget extends StatefulWidget {
+  final PreferredSizeWidget _channelHeader;
+
+  const ChannelWidget({
+    Key key,
+    @required PreferredSizeWidget channelHeader,
+  })  : _channelHeader = channelHeader,
+        super(key: key);
+
   @override
   _ChannelWidgetState createState() => _ChannelWidgetState();
 }
@@ -27,7 +35,7 @@ class _ChannelWidgetState extends State<ChannelWidget> {
       builder: (context, channelBloc, _) {
         return Scaffold(
           resizeToAvoidBottomInset: true,
-          appBar: ChannelHeader(),
+          appBar: widget._channelHeader,
           body: Column(
             children: <Widget>[
               Expanded(
