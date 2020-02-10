@@ -28,6 +28,8 @@ class MessageWidget extends StatelessWidget {
     final bool isMyMessage = messageUserId == currentUserId;
     final isLastUser = previousUserId == messageUserId;
     final isNextUser = nextUserId == messageUserId;
+    final alignment =
+        isMyMessage ? Alignment.centerRight : Alignment.centerLeft;
 
     List<Widget> row = <Widget>[
       Container(
@@ -36,21 +38,10 @@ class MessageWidget extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Align(
-              alignment:
-                  isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
-              child: Container(
-                decoration: _buildBoxDecoration(isMyMessage, isLastUser),
-                padding: EdgeInsets.all(10),
-                constraints: BoxConstraints.loose(Size.fromWidth(300)),
-                child: Text(
-                  message.text,
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
-                ),
-              ),
+              alignment: alignment,
+              child: _buildBubble(isMyMessage, isLastUser),
             ),
-            isNextUser ? Container() : _buildTimestamp(isMyMessage),
+            isNextUser ? Container() : _buildTimestamp(isMyMessage, alignment),
           ],
         ),
       ),
@@ -85,9 +76,23 @@ class MessageWidget extends StatelessWidget {
     );
   }
 
-  Align _buildTimestamp(bool isMyMessage) {
+  Container _buildBubble(bool isMyMessage, bool isLastUser) {
+    return Container(
+      decoration: _buildBoxDecoration(isMyMessage, isLastUser),
+      padding: EdgeInsets.all(10),
+      constraints: BoxConstraints.loose(Size.fromWidth(300)),
+      child: Text(
+        message.text,
+        style: TextStyle(
+          color: Colors.black,
+        ),
+      ),
+    );
+  }
+
+  Align _buildTimestamp(bool isMyMessage, Alignment alignment) {
     return Align(
-      alignment: isMyMessage ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: alignment,
       child: Text(
         formatDate(message.createdAt.toLocal(), [HH, ':', nn]),
       ),
