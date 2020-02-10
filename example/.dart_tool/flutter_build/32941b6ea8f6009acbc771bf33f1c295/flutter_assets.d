@@ -1,0 +1,1 @@
+ build/web/assets/fonts/MaterialIcons-Regular.ttf build/web/assets/AssetManifest.json build/web/assets/FontManifest.json build/web/assets/LICENSE:  /Users/salvatoregiordano/Development/stream_chat_dart/example/pubspec.yaml /Users/salvatoregiordano/Development/flutter/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.ttf
