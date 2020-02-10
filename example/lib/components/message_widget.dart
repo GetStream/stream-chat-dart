@@ -32,18 +32,13 @@ class MessageWidget extends StatelessWidget {
         isMyMessage ? Alignment.centerRight : Alignment.centerLeft;
 
     List<Widget> row = <Widget>[
-      Container(
-        width: MediaQuery.of(context).size.width - 60,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Align(
-              alignment: alignment,
-              child: _buildBubble(isMyMessage, isLastUser),
-            ),
-            isNextUser ? Container() : _buildTimestamp(isMyMessage, alignment),
-          ],
-        ),
+      Column(
+        crossAxisAlignment:
+            isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: <Widget>[
+          _buildBubble(isMyMessage, isLastUser),
+          isNextUser ? Container() : _buildTimestamp(isMyMessage, alignment),
+        ],
       ),
       isNextUser
           ? Container(
@@ -70,6 +65,8 @@ class MessageWidget extends StatelessWidget {
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisAlignment:
+            isMyMessage ? MainAxisAlignment.end : MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.max,
         children: row,
       ),
@@ -90,12 +87,9 @@ class MessageWidget extends StatelessWidget {
     );
   }
 
-  Align _buildTimestamp(bool isMyMessage, Alignment alignment) {
-    return Align(
-      alignment: alignment,
-      child: Text(
-        formatDate(message.createdAt.toLocal(), [HH, ':', nn]),
-      ),
+  Widget _buildTimestamp(bool isMyMessage, Alignment alignment) {
+    return Text(
+      formatDate(message.createdAt.toLocal(), [HH, ':', nn]),
     );
   }
 

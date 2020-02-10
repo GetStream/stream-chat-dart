@@ -40,6 +40,7 @@ class _ChannelWidgetState extends State<ChannelWidget> {
                     final messages = snapshot.data.reversed.toList();
                     _handleScrollingOnNewMessage(channelBloc);
                     return ScrollablePositionedList.builder(
+                      physics: AlwaysScrollableScrollPhysics(),
                       itemCount: messages.length + 1,
                       itemPositionsListener: _itemPositionsListener,
                       itemScrollController: _scrollController,

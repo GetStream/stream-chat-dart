@@ -10,9 +10,12 @@ import '../channel.bloc.dart';
 import 'channel_name_text.dart';
 
 class ChannelPreview extends StatefulWidget {
-  final void Function(ChannelState channel) onTap;
+  final VoidCallback onTap;
 
-  const ChannelPreview({Key key, this.onTap}) : super(key: key);
+  const ChannelPreview({
+    Key key,
+    @required this.onTap,
+  }) : super(key: key);
 
   @override
   _ChannelPreviewState createState() => _ChannelPreviewState();
@@ -30,7 +33,7 @@ class _ChannelPreviewState extends State<ChannelPreview>
           elevation: 0,
           fillColor: Theme.of(context).scaffoldBackgroundColor,
           onPressed: () {
-            widget.onTap(channelState);
+            widget.onTap();
           },
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 10),

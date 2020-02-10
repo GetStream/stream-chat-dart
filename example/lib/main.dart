@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'chat.bloc.dart';
-import 'components/channel_list.dart';
+import 'components/channel_list_page.dart';
 
 void main() => runApp(MyApp());
 
@@ -43,7 +43,7 @@ class ChatLoader extends StatelessWidget {
               ),
             );
           } else {
-            return ChannelList(
+            return ChannelListPage(
               filter: {
                 'members': {
                   '\$in': [snapshot.data.id],
