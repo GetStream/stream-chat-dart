@@ -220,6 +220,46 @@ void main() {
           data: {'event': event.toJson()})).called(1);
     });
 
+    test('keyStroke', () async {
+      final mockDio = MockDio();
+
+      when(mockDio.options).thenReturn(BaseOptions());
+      when(mockDio.interceptors).thenReturn(Interceptors());
+
+      final client = Client('api-key', httpClient: mockDio);
+      final channelClient = client.channel('messaging', id: 'testid');
+      final event = Event(type: EventType.typingStart);
+
+      when(mockDio.post<String>('/channels/messaging/testid/event',
+              data: {'event': event.toJson()}))
+          .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+      await channelClient.keyStroke();
+
+      verify(mockDio.post<String>('/channels/messaging/testid/event',
+          data: {'event': event.toJson()})).called(1);
+    });
+
+    test('stopTyping', () async {
+      final mockDio = MockDio();
+
+      when(mockDio.options).thenReturn(BaseOptions());
+      when(mockDio.interceptors).thenReturn(Interceptors());
+
+      final client = Client('api-key', httpClient: mockDio);
+      final channelClient = client.channel('messaging', id: 'testid');
+      final event = Event(type: EventType.typingEnd);
+
+      when(mockDio.post<String>('/channels/messaging/testid/event',
+              data: {'event': event.toJson()}))
+          .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+      await channelClient.stopTyping();
+
+      verify(mockDio.post<String>('/channels/messaging/testid/event',
+          data: {'event': event.toJson()})).called(1);
+    });
+
     group('reactions', () {
       test('sendReaction', () async {
         final mockDio = MockDio();

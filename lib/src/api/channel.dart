@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:stream_chat/src/event_type.dart';
 
 import '../client.dart';
 import '../models/event.dart';
@@ -276,4 +277,21 @@ class ChannelClient {
 
   Stream<Event> on(String eventType) =>
       _client.on(eventType).where((e) => e.cid == cid);
+
+  DateTime _lastTypingEvent;
+
+  Future<void> keyStroke() async {
+    final now = DateTime.now();
+
+    if (_lastTypingEvent == null ||
+        now.difference(_lastTypingEvent).inSeconds >= 2) {
+      _lastTypingEvent = now;
+      await sendEvent(Event(type: EventType.typingStart));
+    }
+  }
+
+  Future<void> stopTyping() async {
+    _lastTypingEvent = null;
+    await sendEvent(Event(type: EventType.typingEnd));
+  }
 }
