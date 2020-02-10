@@ -73,7 +73,6 @@ class _ChannelWidgetState extends State<ChannelWidget> {
                             previousMessage: previousMessage,
                             message: message,
                             nextMessage: nextMessage,
-                            channelBloc: channelBloc,
                           );
                         }
                       },
