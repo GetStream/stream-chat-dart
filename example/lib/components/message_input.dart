@@ -25,7 +25,7 @@ class _MessageInputState extends State<MessageInput> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
-        height: 50,
+        width: MediaQuery.of(context).size.width,
         padding: EdgeInsets.all(2),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10.0),
@@ -39,7 +39,6 @@ class _MessageInputState extends State<MessageInput> {
             borderRadius: BorderRadius.circular(10.0),
           ),
           child: Container(
-            constraints: BoxConstraints.expand(),
             decoration: BoxDecoration(
               color: Colors.black.withAlpha(5),
               borderRadius: BorderRadius.circular(10.0),
@@ -50,6 +49,9 @@ class _MessageInputState extends State<MessageInput> {
               children: <Widget>[
                 Expanded(
                   child: TextField(
+//                    expands: true,
+                    minLines: null,
+                    maxLines: null,
                     onSubmitted: (_) {
                       _sendMessage(context);
                     },
