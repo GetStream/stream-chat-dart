@@ -62,11 +62,15 @@ class ChannelBloc with ChangeNotifier {
   Stream<bool> get queryMessage => _queryMessageController.stream;
 
   void queryMessages() {
+    String firstId;
+    if (channelState.messages.isNotEmpty) {
+      firstId = channelState.messages.first.id;
+    }
+
     _queryMessageController.add(true);
     channelClient.query(
       {},
-      messagesPagination:
-          PaginationParams(lessThan: channelState.messages.first.id, limit: 10),
+      messagesPagination: PaginationParams(lessThan: firstId, limit: 10),
     ).then((res) {
       channelState.messages.insertAll(0, res.messages);
 

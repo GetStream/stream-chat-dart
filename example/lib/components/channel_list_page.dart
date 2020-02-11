@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_example/channel.bloc.dart';
 import 'package:stream_chat_example/components/channel_widget.dart';
+import 'package:stream_chat_example/components/connection_indicator.dart';
 import 'package:stream_chat_example/main.dart';
 
 import '../chat.bloc.dart';
@@ -31,9 +32,9 @@ class ChannelListPage extends StatefulWidget {
 
 class ChannelListPageState extends State<ChannelListPage> {
   final ScrollController _scrollController = ScrollController();
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   String _selectedChannelId;
   bool showSplit;
+  IndicatorController _indicatorController = IndicatorController();
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +46,9 @@ class ChannelListPageState extends State<ChannelListPage> {
           Flexible(
             flex: 1,
             child: Scaffold(
-              key: _scaffoldKey,
+              bottomNavigationBar: ConnectionIndicator(
+                indicatorController: _indicatorController,
+              ),
               appBar: ChannelListAppBar(),
               body: StreamBuilder<List<ChannelState>>(
                 stream: chatBloc.channelsStream,
@@ -161,29 +164,28 @@ class ChannelListPageState extends State<ChannelListPage> {
     });
 
     chatBloc.client.wsConnectionStatus.addListener(() {
-      _scaffoldKey.currentState.removeCurrentSnackBar();
-
       if (chatBloc.client.wsConnectionStatus.value ==
           ConnectionStatus.disconnected) {
-        _scaffoldKey.currentState.showSnackBar(SnackBar(
-          content: Text('Disconnected'),
+        _indicatorController.showIndicator(
           duration: Duration(minutes: 1),
-        ));
+          color: Colors.red,
+          text: 'Disconnected',
+        );
       } else if (chatBloc.client.wsConnectionStatus.value ==
           ConnectionStatus.connecting) {
-        _scaffoldKey.currentState.showSnackBar(SnackBar(
-          content: Text('Reconnecting'),
-          duration: Duration(seconds: 30),
-        ));
+        _indicatorController.showIndicator(
+          duration: Duration(minutes: 1),
+          color: Colors.yellow,
+          text: 'Reconnecting',
+        );
       } else if (chatBloc.client.wsConnectionStatus.value ==
           ConnectionStatus.connected) {
-        _scaffoldKey.currentState.showSnackBar(SnackBar(
-          content: Text('Connected'),
-        ));
-
-        setState(() {
-          chatBloc.clearChannels();
-        });
+        _indicatorController.showIndicator(
+          duration: Duration(seconds: 5),
+          color: Colors.green,
+          text: 'Connected',
+        );
+        chatBloc.clearChannels();
 
         chatBloc.queryChannels(
           widget.filter,

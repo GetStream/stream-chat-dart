@@ -121,6 +121,7 @@ class WebSocket {
     } else {
       logger.info('connection estabilished');
       _connecting = false;
+      _reconnecting = false;
 
       connectionStatus.value = ConnectionStatus.connected;
 
@@ -139,6 +140,10 @@ class WebSocket {
   Future<void> _onConnectionError(error, stacktrace) async {
     logger.severe('error connecting');
     _connecting = false;
+
+    if (!_reconnecting) {
+      connectionStatus.value = ConnectionStatus.disconnected;
+    }
 
     if (!completer.isCompleted) {
       _cancelTimers();

@@ -5,7 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import '../channel.bloc.dart';
+import '../chat.bloc.dart';
 import 'channel_header.dart';
+import 'connection_indicator.dart';
 import 'message_input.dart';
 import 'message_widget.dart';
 
@@ -26,8 +28,10 @@ class _ChannelWidgetState extends State<ChannelWidget> {
   final ItemPositionsListener _itemPositionsListener =
       ItemPositionsListener.create();
   final ItemScrollController _scrollController = ItemScrollController();
+
   bool isBottom = true;
   ItemPosition _lastBottomPosition;
+  IndicatorController _indicatorController = IndicatorController();
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +42,9 @@ class _ChannelWidgetState extends State<ChannelWidget> {
           appBar: widget._channelHeader,
           body: Column(
             children: <Widget>[
+              ConnectionIndicator(
+                indicatorController: _indicatorController,
+              ),
               Expanded(
                 child: StreamBuilder<List<Message>>(
                   stream: channelBloc.messages,
@@ -182,6 +189,36 @@ class _ChannelWidgetState extends State<ChannelWidget> {
 
     _itemPositionsListener.itemPositions.addListener(() {
       _lastBottomPosition = _itemPositionsListener.itemPositions.value.first;
+    });
+
+    final channelBloc = Provider.of<ChannelBloc>(context, listen: false);
+
+    channelBloc.chatBloc.client.wsConnectionStatus.addListener(() {
+      if (channelBloc.chatBloc.client.wsConnectionStatus.value ==
+          ConnectionStatus.disconnected) {
+        _indicatorController.showIndicator(
+          duration: Duration(minutes: 1),
+          color: Colors.red,
+          text: 'Disconnected',
+        );
+      } else if (channelBloc.chatBloc.client.wsConnectionStatus.value ==
+          ConnectionStatus.connecting) {
+        _indicatorController.showIndicator(
+          duration: Duration(minutes: 1),
+          color: Colors.yellow,
+          text: 'Reconnecting',
+        );
+      } else if (channelBloc.chatBloc.client.wsConnectionStatus.value ==
+          ConnectionStatus.connected) {
+        _indicatorController.showIndicator(
+          duration: Duration(seconds: 5),
+          color: Colors.green,
+          text: 'Connected',
+        );
+
+        channelBloc.messageList.clear();
+        channelBloc.queryMessages();
+      }
     });
   }
 }
