@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:logging/logging.dart';
 import 'package:uuid/uuid.dart';
 
 import 'api/channel.dart';
+import 'api/connection_status.dart';
 import 'api/requests.dart';
 import 'api/responses.dart';
 import 'api/websocket.dart';
@@ -40,6 +42,8 @@ class Client {
   WebSocket _ws;
 
   bool get hasConnectionId => _connectionId != null;
+
+  ValueNotifier<ConnectionStatus> wsConnectionStatus;
 
   Client(
     this.apiKey, {
@@ -116,7 +120,12 @@ class Client {
   Stream<Event> on(String eventType) =>
       stream.where((event) => eventType == null || event.type == eventType);
 
-  void handleEvent(Event event) => _controller.add(event);
+  void handleEvent(Event event) {
+    if (event.connectionId != null) {
+      _connectionId = event.connectionId;
+    }
+    _controller.add(event);
+  }
 
   Future<Event> connect() async {
     _ws = WebSocket(
@@ -134,6 +143,8 @@ class Client {
       handler: handleEvent,
       logger: Logger('WS'),
     );
+
+    wsConnectionStatus = _ws.connectionStatus;
 
     final connectEvent = await _ws.connect();
     _connectionId = connectEvent.connectionId;

@@ -2,6 +2,7 @@ library stream_chat;
 
 export './src/api/requests.dart';
 export './src/api/channel.dart';
+export './src/api/connection_status.dart';
 export './src/models/message.dart';
 export './src/api/responses.dart';
 export './src/client.dart';

@@ -28,6 +28,8 @@ void main() {
   group('src/api/websocket', () {
     group('connect', () {
       test('should connect with correct parameters', () async {
+        final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
+
         final ws = WebSocket(
           baseUrl: 'baseurl',
           user: User(id: 'testid'),
@@ -37,9 +39,8 @@ void main() {
           handler: (e) {
             print(e);
           },
+          connectFunc: connectFunc,
         );
-
-        final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
 
         final mockWSChannel = MockWSChannel();
 
@@ -59,7 +60,7 @@ void main() {
           (_) => streamController.sink.add('{}'),
         );
 
-        await ws.connect(connectFunc);
+        await ws.connect();
 
         verify(connectFunc(computedUrl)).called(1);
 
@@ -70,6 +71,7 @@ void main() {
 
     test('should connect with correct parameters and handle events', () async {
       final handleFunc = MockFunctions().handleFunc;
+      final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
 
       final ws = WebSocket(
         baseUrl: 'baseurl',
@@ -78,9 +80,8 @@ void main() {
         connectParams: {'test': 'true'},
         connectPayload: {'payload': 'test'},
         handler: handleFunc,
+        connectFunc: connectFunc,
       );
-
-      final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
 
       final mockWSChannel = MockWSChannel();
 
@@ -100,7 +101,7 @@ void main() {
         (_) => streamController.sink.add('{}'),
       );
 
-      await ws.connect(connectFunc);
+      await ws.connect();
 
       when(handleFunc(any)).thenAnswer((_) async {
         verify(connectFunc(computedUrl)).called(1);
@@ -114,6 +115,8 @@ void main() {
     test('should close correctly the controller', () async {
       final handleFunc = MockFunctions().handleFunc;
 
+      final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
+
       final ws = WebSocket(
         baseUrl: 'baseurl',
         user: User(id: 'testid'),
@@ -121,9 +124,8 @@ void main() {
         connectParams: {'test': 'true'},
         connectPayload: {'payload': 'test'},
         handler: handleFunc,
+        connectFunc: connectFunc,
       );
-
-      final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
 
       final mockWSChannel = MockWSChannel();
 
@@ -143,7 +145,7 @@ void main() {
         (_) => streamController.sink.add('{}'),
       );
 
-      await ws.connect(connectFunc);
+      await ws.connect();
 
       when(handleFunc(any)).thenAnswer((_) async {
         verify(connectFunc(computedUrl)).called(1);
@@ -155,6 +157,8 @@ void main() {
     });
 
     test('should throw an error', () async {
+      final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
+
       final ws = WebSocket(
         baseUrl: 'baseurl',
         user: User(id: 'testid'),
@@ -164,9 +168,8 @@ void main() {
         handler: (e) {
           print(e);
         },
+        connectFunc: connectFunc,
       );
-
-      final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
 
       final mockWSChannel = MockWSChannel();
 
@@ -187,7 +190,7 @@ void main() {
       );
 
       try {
-        expect(await ws.connect(connectFunc), throwsA(isA<String>()));
+        expect(await ws.connect(), throwsA(isA<String>()));
       } catch (_) {}
 
       verify(connectFunc(computedUrl)).called(1);

@@ -8,11 +8,11 @@ import 'channel.bloc.dart';
 
 class ChatBloc with ChangeNotifier {
   final Client client;
-  final List<StreamSubscription> subscriptions = [];
+  final List<StreamSubscription> _subscriptions = [];
   final Map<String, ChannelBloc> channelBlocs = {};
 
   ChatBloc(this.client) {
-    subscriptions.add(client.on('message.new').listen((Event e) {
+    _subscriptions.add(client.on('message.new').listen((Event e) {
       final index = channels.indexWhere((c) => c.channel.cid == e.cid);
       if (index > 0) {
         final channel = channels.removeAt(index);
@@ -89,11 +89,11 @@ class ChatBloc with ChangeNotifier {
 
   @override
   void dispose() {
-    super.dispose();
     client.dispose();
-    subscriptions.forEach((s) => s.cancel());
+    _subscriptions.forEach((s) => s.cancel());
     _userController.close();
     _queryChannelsLoadingController.close();
     _channelsController.close();
+    super.dispose();
   }
 }

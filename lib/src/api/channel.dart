@@ -19,6 +19,8 @@ class ChannelClient {
   String cid;
   Map<String, dynamic> data;
 
+  final List<StreamSubscription> _subscriptions = [];
+
   ChannelClient(
     this._client,
     this.type,
@@ -315,19 +317,19 @@ class ChannelClient {
   final Map<User, DateTime> _typings = {};
 
   void _listenTypingEvents() {
-    this.on(EventType.typingStart).listen((event) {
+    _subscriptions.add(this.on(EventType.typingStart).listen((event) {
       if (event.user != client.user) {
         _typings[event.user] = DateTime.now();
         _typingEventsController.add(_typings.keys.toList());
       }
-    });
+    }));
 
-    this.on(EventType.typingStop).listen((event) {
+    _subscriptions.add(this.on(EventType.typingStop).listen((event) {
       if (event.user != client.user) {
         _typings.remove(event.user);
         _typingEventsController.add(_typings.keys.toList());
       }
-    });
+    }));
   }
 
   Timer _cleaningTimer;
@@ -355,6 +357,7 @@ class ChannelClient {
   }
 
   void dispose() {
+    _subscriptions.forEach((s) => s.cancel());
     _typingEventsController.close();
     _cleaningTimer.cancel();
   }

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_example/components/channel_widget.dart';
 import 'package:stream_chat_example/components/channel_image.dart';
 
 import '../channel.bloc.dart';
@@ -51,7 +50,9 @@ class _ChannelPreviewState extends State<ChannelPreview>
                       .map((message) => message.last.createdAt),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
-                      return Container();
+                      return SizedBox.fromSize(
+                        size: Size.zero,
+                      );
                     }
                     return _buildDate(snapshot.data.toLocal());
                   }),

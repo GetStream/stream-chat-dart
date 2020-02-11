@@ -4,7 +4,6 @@ import 'package:stream_chat/stream_chat.dart';
 
 import '../channel.bloc.dart';
 import '../chat.bloc.dart';
-import 'channel_widget.dart';
 
 typedef ChannelPreviewBuilder = Widget Function(BuildContext, ChannelState);
 
@@ -38,7 +37,6 @@ class ChannelListView extends StatelessWidget {
       final channelBloc = Provider.of<ChatBloc>(context)
           .channelBlocs[channelsStates[i].channel.id];
       return ChangeNotifierProvider<ChannelBloc>.value(
-        key: Key(channelsStates[i].channel.id),
         value: channelBloc,
         child: _channelPreviewBuilder(
           context,
