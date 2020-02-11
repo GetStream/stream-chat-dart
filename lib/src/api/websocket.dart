@@ -24,7 +24,6 @@ const kHealthCheckInterval = Duration(seconds: 30);
 // TODO: parse error even
 // TODO: make sure parsing the event data is handled correctly
 // TODO: if parsing an error into an event fails we should not hide the original error
-// TODO: implement reconnection logic
 class WebSocket {
   final String baseUrl;
   final User user;
@@ -194,7 +193,7 @@ class WebSocket {
 
   void _startHealthCheck() {
     logger.info('start health check monitor');
-    _healthCheck = Timer.periodic(Duration(seconds: 20), (_) {
+    _healthCheck = Timer.periodic(Duration(seconds: 30), (_) {
       logger.info('sending health.check');
       _channel.sink.add("{'type': 'health.check'}");
     });

@@ -5,8 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import '../channel.bloc.dart';
-import '../chat.bloc.dart';
-import 'channel_header.dart';
 import 'connection_indicator.dart';
 import 'message_input.dart';
 import 'message_widget.dart';
