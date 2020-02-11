@@ -95,7 +95,7 @@ class ChannelListPageState extends State<ChannelListPage> {
           ),
           showSplit
               ? Flexible(
-                  flex: 3,
+                  flex: 2,
                   child: _selectedChannelId == null
                       ? Scaffold(
                           body: Center(
