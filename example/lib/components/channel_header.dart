@@ -29,7 +29,7 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
             padding: const EdgeInsets.only(right: 10.0),
             child: Stack(
               children: <Widget>[
-                ChannelImage(channel: channelState.channel),
+                Center(child: ChannelImage(channel: channelState.channel)),
                 (channelState.members.isNotEmpty &&
                         channelState.members.first.user.online)
                     ? Positioned(

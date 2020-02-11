@@ -87,8 +87,11 @@ class MessageWidget extends StatelessWidget {
   }
 
   Widget _buildTimestamp(bool isMyMessage, Alignment alignment) {
-    return Text(
-      formatDate(message.createdAt.toLocal(), [HH, ':', nn]),
+    return Padding(
+      padding: const EdgeInsets.only(top: 5.0),
+      child: Text(
+        formatDate(message.createdAt.toLocal(), [HH, ':', nn]),
+      ),
     );
   }
 

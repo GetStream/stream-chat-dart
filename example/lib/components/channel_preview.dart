@@ -29,56 +29,35 @@ class _ChannelPreviewState extends State<ChannelPreview>
     return Consumer<ChannelBloc>(
       builder: (context, channelBloc, _) {
         final channelState = channelBloc.channelState;
-        return RawMaterialButton(
-          elevation: 0,
-          onPressed: () {
+        return ListTile(
+          onTap: () {
             widget.onTap();
           },
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 10),
-            height: 60,
-            child: Row(
-              children: <Widget>[
-                ChannelImage(
-                  channel: channelState.channel,
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        ChannelNameText(
-                          channel: channelState.channel,
-                        ),
-                        _buildSubtitle(
-                          channelBloc,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    StreamBuilder<DateTime>(
-                        stream: channelBloc.messages
-                            .map((message) => message.last.createdAt),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return Container();
-                          }
-                          return _buildDate(snapshot.data.toLocal());
-                        }),
-                  ],
-                ),
-              ],
-            ),
+          leading: ChannelImage(
+            channel: channelState.channel,
+          ),
+          title: ChannelNameText(
+            channel: channelState.channel,
+          ),
+          subtitle: _buildSubtitle(
+            channelBloc,
+          ),
+          trailing: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: <Widget>[
+              StreamBuilder<DateTime>(
+                  stream: channelBloc.messages
+                      .map((message) => message.last.createdAt),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Container();
+                    }
+                    return _buildDate(snapshot.data.toLocal());
+                  }),
+            ],
           ),
         );
-        ;
       },
     );
   }
@@ -87,7 +66,9 @@ class _ChannelPreviewState extends State<ChannelPreview>
     String stringDate;
     final now = DateTime.now();
 
-    if (now.difference(lastMessageAt).inDays > 0) {
+    if (now.year != lastMessageAt.year ||
+        now.month != lastMessageAt.month ||
+        now.day != lastMessageAt.day) {
       stringDate =
           '${lastMessageAt.day}/${lastMessageAt.month}/${lastMessageAt.year}';
       stringDate = formatDate(lastMessageAt, [dd, '/', mm, '/', yyyy]);
