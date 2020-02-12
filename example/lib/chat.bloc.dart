@@ -61,6 +61,9 @@ class ChatBloc with ChangeNotifier {
     PaginationParams paginationParams,
     Map<String, dynamic> options,
   ) async {
+    if (_queryChannelsLoadingController.value) {
+      return;
+    }
     _queryChannelsLoadingController.sink.add(true);
 
     try {

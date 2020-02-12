@@ -16,6 +16,7 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
   double _height = 0;
   String _text;
   Color _color;
+  VoidCallback _listener;
 
   @override
   Widget build(BuildContext context) {
@@ -38,30 +39,34 @@ class _ConnectionIndicatorState extends State<ConnectionIndicator> {
   void initState() {
     super.initState();
 
-    widget.indicatorController.indicatorValues.addListener(() {
+    _listener = () {
       final values = widget.indicatorController.indicatorValues.value;
-      setState(() {
-        _height = 30;
-        _text = values.text;
-        _color = values.color;
-      });
+      if (mounted) {
+        setState(() {
+          _height = 30;
+          _text = values.text;
+          _color = values.color;
+        });
+      }
 
       if (values.duration != null) {
-        if (mounted) {
-          Future.delayed(values.duration, () {
+        Future.delayed(values.duration, () {
+          if (mounted) {
             setState(() {
               _height = 0;
               _text = '';
             });
-          });
-        }
+          }
+        });
       }
-    });
+    };
+
+    widget.indicatorController.indicatorValues.addListener(_listener);
   }
 
   @override
   void dispose() {
-    widget.indicatorController.indicatorValues.dispose();
+    widget.indicatorController.indicatorValues.removeListener(_listener);
     super.dispose();
   }
 }

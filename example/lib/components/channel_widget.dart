@@ -214,7 +214,6 @@ class _ChannelWidgetState extends State<ChannelWidget> {
           text: 'Connected',
         );
 
-        channelBloc.messageList.clear();
         channelBloc.queryMessages();
       }
     });

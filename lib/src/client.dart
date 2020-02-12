@@ -18,14 +18,35 @@ import 'models/user.dart';
 
 typedef LogHandlerFunction = void Function(LogRecord record);
 typedef DecoderFunction<T> = T Function(Map<String, dynamic>);
+typedef TokenProvider = Future<String> Function(String userId);
 
 class Client {
   static const defaultBaseURL = "chat-us-east-1.stream-io-api.com";
+  static const tokenExpiredErrorCode = 40;
 
-  final Logger logger = Logger('HTTP');
+  Client(
+    this.apiKey, {
+    @required this.tokenProvider,
+    this.baseURL = defaultBaseURL,
+    this.logLevel = Level.WARNING,
+    LogHandlerFunction logHandlerFunction,
+    Duration connectTimeout = const Duration(seconds: 6),
+    Duration receiveTimeout = const Duration(seconds: 6),
+    Dio httpClient,
+  }) {
+    _setupLogger(logHandlerFunction);
+    _setupDio(httpClient, receiveTimeout, connectTimeout);
+
+    logger.info('instantiating new client');
+  }
+
+  final Logger logger = Logger('📡');
   final Level logLevel;
   final String apiKey;
   final String baseURL;
+  final TokenProvider tokenProvider;
+  VoidCallback _connectionStatusListener;
+
   Dio httpClient = Dio();
 
   LogHandlerFunction _logHandlerFunction;
@@ -39,38 +60,31 @@ class Client {
   User user;
   bool _anonymous = false;
   String _connectionId;
-  WebSocket _ws;
+  WebSocket ws;
 
   bool get hasConnectionId => _connectionId != null;
 
-  ValueNotifier<ConnectionStatus> wsConnectionStatus;
+  final ValueNotifier<ConnectionStatus> wsConnectionStatus =
+      ValueNotifier(null);
 
-  Client(
-    this.apiKey, {
-    this.baseURL = defaultBaseURL,
-    this.logLevel = Level.WARNING,
-    LogHandlerFunction logHandlerFunction,
-    Duration connectTimeout = const Duration(seconds: 6),
-    Duration receiveTimeout = const Duration(seconds: 6),
-    Dio httpClient,
-  }) {
-    _setupLogger(logHandlerFunction);
-    _setupDio(httpClient, receiveTimeout, connectTimeout);
-    logger.info('instantiating new client');
-  }
+  int r = 1;
 
   void _setupDio(
     Dio httpClient,
     Duration receiveTimeout,
     Duration connectTimeout,
   ) {
+    logger.info('http client setup');
+
     this.httpClient = httpClient ?? Dio();
     this.httpClient.options.baseUrl = Uri.https(baseURL, '').toString();
     this.httpClient.options.receiveTimeout = receiveTimeout.inMilliseconds;
     this.httpClient.options.connectTimeout = connectTimeout.inMilliseconds;
-    this.httpClient.interceptors.add(InterceptorsWrapper(
-      onRequest: (options) async {
-        logger.info('''
+    this
+        .httpClient
+        .interceptors
+        .add(InterceptorsWrapper(onRequest: (options) async {
+          logger.info('''
     
           method: ${options.method}
           url: ${options.uri} 
@@ -78,25 +92,68 @@ class Client {
           data: ${options.data.toString()}
     
         ''');
-        options.queryParameters.addAll(commonQueryParams);
-        options.headers.addAll(httpHeaders);
-        return options;
-      },
-    ));
+          options.queryParameters.addAll(commonQueryParams);
+          options.headers.addAll(httpHeaders);
+
+          return options;
+        }, onError: (DioError err) async {
+          final apiError = ApiError(
+            err.response?.data,
+            err.response?.statusCode,
+          );
+
+          if (apiError.code == tokenExpiredErrorCode) {
+            logger.info('token expired');
+            final userId = this.user.id;
+
+            ws.connectionStatus.removeListener(_connectionStatusListener);
+
+            await disconnect();
+
+            final newToken = await this.tokenProvider(userId);
+            this._token = newToken;
+
+            await setUser(User(id: userId), newToken);
+
+            try {
+              return await this.httpClient.request(
+                    err.request.path,
+                    cancelToken: err.request.cancelToken,
+                    data: err.request.data,
+                    onReceiveProgress: err.request.onReceiveProgress,
+                    onSendProgress: err.request.onSendProgress,
+                    queryParameters: err.request.queryParameters,
+                    options: err.request,
+                  );
+            } catch (e) {
+              return e;
+            }
+          }
+
+          return err;
+        }));
   }
 
   void _setupLogger(LogHandlerFunction logHandlerFunction) {
     Logger.root.level = logLevel;
 
+    final levelEmojiMapper = {
+      Level.INFO.name: 'ℹ️',
+      Level.WARNING.name: '⚠️',
+      Level.SEVERE.name: '🚨',
+    };
+
     _logHandlerFunction = logHandlerFunction ??
         (LogRecord record) {
           print(
-              '(${record.time}) ${record.level.name}: <${record.loggerName}> ${record.message}');
+              '(${record.time}) ${levelEmojiMapper[record.level.name] ?? record.level.name} ${record.loggerName} ${record.message}');
           if (record.stackTrace != null) {
             print(record.stackTrace);
           }
         };
     logger.onRecord.listen(_logHandlerFunction);
+
+    logger.info('logger setup');
   }
 
   void dispose() {
@@ -117,6 +174,14 @@ class Client {
     return connect();
   }
 
+  //todo
+//  Future<Event> setUserWithProvider(User user, TokenProvider provider) {
+//    this.user = user;
+//    _token = token;
+//    _anonymous = false;
+//    return connect();
+//  }
+
   Stream<Event> on(String eventType) =>
       stream.where((event) => eventType == null || event.type == eventType);
 
@@ -128,7 +193,7 @@ class Client {
   }
 
   Future<Event> connect() async {
-    _ws = WebSocket(
+    ws = WebSocket(
       baseUrl: baseURL,
       user: user,
       connectParams: {
@@ -144,9 +209,14 @@ class Client {
       logger: Logger('WS'),
     );
 
-    wsConnectionStatus = _ws.connectionStatus;
+    _connectionStatusListener = () {
+      final value = ws.connectionStatus.value;
+      this.wsConnectionStatus.value = value;
+    };
 
-    final connectEvent = await _ws.connect();
+    ws.connectionStatus.addListener(_connectionStatusListener);
+
+    final connectEvent = await ws.connect();
     _connectionId = connectEvent.connectionId;
     return connectEvent;
   }
@@ -191,12 +261,12 @@ class Client {
     );
   }
 
-  void _parseError(DioError error) {
+  _parseError(DioError error) {
     if (error.type == DioErrorType.RESPONSE) {
-      throw ApiError(error.response?.data, error.response?.statusCode);
+      return ApiError(error.response?.data, error.response?.statusCode);
     }
 
-    throw error;
+    return error;
   }
 
   Future<Response<String>> get(
@@ -210,7 +280,7 @@ class Client {
       );
       return response;
     } on DioError catch (error) {
-      _parseError(error);
+      throw _parseError(error);
     }
   }
 
@@ -222,7 +292,7 @@ class Client {
       final response = await httpClient.post<String>(path, data: data);
       return response;
     } on DioError catch (error) {
-      _parseError(error);
+      throw _parseError(error);
     }
   }
 
@@ -235,7 +305,7 @@ class Client {
           queryParameters: queryParameters);
       return response;
     } on DioError catch (error) {
-      _parseError(error);
+      throw _parseError(error);
     }
   }
 
@@ -252,7 +322,7 @@ class Client {
       );
       return response;
     } on DioError catch (error) {
-      _parseError(error);
+      throw _parseError(error);
     }
   }
 
@@ -269,7 +339,7 @@ class Client {
       );
       return response;
     } on DioError catch (error) {
-      _parseError(error);
+      throw _parseError(error);
     }
   }
 
@@ -310,11 +380,10 @@ class Client {
     return setUser(response.user, response.accessToken);
   }
 
-  // TODO disconnect
   Future<void> disconnect() async {
     this._anonymous = false;
     this._connectionId = null;
-    await this._ws.disconnect();
+    await this.ws.disconnect();
     this._token = null;
     this.user = null;
   }

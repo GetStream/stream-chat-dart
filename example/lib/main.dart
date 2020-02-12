@@ -7,7 +7,14 @@ import 'components/channel_list_page.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  final client = Client("qk4nn7rpcn75", logLevel: Level.INFO);
+  final client = Client(
+    "qk4nn7rpcn75",
+    logLevel: Level.INFO,
+    tokenProvider: (userId) async {
+      print('PROVIDERR $userId');
+      return 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo';
+    },
+  );
 
   @override
   Widget build(BuildContext context) {
