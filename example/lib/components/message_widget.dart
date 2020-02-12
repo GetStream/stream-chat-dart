@@ -81,7 +81,7 @@ class MessageWidget extends StatelessWidget {
       constraints: BoxConstraints.loose(Size.fromWidth(300)),
       child: Text(
         message.text,
-        style: Theme.of(context).textTheme.bodyText1,
+        style: Theme.of(context).textTheme.bodyText2,
       ),
     );
   }

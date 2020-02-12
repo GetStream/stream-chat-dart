@@ -5,34 +5,25 @@ import 'package:dio/dio.dart';
 class ApiError implements Exception {
   final String body;
   final Map<String, dynamic> data;
-  final int statusCode;
+  final int status;
+
+  int _code;
+  int get code => _code;
 
   static Map<String, dynamic> _decode(String body) {
     try {
+      if (body == null) {
+        return null;
+      }
       return json.decode(body);
     } on FormatException {
       return null;
     }
   }
 
-  ApiError(this.body, this.statusCode) : data = _decode(body);
-
-  factory ApiError.fromDioError(DioError error) {
-    switch (error.type) {
-      case DioErrorType.RESPONSE:
-        return ApiError(error.response.data, error.response.statusCode);
-      case DioErrorType.CONNECT_TIMEOUT:
-      // TODO: Handle this case.
-      case DioErrorType.SEND_TIMEOUT:
-      // TODO: Handle this case.
-      case DioErrorType.RECEIVE_TIMEOUT:
-      // TODO: Handle this case.
-      case DioErrorType.CANCEL:
-      // TODO: Handle this case.
-      case DioErrorType.DEFAULT:
-      // TODO: Handle this case.
-      default:
-        return ApiError(error.response.data, error.response.statusCode);
+  ApiError(this.body, this.status) : data = _decode(body) {
+    if (data?.containsKey('code') ?? false) {
+      _code = data['code'];
     }
   }
 
@@ -43,13 +34,15 @@ class ApiError implements Exception {
           runtimeType == other.runtimeType &&
           body == other.body &&
           data == other.data &&
-          statusCode == other.statusCode;
+          status == other.status &&
+          _code == other._code;
 
   @override
-  int get hashCode => body.hashCode ^ data.hashCode ^ statusCode.hashCode;
+  int get hashCode =>
+      body.hashCode ^ data.hashCode ^ status.hashCode ^ _code.hashCode;
 
   @override
   String toString() {
-    return 'ApiError {body: $body, statusCode: $statusCode}';
+    return 'ApiError{body: $body, data: $data, status: $status, code: $_code}';
   }
 }

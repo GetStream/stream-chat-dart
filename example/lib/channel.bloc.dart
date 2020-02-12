@@ -70,7 +70,7 @@ class ChannelBloc with ChangeNotifier {
     _queryMessageController.add(true);
     channelClient.query(
       {},
-      messagesPagination: PaginationParams(lessThan: firstId, limit: 10),
+      messagesPagination: PaginationParams(lessThan: firstId, limit: 50),
     ).then((res) {
       channelState.messages.insertAll(0, res.messages);
 

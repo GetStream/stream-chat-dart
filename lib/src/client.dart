@@ -191,6 +191,14 @@ class Client {
     );
   }
 
+  void _parseError(DioError error) {
+    if (error.type == DioErrorType.RESPONSE) {
+      throw ApiError(error.response?.data, error.response?.statusCode);
+    }
+
+    throw error;
+  }
+
   Future<Response<String>> get(
     String path, {
     Map<String, dynamic> queryParameters,
@@ -202,7 +210,7 @@ class Client {
       );
       return response;
     } on DioError catch (error) {
-      throw ApiError.fromDioError(error);
+      _parseError(error);
     }
   }
 
@@ -214,7 +222,7 @@ class Client {
       final response = await httpClient.post<String>(path, data: data);
       return response;
     } on DioError catch (error) {
-      throw ApiError.fromDioError(error);
+      _parseError(error);
     }
   }
 
@@ -227,7 +235,7 @@ class Client {
           queryParameters: queryParameters);
       return response;
     } on DioError catch (error) {
-      throw ApiError.fromDioError(error);
+      _parseError(error);
     }
   }
 
@@ -244,7 +252,7 @@ class Client {
       );
       return response;
     } on DioError catch (error) {
-      throw ApiError.fromDioError(error);
+      _parseError(error);
     }
   }
 
@@ -261,7 +269,7 @@ class Client {
       );
       return response;
     } on DioError catch (error) {
-      throw ApiError.fromDioError(error);
+      _parseError(error);
     }
   }
 

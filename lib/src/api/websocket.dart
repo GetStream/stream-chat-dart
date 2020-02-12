@@ -17,8 +17,6 @@ typedef EventHandler = void Function(Event);
 typedef ConnectWebSocket = WebSocketChannel Function(String url,
     {Iterable<String> protocols});
 
-const kHealthCheckInterval = Duration(seconds: 30);
-
 // TODO: improve error path for the connect() method
 // TODO: make sure we pass an error with a stacktrace
 // TODO: parse error even
@@ -155,7 +153,7 @@ class WebSocket {
   void _startReconnectionMonitor() {
     _reconnectionMonitor = Timer.periodic(Duration(seconds: 1), (_) {
       final now = DateTime.now();
-      if (now.difference(_lastEventAt).inSeconds > 30) {
+      if (now.difference(_lastEventAt).inSeconds > 40) {
         _channel.sink.close();
       }
     });
