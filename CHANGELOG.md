@@ -1,3 +1,9 @@
+## 0.1.2
+
+- add websocket reconnection logic
+
+- add token expiration mechanism
+
 ## 0.1.1
 
 - add typing events handling
