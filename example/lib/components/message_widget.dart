@@ -4,6 +4,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_example/components/user_avatar.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../channel.bloc.dart';
 
@@ -82,9 +83,19 @@ class MessageWidget extends StatelessWidget {
       constraints: BoxConstraints.loose(Size.fromWidth(300)),
       child: MarkdownBody(
         data: message.text,
-        selectable: true,
+        onTapLink: (link) {
+          _launchURL(link);
+        },
       ),
     );
+  }
+
+  _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
   Widget _buildTimestamp(bool isMyMessage, Alignment alignment) {
