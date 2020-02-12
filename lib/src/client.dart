@@ -80,11 +80,9 @@ class Client {
     this.httpClient.options.baseUrl = Uri.https(baseURL, '').toString();
     this.httpClient.options.receiveTimeout = receiveTimeout.inMilliseconds;
     this.httpClient.options.connectTimeout = connectTimeout.inMilliseconds;
-    this
-        .httpClient
-        .interceptors
-        .add(InterceptorsWrapper(onRequest: (options) async {
-          logger.info('''
+    this.httpClient.interceptors.add(InterceptorsWrapper(
+          onRequest: (options) async {
+            logger.info('''
     
           method: ${options.method}
           url: ${options.uri} 
@@ -92,46 +90,50 @@ class Client {
           data: ${options.data.toString()}
     
         ''');
-          options.queryParameters.addAll(commonQueryParams);
-          options.headers.addAll(httpHeaders);
+            options.queryParameters.addAll(commonQueryParams);
+            options.headers.addAll(httpHeaders);
 
-          return options;
-        }, onError: (DioError err) async {
-          final apiError = ApiError(
-            err.response?.data,
-            err.response?.statusCode,
-          );
+            return options;
+          },
+          onError: _tokenExpiredInterceptor,
+        ));
+  }
 
-          if (apiError.code == tokenExpiredErrorCode) {
-            logger.info('token expired');
-            final userId = this.user.id;
+  _tokenExpiredInterceptor(DioError err) async {
+    final apiError = ApiError(
+      err.response?.data,
+      err.response?.statusCode,
+    );
 
-            ws.connectionStatus.removeListener(_connectionStatusListener);
+    if (apiError.code == tokenExpiredErrorCode) {
+      logger.info('token expired');
+      final userId = this.user.id;
 
-            await disconnect();
+      ws.connectionStatus.removeListener(_connectionStatusListener);
 
-            final newToken = await this.tokenProvider(userId);
-            this._token = newToken;
+      await disconnect();
 
-            await setUser(User(id: userId), newToken);
+      final newToken = await this.tokenProvider(userId);
+      this._token = newToken;
 
-            try {
-              return await this.httpClient.request(
-                    err.request.path,
-                    cancelToken: err.request.cancelToken,
-                    data: err.request.data,
-                    onReceiveProgress: err.request.onReceiveProgress,
-                    onSendProgress: err.request.onSendProgress,
-                    queryParameters: err.request.queryParameters,
-                    options: err.request,
-                  );
-            } catch (e) {
-              return e;
-            }
-          }
+      await setUser(User(id: userId), newToken);
 
-          return err;
-        }));
+      try {
+        return await this.httpClient.request(
+              err.request.path,
+              cancelToken: err.request.cancelToken,
+              data: err.request.data,
+              onReceiveProgress: err.request.onReceiveProgress,
+              onSendProgress: err.request.onSendProgress,
+              queryParameters: err.request.queryParameters,
+              options: err.request,
+            );
+      } catch (e) {
+        return e;
+      }
+    }
+
+    return err;
   }
 
   void _setupLogger(LogHandlerFunction logHandlerFunction) {

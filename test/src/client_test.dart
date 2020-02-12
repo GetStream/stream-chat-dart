@@ -67,7 +67,8 @@ void main() {
         client.logger.warning('test');
         client.logger.config('test config');
 
-        expect(log, ['instantiating new client', 'test']);
+        expect([log[log.length - 2], log[log.length - 1]],
+            ['instantiating new client', 'test']);
       }));
 
       test('Channel', () {
