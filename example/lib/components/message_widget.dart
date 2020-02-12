@@ -1,5 +1,6 @@
 import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_example/components/user_avatar.dart';
@@ -79,9 +80,9 @@ class MessageWidget extends StatelessWidget {
       decoration: _buildBoxDecoration(isMyMessage, isLastUser),
       padding: EdgeInsets.all(10),
       constraints: BoxConstraints.loose(Size.fromWidth(300)),
-      child: Text(
-        message.text,
-        style: Theme.of(context).textTheme.bodyText2,
+      child: MarkdownBody(
+        data: message.text,
+        selectable: true,
       ),
     );
   }

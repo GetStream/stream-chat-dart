@@ -60,7 +60,7 @@ class _MessageInputState extends State<MessageInput> {
                           .channelClient
                           .keyStroke();
                       setState(() {
-                        _messageIsPresent = s.isNotEmpty;
+                        _messageIsPresent = s.trim().isNotEmpty;
                       });
                     },
                     onTap: () {
@@ -99,27 +99,15 @@ class _MessageInputState extends State<MessageInput> {
       onPressed: () {
         _sendMessage(context);
       },
-      icon: RawMaterialButton(
-        onPressed: () {
-          _sendMessage(context);
-        },
-        constraints: BoxConstraints.tightFor(
-          height: 40,
-          width: 40,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(32),
-        ),
-        child: Icon(
-          Icons.send,
-        ),
+      icon: Icon(
+        Icons.send,
       ),
     );
   }
 
   void _sendMessage(BuildContext context) {
-    final text = _textController.text;
-    if (text.trim().isEmpty) {
+    final text = _textController.text.trim();
+    if (text.isEmpty) {
       return;
     }
 
