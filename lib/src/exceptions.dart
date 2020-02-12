@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:dio/dio.dart';
-
 class ApiError implements Exception {
   final String body;
   final Map<String, dynamic> jsonData;
