@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 
 class ApiError implements Exception {
   final String body;
-  final Map<String, dynamic> data;
+  final Map<String, dynamic> jsonData;
   final int status;
 
   int _code;
@@ -21,9 +21,9 @@ class ApiError implements Exception {
     }
   }
 
-  ApiError(this.body, this.status) : data = _decode(body) {
-    if (data?.containsKey('code') ?? false) {
-      _code = data['code'];
+  ApiError(this.body, this.status) : jsonData = _decode(body) {
+    if (jsonData != null && jsonData.containsKey('code')) {
+      _code = jsonData['code'];
     }
   }
 
@@ -33,16 +33,16 @@ class ApiError implements Exception {
       other is ApiError &&
           runtimeType == other.runtimeType &&
           body == other.body &&
-          data == other.data &&
+          jsonData == other.jsonData &&
           status == other.status &&
           _code == other._code;
 
   @override
   int get hashCode =>
-      body.hashCode ^ data.hashCode ^ status.hashCode ^ _code.hashCode;
+      body.hashCode ^ jsonData.hashCode ^ status.hashCode ^ _code.hashCode;
 
   @override
   String toString() {
-    return 'ApiError{body: $body, data: $data, status: $status, code: $_code}';
+    return 'ApiError{body: $body, jsonData: $jsonData, status: $status, code: $_code}';
   }
 }
