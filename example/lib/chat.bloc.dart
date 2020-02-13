@@ -21,7 +21,8 @@ class ChatBloc with ChangeNotifier {
       }
     }));
 
-    setUser(User(id: "wild-breeze-7"));
+    setUser(User(id: "wild-breeze-7"),
+        'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo');
   }
 
   final BehaviorSubject<User> _userController = BehaviorSubject();
@@ -34,7 +35,11 @@ class ChatBloc with ChangeNotifier {
     _userController.sink.add(null);
 
     try {
-      await client.setUser(newUser, token);
+      if (token != null) {
+        await client.setUser(newUser, token);
+      } else {
+        await client.setUserWithProvider(newUser);
+      }
       _userController.sink.add(newUser);
     } catch (e, stack) {
       _userController.sink.addError(e, stack);

@@ -26,7 +26,7 @@ class Client {
 
   Client(
     this.apiKey, {
-    @required this.tokenProvider,
+    this.tokenProvider,
     this.baseURL = defaultBaseURL,
     this.logLevel = Level.WARNING,
     LogHandlerFunction logHandlerFunction,
@@ -108,36 +108,38 @@ class Client {
       err.response?.statusCode,
     );
 
-    print('ERROR $apiError');
     if (apiError.code == tokenExpiredErrorCode) {
-      _tokenExpiredCompleter = Completer();
       logger.info('token expired');
-      final userId = this.user.id;
 
-      ws.connectionStatus.removeListener(_connectionStatusListener);
+      if (this.tokenProvider != null) {
+        _tokenExpiredCompleter = Completer();
+        final userId = this.user.id;
 
-      await disconnect();
+        ws.connectionStatus.removeListener(_connectionStatusListener);
 
-      final newToken = await this.tokenProvider(userId);
-      await Future.delayed(Duration(seconds: 4));
-      this._token = newToken;
+        await disconnect();
 
-      await setUser(User(id: userId), newToken);
+        final newToken = await this.tokenProvider(userId);
+        await Future.delayed(Duration(seconds: 4));
+        this._token = newToken;
 
-      _tokenExpiredCompleter.complete();
+        await setUser(User(id: userId), newToken);
 
-      try {
-        return await this.httpClient.request(
-              err.request.path,
-              cancelToken: err.request.cancelToken,
-              data: err.request.data,
-              onReceiveProgress: err.request.onReceiveProgress,
-              onSendProgress: err.request.onSendProgress,
-              queryParameters: err.request.queryParameters,
-              options: err.request,
-            );
-      } catch (e) {
-        return e;
+        _tokenExpiredCompleter.complete();
+
+        try {
+          return await this.httpClient.request(
+                err.request.path,
+                cancelToken: err.request.cancelToken,
+                data: err.request.data,
+                onReceiveProgress: err.request.onReceiveProgress,
+                onSendProgress: err.request.onSendProgress,
+                queryParameters: err.request.queryParameters,
+                options: err.request,
+              );
+        } catch (err) {
+          return err;
+        }
       }
     }
 
@@ -177,13 +179,22 @@ class Client {
         "x-stream-client": userAgent,
       };
 
-  Future<Event> setUser(User user, [String token]) async {
-    if (token == null) {
-      token = await tokenProvider(user.id);
-    }
-
+  Future<Event> setUser(User user, String token) async {
     this.user = user;
     _token = token;
+    _anonymous = false;
+    return connect();
+  }
+
+  Future<Event> setUserWithProvider(User user) async {
+    if (tokenProvider == null) {
+      throw Exception('''
+      TokenProvider must be provided in the constructor in order to use `setUserWithProvider` method.
+      Use `setUser` providing a token.
+      ''');
+    }
+    this.user = user;
+    _token = await tokenProvider(user.id);
     _anonymous = false;
     return connect();
   }
