@@ -9,7 +9,11 @@ const TOKEN =
 
 void main() {
   test('test', () async {
-    final client = Client('6xjf3dex3n7d', logLevel: Level.INFO);
+    final client = Client(
+      '6xjf3dex3n7d',
+      logLevel: Level.INFO,
+      tokenProvider: (_) async => '',
+    );
     final user = User(id: "wild-breeze-7");
 
     final setUserEvent = await client.setGuestUser(user);

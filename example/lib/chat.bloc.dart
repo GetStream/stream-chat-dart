@@ -21,8 +21,7 @@ class ChatBloc with ChangeNotifier {
       }
     }));
 
-    setUser(User(id: "wild-breeze-7"),
-        "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo");
+    setUser(User(id: "wild-breeze-7"));
   }
 
   final BehaviorSubject<User> _userController = BehaviorSubject();
@@ -31,7 +30,7 @@ class ChatBloc with ChangeNotifier {
 
   User get user => _userController.value;
 
-  void setUser(User newUser, String token) async {
+  void setUser(User newUser, [String token]) async {
     _userController.sink.add(null);
 
     try {

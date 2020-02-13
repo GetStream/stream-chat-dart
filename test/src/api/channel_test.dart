@@ -23,7 +23,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
         final message = Message(text: 'hey');
 
@@ -43,7 +47,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
 
         when(mockDio.post<String>('/channels/messaging/testid/read', data: {}))
@@ -61,7 +69,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
         final pagination = PaginationParams();
 
@@ -82,7 +94,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
         final Map<String, dynamic> data = {'test': true};
 
@@ -103,7 +119,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
         final messageIds = ['a', 'b'];
 
@@ -123,7 +143,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
         final file = MultipartFile.fromString('file');
 
@@ -144,7 +168,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
         final file = MultipartFile.fromString('file');
 
@@ -165,7 +193,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
         final url = 'url';
 
@@ -185,7 +217,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
         final url = 'url';
 
@@ -206,7 +242,11 @@ void main() {
       when(mockDio.options).thenReturn(BaseOptions());
       when(mockDio.interceptors).thenReturn(Interceptors());
 
-      final client = Client('api-key', httpClient: mockDio);
+      final client = Client(
+        'api-key',
+        httpClient: mockDio,
+        tokenProvider: (_) async => '',
+      );
       final channelClient = client.channel('messaging', id: 'testid');
       final event = Event(type: EventType.any);
 
@@ -226,7 +266,11 @@ void main() {
       when(mockDio.options).thenReturn(BaseOptions());
       when(mockDio.interceptors).thenReturn(Interceptors());
 
-      final client = Client('api-key', httpClient: mockDio);
+      final client = Client(
+        'api-key',
+        httpClient: mockDio,
+        tokenProvider: (_) async => '',
+      );
       final channelClient = client.channel('messaging', id: 'testid');
       final event = Event(type: EventType.typingStart);
 
@@ -246,7 +290,11 @@ void main() {
       when(mockDio.options).thenReturn(BaseOptions());
       when(mockDio.interceptors).thenReturn(Interceptors());
 
-      final client = Client('api-key', httpClient: mockDio);
+      final client = Client(
+        'api-key',
+        httpClient: mockDio,
+        tokenProvider: (_) async => '',
+      );
       final channelClient = client.channel('messaging', id: 'testid');
       final event = Event(type: EventType.typingStop);
 
@@ -267,7 +315,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
         final reaction = Reaction(type: 'test');
 
@@ -287,7 +339,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
 
         when(mockDio.delete<String>('/messages/messageid/reaction/test'))
@@ -305,7 +361,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
         final pagination = PaginationParams();
 
@@ -328,7 +388,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
         final List<Member> members = [Member(invited: true)];
         final message = Message(text: 'test');
@@ -352,7 +416,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
         final message = Message(text: 'test');
 
@@ -374,7 +442,11 @@ void main() {
           when(mockDio.options).thenReturn(BaseOptions());
           when(mockDio.interceptors).thenReturn(Interceptors());
 
-          final client = Client('api-key', httpClient: mockDio);
+          final client = Client(
+            'api-key',
+            httpClient: mockDio,
+            tokenProvider: (_) async => '',
+          );
           final channelClient = client.channel('messaging');
           final Map<String, dynamic> options = {
             'watch': true,
@@ -685,7 +757,11 @@ void main() {
           when(mockDio.options).thenReturn(BaseOptions());
           when(mockDio.interceptors).thenReturn(Interceptors());
 
-          final client = Client('api-key', httpClient: mockDio);
+          final client = Client(
+            'api-key',
+            httpClient: mockDio,
+            tokenProvider: (_) async => '',
+          );
           final channelClient = client.channel('messaging', id: 'testid');
           final Map<String, dynamic> options = {
             'state': false,
@@ -995,7 +1071,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging');
         final Map<String, dynamic> options = {
           'watch': false,
@@ -1306,7 +1386,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging');
         final Map<String, dynamic> options = {
           'watch': true,
@@ -1617,7 +1701,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
 
         when(mockDio.post<String>('/channels/messaging/testid/stop-watching'))
@@ -1635,7 +1723,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
         final message = Message(text: 'test');
 
@@ -1658,7 +1750,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
 
         when(mockDio.delete<String>('/channels/messaging/testid'))
@@ -1675,7 +1771,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
 
         when(mockDio.post<String>('/channels/messaging/testid/truncate'))
@@ -1693,7 +1793,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
         final message = Message(text: 'test');
 
@@ -1714,7 +1818,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
         final List<Member> members = [Member(invited: true)];
         final message = Message(text: 'test');
@@ -1738,7 +1846,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
         final List<Member> members = [Member(invited: true)];
         final message = Message(text: 'test');
@@ -1762,7 +1874,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
 
         when(mockDio.post<String>('/channels/messaging/testid/hide',
@@ -1781,7 +1897,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
 
         when(mockDio.post<String>('/channels/messaging/testid/show'))
@@ -1799,7 +1919,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
 
         when(mockDio.post<String>('/moderation/ban', data: {
@@ -1826,7 +1950,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
         final channelClient = client.channel('messaging', id: 'testid');
 
         when(mockDio.delete<String>('/moderation/ban', queryParameters: {

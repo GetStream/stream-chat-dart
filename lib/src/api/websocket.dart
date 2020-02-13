@@ -30,8 +30,9 @@ class WebSocket {
   final EventHandler handler;
   final Logger logger;
   final ConnectWebSocket connectFunc;
-  final int reconnectionMonitorInterval = 1;
-  final int reconnectionMonitorTimeout = 40;
+  final int reconnectionMonitorInterval;
+  final int healthCheckInterval;
+  final int reconnectionMonitorTimeout;
 
   ValueNotifier<ConnectionStatus> connectionStatus =
       ValueNotifier(ConnectionStatus.disconnected);
@@ -52,6 +53,9 @@ class WebSocket {
     this.handler,
     this.logger,
     this.connectFunc = connectWebSocket,
+    this.reconnectionMonitorInterval = 1,
+    this.healthCheckInterval = 30,
+    this.reconnectionMonitorTimeout = 40,
   }) {
     final qs = Map<String, String>.from(connectParams);
 
@@ -155,9 +159,10 @@ class WebSocket {
   }
 
   void _startReconnectionMonitor() {
-    _reconnectionMonitor = Timer.periodic(Duration(seconds: 1), (_) {
+    _reconnectionMonitor =
+        Timer.periodic(Duration(seconds: reconnectionMonitorInterval), (_) {
       final now = DateTime.now();
-      if (now.difference(_lastEventAt).inSeconds > 40) {
+      if (now.difference(_lastEventAt).inSeconds > reconnectionMonitorTimeout) {
         _channel.sink.close();
       }
     });
@@ -203,10 +208,18 @@ class WebSocket {
 
   void _startHealthCheck() {
     logger.info('start health check monitor');
-    _healthCheck = Timer.periodic(Duration(seconds: 30), (_) {
+
+    final healthCheckTimer = (_) {
       logger.info('sending health.check');
       _channel.sink.add("{'type': 'health.check'}");
-    });
+    };
+
+    _healthCheck = Timer.periodic(
+      Duration(seconds: healthCheckInterval),
+      healthCheckTimer,
+    );
+
+    healthCheckTimer(_healthCheck);
   }
 
   Future<void> disconnect() {

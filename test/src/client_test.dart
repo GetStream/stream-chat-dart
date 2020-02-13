@@ -35,7 +35,10 @@ void main() {
       });
 
       test('should create the object correctly', () {
-        final client = Client('api-key');
+        final client = Client(
+          'api-key',
+          tokenProvider: (_) async => '',
+        );
 
         expect(client.baseURL, Client.defaultBaseURL);
         expect(client.apiKey, 'api-key');
@@ -56,6 +59,7 @@ void main() {
           logLevel: Level.INFO,
           baseURL: 'test.com',
           logHandlerFunction: logHandler,
+          tokenProvider: (_) async => '',
         );
 
         expect(client.baseURL, 'test.com');
@@ -72,7 +76,10 @@ void main() {
       }));
 
       test('Channel', () {
-        final client = Client('test');
+        final client = Client(
+          'test',
+          tokenProvider: (_) async => '',
+        );
         final Map<String, dynamic> data = {'test': 1};
         final channelClient = client.channel('type', id: 'id', data: data);
         expect(channelClient.type, 'type');
@@ -88,7 +95,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         final queryParams = {
           'payload': json.encode({
@@ -116,7 +127,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         final Map<String, dynamic> queryFilter = {
           "id": {
@@ -157,7 +172,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         final queryParams = {
           'payload': json.encode({
@@ -182,7 +201,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         final filters = {
           "id": {
@@ -222,7 +245,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         when(mockDio.post<String>('/devices', data: {
           'id': 'test-id',
@@ -241,7 +268,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         when(mockDio.get<String>('/devices'))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
@@ -257,7 +288,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         when(mockDio
                 .delete<String>('/devices', queryParameters: {'id': 'test-id'}))
@@ -271,7 +306,10 @@ void main() {
     });
 
     test('devToken', () {
-      final client = Client('api-key');
+      final client = Client(
+        'api-key',
+        tokenProvider: (_) async => '',
+      );
       final token = client.devToken('test');
 
       expect(
@@ -287,7 +325,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         final queryParams = {
           'payload': json.encode({
@@ -312,7 +354,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         final Map<String, dynamic> queryFilter = {
           "id": {
@@ -352,7 +398,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         final user = User(id: 'test-id');
 
@@ -374,7 +424,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         when(mockDio.post<String>('/moderation/ban',
                 data: {'test': true, 'target_user_id': 'test-id'}))
@@ -392,7 +446,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         when(mockDio.delete<String>('/moderation/ban',
                 queryParameters: {'test': true, 'target_user_id': 'test-id'}))
@@ -411,7 +469,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         when(mockDio.post<String>('/moderation/mute',
                 data: {'target_id': 'test-id'}))
@@ -429,7 +491,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         when(mockDio.post<String>('/moderation/unmute',
                 data: {'target_id': 'test-id'}))
@@ -449,7 +515,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         when(mockDio.post<String>('/moderation/flag',
                 data: {'target_message_id': 'test-id'}))
@@ -467,7 +537,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         when(mockDio.post<String>('/moderation/unflag',
                 data: {'target_message_id': 'test-id'}))
@@ -485,7 +559,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         final message = Message(id: 'test');
 
@@ -505,7 +583,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         final messageId = 'test';
 
@@ -523,7 +605,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         final messageId = 'test';
 
@@ -541,7 +627,11 @@ void main() {
         when(mockDio.options).thenReturn(BaseOptions());
         when(mockDio.interceptors).thenReturn(Interceptors());
 
-        final client = Client('api-key', httpClient: mockDio);
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
 
         when(mockDio.post<String>('/channels/read'))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
@@ -560,7 +650,11 @@ void main() {
           when(mockDio.options).thenReturn(BaseOptions());
           when(mockDio.interceptors).thenReturn(Interceptors());
 
-          final client = Client('api-key', httpClient: mockDio);
+          final client = Client(
+            'api-key',
+            httpClient: mockDio,
+            tokenProvider: (_) async => '',
+          );
 
           final Map<String, dynamic> queryParams = {
             'test': 1,
@@ -582,7 +676,11 @@ void main() {
           final mockHttpClientAdapter = MockHttpClientAdapter();
           dioHttp.httpClientAdapter = mockHttpClientAdapter;
 
-          final client = Client('api-key', httpClient: dioHttp);
+          final client = Client(
+            'api-key',
+            httpClient: dioHttp,
+            tokenProvider: (_) async => '',
+          );
 
           when(mockHttpClientAdapter.fetch(any, any, any)).thenAnswer(
               (_) async => ResponseBody.fromString('test error', 400));
@@ -598,7 +696,11 @@ void main() {
           when(mockDio.options).thenReturn(BaseOptions());
           when(mockDio.interceptors).thenReturn(Interceptors());
 
-          final client = Client('api-key', httpClient: mockDio);
+          final client = Client(
+            'api-key',
+            httpClient: mockDio,
+            tokenProvider: (_) async => '',
+          );
 
           final Map<String, dynamic> data = {
             'test': 1,
@@ -618,7 +720,11 @@ void main() {
           final mockHttpClientAdapter = MockHttpClientAdapter();
           dioHttp.httpClientAdapter = mockHttpClientAdapter;
 
-          final client = Client('api-key', httpClient: dioHttp);
+          final client = Client(
+            'api-key',
+            httpClient: dioHttp,
+            tokenProvider: (_) async => '',
+          );
 
           when(mockHttpClientAdapter.fetch(any, any, any)).thenAnswer(
               (_) async => ResponseBody.fromString('test error', 400));
@@ -634,7 +740,11 @@ void main() {
           when(mockDio.options).thenReturn(BaseOptions());
           when(mockDio.interceptors).thenReturn(Interceptors());
 
-          final client = Client('api-key', httpClient: mockDio);
+          final client = Client(
+            'api-key',
+            httpClient: mockDio,
+            tokenProvider: (_) async => '',
+          );
 
           final Map<String, dynamic> data = {
             'test': 1,
@@ -654,7 +764,11 @@ void main() {
           final mockHttpClientAdapter = MockHttpClientAdapter();
           dioHttp.httpClientAdapter = mockHttpClientAdapter;
 
-          final client = Client('api-key', httpClient: dioHttp);
+          final client = Client(
+            'api-key',
+            httpClient: dioHttp,
+            tokenProvider: (_) async => '',
+          );
 
           when(mockHttpClientAdapter.fetch(any, any, any)).thenAnswer(
               (_) async => ResponseBody.fromString('test error', 400));
@@ -670,7 +784,11 @@ void main() {
           when(mockDio.options).thenReturn(BaseOptions());
           when(mockDio.interceptors).thenReturn(Interceptors());
 
-          final client = Client('api-key', httpClient: mockDio);
+          final client = Client(
+            'api-key',
+            httpClient: mockDio,
+            tokenProvider: (_) async => '',
+          );
 
           final Map<String, dynamic> data = {
             'test': 1,
@@ -691,7 +809,11 @@ void main() {
           final mockHttpClientAdapter = MockHttpClientAdapter();
           dioHttp.httpClientAdapter = mockHttpClientAdapter;
 
-          final client = Client('api-key', httpClient: dioHttp);
+          final client = Client(
+            'api-key',
+            httpClient: dioHttp,
+            tokenProvider: (_) async => '',
+          );
 
           when(mockHttpClientAdapter.fetch(any, any, any)).thenAnswer(
               (_) async => ResponseBody.fromString('test error', 400));
@@ -707,7 +829,11 @@ void main() {
           when(mockDio.options).thenReturn(BaseOptions());
           when(mockDio.interceptors).thenReturn(Interceptors());
 
-          final client = Client('api-key', httpClient: mockDio);
+          final client = Client(
+            'api-key',
+            httpClient: mockDio,
+            tokenProvider: (_) async => '',
+          );
 
           final Map<String, dynamic> queryParams = {
             'test': 1,
@@ -729,7 +855,11 @@ void main() {
           final mockHttpClientAdapter = MockHttpClientAdapter();
           dioHttp.httpClientAdapter = mockHttpClientAdapter;
 
-          final client = Client('api-key', httpClient: dioHttp);
+          final client = Client(
+            'api-key',
+            httpClient: dioHttp,
+            tokenProvider: (_) async => '',
+          );
 
           when(mockHttpClientAdapter.fetch(any, any, any)).thenAnswer(
               (_) async => ResponseBody.fromString('test error', 400));

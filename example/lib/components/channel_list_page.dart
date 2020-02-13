@@ -5,7 +5,6 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_example/channel.bloc.dart';
 import 'package:stream_chat_example/components/channel_widget.dart';
 import 'package:stream_chat_example/components/connection_indicator.dart';
-import 'package:stream_chat_example/main.dart';
 
 import '../chat.bloc.dart';
 import 'channel_header.dart';

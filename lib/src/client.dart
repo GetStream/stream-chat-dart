@@ -67,7 +67,7 @@ class Client {
   final ValueNotifier<ConnectionStatus> wsConnectionStatus =
       ValueNotifier(null);
 
-  int r = 1;
+  Completer _tokenExpiredCompleter;
 
   void _setupDio(
     Dio httpClient,
@@ -82,6 +82,9 @@ class Client {
     this.httpClient.options.connectTimeout = connectTimeout.inMilliseconds;
     this.httpClient.interceptors.add(InterceptorsWrapper(
           onRequest: (options) async {
+            if (_tokenExpiredCompleter != null) {
+              await _tokenExpiredCompleter.future;
+            }
             logger.info('''
     
           method: ${options.method}
@@ -106,6 +109,7 @@ class Client {
     );
 
     if (apiError.code == tokenExpiredErrorCode) {
+      _tokenExpiredCompleter = Completer();
       logger.info('token expired');
       final userId = this.user.id;
 
@@ -114,9 +118,12 @@ class Client {
       await disconnect();
 
       final newToken = await this.tokenProvider(userId);
+      await Future.delayed(Duration(seconds: 4));
       this._token = newToken;
 
       await setUser(User(id: userId), newToken);
+
+      _tokenExpiredCompleter.complete();
 
       try {
         return await this.httpClient.request(
@@ -169,20 +176,16 @@ class Client {
         "x-stream-client": userAgent,
       };
 
-  Future<Event> setUser(User user, String token) {
+  Future<Event> setUser(User user, [String token]) async {
+    if (token == null) {
+      token = await tokenProvider(user.id);
+    }
+
     this.user = user;
     _token = token;
     _anonymous = false;
     return connect();
   }
-
-  //todo
-//  Future<Event> setUserWithProvider(User user, TokenProvider provider) {
-//    this.user = user;
-//    _token = token;
-//    _anonymous = false;
-//    return connect();
-//  }
 
   Stream<Event> on(String eventType) =>
       stream.where((event) => eventType == null || event.type == eventType);
