@@ -400,6 +400,50 @@ void main() {
     });
 
     group('user', () {
+      test('flagUser', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
+
+        when(mockDio.post<String>('/moderation/flag',
+                data: {'target_user_id': 'test-id'}))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.flagUser('test-id');
+
+        verify(mockDio.post<String>('/moderation/flag',
+            data: {'target_user_id': 'test-id'})).called(1);
+      });
+
+      test('unflagUser', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+          tokenProvider: (_) async => '',
+        );
+
+        when(mockDio.post<String>('/moderation/unflag',
+                data: {'target_user_id': 'test-id'}))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.unflagUser('test-id');
+
+        verify(mockDio.post<String>('/moderation/unflag',
+            data: {'target_user_id': 'test-id'})).called(1);
+      });
+
       test('updateUser', () async {
         final mockDio = MockDio();
 

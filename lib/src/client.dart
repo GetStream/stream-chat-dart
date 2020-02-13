@@ -570,6 +570,20 @@ class Client {
     return decode(response.data, EmptyResponse.fromJson);
   }
 
+  Future<EmptyResponse> flagUser(String userId) async {
+    final response = await post("/moderation/flag", data: {
+      "target_user_id": userId,
+    });
+    return decode(response.data, EmptyResponse.fromJson);
+  }
+
+  Future<EmptyResponse> unflagUser(String userId) async {
+    final response = await post("/moderation/unflag", data: {
+      "target_user_id": userId,
+    });
+    return decode(response.data, EmptyResponse.fromJson);
+  }
+
   Future<EmptyResponse> markAllRead() async {
     final response = await post("/channels/read");
     return decode(response.data, EmptyResponse.fromJson);
