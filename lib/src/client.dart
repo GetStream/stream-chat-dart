@@ -108,6 +108,7 @@ class Client {
       err.response?.statusCode,
     );
 
+    print('ERROR $apiError');
     if (apiError.code == tokenExpiredErrorCode) {
       _tokenExpiredCompleter = Completer();
       logger.info('token expired');

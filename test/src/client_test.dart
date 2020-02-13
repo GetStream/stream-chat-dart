@@ -12,9 +12,17 @@ import 'package:stream_chat/src/exceptions.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/user.dart';
 
+import 'api/websocket_test.dart';
+
 class MockDio extends Mock implements DioForNative {}
 
 class MockHttpClientAdapter extends Mock implements HttpClientAdapter {}
+
+class Functions {
+  Future<String> tokenProvider(String userId) => null;
+}
+
+class MockFunctions extends Mock implements Functions {}
 
 void main() {
   group('src/client', () {

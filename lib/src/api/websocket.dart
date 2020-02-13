@@ -177,7 +177,6 @@ class WebSocket {
   }
 
   Future<void> _reconnect() async {
-    print('reconnect');
     if (!_reconnecting) {
       _reconnecting = true;
       connectionStatus.value = ConnectionStatus.connecting;
@@ -203,7 +202,6 @@ class WebSocket {
     final timer = Timer.periodic(Duration(seconds: 5), reconnectionTimer);
 
     reconnectionTimer(timer);
-    print('reconnect end');
   }
 
   void _cancelTimers() {

@@ -102,20 +102,19 @@ void main() {
       return streamController.stream;
     });
 
-    final timer = Timer.periodic(
-      Duration(milliseconds: 100),
-      (_) => streamController.sink.add('{}'),
-    );
-
-    await ws.connect();
-
-    when(handleFunc(any)).thenAnswer((_) async {
+    final connect = ws.connect().then((_) {
+      streamController.sink.add('{}');
+      return Future.delayed(Duration(milliseconds: 200));
+    }).then((value) {
       verify(connectFunc(computedUrl)).called(1);
       verify(handleFunc(any)).called(greaterThan(0));
 
-      timer.cancel();
-      await streamController.close();
+      return streamController.close();
     });
+
+    streamController.sink.add('{}');
+
+    return connect;
   });
 
   test('should close correctly the controller', () async {
@@ -147,20 +146,19 @@ void main() {
       return streamController.stream;
     });
 
-    final timer = Timer.periodic(
-      Duration(milliseconds: 100),
-      (_) => streamController.sink.add('{}'),
-    );
-
-    await ws.connect();
-
-    when(handleFunc(any)).thenAnswer((_) async {
+    final connect = ws.connect().then((_) {
+      streamController.sink.add('{}');
+      return Future.delayed(Duration(milliseconds: 200));
+    }).then((value) {
       verify(connectFunc(computedUrl)).called(1);
       verify(handleFunc(any)).called(greaterThan(0));
 
-      timer.cancel();
-      await streamController.close();
+      return streamController.close();
     });
+
+    streamController.sink.add('{}');
+
+    return connect;
   });
 
   test('should run correctly health check', () async {
@@ -198,15 +196,20 @@ void main() {
       (_) => streamController.sink.add('{}'),
     );
 
-    await ws.connect();
-
-    when(handleFunc(any)).thenAnswer((_) async {
+    final connect = ws.connect().then((_) {
+      streamController.sink.add('{}');
+      return Future.delayed(Duration(milliseconds: 200));
+    }).then((value) async {
       verify(mockWSSink.add("{'type': 'health.check'}")).called(greaterThan(0));
 
       timer.cancel();
       await streamController.close();
-      await mockWSSink.close();
+      return mockWSSink.close();
     });
+
+    streamController.sink.add('{}');
+
+    return connect;
   });
 
   test('should run correctly reconnection check', () async {
@@ -242,33 +245,24 @@ void main() {
     });
     when(mockWSChannel.sink).thenReturn(mockWSSink);
 
-    Future.delayed(
-      Duration(milliseconds: 1),
-      () {
-        streamController.sink.add('{}');
-        streamController.close();
-        streamController = StreamController<String>.broadcast();
-      },
-    );
-    Future.delayed(
-      Duration(milliseconds: 2),
-      () {
-        streamController.sink.add('{}');
-        streamController.close();
-      },
-    );
-
-    await ws.connect();
-
-    final done = Completer();
-
-    when(handleFunc(any)).thenAnswer((_) async {
+    final connect = ws.connect().then((_) {
+      streamController.sink.add('{}');
+      streamController.close();
+      streamController = StreamController<String>.broadcast();
+      streamController.sink.add('{}');
+      return Future.delayed(Duration(milliseconds: 200));
+    }).then((value) async {
       verify(mockWSSink.add("{'type': 'health.check'}")).called(greaterThan(0));
 
       verify(connectFunc(computedUrl)).called(2);
 
-      await mockWSSink.close();
+      await streamController.close();
+      return mockWSSink.close();
     });
+
+    streamController.sink.add('{}');
+
+    return connect;
   });
 
   test('should close correctly the controller', () async {
@@ -301,22 +295,20 @@ void main() {
     });
     when(mockWSChannel.sink).thenReturn(mockWSSink);
 
-    final timer = Timer.periodic(
-      Duration(milliseconds: 100),
-      (_) => streamController.sink.add('{}'),
-    );
-
-    await ws.connect();
-
-    when(handleFunc(any)).thenAnswer((_) async {
+    final connect = ws.connect().then((_) {
+      streamController.sink.add('{}');
+      return Future.delayed(Duration(milliseconds: 200));
+    }).then((value) async {
       await ws.disconnect();
-      expect(ws.connectionStatus.value, ConnectionStatus.disconnected);
       verify(mockWSSink.close()).called(greaterThan(0));
 
-      timer.cancel();
       await streamController.close();
       await mockWSSink.close();
     });
+
+    streamController.sink.add('{}');
+
+    return connect;
   });
 
   test('should throw an error', () async {
