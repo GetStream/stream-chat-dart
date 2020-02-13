@@ -30,6 +30,8 @@ class WebSocket {
   final EventHandler handler;
   final Logger logger;
   final ConnectWebSocket connectFunc;
+  final int reconnectionMonitorInterval = 1;
+  final int reconnectionMonitorTimeout = 40;
 
   ValueNotifier<ConnectionStatus> connectionStatus =
       ValueNotifier(ConnectionStatus.disconnected);
@@ -66,7 +68,7 @@ class WebSocket {
     return Event.fromJson(json.decode(source));
   }
 
-  Completer<Event> completer = Completer<Event>();
+  Completer<Event> _connectionCompleter = Completer<Event>();
 
   Future<Event> connect() {
     if (_manuallyClosed) {
@@ -75,7 +77,7 @@ class WebSocket {
     _manuallyClosed = false;
 
     if (_connecting) {
-      logger.info('already connecting');
+      logger.severe('already connecting');
       return null;
     }
 
@@ -96,7 +98,7 @@ class WebSocket {
         _onDone();
       },
     );
-    return completer.future;
+    return _connectionCompleter.future;
   }
 
   void _onDone() {
@@ -107,7 +109,9 @@ class WebSocket {
     logger.info(
         'connection closed | closeCode: ${_channel.closeCode} | closedReason: ${_channel.closeReason}');
 
-    _reconnect();
+    if (!_reconnecting) {
+      _reconnect();
+    }
   }
 
   void _onData(data) {
@@ -122,8 +126,8 @@ class WebSocket {
 
       connectionStatus.value = ConnectionStatus.connected;
 
-      if (!completer.isCompleted) {
-        completer.complete(event);
+      if (!_connectionCompleter.isCompleted) {
+        _connectionCompleter.complete(event);
       } else {
         handler(event);
       }
@@ -142,10 +146,10 @@ class WebSocket {
       connectionStatus.value = ConnectionStatus.disconnected;
     }
 
-    if (!completer.isCompleted) {
+    if (!_connectionCompleter.isCompleted) {
       _cancelTimers();
-      completer.completeError(error, stacktrace);
-    } else {
+      _connectionCompleter.completeError(error, stacktrace);
+    } else if (!_reconnecting) {
       return _reconnect();
     }
   }
@@ -165,18 +169,26 @@ class WebSocket {
       connectionStatus.value = ConnectionStatus.connecting;
     }
 
-    if (_connecting) {
-      logger.info('already connecting');
-      return null;
-    }
+    final reconnectionTimer = (timer) {
+      if (!_reconnecting) {
+        timer.cancel();
+        return;
+      }
+      if (_connecting) {
+        logger.info('already connecting');
+        return null;
+      }
 
-    logger.info('reconnecting..');
+      logger.info('reconnecting..');
 
-    _cancelTimers();
+      _cancelTimers();
 
-    await Future.delayed(Duration(seconds: 5));
+      connect();
+    };
 
-    return connect();
+    final timer = Timer.periodic(Duration(seconds: 5), reconnectionTimer);
+
+    reconnectionTimer(timer);
   }
 
   void _cancelTimers() {
@@ -199,7 +211,7 @@ class WebSocket {
 
   Future<void> disconnect() {
     logger.info('disconnecting');
-    completer = Completer();
+    _connectionCompleter = Completer();
     _cancelTimers();
     _manuallyClosed = true;
     connectionStatus.value = ConnectionStatus.disconnected;
