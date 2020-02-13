@@ -19,8 +19,6 @@ dependencies:
  stream_chat: ^0.1.2
 ```
 
-> This library is currently in active development and it is not yet released on pub.dev
-
 You should then run `flutter packages get`
 
 ## Example Project
