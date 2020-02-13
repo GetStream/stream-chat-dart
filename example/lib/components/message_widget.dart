@@ -1,14 +1,18 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:date_format/date_format.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_example/components/user_avatar.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:chewie/chewie.dart';
+import 'package:video_player/video_player.dart';
 
 import '../channel.bloc.dart';
 
-class MessageWidget extends StatelessWidget {
+class MessageWidget extends StatefulWidget {
   const MessageWidget({
     Key key,
     @required this.previousMessage,
@@ -21,12 +25,21 @@ class MessageWidget extends StatelessWidget {
   final Message nextMessage;
 
   @override
+  _MessageWidgetState createState() => _MessageWidgetState();
+}
+
+class _MessageWidgetState extends State<MessageWidget>
+    with AutomaticKeepAliveClientMixin {
+  final Map<String, ChangeNotifier> _videoControllers = {};
+  final Map<String, ChangeNotifier> _chuwieControllers = {};
+
+  @override
   Widget build(BuildContext context) {
     final channelBloc = Provider.of<ChannelBloc>(context);
     final currentUserId = channelBloc.chatBloc.user.id;
-    final messageUserId = message.user.id;
-    final previousUserId = previousMessage?.user?.id;
-    final nextUserId = nextMessage?.user?.id;
+    final messageUserId = widget.message.user.id;
+    final previousUserId = widget.previousMessage?.user?.id;
+    final nextUserId = widget.nextMessage?.user?.id;
     final bool isMyMessage = messageUserId == currentUserId;
     final isLastUser = previousUserId == messageUserId;
     final isNextUser = nextUserId == messageUserId;
@@ -51,7 +64,7 @@ class MessageWidget extends StatelessWidget {
                 left: isMyMessage ? 8.0 : 0,
                 right: isMyMessage ? 0 : 8.0,
               ),
-              child: UserAvatar(user: message.user),
+              child: UserAvatar(user: widget.message.user),
             ),
     ];
 
@@ -63,7 +76,7 @@ class MessageWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       margin: EdgeInsets.only(
         top: isLastUser ? 5 : 24,
-        bottom: nextMessage == null ? 30 : 0,
+        bottom: widget.nextMessage == null ? 30 : 0,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -75,18 +88,87 @@ class MessageWidget extends StatelessWidget {
     );
   }
 
-  Container _buildBubble(
-      BuildContext context, bool isMyMessage, bool isLastUser) {
-    return Container(
-      decoration: _buildBoxDecoration(isMyMessage, isLastUser),
-      padding: EdgeInsets.all(10),
-      constraints: BoxConstraints.loose(Size.fromWidth(300)),
-      child: MarkdownBody(
-        data: message.text,
-        onTapLink: (link) {
-          _launchURL(link);
-        },
-      ),
+  Widget _buildBubble(
+    BuildContext context,
+    bool isMyMessage,
+    bool isLastUser,
+  ) {
+    return Column(
+      children: widget.message.attachments.map((attachment) {
+        if (attachment.type == 'video') {
+          VideoPlayerController videoController;
+          if (_videoControllers.containsKey(attachment.assetUrl)) {
+            videoController = _videoControllers[attachment.assetUrl];
+          } else {
+            videoController =
+                VideoPlayerController.network(attachment.assetUrl);
+            _videoControllers[attachment.assetUrl] = videoController;
+          }
+
+          ChewieController chewieController;
+          if (_chuwieControllers.containsKey(attachment.assetUrl)) {
+            chewieController = _chuwieControllers[attachment.assetUrl];
+          } else {
+            chewieController = ChewieController(
+                videoPlayerController: videoController,
+                autoInitialize: true,
+                errorBuilder: (_, e) {
+                  print(widget.message.toJson());
+                  return Container(
+                    constraints: BoxConstraints.loose(Size.fromWidth(300)),
+                    decoration: _buildBoxDecoration(isMyMessage, isLastUser),
+                    child: Stack(
+                      children: <Widget>[
+                        Container(
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              fit: BoxFit.cover,
+                              image: CachedNetworkImageProvider(
+                                attachment.thumbUrl,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () => _launchURL(attachment.assetUrl),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                });
+            _chuwieControllers[attachment.assetUrl] = chewieController;
+          }
+
+          return Container(
+            constraints: BoxConstraints.loose(Size.fromWidth(300)),
+            decoration: _buildBoxDecoration(isMyMessage, isLastUser),
+            child: ClipRRect(
+              borderRadius:
+                  _buildBoxDecoration(isMyMessage, isLastUser).borderRadius,
+              child: Chewie(
+                controller: chewieController,
+              ),
+            ),
+          );
+        }
+        return Container();
+      }).toList()
+        ..add(
+          Container(
+            decoration: _buildBoxDecoration(isMyMessage, isLastUser),
+            padding: EdgeInsets.all(10),
+            constraints: BoxConstraints.loose(Size.fromWidth(300)),
+            child: MarkdownBody(
+              data: widget.message.text,
+              onTapLink: (link) {
+                _launchURL(link);
+              },
+            ),
+          ),
+        ),
     );
   }
 
@@ -94,15 +176,27 @@ class MessageWidget extends StatelessWidget {
     if (await canLaunch(url)) {
       await launch(url);
     } else {
-      throw 'Could not launch $url';
+      Scaffold.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Cannot launch the url'),
+        ),
+      );
     }
+  }
+
+  @override
+  void dispose() {
+    _videoControllers.values.forEach((element) {
+      element.dispose();
+    });
+    super.dispose();
   }
 
   Widget _buildTimestamp(bool isMyMessage, Alignment alignment) {
     return Padding(
       padding: const EdgeInsets.only(top: 5.0),
       child: Text(
-        formatDate(message.createdAt.toLocal(), [HH, ':', nn]),
+        formatDate(widget.message.createdAt.toLocal(), [HH, ':', nn]),
       ),
     );
   }
@@ -119,4 +213,7 @@ class MessageWidget extends StatelessWidget {
       color: isMyMessage ? Color(0xffebebeb) : Colors.white,
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
