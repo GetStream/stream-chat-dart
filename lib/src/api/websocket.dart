@@ -127,6 +127,7 @@ class WebSocket {
       logger.info('connection estabilished');
       _connecting = false;
       _reconnecting = false;
+      _lastEventAt = DateTime.now();
 
       connectionStatus.value = ConnectionStatus.connected;
 
@@ -159,16 +160,24 @@ class WebSocket {
   }
 
   void _startReconnectionMonitor() {
-    _reconnectionMonitor =
-        Timer.periodic(Duration(seconds: reconnectionMonitorInterval), (_) {
+    final reconnectionTimer = (_) {
       final now = DateTime.now();
-      if (now.difference(_lastEventAt).inSeconds > reconnectionMonitorTimeout) {
+      if (_lastEventAt != null &&
+          now.difference(_lastEventAt).inSeconds > reconnectionMonitorTimeout) {
         _channel.sink.close();
       }
-    });
+    };
+
+    _reconnectionMonitor = Timer.periodic(
+      Duration(seconds: reconnectionMonitorInterval),
+      reconnectionTimer,
+    );
+
+    reconnectionTimer(_reconnectionMonitor);
   }
 
-  Future<Event> _reconnect() async {
+  Future<void> _reconnect() async {
+    print('reconnect');
     if (!_reconnecting) {
       _reconnecting = true;
       connectionStatus.value = ConnectionStatus.connecting;
@@ -194,6 +203,7 @@ class WebSocket {
     final timer = Timer.periodic(Duration(seconds: 5), reconnectionTimer);
 
     reconnectionTimer(timer);
+    print('reconnect end');
   }
 
   void _cancelTimers() {

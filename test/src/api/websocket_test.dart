@@ -7,6 +7,7 @@ import 'package:stream_chat/src/api/connection_status.dart';
 import 'package:stream_chat/src/api/websocket.dart';
 import 'package:stream_chat/src/models/event.dart';
 import 'package:stream_chat/src/models/user.dart';
+import 'package:stream_chat/stream_chat.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class Functions {
@@ -162,7 +163,7 @@ void main() {
     });
   });
 
-  test('should close correctly the controller', () async {
+  test('should run correctly health check', () async {
     final handleFunc = MockFunctions().handleFunc;
 
     final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
@@ -200,10 +201,72 @@ void main() {
     await ws.connect();
 
     when(handleFunc(any)).thenAnswer((_) async {
-      verify(mockWSSink.add({'type': 'health.check'})).called(greaterThan(0));
+      verify(mockWSSink.add("{'type': 'health.check'}")).called(greaterThan(0));
 
       timer.cancel();
       await streamController.close();
+      await mockWSSink.close();
+    });
+  });
+
+  test('should run correctly reconnection check', () async {
+    final handleFunc = MockFunctions().handleFunc;
+
+    final ConnectWebSocket connectFunc = MockFunctions().connectFunc;
+
+    Logger.root.level = Level.ALL;
+    final ws = WebSocket(
+      baseUrl: 'baseurl',
+      user: User(id: 'testid'),
+      logger: Logger('ws'),
+      connectParams: {'test': 'true'},
+      connectPayload: {'payload': 'test'},
+      handler: handleFunc,
+      connectFunc: connectFunc,
+      reconnectionMonitorTimeout: 1,
+      reconnectionMonitorInterval: 1,
+    );
+
+    final mockWSChannel = MockWSChannel();
+    final mockWSSink = MockWSSink();
+
+    StreamController<String> streamController =
+        StreamController<String>.broadcast();
+
+    final computedUrl =
+        'wss://baseurl/connect?test=true&json=%7B%22payload%22%3A%22test%22%2C%22user_details%22%3A%7B%22id%22%3A%22testid%22%7D%7D';
+
+    when(connectFunc(computedUrl)).thenAnswer((_) => mockWSChannel);
+    when(mockWSChannel.stream).thenAnswer((_) {
+      return streamController.stream;
+    });
+    when(mockWSChannel.sink).thenReturn(mockWSSink);
+
+    Future.delayed(
+      Duration(milliseconds: 1),
+      () {
+        streamController.sink.add('{}');
+        streamController.close();
+        streamController = StreamController<String>.broadcast();
+      },
+    );
+    Future.delayed(
+      Duration(milliseconds: 2),
+      () {
+        streamController.sink.add('{}');
+        streamController.close();
+      },
+    );
+
+    await ws.connect();
+
+    final done = Completer();
+
+    when(handleFunc(any)).thenAnswer((_) async {
+      verify(mockWSSink.add("{'type': 'health.check'}")).called(greaterThan(0));
+
+      verify(connectFunc(computedUrl)).called(2);
+
       await mockWSSink.close();
     });
   });
