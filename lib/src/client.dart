@@ -85,6 +85,10 @@ class Client {
             if (_tokenExpiredCompleter != null) {
               await _tokenExpiredCompleter.future;
             }
+
+            options.queryParameters.addAll(commonQueryParams);
+            options.headers.addAll(httpHeaders);
+
             logger.info('''
     
           method: ${options.method}
@@ -93,8 +97,6 @@ class Client {
           data: ${options.data.toString()}
     
         ''');
-            options.queryParameters.addAll(commonQueryParams);
-            options.headers.addAll(httpHeaders);
 
             return options;
           },

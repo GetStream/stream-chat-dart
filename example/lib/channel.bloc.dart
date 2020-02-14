@@ -70,9 +70,12 @@ class ChannelBloc with ChangeNotifier {
     _queryMessageController.add(true);
     channelClient.query(
       {},
-      messagesPagination: PaginationParams(lessThan: firstId, limit: 50),
+      messagesPagination: PaginationParams(lessThan: firstId, limit: 100),
     ).then((res) {
-      channelState.messages.insertAll(0, res.messages);
+      channelState.messages.insertAll(0, res.messages.where((newMessage) {
+        return !channelState.messages
+            .any((oldMessage) => oldMessage.id == newMessage.id);
+      }));
 
       _messagesController.add(channelState.messages);
       _queryMessageController.add(false);

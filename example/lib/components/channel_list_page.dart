@@ -113,6 +113,11 @@ class ChannelListPageState extends State<ChannelListPage> {
                       : ChangeNotifierProvider<ChannelBloc>.value(
                           value: chatBloc.channelBlocs[_selectedChannelId],
                           child: ChannelWidget(
+                            key: ValueKey<String>(chatBloc
+                                .channelBlocs[_selectedChannelId]
+                                .channelState
+                                .channel
+                                .id),
                             channelHeader: ChannelHeader(
                               showBackButton: false,
                             ),

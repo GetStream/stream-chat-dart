@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
+import 'package:stream_chat/src/models/attachment.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_example/components/user_avatar.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -28,8 +29,7 @@ class MessageWidget extends StatefulWidget {
   _MessageWidgetState createState() => _MessageWidgetState();
 }
 
-class _MessageWidgetState extends State<MessageWidget>
-    with AutomaticKeepAliveClientMixin {
+class _MessageWidgetState extends State<MessageWidget> {
   final Map<String, ChangeNotifier> _videoControllers = {};
   final Map<String, ChangeNotifier> _chuwieControllers = {};
 
@@ -93,82 +93,108 @@ class _MessageWidgetState extends State<MessageWidget>
     bool isMyMessage,
     bool isLastUser,
   ) {
-    return Column(
+    int nOfAttachmentWidgets = 0;
+
+    final column = Column(
       children: widget.message.attachments.map((attachment) {
+        nOfAttachmentWidgets++;
         if (attachment.type == 'video') {
-          VideoPlayerController videoController;
-          if (_videoControllers.containsKey(attachment.assetUrl)) {
-            videoController = _videoControllers[attachment.assetUrl];
-          } else {
-            videoController =
-                VideoPlayerController.network(attachment.assetUrl);
-            _videoControllers[attachment.assetUrl] = videoController;
-          }
-
-          ChewieController chewieController;
-          if (_chuwieControllers.containsKey(attachment.assetUrl)) {
-            chewieController = _chuwieControllers[attachment.assetUrl];
-          } else {
-            chewieController = ChewieController(
-                videoPlayerController: videoController,
-                autoInitialize: true,
-                errorBuilder: (_, e) {
-                  print(widget.message.toJson());
-                  return Container(
-                    constraints: BoxConstraints.loose(Size.fromWidth(300)),
-                    decoration: _buildBoxDecoration(isMyMessage, isLastUser),
-                    child: Stack(
-                      children: <Widget>[
-                        Container(
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              fit: BoxFit.cover,
-                              image: CachedNetworkImageProvider(
-                                attachment.thumbUrl,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () => _launchURL(attachment.assetUrl),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                });
-            _chuwieControllers[attachment.assetUrl] = chewieController;
-          }
-
-          return Container(
-            constraints: BoxConstraints.loose(Size.fromWidth(300)),
-            decoration: _buildBoxDecoration(isMyMessage, isLastUser),
-            child: ClipRRect(
-              borderRadius:
-                  _buildBoxDecoration(isMyMessage, isLastUser).borderRadius,
-              child: Chewie(
-                controller: chewieController,
-              ),
-            ),
-          );
+          return _buildVideo(attachment, isMyMessage, isLastUser);
+        } else if (attachment.type == 'image') {
+          return _buildImage(isMyMessage, isLastUser, attachment);
         }
+
+        nOfAttachmentWidgets--;
         return Container();
-      }).toList()
-        ..add(
-          Container(
-            decoration: _buildBoxDecoration(isMyMessage, isLastUser),
-            padding: EdgeInsets.all(10),
-            constraints: BoxConstraints.loose(Size.fromWidth(300)),
-            child: MarkdownBody(
-              data: widget.message.text,
-              onTapLink: (link) {
-                _launchURL(link);
-              },
-            ),
-          ),
+      }).toList(),
+    );
+
+    if (widget.message.text.trim().isNotEmpty) {
+      column.children.add(Container(
+        decoration: _buildBoxDecoration(
+            isMyMessage, isLastUser || nOfAttachmentWidgets > 0),
+        padding: EdgeInsets.all(10),
+        constraints: BoxConstraints.loose(Size.fromWidth(300)),
+        child: MarkdownBody(
+          data: '${widget.message.text}',
+          onTapLink: (link) {
+            _launchURL(link);
+          },
         ),
+      ));
+    }
+
+    return column;
+  }
+
+  Container _buildImage(
+      bool isMyMessage, bool isLastUser, Attachment attachment) {
+    return Container(
+      constraints: BoxConstraints.loose(Size.fromWidth(300)),
+      decoration: _buildBoxDecoration(isMyMessage, isLastUser),
+      clipBehavior: Clip.hardEdge,
+      child: CachedNetworkImage(
+        imageUrl: attachment.imageUrl,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+
+  Container _buildVideo(
+      Attachment attachment, bool isMyMessage, bool isLastUser) {
+    VideoPlayerController videoController;
+    if (_videoControllers.containsKey(attachment.assetUrl)) {
+      videoController = _videoControllers[attachment.assetUrl];
+    } else {
+      videoController = VideoPlayerController.network(attachment.assetUrl);
+      _videoControllers[attachment.assetUrl] = videoController;
+    }
+
+    ChewieController chewieController;
+    if (_chuwieControllers.containsKey(attachment.assetUrl)) {
+      chewieController = _chuwieControllers[attachment.assetUrl];
+    } else {
+      chewieController = ChewieController(
+          videoPlayerController: videoController,
+          autoInitialize: true,
+          errorBuilder: (_, e) {
+            return Container(
+              constraints: BoxConstraints.loose(Size.fromWidth(300)),
+              decoration: _buildBoxDecoration(isMyMessage, isLastUser),
+              child: Stack(
+                children: <Widget>[
+                  Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: CachedNetworkImageProvider(
+                          attachment.thumbUrl,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => _launchURL(attachment.assetUrl),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          });
+      _chuwieControllers[attachment.assetUrl] = chewieController;
+    }
+
+    return Container(
+      constraints: BoxConstraints.loose(Size.fromWidth(300)),
+      decoration: _buildBoxDecoration(isMyMessage, isLastUser),
+      child: ClipRRect(
+        borderRadius: _buildBoxDecoration(isMyMessage, isLastUser).borderRadius,
+        child: Chewie(
+          controller: chewieController,
+        ),
+      ),
     );
   }
 
@@ -213,7 +239,4 @@ class _MessageWidgetState extends State<MessageWidget>
       color: isMyMessage ? Color(0xffebebeb) : Colors.white,
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }

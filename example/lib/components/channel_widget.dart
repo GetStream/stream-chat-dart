@@ -83,7 +83,6 @@ class _ChannelWidgetState extends State<ChannelWidget> {
                             );
                           }
                           return MessageWidget(
-                            key: ValueKey<String>(message.id),
                             previousMessage: previousMessage,
                             message: message,
                             nextMessage: nextMessage,
@@ -134,7 +133,6 @@ class _ChannelWidgetState extends State<ChannelWidget> {
         }
       },
       child: MessageWidget(
-        key: ValueKey<String>(message.id),
         previousMessage: previousMessage,
         message: message,
         nextMessage: null,
@@ -170,7 +168,6 @@ class _ChannelWidgetState extends State<ChannelWidget> {
   ) {
     return VisibilityDetector(
       child: MessageWidget(
-        key: ValueKey<String>(message.id),
         previousMessage: null,
         message: message,
         nextMessage: nextMessage,
