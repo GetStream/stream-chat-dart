@@ -96,12 +96,25 @@ class _MessageWidgetState extends State<MessageWidget> {
     int nOfAttachmentWidgets = 0;
 
     final column = Column(
+      crossAxisAlignment:
+          isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: widget.message.attachments.map((attachment) {
         nOfAttachmentWidgets++;
+
+        Widget attachmentWidget;
         if (attachment.type == 'video') {
-          return _buildVideo(attachment, isMyMessage, isLastUser);
+          attachmentWidget = _buildVideo(attachment, isMyMessage, isLastUser);
         } else if (attachment.type == 'image') {
-          return _buildImage(isMyMessage, isLastUser, attachment);
+          attachmentWidget = _buildImage(isMyMessage, isLastUser, attachment);
+        }
+
+        if (attachmentWidget != null) {
+          return Container(
+            child: attachmentWidget,
+            margin: EdgeInsets.only(
+              top: nOfAttachmentWidgets > 1 ? 5 : 0,
+            ),
+          );
         }
 
         nOfAttachmentWidgets--;
@@ -111,6 +124,9 @@ class _MessageWidgetState extends State<MessageWidget> {
 
     if (widget.message.text.trim().isNotEmpty) {
       column.children.add(Container(
+        margin: EdgeInsets.only(
+          top: nOfAttachmentWidgets > 0 ? 5 : 0,
+        ),
         decoration: _buildBoxDecoration(
             isMyMessage, isLastUser || nOfAttachmentWidgets > 0),
         padding: EdgeInsets.all(10),

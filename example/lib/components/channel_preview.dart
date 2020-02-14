@@ -110,8 +110,27 @@ class _ChannelPreviewState extends State<ChannelPreview>
                   : StreamBuilder<Message>(
                       stream: channelBloc.messages.map((event) => event.last),
                       builder: (context, snapshot) {
+                        final message = snapshot.data;
+                        if (message == null) {
+                          return SizedBox.fromSize(
+                            size: Size.zero,
+                          );
+                        }
+
+                        final prefix = message.attachments
+                            .map((e) {
+                              if (e.type == 'image') {
+                                return '📷';
+                              } else if (e.type == 'video') {
+                                return '🎬';
+                              }
+                              return null;
+                            })
+                            .where((e) => e != null)
+                            .join(' ');
+
                         return Text(
-                          snapshot.data?.text ?? '',
+                          '$prefix ${message.text ?? ''}',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.caption.copyWith(
