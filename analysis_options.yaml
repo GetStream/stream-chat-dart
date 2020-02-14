@@ -1,12 +1,9 @@
 include: package:pedantic/analysis_options.yaml
 
 analyzer:
-  errors:
-    # treat missing required parameters as a warning (not a hint)
-    missing_required_param: warning
   exclude:
     - lib/**/*.g.dart
-    - example/**
+    - example/*
 
 linter:
   rules:
