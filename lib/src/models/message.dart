@@ -104,4 +104,49 @@ class Message {
 
   Map<String, dynamic> toJson() =>
       Serialization.moveKeysToMapInPlace(_$MessageToJson(this), topLevelFields);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Message &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          text == other.text &&
+          type == other.type &&
+          attachments == other.attachments &&
+          mentionedUsers == other.mentionedUsers &&
+          reactionCounts == other.reactionCounts &&
+          reactionScores == other.reactionScores &&
+          latestReactions == other.latestReactions &&
+          ownReactions == other.ownReactions &&
+          parentId == other.parentId &&
+          replyCount == other.replyCount &&
+          showInChannel == other.showInChannel &&
+          command == other.command &&
+          html == other.html &&
+          createdAt == other.createdAt &&
+          updatedAt == other.updatedAt &&
+          user == other.user &&
+          extraData == other.extraData;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      text.hashCode ^
+      type.hashCode ^
+      attachments.hashCode ^
+      mentionedUsers.hashCode ^
+      reactionCounts.hashCode ^
+      reactionScores.hashCode ^
+      latestReactions.hashCode ^
+      ownReactions.hashCode ^
+      parentId.hashCode ^
+      replyCount.hashCode ^
+      showInChannel.hashCode ^
+      command.hashCode ^
+      html.hashCode ^
+      createdAt.hashCode ^
+      updatedAt.hashCode ^
+      user.hashCode ^
+      extraData.hashCode;
 }

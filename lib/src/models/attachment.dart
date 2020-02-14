@@ -76,4 +76,51 @@ class Attachment {
 
   Map<String, dynamic> toJson() => Serialization.moveKeysToMapInPlace(
       _$AttachmentToJson(this), topLevelFields);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Attachment &&
+          runtimeType == other.runtimeType &&
+          type == other.type &&
+          titleLink == other.titleLink &&
+          title == other.title &&
+          thumbUrl == other.thumbUrl &&
+          text == other.text &&
+          pretext == other.pretext &&
+          ogScrapeUrl == other.ogScrapeUrl &&
+          imageUrl == other.imageUrl &&
+          footerIcon == other.footerIcon &&
+          footer == other.footer &&
+          fields == other.fields &&
+          fallback == other.fallback &&
+          color == other.color &&
+          authorName == other.authorName &&
+          authorLink == other.authorLink &&
+          authorIcon == other.authorIcon &&
+          assetUrl == other.assetUrl &&
+          actions == other.actions &&
+          extraData == other.extraData;
+
+  @override
+  int get hashCode =>
+      type.hashCode ^
+      titleLink.hashCode ^
+      title.hashCode ^
+      thumbUrl.hashCode ^
+      text.hashCode ^
+      pretext.hashCode ^
+      ogScrapeUrl.hashCode ^
+      imageUrl.hashCode ^
+      footerIcon.hashCode ^
+      footer.hashCode ^
+      fields.hashCode ^
+      fallback.hashCode ^
+      color.hashCode ^
+      authorName.hashCode ^
+      authorLink.hashCode ^
+      authorIcon.hashCode ^
+      assetUrl.hashCode ^
+      actions.hashCode ^
+      extraData.hashCode;
 }

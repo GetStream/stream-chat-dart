@@ -26,20 +26,37 @@ class MessageWidget extends StatefulWidget {
   final Message nextMessage;
 
   @override
-  _MessageWidgetState createState() => _MessageWidgetState();
+  _MessageWidgetState createState() => _MessageWidgetState(
+        message,
+        previousMessage,
+        nextMessage,
+      );
 }
 
-class _MessageWidgetState extends State<MessageWidget> {
+class _MessageWidgetState extends State<MessageWidget>
+    with AutomaticKeepAliveClientMixin {
   final Map<String, ChangeNotifier> _videoControllers = {};
   final Map<String, ChangeNotifier> _chuwieControllers = {};
 
+  final Message previousMessage;
+  final Message message;
+  final Message nextMessage;
+
+  _MessageWidgetState(
+    this.message,
+    this.previousMessage,
+    this.nextMessage,
+  );
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     final channelBloc = Provider.of<ChannelBloc>(context);
     final currentUserId = channelBloc.chatBloc.user.id;
-    final messageUserId = widget.message.user.id;
-    final previousUserId = widget.previousMessage?.user?.id;
-    final nextUserId = widget.nextMessage?.user?.id;
+    final messageUserId = message.user.id;
+    final previousUserId = previousMessage?.user?.id;
+    final nextUserId = nextMessage?.user?.id;
     final bool isMyMessage = messageUserId == currentUserId;
     final isLastUser = previousUserId == messageUserId;
     final isNextUser = nextUserId == messageUserId;
@@ -64,7 +81,7 @@ class _MessageWidgetState extends State<MessageWidget> {
                 left: isMyMessage ? 8.0 : 0,
                 right: isMyMessage ? 0 : 8.0,
               ),
-              child: UserAvatar(user: widget.message.user),
+              child: UserAvatar(user: message.user),
             ),
     ];
 
@@ -76,7 +93,7 @@ class _MessageWidgetState extends State<MessageWidget> {
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       margin: EdgeInsets.only(
         top: isLastUser ? 5 : 24,
-        bottom: widget.nextMessage == null ? 30 : 0,
+        bottom: nextMessage == null ? 30 : 0,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -98,13 +115,13 @@ class _MessageWidgetState extends State<MessageWidget> {
     final column = Column(
       crossAxisAlignment:
           isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-      children: widget.message.attachments.map((attachment) {
+      children: message.attachments.map((attachment) {
         nOfAttachmentWidgets++;
 
         Widget attachmentWidget;
         if (attachment.type == 'video') {
           attachmentWidget = _buildVideo(attachment, isMyMessage, isLastUser);
-        } else if (attachment.type == 'image') {
+        } else if (attachment.type == 'image' || attachment.type == 'giphy') {
           attachmentWidget = _buildImage(isMyMessage, isLastUser, attachment);
         }
 
@@ -122,7 +139,7 @@ class _MessageWidgetState extends State<MessageWidget> {
       }).toList(),
     );
 
-    if (widget.message.text.trim().isNotEmpty) {
+    if (message.text.trim().isNotEmpty) {
       column.children.add(Container(
         margin: EdgeInsets.only(
           top: nOfAttachmentWidgets > 0 ? 5 : 0,
@@ -132,7 +149,7 @@ class _MessageWidgetState extends State<MessageWidget> {
         padding: EdgeInsets.all(10),
         constraints: BoxConstraints.loose(Size.fromWidth(300)),
         child: MarkdownBody(
-          data: '${widget.message.text}',
+          data: '${message.text}',
           onTapLink: (link) {
             _launchURL(link);
           },
@@ -144,20 +161,25 @@ class _MessageWidgetState extends State<MessageWidget> {
   }
 
   Container _buildImage(
-      bool isMyMessage, bool isLastUser, Attachment attachment) {
+    bool isMyMessage,
+    bool isLastUser,
+    Attachment attachment,
+  ) {
     return Container(
       constraints: BoxConstraints.loose(Size.fromWidth(300)),
       decoration: _buildBoxDecoration(isMyMessage, isLastUser),
-      clipBehavior: Clip.hardEdge,
       child: CachedNetworkImage(
-        imageUrl: attachment.imageUrl,
+        imageUrl: attachment.imageUrl ?? attachment.thumbUrl,
         fit: BoxFit.cover,
       ),
     );
   }
 
   Container _buildVideo(
-      Attachment attachment, bool isMyMessage, bool isLastUser) {
+    Attachment attachment,
+    bool isMyMessage,
+    bool isLastUser,
+  ) {
     VideoPlayerController videoController;
     if (_videoControllers.containsKey(attachment.assetUrl)) {
       videoController = _videoControllers[attachment.assetUrl];
@@ -208,6 +230,7 @@ class _MessageWidgetState extends State<MessageWidget> {
       child: ClipRRect(
         borderRadius: _buildBoxDecoration(isMyMessage, isLastUser).borderRadius,
         child: Chewie(
+          key: ValueKey<String>('ATTACHMENT-${attachment.title}-${message.id}'),
           controller: chewieController,
         ),
       ),
@@ -238,7 +261,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     return Padding(
       padding: const EdgeInsets.only(top: 5.0),
       child: Text(
-        formatDate(widget.message.createdAt.toLocal(), [HH, ':', nn]),
+        formatDate(message.createdAt.toLocal(), [HH, ':', nn]),
       ),
     );
   }
@@ -254,5 +277,10 @@ class _MessageWidgetState extends State<MessageWidget> {
       ),
       color: isMyMessage ? Color(0xffebebeb) : Colors.white,
     );
+  }
+
+  @override
+  bool get wantKeepAlive {
+    return message.attachments.isNotEmpty;
   }
 }

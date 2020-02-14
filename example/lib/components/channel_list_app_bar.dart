@@ -21,7 +21,7 @@ class ChannelListAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: Padding(
               padding: const EdgeInsets.only(left: 8.0),
               child: TextField(
-                style: Theme.of(context).textTheme.bodyText1,
+                style: Theme.of(context).textTheme.body1,
                 autofocus: false,
                 decoration: InputDecoration(
                   hintText: 'Search',

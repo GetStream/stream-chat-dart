@@ -68,7 +68,7 @@ class _MessageInputState extends State<MessageInput> {
                         _typingStarted = true;
                       });
                     },
-                    style: Theme.of(context).textTheme.bodyText1,
+                    style: Theme.of(context).textTheme.body1,
                     autofocus: false,
                     decoration: InputDecoration(
                       hintText: 'Write a message',

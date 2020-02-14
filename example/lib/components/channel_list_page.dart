@@ -106,7 +106,7 @@ class ChannelListPageState extends State<ChannelListPage> {
                           body: Center(
                             child: Text(
                               'Pick a channel to show the messages 💬',
-                              style: Theme.of(context).textTheme.headline3,
+                              style: Theme.of(context).textTheme.headline,
                             ),
                           ),
                         )

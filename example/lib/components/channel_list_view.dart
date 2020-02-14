@@ -37,6 +37,7 @@ class ChannelListView extends StatelessWidget {
       final channelBloc = Provider.of<ChatBloc>(context)
           .channelBlocs[channelsStates[i].channel.id];
       return ChangeNotifierProvider<ChannelBloc>.value(
+        key: ValueKey('CHANNEL-${channelBloc.channelState.channel.id}'),
         value: channelBloc,
         child: _channelPreviewBuilder(
           context,

@@ -13,7 +13,7 @@ class ChannelNameText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       channel.extraData['name'] as String ?? channel.config.name,
-      style: Theme.of(context).textTheme.bodyText2,
+      style: Theme.of(context).textTheme.body2,
     );
   }
 }
