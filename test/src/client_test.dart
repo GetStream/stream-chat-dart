@@ -143,13 +143,19 @@ void main() {
         };
         final List<SortOption> sortOptions = [];
         final options = {"state": false, "watch": false, "presence": true};
+        final paginationParams = PaginationParams(
+          limit: 10,
+          offset: 2,
+        );
 
         final Map<String, dynamic> queryParams = {
           'payload': json.encode({
             "filter_conditions": queryFilter,
             "sort": sortOptions,
             "user_details": null,
-          }..addAll(options)),
+          }
+            ..addAll(options)
+            ..addAll(paginationParams.toJson())),
         };
 
         when(mockDio.get<String>('/channels', queryParameters: queryParams))
@@ -161,6 +167,7 @@ void main() {
           filter: queryFilter,
           sort: sortOptions,
           options: options,
+          paginationParams: paginationParams,
         );
 
         verify(mockDio.get<String>('/channels', queryParameters: queryParams))
