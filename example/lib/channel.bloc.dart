@@ -44,7 +44,7 @@ class ChannelBloc with ChangeNotifier {
 
     final userRead = channelState.read
         ?.lastWhere((r) => r.user.id == chatBloc.user.id, orElse: () => null);
-    if (channelState.messages.last.user.id != chatBloc.user.id &&
+    if (channelState.messages?.last?.user?.id != chatBloc.user.id &&
         (userRead == null ||
             userRead.lastRead.isBefore(channelState.channel.lastMessageAt))) {
       _readController.add(false);

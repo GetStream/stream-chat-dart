@@ -76,6 +76,8 @@ class ChannelListPageState extends State<ChannelListPage> {
                         channelsStates: snapshot.data,
                         channelPreviewBuilder: (context, channelState) {
                           return ChannelPreview(
+                            key: ValueKey<String>(
+                                'CHANNEL-PREVIEW-${channelState.channel.id}'),
                             onTap: () {
                               _navigateToChannel(
                                 context,
