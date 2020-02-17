@@ -201,7 +201,7 @@ class Client {
     return connect();
   }
 
-  Stream<Event> on(String eventType) =>
+  Stream<Event> on([String eventType]) =>
       stream.where((event) => eventType == null || event.type == eventType);
 
   void handleEvent(Event event) {

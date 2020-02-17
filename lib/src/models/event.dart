@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/models/message.dart';
 
+import 'own_user.dart';
 import 'user.dart';
 
 part 'event.g.dart';
@@ -11,7 +12,7 @@ class Event {
   final String cid;
   final String connectionId;
   final DateTime createdAt;
-  final User own;
+  final OwnUser me;
   final User user;
   final Message message;
 
@@ -20,7 +21,7 @@ class Event {
     this.cid,
     this.connectionId,
     this.createdAt,
-    this.own,
+    this.me,
     this.user,
     this.message,
   });

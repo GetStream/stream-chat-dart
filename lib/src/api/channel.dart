@@ -171,7 +171,7 @@ class ChannelClient {
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
-  Future<ChannelStateResponse> watch(Map<String, dynamic> options) async {
+  Future<ChannelStateResponse> watch([Map<String, dynamic> options = const {}]) async {
     final watchOptions = Map<String, dynamic>.from({
       "state": true,
       "watch": true,
@@ -287,7 +287,7 @@ class ChannelClient {
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
-  Stream<Event> on(String eventType) =>
+  Stream<Event> on([String eventType]) =>
       _client.on(eventType).where((e) => e.cid == cid);
 
   DateTime _lastTypingEvent;
