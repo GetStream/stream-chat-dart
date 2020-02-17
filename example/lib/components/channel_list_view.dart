@@ -23,12 +23,19 @@ class ChannelListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
+    return ListView.custom(
       physics: AlwaysScrollableScrollPhysics(),
-      separatorBuilder: _separatorBuilder,
+//      separatorBuilder: _separatorBuilder,
       controller: _scrollController,
-      itemCount: channelsStates.length + 1,
-      itemBuilder: _itemBuilder,
+//      itemCount: channelsStates.length + 1,
+//      itemBuilder: _itemBuilder,
+      childrenDelegate: SliverChildBuilderDelegate(_itemBuilder,
+          childCount: channelsStates.length + 1, findChildIndexCallback: (key) {
+        final ValueKey<String> valueKey = key;
+        final channelState = channelsStates
+            .indexWhere((cs) => 'CHANNEL-${cs.channel.id}' == valueKey.value);
+        return channelState != -1 ? channelState : null;
+      }),
     );
   }
 

@@ -8,7 +8,7 @@ import 'message_widget.dart';
 
 class MessageList extends StatefulWidget {
   final List<Message> messages;
-  final ItemScrollController scrollController;
+  final ScrollController scrollController;
 
   MessageList(
     this.messages, {
@@ -17,63 +17,82 @@ class MessageList extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _MessageListState createState() => _MessageListState();
+  _MessageListState createState() => _MessageListState(messages);
 }
 
 class _MessageListState extends State<MessageList> {
-  final ItemPositionsListener _itemPositionsListener =
-      ItemPositionsListener.create();
-  final ItemScrollController _scrollController = ItemScrollController();
-
-  bool isBottom = true;
-  ItemPosition _lastBottomPosition;
+  static const _newMessageLoadingOffset = 100;
+  bool _isBottom = true;
   bool _topWasVisible = false;
-  int _lastMessageCount = 0;
+  List<Message> _messages;
+  List<Message> _newMessageList = [];
+
+  _MessageListState(this._messages);
 
   @override
   Widget build(BuildContext context) {
     final channelBloc = Provider.of<ChannelBloc>(context);
-    _handleScrollingOnNewMessage(channelBloc, widget.messages.length);
-    _lastMessageCount = widget.messages.length;
-    return ScrollablePositionedList.builder(
-      key: ValueKey<String>('LIST-${channelBloc.channelState.channel.id}'),
-      physics: AlwaysScrollableScrollPhysics(),
-      itemCount: widget.messages.length + 1,
-      itemPositionsListener: _itemPositionsListener,
-      itemScrollController: _scrollController,
-      reverse: true,
-      itemBuilder: (context, i) {
-        if (i == widget.messages.length) {
-          return _buildLoadingIndicator(channelBloc);
-        } else {
-          final message = widget.messages[i];
-          final previousMessage =
-              i < widget.messages.length - 1 ? widget.messages[i + 1] : null;
-          final nextMessage = i > 0 ? widget.messages[i - 1] : null;
-          if (i == widget.messages.length - 1) {
-            return _buildTopMessage(
-              message,
-              nextMessage,
-              channelBloc,
-              context,
-            );
-          }
-          if (i == 0) {
-            return _buildBottomMessage(
-              channelBloc,
-              previousMessage,
-              message,
-              context,
-            );
-          }
-          return MessageWidget(
-            key: ValueKey<String>('MESSAGE-${message.id}'),
-            previousMessage: previousMessage,
-            message: message,
-            nextMessage: nextMessage,
-          );
+
+    /// TODO: find a better solution when (https://github.com/flutter/flutter/issues/21023) is fixed
+    return NotificationListener<ScrollNotification>(
+      onNotification: (_) {
+        if (widget.scrollController.offset < 150 &&
+            _newMessageList.isNotEmpty) {
+          setState(() {
+            _messages.insert(0, _newMessageList.removeLast());
+          });
         }
+        return true;
       },
+      child: ListView.custom(
+        physics: AlwaysScrollableScrollPhysics(),
+        controller: widget.scrollController,
+        reverse: true,
+        childrenDelegate: SliverChildBuilderDelegate(
+          (context, i) {
+            if (i == this._messages.length) {
+              return _buildLoadingIndicator(channelBloc);
+            }
+            final message = this._messages[i];
+            final previousMessage =
+                i < this._messages.length - 1 ? this._messages[i + 1] : null;
+            final nextMessage = i > 0 ? this._messages[i - 1] : null;
+
+            if (i == 0) {
+              return _buildBottomMessage(
+                channelBloc,
+                previousMessage,
+                message,
+                context,
+              );
+            }
+
+            if (i == this._messages.length - 1) {
+              return _buildTopMessage(
+                message,
+                nextMessage,
+                channelBloc,
+                context,
+              );
+            }
+
+            return MessageWidget(
+              key: ValueKey<String>('MESSAGE-${message.id}'),
+              previousMessage: previousMessage,
+              message: message,
+              nextMessage: nextMessage,
+            );
+          },
+          childCount: this._messages.length + 1,
+          findChildIndexCallback: (key) {
+            final ValueKey<String> valueKey = key;
+            final index = this
+                ._messages
+                .indexWhere((m) => 'MESSAGE-${m.id}' == valueKey.value);
+            return index != -1 ? index : null;
+          },
+        ),
+      ),
     );
   }
 
@@ -104,13 +123,13 @@ class _MessageListState extends State<MessageList> {
     BuildContext context,
   ) {
     return VisibilityDetector(
+      key: ValueKey<String>('TOP-MESSAGE'),
       child: MessageWidget(
         key: ValueKey<String>('MESSAGE-${message.id}'),
         previousMessage: null,
         message: message,
         nextMessage: nextMessage,
       ),
-      key: ValueKey<String>('MESSAGE-${message.id}'),
       onVisibilityChanged: (visibility) {
         final topIsVisible = visibility.visibleBounds != Rect.zero;
         if (topIsVisible && !_topWasVisible) {
@@ -128,10 +147,10 @@ class _MessageListState extends State<MessageList> {
     BuildContext context,
   ) {
     return VisibilityDetector(
-      key: ValueKey<String>('MESSAGE-${message.id}'),
+      key: ValueKey<String>('BOTTOM-MESSAGE'),
       onVisibilityChanged: (visibility) {
-        this.isBottom = visibility.visibleBounds != Rect.zero;
-        if (this.isBottom) {
+        this._isBottom = visibility.visibleBounds != Rect.zero;
+        if (this._isBottom) {
           if (!channelBloc.readValue) {
             channelBloc.channelClient.markRead();
           }
@@ -146,22 +165,22 @@ class _MessageListState extends State<MessageList> {
     );
   }
 
-  void _handleScrollingOnNewMessage(ChannelBloc channelBloc, int messageCount) {
-    if (!channelBloc.readValue &&
-        !this.isBottom &&
-        messageCount > _lastMessageCount) {
-      _scrollController.jumpTo(
-          index: _lastBottomPosition.index + 1,
-          alignment: _lastBottomPosition.itemLeadingEdge);
-    }
-  }
-
   @override
-  void initState() {
-    super.initState();
+  void didUpdateWidget(MessageList oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
-    _itemPositionsListener.itemPositions.addListener(() {
-      _lastBottomPosition = _itemPositionsListener.itemPositions.value.first;
-    });
+    final newMessages = this.widget.messages;
+
+    if (newMessages[0].id != oldWidget.messages[0].id) {
+      if (widget.scrollController.offset < _newMessageLoadingOffset) {
+        this._messages = newMessages;
+      } else {
+        _newMessageList =
+            newMessages.toSet().difference(this._messages.toSet()).toList();
+        print('NEWME ${_newMessageList.length}');
+      }
+    } else if (newMessages.length != oldWidget.messages.length) {
+      this._messages = newMessages;
+    }
   }
 }

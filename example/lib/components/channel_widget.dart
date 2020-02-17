@@ -23,7 +23,7 @@ class ChannelWidget extends StatefulWidget {
 }
 
 class _ChannelWidgetState extends State<ChannelWidget> {
-  final ItemScrollController _scrollController = ItemScrollController();
+  final ScrollController _scrollController = ScrollController();
 
   IndicatorController _indicatorController = IndicatorController();
 
@@ -49,18 +49,15 @@ class _ChannelWidgetState extends State<ChannelWidget> {
                     final messages = snapshot.data.reversed.toList();
                     return MessageList(
                       messages,
+                      key: ValueKey<String>('CHANNEL-MESSAGE-LIST'),
                       scrollController: _scrollController,
-                      key: ValueKey<String>(
-                          'MESSAGELIST-${channelBloc.channelState.channel.id}'),
                     );
                   },
                 ),
               ),
               MessageInput(
                 onMessageSent: (_) {
-                  _scrollController.jumpTo(
-                    index: 0,
-                  );
+                  _scrollController.jumpTo(0);
                 },
               ),
             ],
