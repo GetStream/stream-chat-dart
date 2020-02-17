@@ -86,7 +86,7 @@ void main() {
           'test',
         );
         final Map<String, dynamic> data = {'test': 1};
-        final channelClient = client.channel('type', id: 'id', data: data);
+        final channelClient = client.channel('type', id: 'id', extraData: data);
         expect(channelClient.type, 'type');
         expect(channelClient.id, 'id');
         expect(channelClient.data, data);

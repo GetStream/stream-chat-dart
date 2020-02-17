@@ -492,9 +492,9 @@ class Client {
   ChannelClient channel(
     String type, {
     String id,
-    Map<String, dynamic> data,
+    Map<String, dynamic> extraData,
   }) {
-    return ChannelClient(this, type, id, data);
+    return ChannelClient(this, type, id, extraData);
   }
 
   Future<UpdateUsersResponse> updateUser(User user) async {
