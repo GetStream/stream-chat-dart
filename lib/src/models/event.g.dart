@@ -14,9 +14,9 @@ Event _$EventFromJson(Map<String, dynamic> json) {
     createdAt: json['created_at'] == null
         ? null
         : DateTime.parse(json['created_at'] as String),
-    own: json['own'] == null
+    me: json['me'] == null
         ? null
-        : User.fromJson(json['own'] as Map<String, dynamic>),
+        : OwnUser.fromJson(json['me'] as Map<String, dynamic>),
     user: json['user'] == null
         ? null
         : User.fromJson(json['user'] as Map<String, dynamic>),
@@ -31,7 +31,7 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'cid': instance.cid,
       'connection_id': instance.connectionId,
       'created_at': instance.createdAt?.toIso8601String(),
-      'own': instance.own?.toJson(),
+      'me': instance.me?.toJson(),
       'user': instance.user?.toJson(),
       'message': instance.message?.toJson(),
     };
