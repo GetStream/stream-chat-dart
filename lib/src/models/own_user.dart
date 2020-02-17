@@ -21,28 +21,27 @@ class OwnUser extends User {
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final int unreadChannels;
 
-  static final topLevelFields = User.topLevelFields
-    ..addAll([
-      'devices',
-      'mutes',
-      'total_unread_count',
-      'unread_channels',
-    ]);
+  static final topLevelFields = [
+    'devices',
+    'mutes',
+    'total_unread_count',
+    'unread_channels',
+  ]..addAll(User.topLevelFields);
 
-  OwnUser(
+  OwnUser({
     this.devices,
     this.mutes,
     this.totalUnreadCount,
     this.unreadChannels,
-    id,
-    role,
-    createdAt,
-    updatedAt,
-    lastActive,
-    online,
-    extraData,
-    banned,
-  ) : super(
+    String id,
+    String role,
+    DateTime createdAt,
+    DateTime updatedAt,
+    DateTime lastActive,
+    bool online,
+    Map<String, dynamic> extraData,
+    bool banned,
+  }) : super(
           id: id,
           role: role,
           createdAt: createdAt,

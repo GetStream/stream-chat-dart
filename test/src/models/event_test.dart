@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat/src/models/event.dart';
+import 'package:stream_chat/src/models/own_user.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 void main() {
@@ -12,7 +13,7 @@ void main() {
         "cid": "cid",
         "connection_id": "connectionId",
         "created_at": "2019-04-03T18:43:33.213374Z",
-        "own": {
+        "me": {
          "id": "dry-meadow-0",
          "role": "user",
          "created_at": "2019-03-27T17:40:17.155892Z",
@@ -43,7 +44,7 @@ void main() {
       expect(event.cid, 'cid');
       expect(event.connectionId, 'connectionId');
       expect(event.createdAt, isA<DateTime>());
-      expect(event.own, isA<User>());
+      expect(event.me, isA<OwnUser>());
       expect(event.user, isA<User>());
     });
 
@@ -54,7 +55,7 @@ void main() {
         cid: 'cid',
         connectionId: 'connectionId',
         createdAt: DateTime.parse("2020-01-29T03:22:47.63613Z"),
-        own: User(id: 'id2'),
+        me: OwnUser(id: 'id2'),
       );
 
       expect(
@@ -64,7 +65,7 @@ void main() {
           'cid': 'cid',
           'connection_id': 'connectionId',
           'created_at': '2020-01-29T03:22:47.636130Z',
-          'own': {'id': 'id2'},
+          'me': {'id': 'id2'},
           'user': {'id': 'id'},
           'message': null
         },

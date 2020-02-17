@@ -8,24 +8,30 @@ part of 'own_user.dart';
 
 OwnUser _$OwnUserFromJson(Map<String, dynamic> json) {
   return OwnUser(
-    (json['devices'] as List)
+    devices: (json['devices'] as List)
         ?.map((e) =>
             e == null ? null : Device.fromJson(e as Map<String, dynamic>))
         ?.toList(),
-    (json['mutes'] as List)
+    mutes: (json['mutes'] as List)
         ?.map(
             (e) => e == null ? null : Mute.fromJson(e as Map<String, dynamic>))
         ?.toList(),
-    json['total_unread_count'] as int,
-    json['unread_channels'] as int,
-    json['id'],
-    json['role'],
-    json['created_at'],
-    json['updated_at'],
-    json['last_active'],
-    json['online'],
-    json['extra_data'],
-    json['banned'],
+    totalUnreadCount: json['total_unread_count'] as int,
+    unreadChannels: json['unread_channels'] as int,
+    id: json['id'] as String,
+    role: json['role'] as String,
+    createdAt: json['created_at'] == null
+        ? null
+        : DateTime.parse(json['created_at'] as String),
+    updatedAt: json['updated_at'] == null
+        ? null
+        : DateTime.parse(json['updated_at'] as String),
+    lastActive: json['last_active'] == null
+        ? null
+        : DateTime.parse(json['last_active'] as String),
+    online: json['online'] as bool,
+    extraData: json['extra_data'] as Map<String, dynamic>,
+    banned: json['banned'] as bool,
   );
 }
 

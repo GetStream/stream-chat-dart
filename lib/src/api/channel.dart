@@ -171,7 +171,8 @@ class ChannelClient {
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
-  Future<ChannelStateResponse> watch([Map<String, dynamic> options = const {}]) async {
+  Future<ChannelStateResponse> watch(
+      [Map<String, dynamic> options = const {}]) async {
     final watchOptions = Map<String, dynamic>.from({
       "state": true,
       "watch": true,
