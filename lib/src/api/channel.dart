@@ -178,7 +178,7 @@ class ChannelClient {
       "presence": false,
     })
       ..addAll(options);
-    return query(watchOptions);
+    return query(options: watchOptions);
   }
 
   Future<EmptyResponse> stopWatching() async {
@@ -215,15 +215,15 @@ class ChannelClient {
   }
 
   Future<ChannelStateResponse> create() async {
-    return query({
+    return query(options: {
       "watch": false,
       "state": false,
       "presence": false,
     });
   }
 
-  Future<ChannelStateResponse> query(
-    Map<String, dynamic> options, {
+  Future<ChannelStateResponse> query({
+    Map<String, dynamic> options,
     PaginationParams messagesPagination,
     PaginationParams membersPagination,
     PaginationParams watchersPagination,

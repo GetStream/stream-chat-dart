@@ -743,7 +743,7 @@ void main() {
         }
             ''', statusCode: 200));
 
-          final response = await channelClient.query(options);
+          final response = await channelClient.query(options: options);
 
           verify(mockDio.post<String>('/channels/messaging', data: options))
               .called(1);
@@ -1057,7 +1057,7 @@ void main() {
         }
             ''', statusCode: 200));
 
-          await channelClient.query(options);
+          await channelClient.query(options: options);
 
           verify(mockDio.post<String>('/channels/messaging/testid/query',
                   data: options))
