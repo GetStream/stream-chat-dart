@@ -103,6 +103,12 @@ class _MessageListState extends State<MessageList> {
           stream: channelBloc.queryMessage,
           initialData: false,
           builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              print((snapshot.error as Error).stackTrace.toString());
+              return Center(
+                child: Text(snapshot.error.toString()),
+              );
+            }
             if (!snapshot.data) {
               return Container();
             }

@@ -270,7 +270,7 @@ class ChannelClient {
 
   /// Query the API, get messages, members or other channel fields
   Future<ChannelStateResponse> query({
-    Map<String, dynamic> options,
+    Map<String, dynamic> options = const {},
     PaginationParams messagesPagination,
     PaginationParams membersPagination,
     PaginationParams watchersPagination,
