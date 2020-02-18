@@ -498,21 +498,18 @@ class Client {
   }
 
   Future<UpdateUsersResponse> updateUser(User user) async {
-    final response = await post("/users", data: {
-      "users": {user.id: user.toJson()},
-    });
-    return decode<UpdateUsersResponse>(
-        response.data, UpdateUsersResponse.fromJson);
+    return updateUsers([user]);
   }
 
-  // TODO
-//  Future<UpdateUsersResponse> updateUsers(User user) async {
-//    final response = await post("/users", data: {
-//      "users": {user.id: user.toJson()},
-//    });
-//    return decode<UpdateUsersResponse>(
-//        response.data, UpdateUsersResponse.fromJson);
-//  }
+  Future<UpdateUsersResponse> updateUsers(List<User> users) async {
+    final response = await post("/users", data: {
+      "users": users.asMap().map((_, u) => MapEntry(u.id, u.toJson())),
+    });
+    return decode<UpdateUsersResponse>(
+      response.data,
+      UpdateUsersResponse.fromJson,
+    );
+  }
 
   Future<EmptyResponse> banUser(
     String targetUserID, [

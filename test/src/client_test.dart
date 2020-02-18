@@ -476,6 +476,35 @@ void main() {
         verify(mockDio.post<String>('/users', data: data)).called(1);
       });
 
+      test('updateUsers', () async {
+        final mockDio = MockDio();
+
+        when(mockDio.options).thenReturn(BaseOptions());
+        when(mockDio.interceptors).thenReturn(Interceptors());
+
+        final client = Client(
+          'api-key',
+          httpClient: mockDio,
+        );
+
+        final user = User(id: 'test-id');
+        final user2 = User(id: 'test-id2');
+
+        final data = {
+          'users': {
+            user.id: user.toJson(),
+            user2.id: user2.toJson(),
+          },
+        };
+
+        when(mockDio.post<String>('/users', data: data))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+
+        await client.updateUsers([user, user2]);
+
+        verify(mockDio.post<String>('/users', data: data)).called(1);
+      });
+
       test('banUser', () async {
         final mockDio = MockDio();
 
