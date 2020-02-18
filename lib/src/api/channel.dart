@@ -346,11 +346,13 @@ class ChannelClient {
 
       _typings.forEach((user, lastTypingEvent) {
         if (now.difference(lastTypingEvent).inSeconds > 7) {
-          this.client.handleEvent(Event(
-                type: EventType.typingStop,
-                user: user,
-                cid: cid,
-              ));
+          this.client.handleEvent(
+                Event(
+                  type: EventType.typingStop,
+                  user: user,
+                  cid: cid,
+                ),
+              );
         }
       });
       _typingEventsController.add(_typings.keys.toList());

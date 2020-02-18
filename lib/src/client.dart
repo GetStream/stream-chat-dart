@@ -20,53 +20,106 @@ typedef LogHandlerFunction = void Function(LogRecord record);
 typedef DecoderFunction<T> = T Function(Map<String, dynamic>);
 typedef TokenProvider = Future<String> Function(String userId);
 
+/// The official Dart client for Stream Chat,
+/// a service for building chat applications.
+/// This library can be used on any Dart project and on both mobile and web apps with Flutter.
+/// You can sign up for a Stream account at https://getstream.io/chat/
+///
+/// The Chat client will manage API call, event handling and manage the
+/// websocket connection to Stream Chat servers.
+///
+/// ```dart
+/// final client = Client("stream-chat-api-key");
+/// ```
 class Client {
-  static const defaultBaseURL = "chat-us-east-1.stream-io-api.com";
-  static const tokenExpiredErrorCode = 40;
-
+  /// Create a client instance with default options.
+  /// You should only create the client once and re-use it across your application.
   Client(
     this.apiKey, {
     this.tokenProvider,
-    this.baseURL = defaultBaseURL,
+    this.baseURL = _defaultBaseURL,
     this.logLevel = Level.WARNING,
-    LogHandlerFunction logHandlerFunction,
+    this.logHandlerFunction,
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
     Dio httpClient,
   }) {
-    _setupLogger(logHandlerFunction);
+    _setupLogger();
     _setupDio(httpClient, receiveTimeout, connectTimeout);
 
     logger.info('instantiating new client');
   }
 
-  final Logger logger = Logger('📡');
+  /// By default the Chat Client will write all messages with level Warn or Error to stdout.
+  /// During development you might want to enable more logging information, you can change the default log level when constructing the client.
+  ///
+  /// ```dart
+  /// final client = Client("stream-chat-api-key", logLevel: Level.INFO);
+  /// ```
   final Level logLevel;
-  final String apiKey;
-  final String baseURL;
-  final TokenProvider tokenProvider;
-  VoidCallback _connectionStatusListener;
 
+  /// Client specific logger instance.
+  /// Refer to the class [Logger] to learn more about the specific implementation.
+  final Logger logger = Logger('📡');
+
+  /// A function that has a parameter of type [LogRecord].
+  /// This is called on every new log record.
+  /// By default the client will use the handler returned by [_getDefaultLogHandler].
+  /// Setting it you can handle the log messages directly instead of have them written to stdout,
+  /// this is very convenient if you use an error tracking tool or if you want to centralize your logs into one facility.
+  ///
+  /// ```dart
+  /// myLogHandlerFunction = (LogRecord record) {
+  ///  // do something with the record (ie. send it to Sentry or Fabric)
+  /// }
+  ///
+  /// final client = Client("stream-chat-api-key", logHandlerFunction: myLogHandlerFunction);
+  ///```
+  LogHandlerFunction logHandlerFunction;
+
+  /// Your project Stream Chat api key.
+  /// Find your API keys here https://getstream.io/dashboard/
+  final String apiKey;
+
+  /// Your project Stream Chat base url.
+  final String baseURL;
+
+  /// A function in which you send a request to your own backend to get a Stream Chat API token.
+  /// The token will be the return value of the function.
+  /// It's used by the client to refresh the token once expired or to set the user without a predefined token using [setUserWithProvider].
+  final TokenProvider tokenProvider;
+
+  /// [Dio] httpClient
+  /// It's be chosen because it's easy to use and supports interesting features out of the box
+  /// (Interceptors, Global configuration, FormData, File downloading etc.)
+  @visibleForTesting
   Dio httpClient = Dio();
 
-  LogHandlerFunction _logHandlerFunction;
+  static const _defaultBaseURL = "chat-us-east-1.stream-io-api.com";
+  static const _tokenExpiredErrorCode = 40;
+  VoidCallback _connectionStatusListener;
 
   final StreamController<Event> _controller =
       StreamController<Event>.broadcast();
 
+  /// Stream of [Event] coming from websocket connection
+  /// Listen to this or use the [on] method to filter specific event types
   Stream<Event> get stream => _controller.stream;
 
-  String _token;
+  /// The current user
   User user;
-  bool _anonymous = false;
-  String _connectionId;
-  WebSocket ws;
 
-  bool get hasConnectionId => _connectionId != null;
-
+  /// This notifies the connection status of the websocket connection.
+  /// Listen to this to get notified when the websocket tries to reconnect.
   final ValueNotifier<ConnectionStatus> wsConnectionStatus =
       ValueNotifier(null);
 
+  String _token;
+  bool _anonymous = false;
+  String _connectionId;
+  WebSocket _ws;
+
+  bool get _hasConnectionId => _connectionId != null;
   Completer _tokenExpiredCompleter;
 
   void _setupDio(
@@ -86,8 +139,8 @@ class Client {
               await _tokenExpiredCompleter.future;
             }
 
-            options.queryParameters.addAll(commonQueryParams);
-            options.headers.addAll(httpHeaders);
+            options.queryParameters.addAll(_commonQueryParams);
+            options.headers.addAll(_httpHeaders);
 
             logger.info('''
     
@@ -110,14 +163,14 @@ class Client {
       err.response?.statusCode,
     );
 
-    if (apiError.code == tokenExpiredErrorCode) {
+    if (apiError.code == _tokenExpiredErrorCode) {
       logger.info('token expired');
 
       if (this.tokenProvider != null) {
         _tokenExpiredCompleter = Completer();
         final userId = this.user.id;
 
-        ws.connectionStatus.removeListener(_connectionStatusListener);
+        _ws.connectionStatus.removeListener(_connectionStatusListener);
 
         await disconnect();
 
@@ -148,46 +201,55 @@ class Client {
     return err;
   }
 
-  void _setupLogger(LogHandlerFunction logHandlerFunction) {
-    Logger.root.level = logLevel;
-
+  LogHandlerFunction _getDefaultLogHandler() {
     final levelEmojiMapper = {
       Level.INFO.name: 'ℹ️',
       Level.WARNING.name: '⚠️',
       Level.SEVERE.name: '🚨',
     };
+    return (LogRecord record) {
+      print(
+          '(${record.time}) ${levelEmojiMapper[record.level.name] ?? record.level.name} ${record.loggerName} ${record.message}');
+      if (record.stackTrace != null) {
+        print(record.stackTrace);
+      }
+    };
+  }
 
-    _logHandlerFunction = logHandlerFunction ??
-        (LogRecord record) {
-          print(
-              '(${record.time}) ${levelEmojiMapper[record.level.name] ?? record.level.name} ${record.loggerName} ${record.message}');
-          if (record.stackTrace != null) {
-            print(record.stackTrace);
-          }
-        };
-    logger.onRecord.listen(_logHandlerFunction);
+  void _setupLogger() {
+    Logger.root.level = logLevel;
+
+    logHandlerFunction ??= _getDefaultLogHandler();
+
+    logger.onRecord.listen(logHandlerFunction);
 
     logger.info('logger setup');
   }
 
-  void dispose() {
+  /// Call this function to dispose the client
+  void dispose() async {
+    await this.disconnect();
     httpClient.close();
-    _controller.close();
+    await _controller.close();
   }
 
-  Map<String, String> get httpHeaders => {
+  Map<String, String> get _httpHeaders => {
         "Authorization": _token,
-        "stream-auth-type": authType,
-        "x-stream-client": userAgent,
+        "stream-auth-type": _authType,
+        "x-stream-client": _userAgent,
       };
 
+  /// Set the current user, this triggers a connection to the API.
+  /// It returns a [Future] that resolves when the connection is setup.
   Future<Event> setUser(User user, String token) async {
     this.user = user;
     _token = token;
     _anonymous = false;
-    return connect();
+    return _connect();
   }
 
+  /// Set the current user using the [tokenProvider] to fetch the token.
+  /// It returns a [Future] that resolves when the connection is setup.
   Future<Event> setUserWithProvider(User user) async {
     if (tokenProvider == null) {
       throw Exception('''
@@ -195,15 +257,16 @@ class Client {
       Use `setUser` providing a token.
       ''');
     }
-    this.user = user;
-    _token = await tokenProvider(user.id);
-    _anonymous = false;
-    return connect();
+    final token = await tokenProvider(user.id);
+    return setUser(user, token);
   }
 
+  /// Stream of [Event] coming from websocket connection
+  /// Pass an eventType as parameter in order to filter just a type of event
   Stream<Event> on([String eventType]) =>
       stream.where((event) => eventType == null || event.type == eventType);
 
+  /// Method called to add a new event to the [_controller].
   void handleEvent(Event event) {
     if (event.connectionId != null) {
       _connectionId = event.connectionId;
@@ -211,14 +274,14 @@ class Client {
     _controller.add(event);
   }
 
-  Future<Event> connect() async {
-    ws = WebSocket(
+  Future<Event> _connect() async {
+    _ws = WebSocket(
       baseUrl: baseURL,
       user: user,
       connectParams: {
         "api_key": apiKey,
         "authorization": _token,
-        "stream-auth-type": authType,
+        "stream-auth-type": _authType,
       },
       connectPayload: {
         "user_id": user.id,
@@ -229,22 +292,24 @@ class Client {
     );
 
     _connectionStatusListener = () {
-      final value = ws.connectionStatus.value;
+      final value = _ws.connectionStatus.value;
       this.wsConnectionStatus.value = value;
     };
 
-    ws.connectionStatus.addListener(_connectionStatusListener);
+    _ws.connectionStatus.addListener(_connectionStatusListener);
 
-    final connectEvent = await ws.connect();
+    final connectEvent = await _ws.connect();
     _connectionId = connectEvent.connectionId;
     return connectEvent;
   }
 
+  /// Requests channels with a given query.
   Future<QueryChannelsResponse> queryChannels({
     Map<String, dynamic> filter,
     List<SortOption> sort,
     Map<String, dynamic> options,
     PaginationParams paginationParams,
+    int messageLimit,
   }) async {
     final Map<String, dynamic> defaultOptions = {
       "state": true,
@@ -257,6 +322,10 @@ class Client {
       "sort": sort,
       "user_details": this.user,
     };
+
+    if (messageLimit != null) {
+      payload['message_limit'] = messageLimit;
+    }
 
     payload.addAll(defaultOptions);
 
@@ -288,6 +357,7 @@ class Client {
     return error;
   }
 
+  /// Handy method to make http GET request with error parsing.
   Future<Response<String>> get(
     String path, {
     Map<String, dynamic> queryParameters,
@@ -303,6 +373,7 @@ class Client {
     }
   }
 
+  /// Handy method to make http POST request with error parsing.
   Future<Response<String>> post(
     String path, {
     dynamic data,
@@ -315,6 +386,7 @@ class Client {
     }
   }
 
+  /// Handy method to make http DELETE request with error parsing.
   Future<Response<String>> delete(
     String path, {
     Map<String, dynamic> queryParameters,
@@ -328,6 +400,7 @@ class Client {
     }
   }
 
+  /// Handy method to make http PATCH request with error parsing.
   Future<Response<String>> patch(
     String path, {
     Map<String, dynamic> queryParameters,
@@ -345,6 +418,7 @@ class Client {
     }
   }
 
+  /// Handy method to make http PUT request with error parsing.
   Future<Response<String>> put(
     String path, {
     Map<String, dynamic> queryParameters,
@@ -362,7 +436,7 @@ class Client {
     }
   }
 
-  // Used to log errors and stacktrace in case of bad json deserialization
+  /// Used to log errors and stacktrace in case of bad json deserialization
   T decode<T>(String j, DecoderFunction<T> decoderFunction) {
     try {
       return decoderFunction(json.decode(j));
@@ -372,24 +446,28 @@ class Client {
     }
   }
 
-  String get authType => _anonymous ? 'anonymous' : 'jwt';
+  String get _authType => _anonymous ? 'anonymous' : 'jwt';
 
   // TODO: get the right version of the lib from the build toolchain
-  String get userAgent => "stream_chat_dart-client-0.0.1";
+  String get _userAgent => "stream_chat_dart-client-0.0.1";
 
-  Map<String, String> get commonQueryParams => {
+  Map<String, String> get _commonQueryParams => {
         "user_id": user?.id,
         "api_key": apiKey,
         "connection_id": _connectionId,
       };
 
+  /// Set the current user with an anonymous id, this triggers a connection to the API.
+  /// It returns a [Future] that resolves when the connection is setup.
   Future<Event> setAnonymousUser() async {
     this._anonymous = true;
     final uuid = Uuid();
     this.user = User(id: uuid.v4());
-    return connect();
+    return _connect();
   }
 
+  /// Set the current user as guest, this triggers a connection to the API.
+  /// It returns a [Future] that resolves when the connection is setup.
   Future<Event> setGuestUser(User user) async {
     _anonymous = true;
     final response = await post("/guest", data: {"user": user.toJson()})
@@ -399,21 +477,23 @@ class Client {
     return setUser(response.user, response.accessToken);
   }
 
+  /// Closes the websocket connection and resets the client
   Future<void> disconnect() async {
     this._anonymous = false;
     this._connectionId = null;
-    await this.ws.disconnect();
+    await this._ws.disconnect();
     this._token = null;
     this.user = null;
   }
 
+  /// Requests users with a given query.
   Future<QueryUsersResponse> queryUsers(
     Map<String, dynamic> filter,
     List<SortOption> sort,
     Map<String, dynamic> options,
   ) async {
     final Map<String, dynamic> defaultOptions = {
-      "presence": this.hasConnectionId,
+      "presence": this._hasConnectionId,
     };
 
     Map<String, dynamic> payload = {
@@ -439,6 +519,7 @@ class Client {
     );
   }
 
+  /// A message search.
   Future<SearchMessagesResponse> search(
     Map<String, dynamic> filters,
     List<SortOption> sort,
@@ -461,6 +542,7 @@ class Client {
         response.data, SearchMessagesResponse.fromJson);
   }
 
+  /// Add a device for Push Notifications.
   Future<EmptyResponse> addDevice(String id, String pushProvider) async {
     final response = await post("/devices", data: {
       "id": id,
@@ -469,12 +551,14 @@ class Client {
     return decode<EmptyResponse>(response.data, EmptyResponse.fromJson);
   }
 
+  /// Gets a list of user devices.
   Future<ListDevicesResponse> getDevices() async {
     final response = await get("/devices");
     return decode<ListDevicesResponse>(
         response.data, ListDevicesResponse.fromJson);
   }
 
+  /// Remove a user's device.
   Future<EmptyResponse> removeDevice(String id) async {
     final response = await delete("/devices", queryParameters: {
       "id": id,
@@ -482,6 +566,7 @@ class Client {
     return decode(response.data, EmptyResponse.fromJson);
   }
 
+  /// Get a development token
   String devToken(String userId) {
     final payload = json.encode({"user_id": userId});
     final payloadBytes = utf8.encode(payload);
@@ -489,6 +574,7 @@ class Client {
     return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.$payloadB64.devtoken";
   }
 
+  /// Returns a channel client with the given type, id and custom data.
   ChannelClient channel(
     String type, {
     String id,
@@ -497,10 +583,12 @@ class Client {
     return ChannelClient(this, type, id, extraData);
   }
 
+  /// Update or Create the given user object.
   Future<UpdateUsersResponse> updateUser(User user) async {
     return updateUsers([user]);
   }
 
+  /// Batch update a list of users
   Future<UpdateUsersResponse> updateUsers(List<User> users) async {
     final response = await post("/users", data: {
       "users": users.asMap().map((_, u) => MapEntry(u.id, u.toJson())),
@@ -511,6 +599,7 @@ class Client {
     );
   }
 
+  /// Bans a user from all channels
   Future<EmptyResponse> banUser(
     String targetUserID, [
     Map<String, dynamic> options = const {},
@@ -526,6 +615,7 @@ class Client {
     return decode(response.data, EmptyResponse.fromJson);
   }
 
+  /// Remove global ban for a user
   Future<EmptyResponse> unbanUser(
     String targetUserID, [
     Map<String, dynamic> options = const {},
@@ -541,6 +631,7 @@ class Client {
     return decode(response.data, EmptyResponse.fromJson);
   }
 
+  /// Mutes a user
   Future<EmptyResponse> muteUser(String targetID) async {
     final response = await post("/moderation/mute", data: {
       "target_id": targetID,
@@ -548,6 +639,7 @@ class Client {
     return decode(response.data, EmptyResponse.fromJson);
   }
 
+  /// Unmutes a user
   Future<EmptyResponse> unmuteUser(String targetID) async {
     final response = await post("/moderation/unmute", data: {
       "target_id": targetID,
@@ -555,6 +647,7 @@ class Client {
     return decode(response.data, EmptyResponse.fromJson);
   }
 
+  /// Flag a message
   Future<EmptyResponse> flagMessage(String messageID) async {
     final response = await post("/moderation/flag", data: {
       "target_message_id": messageID,
@@ -562,6 +655,7 @@ class Client {
     return decode(response.data, EmptyResponse.fromJson);
   }
 
+  /// Unflag a message
   Future<EmptyResponse> unflagMessage(String messageId) async {
     final response = await post("/moderation/unflag", data: {
       "target_message_id": messageId,
@@ -569,6 +663,7 @@ class Client {
     return decode(response.data, EmptyResponse.fromJson);
   }
 
+  /// Flag a user
   Future<EmptyResponse> flagUser(String userId) async {
     final response = await post("/moderation/flag", data: {
       "target_user_id": userId,
@@ -576,6 +671,7 @@ class Client {
     return decode(response.data, EmptyResponse.fromJson);
   }
 
+  /// Unflag a message
   Future<EmptyResponse> unflagUser(String userId) async {
     final response = await post("/moderation/unflag", data: {
       "target_user_id": userId,
@@ -583,21 +679,25 @@ class Client {
     return decode(response.data, EmptyResponse.fromJson);
   }
 
+  /// Mark all channels for this user as read
   Future<EmptyResponse> markAllRead() async {
     final response = await post("/channels/read");
     return decode(response.data, EmptyResponse.fromJson);
   }
 
+  /// Update the given message
   Future<UpdateMessageResponse> updateMessage(Message message) async {
     return post("/messages/${message.id}", data: {'message': message})
         .then((res) => decode(res.data, UpdateMessageResponse.fromJson));
   }
 
+  /// Deletes the given message
   Future<EmptyResponse> deleteMessage(String messageId) async {
     final response = await delete("/messages/$messageId");
     return decode(response.data, EmptyResponse.fromJson);
   }
 
+  /// Get a message by id
   Future<GetMessageResponse> getMessage(String messageId) async {
     final response = await get("/messages/$messageId");
     return decode(response.data, GetMessageResponse.fromJson);

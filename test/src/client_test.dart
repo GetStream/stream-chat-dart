@@ -47,7 +47,7 @@ void main() {
           'api-key',
         );
 
-        expect(client.baseURL, Client.defaultBaseURL);
+        expect(client.baseURL, 'chat-us-east-1.stream-io-api.com');
         expect(client.apiKey, 'api-key');
         expect(client.logLevel, Level.WARNING);
         expect(client.httpClient.options.connectTimeout, 6000);
