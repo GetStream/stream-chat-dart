@@ -80,13 +80,17 @@ class ChannelClient {
     });
   }
 
-  Future<SendReactionResponse> sendReaction(
-    String messageID,
-    Reaction reaction,
-  ) async {
+  Future<SendReactionResponse> sendReaction(String messageID, String type,
+      {Map<String, dynamic> extraData = const {}}) async {
+
+    final data = Map<String, dynamic>.from(extraData)
+      ..addAll({
+        "type": type,
+      });
+
     final res = await _client.post(
       "/messages/$messageID/reaction",
-      data: {"reaction": reaction.toJson()},
+      data: {"reaction": data},
     );
     return _client.decode(res.data, SendReactionResponse.fromJson);
   }
@@ -171,7 +175,8 @@ class ChannelClient {
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
-  Future<ChannelStateResponse> watch([Map<String, dynamic> options = const {}]) async {
+  Future<ChannelStateResponse> watch(
+      [Map<String, dynamic> options = const {}]) async {
     final watchOptions = Map<String, dynamic>.from({
       "state": true,
       "watch": true,
@@ -276,7 +281,7 @@ class ChannelClient {
     });
   }
 
-  Future<EmptyResponse> hide([bool clearHistory = false]) async {
+  Future<EmptyResponse> hide({bool clearHistory = false}) async {
     final response = await _client
         .post("$_channelURL/hide", data: {'clear_history': clearHistory});
     return _client.decode(response.data, EmptyResponse.fromJson);
