@@ -12,9 +12,6 @@ Map<String, dynamic> _$SortOptionToJson(SortOption instance) =>
       'direction': instance.direction,
     };
 
-Map<String, dynamic> _$QueryFilterToJson(QueryFilter instance) =>
-    <String, dynamic>{};
-
 Map<String, dynamic> _$PaginationParamsToJson(PaginationParams instance) {
   final val = <String, dynamic>{};
 

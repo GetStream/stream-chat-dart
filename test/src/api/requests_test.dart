@@ -9,12 +9,6 @@ void main() {
       expect(j, {'field': 'name', 'direction': -1});
     });
 
-    test('QueryFilter', () {
-      final option = QueryFilter();
-      final j = option.toJson();
-      expect(j, {});
-    });
-
     test('PaginationParams', () {
       final option = PaginationParams();
       final j = option.toJson();

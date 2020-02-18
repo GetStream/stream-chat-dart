@@ -8,7 +8,6 @@ import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/models/event.dart';
 import 'package:stream_chat/src/models/member.dart';
 import 'package:stream_chat/src/models/message.dart';
-import 'package:stream_chat/src/models/reaction.dart';
 
 class MockDio extends Mock implements DioForNative {}
 

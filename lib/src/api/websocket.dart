@@ -17,34 +17,12 @@ typedef EventHandler = void Function(Event);
 typedef ConnectWebSocket = WebSocketChannel Function(String url,
     {Iterable<String> protocols});
 
-// TODO: improve error path for the connect() method
-// TODO: make sure we pass an error with a stacktrace
 // TODO: parse error even
-// TODO: make sure parsing the event data is handled correctly
 // TODO: if parsing an error into an event fails we should not hide the original error
+/// A WebSocket connection that reconnects upon failure.
 class WebSocket {
-  final String baseUrl;
-  final User user;
-  final Map<String, String> connectParams;
-  final Map<String, dynamic> connectPayload;
-  final EventHandler handler;
-  final Logger logger;
-  final ConnectWebSocket connectFunc;
-  final int reconnectionMonitorInterval;
-  final int healthCheckInterval;
-  final int reconnectionMonitorTimeout;
-
-  ValueNotifier<ConnectionStatus> connectionStatus =
-      ValueNotifier(ConnectionStatus.disconnected);
-
-  Uri uri;
-  String path;
-
-  WebSocketChannel _channel;
-  Timer _healthCheck, _reconnectionMonitor;
-  DateTime _lastEventAt;
-  bool _manuallyClosed = false, _connecting = false, _reconnecting = false;
-
+  /// Creates a new websocket
+  /// To connect the WS call [connect]
   WebSocket({
     @required this.baseUrl,
     this.user,
@@ -64,16 +42,65 @@ class WebSocket {
     data["user_details"] = user.toJson();
     qs["json"] = json.encode(data);
 
-    uri = Uri.https(baseUrl, "connect", qs);
-    path = uri.toString().replaceFirst("https", "wss");
+    _uri = Uri.https(baseUrl, "connect", qs);
+    _path = _uri.toString().replaceFirst("https", "wss");
   }
 
-  Event decodeEvent(String source) {
+  /// WS base url
+  final String baseUrl;
+
+  /// User performing the WS connection
+  final User user;
+
+  /// Querystring connection parameters
+  final Map<String, String> connectParams;
+
+  /// WS connection payload
+  final Map<String, dynamic> connectPayload;
+
+  /// Functions that will be called every time a new event is received from the connection
+  final EventHandler handler;
+
+  /// A WS specific logger instance
+  final Logger logger;
+
+  /// Connection function
+  /// Used only for testing purpose
+  @visibleForTesting
+  final ConnectWebSocket connectFunc;
+
+  /// Interval of the reconnection monitor timer
+  /// This checks that it received a new event in the last [reconnectionMonitorTimeout] seconds,
+  /// otherwise it considers the connection unhealthy and reconnects the WS
+  final int reconnectionMonitorInterval;
+
+  /// Interval of the health event sending timer
+  /// This sends a health event every [healthCheckInterval] seconds in order to
+  /// make the server aware that the client is still listening
+  final int healthCheckInterval;
+
+  /// The timeout that uses the reconnection monitor timer to consider the connection unhealthy
+  final int reconnectionMonitorTimeout;
+
+  /// This notifies of connection status changes
+  ValueNotifier<ConnectionStatus> connectionStatus =
+      ValueNotifier(ConnectionStatus.disconnected);
+
+  Uri _uri;
+  String _path;
+
+  WebSocketChannel _channel;
+  Timer _healthCheck, _reconnectionMonitor;
+  DateTime _lastEventAt;
+  bool _manuallyClosed = false, _connecting = false, _reconnecting = false;
+
+  Event _decodeEvent(String source) {
     return Event.fromJson(json.decode(source));
   }
 
   Completer<Event> _connectionCompleter = Completer<Event>();
 
+  /// Connect the WS using the parameters passed in the constructor
   Future<Event> connect() {
     if (_manuallyClosed) {
       connectionStatus = ValueNotifier(ConnectionStatus.disconnected);
@@ -88,9 +115,9 @@ class WebSocket {
     _connecting = true;
     connectionStatus.value = ConnectionStatus.connecting;
 
-    logger.info('connecting to $path');
+    logger.info('connecting to $_path');
 
-    _channel = connectFunc(path);
+    _channel = connectFunc(_path);
     _channel.stream.listen(
       (data) {
         _onData(data);
@@ -120,7 +147,7 @@ class WebSocket {
 
   void _onData(data) {
     logger.info('new data: $data');
-    final event = decodeEvent(data);
+    final event = _decodeEvent(data);
     if (_lastEventAt != null) {
       handler(event);
     } else {
@@ -230,6 +257,7 @@ class WebSocket {
     healthCheckTimer(_healthCheck);
   }
 
+  /// Disconnects the WS and releases eventual resources
   Future<void> disconnect() {
     logger.info('disconnecting');
     _connectionCompleter = Completer();

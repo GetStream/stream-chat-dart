@@ -4,15 +4,29 @@ import 'serialization.dart';
 
 part 'attachment.g.dart';
 
+/// The class that contains the information about an attachment
 @JsonSerializable(includeIfNull: false)
 class Attachment {
+  /// The type of this attachment
   final String type;
+
+  /// The link of this attachment title
   final String titleLink;
+
+  /// The attachment title
   final String title;
+
+  /// The url of the thumbnail of this attachment
   final String thumbUrl;
+
+  /// The text of this attachment
   final String text;
   final String pretext;
+
+  /// Open graph scrape url
   final String ogScrapeUrl;
+
+  /// Image url of the attachment
   final String imageUrl;
   final String footerIcon;
   final String footer;
@@ -23,11 +37,16 @@ class Attachment {
   final String authorLink;
   final String authorIcon;
   final String assetUrl;
+
+  /// Actions related to the attachment
   final List<Action> actions;
 
+  /// Map of custom channel extraData
   @JsonKey(includeIfNull: false)
   final Map<String, dynamic> extraData;
 
+  /// Known top level fields.
+  /// Useful for [Serialization] methods.
   static const topLevelFields = [
     'type',
     'title_link',
@@ -49,6 +68,7 @@ class Attachment {
     'actions',
   ];
 
+  /// Constructor used for json serialization
   Attachment({
     this.type,
     this.titleLink,
@@ -71,9 +91,11 @@ class Attachment {
     this.extraData,
   });
 
+  /// Create a new instance from a json
   factory Attachment.fromJson(Map<String, dynamic> json) =>
       _$AttachmentFromJson(Serialization.moveKeysToRoot(json, topLevelFields));
 
+  /// Serialize to json
   Map<String, dynamic> toJson() => Serialization.moveKeysToMapInPlace(
       _$AttachmentToJson(this), topLevelFields);
 

@@ -12,8 +12,6 @@ import 'package:stream_chat/src/exceptions.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/user.dart';
 
-import 'api/websocket_test.dart';
-
 class MockDio extends Mock implements DioForNative {}
 
 class MockHttpClientAdapter extends Mock implements HttpClientAdapter {}
@@ -89,7 +87,7 @@ void main() {
         final channelClient = client.channel('type', id: 'id', extraData: data);
         expect(channelClient.type, 'type');
         expect(channelClient.id, 'id');
-        expect(channelClient.data, data);
+        expect(channelClient.extraData, data);
       });
     });
 

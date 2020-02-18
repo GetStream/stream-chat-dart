@@ -1,12 +1,19 @@
 import 'dart:convert';
 
+/// Exception related to api calls
 class ApiError implements Exception {
+  /// Raw body of the response
   final String body;
+
+  /// Json parsed body
   final Map<String, dynamic> jsonData;
+
+  /// Http status code of the response
   final int status;
 
-  int _code;
+  /// Stream specific error code
   int get code => _code;
+  int _code;
 
   static Map<String, dynamic> _decode(String body) {
     try {
@@ -19,6 +26,7 @@ class ApiError implements Exception {
     }
   }
 
+  /// Creates a new ApiError instance using the response body and status code
   ApiError(this.body, this.status) : jsonData = _decode(body) {
     if (jsonData != null && jsonData.containsKey('code')) {
       _code = jsonData['code'];

@@ -1,10 +1,16 @@
+/// Used to avoid to serialize properties to json
 readonly(_) => null;
 
+/// Helper class for serialization to and from json
 class Serialization {
+  /// Used to avoid to serialize properties to json
   static const Function readOnly = readonly;
 
+  /// Takes values in `extra_data` key and puts them on the root level of the json map
   static Map<String, dynamic> moveKeysToRoot(
-      Map<String, dynamic> json, List<String> topLevelFields) {
+    Map<String, dynamic> json,
+    List<String> topLevelFields,
+  ) {
     if (json == null) {
       return json;
     }
@@ -20,8 +26,11 @@ class Serialization {
     return clone;
   }
 
+  /// Takes unknown json keys and puts them in the `extra_data` key
   static Map<String, dynamic> moveKeysToMapInPlace(
-      Map<String, dynamic> intermediateMap, List<String> topLevelFields) {
+    Map<String, dynamic> intermediateMap,
+    List<String> topLevelFields,
+  ) {
     if (intermediateMap == null) {
       return intermediateMap;
     }
