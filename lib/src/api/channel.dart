@@ -82,7 +82,6 @@ class ChannelClient {
 
   Future<SendReactionResponse> sendReaction(String messageID, String type,
       {Map<String, dynamic> extraData = const {}}) async {
-
     final data = Map<String, dynamic>.from(extraData)
       ..addAll({
         "type": type,

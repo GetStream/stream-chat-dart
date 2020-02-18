@@ -321,16 +321,24 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final reaction = Reaction(type: 'test');
+        final reactionType = 'test';
 
-        when(mockDio.post<String>('/messages/messageid/reaction',
-                data: {'reaction': reaction.toJson()}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(mockDio.post<String>(
+          '/messages/messageid/reaction',
+          data: {
+            'reaction': {
+              'type': reactionType,
+            },
+          },
+        )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
-        await channelClient.sendReaction('messageid', reaction);
+        await channelClient.sendReaction('messageid', reactionType);
 
-        verify(mockDio.post<String>('/messages/messageid/reaction',
-            data: {'reaction': reaction.toJson()})).called(1);
+        verify(mockDio.post<String>('/messages/messageid/reaction', data: {
+          'reaction': {
+            'type': reactionType,
+          },
+        })).called(1);
       });
 
       test('deleteReaction', () async {
@@ -1885,7 +1893,7 @@ void main() {
                 data: {'clear_history': true}))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
-        await channelClient.hide(true);
+        await channelClient.hide(clearHistory: true);
 
         verify(mockDio.post<String>('/channels/messaging/testid/hide',
             data: {'clear_history': true})).called(1);
