@@ -15,6 +15,8 @@ class Event {
   final OwnUser me;
   final User user;
   final Message message;
+  final int totalUnreadCount;
+  final int unreadChannels;
 
   Event({
     this.type,
@@ -24,6 +26,8 @@ class Event {
     this.me,
     this.user,
     this.message,
+    this.totalUnreadCount,
+    this.unreadChannels,
   });
 
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);

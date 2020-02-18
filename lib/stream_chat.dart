@@ -5,6 +5,7 @@ export './src/api/channel.dart';
 export './src/api/connection_status.dart';
 export './src/models/message.dart';
 export './src/models/attachment.dart';
+export './src/models/reaction.dart';
 export './src/api/responses.dart';
 export './src/client.dart';
 export './src/models/channel.dart';
