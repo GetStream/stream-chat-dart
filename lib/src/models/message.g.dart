@@ -37,7 +37,6 @@ Message _$MessageFromJson(Map<String, dynamic> json) {
     replyCount: json['reply_count'] as int,
     showInChannel: json['show_in_channel'] as bool,
     command: json['command'] as String,
-    html: json['html'] as String,
     createdAt: json['created_at'] == null
         ? null
         : DateTime.parse(json['created_at'] as String),
@@ -75,7 +74,6 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   writeNotNull('reply_count', readonly(instance.replyCount));
   val['show_in_channel'] = instance.showInChannel;
   writeNotNull('command', readonly(instance.command));
-  writeNotNull('html', readonly(instance.html));
   writeNotNull('created_at', readonly(instance.createdAt));
   writeNotNull('updated_at', readonly(instance.updatedAt));
   writeNotNull('user', readonly(instance.user));
