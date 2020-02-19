@@ -51,7 +51,17 @@ void main() {
           httpClient: mockDio,
           tokenProvider: (_) async => '',
         );
+
         final channelClient = client.channel('messaging', id: 'testid');
+
+        when(mockDio.post<String>(
+          any,
+          data: anyNamed('data'),
+        )).thenAnswer((_) async => Response(
+              data: '{}',
+              statusCode: 200,
+            ));
+        await channelClient.watch();
 
         when(mockDio.post<String>('/channels/messaging/testid/read', data: {}))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
@@ -99,6 +109,16 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
+
+        when(mockDio.post<String>(
+          any,
+          data: anyNamed('data'),
+        )).thenAnswer((_) async => Response(
+              data: '{}',
+              statusCode: 200,
+            ));
+        await channelClient.watch();
+
         final Map<String, dynamic> data = {'test': true};
 
         when(mockDio.post<String>('/messages/messageid/action',
@@ -247,6 +267,16 @@ void main() {
         tokenProvider: (_) async => '',
       );
       final channelClient = client.channel('messaging', id: 'testid');
+
+      when(mockDio.post<String>(
+        any,
+        data: anyNamed('data'),
+      )).thenAnswer((_) async => Response(
+            data: '{}',
+            statusCode: 200,
+          ));
+      await channelClient.watch();
+
       final event = Event(type: EventType.any);
 
       when(mockDio.post<String>('/channels/messaging/testid/event',
@@ -271,6 +301,16 @@ void main() {
         tokenProvider: (_) async => '',
       );
       final channelClient = client.channel('messaging', id: 'testid');
+
+      when(mockDio.post<String>(
+        any,
+        data: anyNamed('data'),
+      )).thenAnswer((_) async => Response(
+            data: '{}',
+            statusCode: 200,
+          ));
+      await channelClient.watch();
+
       final event = Event(type: EventType.typingStart);
 
       when(mockDio.post<String>('/channels/messaging/testid/event',
@@ -295,6 +335,16 @@ void main() {
         tokenProvider: (_) async => '',
       );
       final channelClient = client.channel('messaging', id: 'testid');
+
+      when(mockDio.post<String>(
+        any,
+        data: anyNamed('data'),
+      )).thenAnswer((_) async => Response(
+            data: '{}',
+            statusCode: 200,
+          ));
+      await channelClient.watch();
+
       final event = Event(type: EventType.typingStop);
 
       when(mockDio.post<String>('/channels/messaging/testid/event',
@@ -352,6 +402,15 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
+
+        when(mockDio.post<String>(
+          any,
+          data: anyNamed('data'),
+        )).thenAnswer((_) async => Response(
+              data: '{}',
+              statusCode: 200,
+            ));
+        await channelClient.watch();
 
         when(mockDio.delete<String>('/messages/messageid/reaction/test'))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
@@ -1888,6 +1947,15 @@ void main() {
         );
         final channelClient = client.channel('messaging', id: 'testid');
 
+        when(mockDio.post<String>(
+          any,
+          data: anyNamed('data'),
+        )).thenAnswer((_) async => Response(
+              data: '{}',
+              statusCode: 200,
+            ));
+        await channelClient.watch();
+
         when(mockDio.post<String>('/channels/messaging/testid/hide',
                 data: {'clear_history': true}))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
@@ -1911,6 +1979,15 @@ void main() {
         );
         final channelClient = client.channel('messaging', id: 'testid');
 
+        when(mockDio.post<String>(
+          any,
+          data: anyNamed('data'),
+        )).thenAnswer((_) async => Response(
+              data: '{}',
+              statusCode: 200,
+            ));
+        await channelClient.watch();
+
         when(mockDio.post<String>('/channels/messaging/testid/show'))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
@@ -1932,6 +2009,15 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
+
+        when(mockDio.post<String>(
+          any,
+          data: anyNamed('data'),
+        )).thenAnswer((_) async => Response(
+              data: '{}',
+              statusCode: 200,
+            ));
+        await channelClient.watch();
 
         when(mockDio.post<String>('/moderation/ban', data: {
           'test': true,
@@ -1963,6 +2049,15 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
+
+        when(mockDio.post<String>(
+          any,
+          data: anyNamed('data'),
+        )).thenAnswer((_) async => Response(
+              data: '{}',
+              statusCode: 200,
+            ));
+        await channelClient.watch();
 
         when(mockDio.delete<String>('/moderation/ban', queryParameters: {
           'target_user_id': 'test-id',

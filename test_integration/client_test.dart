@@ -20,7 +20,7 @@ void main() {
     print(setUserEvent.toJson());
 
     final queryChannels = await client.queryChannels();
-    print('queryChannels.channels.length: ${queryChannels.channels.length}');
+    print('queryChannels.channels.length: ${queryChannels.length}');
 
     final queryUsers = await client.queryUsers(
         null, [SortOption('created_at', direction: SortOption.DESC)], null);

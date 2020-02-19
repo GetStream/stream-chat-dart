@@ -40,7 +40,7 @@ class ChannelState {
   });
 
   /// Create a new instance from a json
-  factory ChannelState.fromJson(Map<String, dynamic> json) =>
+  static ChannelState fromJson(Map<String, dynamic> json) =>
       _$ChannelStateFromJson(json);
 
   /// Serialize to json

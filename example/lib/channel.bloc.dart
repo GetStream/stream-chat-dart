@@ -22,7 +22,6 @@ class ChannelBloc with ChangeNotifier {
   List<Message> get messageList => _messagesController.value;
 
   final ChannelClient channelClient;
-  final List<StreamSubscription> _subscriptions = [];
   final ChatBloc chatBloc;
 
   ChannelBloc(Client client, this.channelState, this.chatBloc)
@@ -33,14 +32,14 @@ class ChannelBloc with ChangeNotifier {
           null,
         ) {
     _messagesController.add(channelState.messages);
-    _subscriptions.add(channelClient.on('message.new').listen((Event e) {
+    channelClient.on('message.new').listen((Event e) {
       channelState.messages.add(e.message);
       _messagesController.add(channelState.messages);
 
       if (e.user.id != chatBloc.user.id) {
         _readController.add(false);
       }
-    }));
+    });
 
     final userRead = channelState.read
         ?.lastWhere((r) => r.user.id == chatBloc.user.id, orElse: () => null);
@@ -50,11 +49,11 @@ class ChannelBloc with ChangeNotifier {
       _readController.add(false);
     }
 
-    _subscriptions.add(channelClient.on('message.read').listen((Event e) {
+    channelClient.on('message.read').listen((Event e) {
       if (e.user.id == chatBloc.user.id) {
         _readController.add(true);
       }
-    }));
+    });
   }
 
   final BehaviorSubject<bool> _queryMessageController = BehaviorSubject();
@@ -91,7 +90,6 @@ class ChannelBloc with ChangeNotifier {
 
   @override
   void dispose() {
-    _subscriptions.forEach((s) => s.cancel());
     _readController.close();
     _messagesController.close();
     _queryMessageController.close();

@@ -1,8 +1,11 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/event_type.dart';
+import 'package:stream_chat/src/models/channel_state.dart';
 import 'package:stream_chat/src/models/user.dart';
+import 'package:stream_chat/stream_chat.dart';
 
 import '../client.dart';
 import '../models/event.dart';
@@ -21,8 +24,19 @@ class ChannelClient {
     this.extraData,
   ) : cid = id != null ? "$type:$id" : null {
     _startCleaning();
-    _listenTypingEvents();
   }
+
+  /// Create a channel client instance from a [ChannelState] object
+  ChannelClient.fromState(Client client, ChannelState state) {
+    cid = state.channel.cid;
+    id = state.channel.id;
+    type = state.channel.type;
+
+    _channelClientState = ChannelClientState(this, state);
+    _startCleaning();
+  }
+
+  ChannelClientState _channelClientState;
 
   /// The channel type
   String type;
@@ -40,9 +54,11 @@ class ChannelClient {
   Client get client => _client;
   Client _client;
 
-  final List<StreamSubscription> _subscriptions = [];
-
   String get _channelURL => "/channels/$type/$id";
+
+  /// True if this is initialized
+  /// Call [watch] to initialize the client or instantiate it using [ChannelClient.fromState]
+  bool get initialized => _channelClientState != null;
 
   /// Send a message to this channel
   Future<SendMessageResponse> sendMessage(Message message) async {
@@ -87,6 +103,7 @@ class ChannelClient {
 
   /// Send an event on this channel
   Future<EmptyResponse> sendEvent(Event event) {
+    _checkInitialized();
     return _client.post(
       "$_channelURL/event",
       data: {"event": event.toJson()},
@@ -115,6 +132,7 @@ class ChannelClient {
 
   /// Delete a reaction from this channel
   Future<EmptyResponse> deleteReaction(String messageID, String reactionType) {
+    _checkInitialized();
     return client
         .delete("/messages/$messageID/reaction/$reactionType")
         .then((res) => _client.decode(res.data, EmptyResponse.fromJson));
@@ -195,6 +213,7 @@ class ChannelClient {
     String messageID,
     Map<String, dynamic> formData,
   ) async {
+    _checkInitialized();
     final response = await _client.post("/messages/$messageID/action",
         data: {'id': id, 'type': type, 'form_data': formData});
     return _client.decode(response.data, SendActionResponse.fromJson);
@@ -202,20 +221,25 @@ class ChannelClient {
 
   /// Mark all channel messages as read
   Future<EmptyResponse> markRead() async {
+    _checkInitialized();
     final response = await _client.post("$_channelURL/read", data: {});
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Loads the initial channel state and watches for changes
-  Future<ChannelStateResponse> watch(
-      [Map<String, dynamic> options = const {}]) async {
+  Future<ChannelState> watch([Map<String, dynamic> options = const {}]) async {
     final watchOptions = Map<String, dynamic>.from({
       "state": true,
       "watch": true,
       "presence": false,
     })
       ..addAll(options);
-    return query(options: watchOptions);
+
+    final response = await query(options: watchOptions);
+
+    _channelClientState = ChannelClientState(this, response);
+
+    return response;
   }
 
   /// Stop watching the channel
@@ -260,7 +284,7 @@ class ChannelClient {
   }
 
   /// Creates a new channel
-  Future<ChannelStateResponse> create() async {
+  Future<ChannelState> create() async {
     return query(options: {
       "watch": false,
       "state": false,
@@ -269,7 +293,7 @@ class ChannelClient {
   }
 
   /// Query the API, get messages, members or other channel fields
-  Future<ChannelStateResponse> query({
+  Future<ChannelState> query({
     Map<String, dynamic> options = const {},
     PaginationParams messagesPagination,
     PaginationParams membersPagination,
@@ -296,7 +320,7 @@ class ChannelClient {
     }
 
     final response = await _client.post(path, data: data);
-    final state = _client.decode(response.data, ChannelStateResponse.fromJson);
+    final state = _client.decode(response.data, ChannelState.fromJson);
     if (id == null) {
       id = state.channel.id;
       cid = state.channel.id;
@@ -309,6 +333,7 @@ class ChannelClient {
     String userID,
     Map<String, dynamic> options,
   ) async {
+    _checkInitialized();
     final opts = Map<String, dynamic>.from(options)
       ..addAll({
         'type': type,
@@ -319,6 +344,7 @@ class ChannelClient {
 
   /// Remove the ban for a user in the channel
   Future<EmptyResponse> unbanUser(String userID) async {
+    _checkInitialized();
     return _client.unbanUser(userID, {
       'type': type,
       'id': id,
@@ -328,6 +354,7 @@ class ChannelClient {
   /// Hides the channel from [Client.queryChannels] for the user until a message is added
   ///	If [clearHistory] is set to true - all messages will be removed for the user
   Future<EmptyResponse> hide({bool clearHistory = false}) async {
+    _checkInitialized();
     final response = await _client
         .post("$_channelURL/hide", data: {'clear_history': clearHistory});
     return _client.decode(response.data, EmptyResponse.fromJson);
@@ -335,6 +362,7 @@ class ChannelClient {
 
   /// Removes the hidden status for the channel
   Future<EmptyResponse> show() async {
+    _checkInitialized();
     final response = await _client.post("$_channelURL/show");
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
@@ -366,29 +394,6 @@ class ChannelClient {
     await sendEvent(Event(type: EventType.typingStop));
   }
 
-  /// Channel related typing users stream
-  Stream<List<User>> get typingEvents => _typingEventsController.stream;
-  StreamController<List<User>> _typingEventsController =
-      StreamController.broadcast();
-
-  final Map<User, DateTime> _typings = {};
-
-  void _listenTypingEvents() {
-    _subscriptions.add(this.on(EventType.typingStart).listen((event) {
-      if (event.user != client.user) {
-        _typings[event.user] = DateTime.now();
-        _typingEventsController.add(_typings.keys.toList());
-      }
-    }));
-
-    _subscriptions.add(this.on(EventType.typingStop).listen((event) {
-      if (event.user != client.user) {
-        _typings.remove(event.user);
-        _typingEventsController.add(_typings.keys.toList());
-      }
-    }));
-  }
-
   Timer _cleaningTimer;
 
   void _startCleaning() {
@@ -400,25 +405,103 @@ class ChannelClient {
         stopTyping();
       }
 
-      _typings.forEach((user, lastTypingEvent) {
-        if (now.difference(lastTypingEvent).inSeconds > 7) {
-          this.client.handleEvent(
-                Event(
-                  type: EventType.typingStop,
-                  user: user,
-                  cid: cid,
-                ),
-              );
-        }
-      });
-      _typingEventsController.add(_typings.keys.toList());
+      _channelClientState._clean();
     });
   }
 
-  /// Call this function to dispose the channel client
+  /// Call this method to dispose the channel client
   void dispose() {
-    _subscriptions.forEach((s) => s.cancel());
-    _typingEventsController.close();
     _cleaningTimer.cancel();
+  }
+
+  void _checkInitialized() {
+    if (!this.initialized) {
+      throw Exception(
+          "Channel ${this.cid} hasn't been initialized yet. Make sure to call .watch() or to instantiate the client using [ChannelClient.fromState]");
+    }
+  }
+}
+
+/// Class that handles the state of the channel listening to the events
+class ChannelClientState {
+  /// Creates a new instance listening to events and updating the state
+  ChannelClientState(this._channelClient, ChannelState channelState) {
+    _lastMessageAt =
+        BehaviorSubject.seeded(channelState.channel?.lastMessageAt);
+    _channelState = BehaviorSubject.seeded(channelState);
+    _listenTypingEvents();
+
+    _channelClient.on('message.new').listen((event) {
+      _lastMessageAt.add(event.message.createdAt);
+      channelState.messages.add(event.message);
+    });
+  }
+
+  /// The channel state related to this client
+  ChannelState get channelState => _channelState.value;
+
+  /// The channel state related to this client as a stream
+  Stream<ChannelState> get channelStateStream => _channelState.stream;
+  BehaviorSubject<ChannelState> _channelState;
+
+  /// The date of the last message
+  DateTime get lastMessageAt => _lastMessageAt.value;
+
+  /// The date of the last message as a stream
+  Stream<DateTime> get lastMessageAtStream => _lastMessageAt.stream;
+  BehaviorSubject<DateTime> _lastMessageAt;
+
+  /// Channel related typing users last value
+  List<User> get typingEvents => _typingEventsController.value;
+
+  /// Channel related typing users stream
+  Stream<List<User>> get typingEventsStream => _typingEventsController.stream;
+  BehaviorSubject<List<User>> _typingEventsController =
+      BehaviorSubject.seeded([]);
+
+  final ChannelClient _channelClient;
+  final List<StreamSubscription> _subscriptions = [];
+  final Map<User, DateTime> _typings = {};
+
+  void _listenTypingEvents() {
+    _subscriptions
+        .add(this._channelClient.on(EventType.typingStart).listen((event) {
+      if (event.user != _channelClient.client.user) {
+        _typings[event.user] = DateTime.now();
+        _typingEventsController.add(_typings.keys.toList());
+      }
+    }));
+
+    _subscriptions
+        .add(this._channelClient.on(EventType.typingStop).listen((event) {
+      if (event.user != _channelClient.client.user) {
+        _typings.remove(event.user);
+        _typingEventsController.add(_typings.keys.toList());
+      }
+    }));
+  }
+
+  void _clean() {
+    final now = DateTime.now();
+    _typings.forEach((user, lastTypingEvent) {
+      if (now.difference(lastTypingEvent).inSeconds > 7) {
+        this._channelClient.client.handleEvent(
+              Event(
+                type: EventType.typingStop,
+                user: user,
+                cid: _channelClient.cid,
+              ),
+            );
+      }
+    });
+    _typingEventsController.add(_typings.keys.toList());
+  }
+
+  /// Call this method to dispose this object
+  void dispose() {
+    _lastMessageAt.close();
+    _channelState.close();
+    _typingEventsController.close();
+    _subscriptions.forEach((s) => s.cancel());
   }
 }

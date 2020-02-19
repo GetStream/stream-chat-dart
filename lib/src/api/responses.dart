@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/api/channel.dart';
+import 'package:stream_chat/src/api/channel_client.dart';
 import 'package:stream_chat/src/client.dart';
 import 'package:stream_chat/src/models/device.dart';
 

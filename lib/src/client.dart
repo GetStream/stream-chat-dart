@@ -7,7 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
 
-import 'api/channel.dart';
+import 'api/channel_client.dart';
 import 'api/connection_status.dart';
 import 'api/requests.dart';
 import 'api/responses.dart';
@@ -305,7 +305,7 @@ class Client {
   }
 
   /// Requests channels with a given query.
-  Future<QueryChannelsResponse> queryChannels({
+  Future<List<ChannelClient>> queryChannels({
     Map<String, dynamic> filter,
     List<SortOption> sort,
     Map<String, dynamic> options,
@@ -347,7 +347,7 @@ class Client {
     return decode<QueryChannelsResponse>(
       response.data,
       QueryChannelsResponse.fromJson,
-    );
+    )?.channels?.map((channel) => ChannelClient.fromState(this, channel));
   }
 
   _parseError(DioError error) {
