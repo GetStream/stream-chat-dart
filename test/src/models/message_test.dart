@@ -11,7 +11,6 @@ void main() {
     const jsonExample = r'''{
       "id": "4637f7e4-a06b-42db-ba5a-8d8270dd926f",
       "text": "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
-      "html": "\u003cp\u003e\u003ca href=\"https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA\" rel=\"nofollow\"\u003ehttps://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA\u003c/a\u003e\u003c/p\u003e\n",
       "type": "regular",
       "user": {
           "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
@@ -74,8 +73,6 @@ void main() {
       expect(message.id, "4637f7e4-a06b-42db-ba5a-8d8270dd926f");
       expect(message.text,
           "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA");
-      expect(message.html,
-          "\u003cp\u003e\u003ca href=\"https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA\" rel=\"nofollow\"\u003ehttps://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA\u003c/a\u003e\u003c/p\u003e\n");
       expect(message.type, "regular");
       expect(message.user, isA<User>());
       expect(message.attachments, isA<List<Attachment>>());

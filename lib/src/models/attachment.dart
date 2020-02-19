@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'package:json_annotation/json_annotation.dart';
 import 'action.dart';
 import 'serialization.dart';
@@ -7,35 +9,39 @@ part 'attachment.g.dart';
 /// The class that contains the information about an attachment
 @JsonSerializable(includeIfNull: false)
 class Attachment {
-  /// The type of this attachment
+  ///The attachment type based on the URL resource. This can be: audio, image or video
   final String type;
 
-  /// The link of this attachment title
+  ///The link to which the attachment message points to.
   final String titleLink;
 
   /// The attachment title
   final String title;
 
-  /// The url of the thumbnail of this attachment
+  /// The URL to the attached file thumbnail. You can use this to represent the attached link.
   final String thumbUrl;
 
-  /// The text of this attachment
+  /// The attachment text. It will be displayed in the channel next to the original message.
   final String text;
   final String pretext;
 
-  /// Open graph scrape url
+  /// The original URL that was used to scrape this attachment.
   final String ogScrapeUrl;
 
-  /// Image url of the attachment
+  /// The URL to the attached image. This is present for URL pointing to an image article (eg. Unsplash)
   final String imageUrl;
   final String footerIcon;
   final String footer;
   final dynamic fields;
   final String fallback;
   final String color;
+
+  /// The name of the author.
   final String authorName;
   final String authorLink;
   final String authorIcon;
+
+  /// The URL to the audio, video or image related to the URL.
   final String assetUrl;
 
   /// Actions related to the attachment

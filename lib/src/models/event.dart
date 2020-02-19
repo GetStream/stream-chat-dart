@@ -23,16 +23,16 @@ class Event {
   /// The date of creation of the channel
   final DateTime createdAt;
 
-  /// The updated current user information
+  /// User object of the health check user
   final OwnUser me;
 
-  /// The information about the user involved in the event
+  /// User object of the current user
   final User user;
 
   /// The message sent with the event
   final Message message;
 
-  /// User total unread messages
+  /// The number of unread messages for current user
   final int totalUnreadCount;
 
   /// User total unread channels

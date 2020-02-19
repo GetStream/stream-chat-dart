@@ -10,17 +10,17 @@ part 'message.g.dart';
 /// The class that contains the information about a message
 @JsonSerializable()
 class Message {
-  /// Id of this message
+  /// The message ID. This is either created by Stream or set client side when the message is added.
   final String id;
 
   /// The text of this message
   final String text;
 
-  /// The type describing this message
+  /// The message type
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final String type;
 
-  /// The list of message
+  /// The list of attachments, either provided by the user or generated from a command or as a result of URL scraping.
   @JsonKey(includeIfNull: false)
   final List<Attachment> attachments;
 
@@ -36,18 +36,18 @@ class Message {
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final Map<String, int> reactionScores;
 
-  /// The list of the latest reactions
+  /// The latest reactions to the message created by any user.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final List<Reaction> latestReactions;
 
-  /// The list of own user reactions
+  /// The reactions added to the message by the current user.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final List<Reaction> ownReactions;
 
-  /// The id of the parent message
+  /// The ID of the parent message, if the message is a reply.
   final String parentId;
 
-  /// The count of the replies to this message
+  /// Reserved field indicating the number of replies for this message.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final int replyCount;
 
@@ -58,14 +58,11 @@ class Message {
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final String command;
 
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
-  final String html;
-
-  /// Date of message creation
+  /// Reserved field indicating when the message was created.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final DateTime createdAt;
 
-  /// Date of message update
+  /// Reserved field indicating when the message was updated last time.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final DateTime updatedAt;
 
@@ -93,7 +90,6 @@ class Message {
     'reply_count',
     'show_in_channel',
     'command',
-    'html',
     'created_at',
     'updated_at',
     'user',
@@ -114,7 +110,6 @@ class Message {
     this.replyCount,
     this.showInChannel,
     this.command,
-    this.html,
     this.createdAt,
     this.updatedAt,
     this.user,
@@ -147,7 +142,6 @@ class Message {
           replyCount == other.replyCount &&
           showInChannel == other.showInChannel &&
           command == other.command &&
-          html == other.html &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt &&
           user == other.user &&
@@ -168,7 +162,6 @@ class Message {
       replyCount.hashCode ^
       showInChannel.hashCode ^
       command.hashCode ^
-      html.hashCode ^
       createdAt.hashCode ^
       updatedAt.hashCode ^
       user.hashCode ^

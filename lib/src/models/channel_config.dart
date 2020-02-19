@@ -7,6 +7,7 @@ part 'channel_config.g.dart';
 /// The class that contains the information about the configuration of a channel
 @JsonSerializable()
 class ChannelConfig {
+  /// Moderation configuration
   final String automod;
 
   /// List of available commands
@@ -27,7 +28,7 @@ class ChannelConfig {
   /// Duration of message retention
   final String messageRetention;
 
-  // True if users can be muted
+  /// True if users can be muted
   final bool mutes;
 
   /// Name of the channel
@@ -51,6 +52,7 @@ class ChannelConfig {
   /// True if it's possible to upload files to this channel
   final bool uploads;
 
+  /// True if urls appears as attachments
   final bool urlEnrichment;
 
   /// Constructor used for json serialization
