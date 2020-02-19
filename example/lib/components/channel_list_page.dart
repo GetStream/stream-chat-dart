@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_example/channel.bloc.dart';
 import 'package:stream_chat_example/components/channel_widget.dart';
@@ -37,98 +36,97 @@ class ChannelListPageState extends State<ChannelListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final chatBloc = InheritedChatBloc.of(context).chatBloc;
     showSplit = MediaQuery.of(context).size.width > 1000;
-    return Consumer<ChatBloc>(
-      builder: (context, ChatBloc chatBloc, _) => Flex(
-        direction: Axis.horizontal,
-        children: <Widget>[
-          Flexible(
-            flex: 1,
-            child: Scaffold(
-              bottomNavigationBar: ConnectionIndicator(
-                indicatorController: _indicatorController,
-              ),
-              appBar: ChannelListAppBar(),
-              body: StreamBuilder<List<ChannelState>>(
-                stream: chatBloc.channelsStream,
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Center(
-                      child: Text(snapshot.error.toString()),
-                    );
-                  } else if (!snapshot.hasData) {
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else {
-                    return RefreshIndicator(
-                      onRefresh: () async {
-                        chatBloc.clearChannels();
-                        return chatBloc.queryChannels(
-                          widget.filter,
-                          widget.sort,
-                          widget.pagination,
-                          widget.options,
+    return Flex(
+      direction: Axis.horizontal,
+      children: <Widget>[
+        Flexible(
+          flex: 1,
+          child: Scaffold(
+            bottomNavigationBar: ConnectionIndicator(
+              indicatorController: _indicatorController,
+            ),
+            appBar: ChannelListAppBar(),
+            body: StreamBuilder<List<ChannelState>>(
+              stream: chatBloc.channelsStream,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text(snapshot.error.toString()),
+                  );
+                } else if (!snapshot.hasData) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                } else {
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      chatBloc.clearChannels();
+                      return chatBloc.queryChannels(
+                        widget.filter,
+                        widget.sort,
+                        widget.pagination,
+                        widget.options,
+                      );
+                    },
+                    child: ChannelListView(
+                      scrollController: _scrollController,
+                      channelsStates: snapshot.data,
+                      channelPreviewBuilder: (context, channelState) {
+                        return ChannelPreview(
+                          key: ValueKey<String>(
+                              'CHANNEL-PREVIEW-${channelState.channel.id}'),
+                          onTap: () {
+                            _navigateToChannel(
+                              context,
+                              chatBloc.channelBlocs[channelState.channel.id],
+                            );
+                          },
                         );
                       },
-                      child: ChannelListView(
-                        scrollController: _scrollController,
-                        channelsStates: snapshot.data,
-                        channelPreviewBuilder: (context, channelState) {
-                          return ChannelPreview(
-                            key: ValueKey<String>(
-                                'CHANNEL-PREVIEW-${channelState.channel.id}'),
-                            onTap: () {
-                              _navigateToChannel(
-                                context,
-                                chatBloc.channelBlocs[channelState.channel.id],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    );
-                  }
-                },
-              ),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {},
-                backgroundColor: Colors.white,
-                child: Icon(
-                  Icons.send,
-                ),
+                    ),
+                  );
+                }
+              },
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {},
+              backgroundColor: Colors.white,
+              child: Icon(
+                Icons.send,
               ),
             ),
           ),
-          showSplit
-              ? Flexible(
-                  flex: 2,
-                  child: _selectedChannelId == null
-                      ? Scaffold(
-                          body: Center(
-                            child: Text(
-                              'Pick a channel to show the messages 💬',
-                              style: Theme.of(context).textTheme.headline,
-                            ),
-                          ),
-                        )
-                      : ChangeNotifierProvider<ChannelBloc>.value(
-                          value: chatBloc.channelBlocs[_selectedChannelId],
-                          child: ChannelWidget(
-                            key: ValueKey<String>(chatBloc
-                                .channelBlocs[_selectedChannelId]
-                                .channelState
-                                .channel
-                                .id),
-                            channelHeader: ChannelHeader(
-                              showBackButton: false,
-                            ),
+        ),
+        showSplit
+            ? Flexible(
+                flex: 2,
+                child: _selectedChannelId == null
+                    ? Scaffold(
+                        body: Center(
+                          child: Text(
+                            'Pick a channel to show the messages 💬',
+                            style: Theme.of(context).textTheme.headline,
                           ),
                         ),
-                )
-              : Container(),
-        ],
-      ),
+                      )
+                    : InheritedChannelBloc(
+                        channelBloc: chatBloc.channelBlocs[_selectedChannelId],
+                        child: ChannelWidget(
+                          key: ValueKey<String>(chatBloc
+                              .channelBlocs[_selectedChannelId]
+                              .channelState
+                              .channel
+                              .id),
+                          channelHeader: ChannelHeader(
+                            showBackButton: false,
+                          ),
+                        ),
+                      ),
+              )
+            : Container(),
+      ],
     );
   }
 
@@ -141,8 +139,8 @@ class ChannelListPageState extends State<ChannelListPage> {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) {
-            return ChangeNotifierProvider<ChannelBloc>.value(
-              value: channelBloc,
+            return InheritedChannelBloc(
+              channelBloc: channelBloc,
               child: ChannelWidget(
                 channelHeader: ChannelHeader(),
               ),
@@ -157,7 +155,7 @@ class ChannelListPageState extends State<ChannelListPage> {
   void initState() {
     super.initState();
 
-    final chatBloc = Provider.of<ChatBloc>(context, listen: false);
+    final chatBloc = InheritedChatBloc.of(context).chatBloc;
     chatBloc.queryChannels(
       widget.filter,
       widget.sort,

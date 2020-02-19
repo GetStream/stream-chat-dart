@@ -1,14 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chewie/chewie.dart';
 import 'package:date_format/date_format.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:provider/provider.dart';
 import 'package:stream_chat/src/models/attachment.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_example/components/user_avatar.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:chewie/chewie.dart';
 import 'package:video_player/video_player.dart';
 
 import '../channel.bloc.dart';
@@ -52,7 +51,7 @@ class _MessageWidgetState extends State<MessageWidget>
   Widget build(BuildContext context) {
     super.build(context);
 
-    final channelBloc = Provider.of<ChannelBloc>(context);
+    final channelBloc = InheritedChannelBloc.of(context).channelBloc;
     final currentUserId = channelBloc.chatBloc.user.id;
     final messageUserId = message.user.id;
     final previousUserId = previousMessage?.user?.id;

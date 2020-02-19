@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import '../channel.bloc.dart';
@@ -25,27 +24,32 @@ class ChannelListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.custom(
       physics: AlwaysScrollableScrollPhysics(),
-//      separatorBuilder: _separatorBuilder,
       controller: _scrollController,
-//      itemCount: channelsStates.length + 1,
-//      itemBuilder: _itemBuilder,
-      childrenDelegate: SliverChildBuilderDelegate(_itemBuilder,
-          childCount: channelsStates.length + 1, findChildIndexCallback: (key) {
-        final ValueKey<String> valueKey = key;
-        final channelState = channelsStates
-            .indexWhere((cs) => 'CHANNEL-${cs.channel.id}' == valueKey.value);
-        return channelState != -1 ? channelState : null;
-      }),
+      childrenDelegate: SliverChildBuilderDelegate(
+        _itemBuilder,
+        childCount: (channelsStates.length * 2) + 1,
+        findChildIndexCallback: (key) {
+          final ValueKey<String> valueKey = key;
+          final index = channelsStates
+              .indexWhere((cs) => 'CHANNEL-${cs.channel.id}' == valueKey.value);
+          return index != -1 ? (index * 2) : null;
+        },
+      ),
     );
   }
 
-  Widget _itemBuilder(context, i) {
+  Widget _itemBuilder(context, int i) {
+    if (i % 2 != 0) {
+      return _separatorBuilder(context, i);
+    }
+    i = i ~/ 2;
     if (i < channelsStates.length) {
-      final channelBloc = Provider.of<ChatBloc>(context)
+      final channelBloc = InheritedChatBloc.of(context)
+          .chatBloc
           .channelBlocs[channelsStates[i].channel.id];
-      return ChangeNotifierProvider<ChannelBloc>.value(
+      return InheritedChannelBloc(
         key: ValueKey('CHANNEL-${channelBloc.channelState.channel.id}'),
-        value: channelBloc,
+        channelBloc: channelBloc,
         child: _channelPreviewBuilder(
           context,
           channelsStates[i],
@@ -58,7 +62,7 @@ class ChannelListView extends StatelessWidget {
 
   StreamBuilder<bool> _buildQueryProgressIndicator(context) {
     return StreamBuilder<bool>(
-      stream: Provider.of<ChatBloc>(context).queryChannelsLoading,
+      stream: InheritedChatBloc.of(context).chatBloc.queryChannelsLoading,
       builder: (context, snapshot) {
         return Container(
           height: 100,
@@ -74,9 +78,6 @@ class ChannelListView extends StatelessWidget {
   }
 
   Widget _separatorBuilder(context, i) {
-    if (i >= channelsStates.length) {
-      return Container();
-    }
     return Container(
       height: 1,
       color: Colors.black.withOpacity(0.1),

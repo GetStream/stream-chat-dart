@@ -9,7 +9,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  provider: ^4.0.2
   rxdart: ^0.23.1
   flutter_widgets: ^0.1.10
   timeago: ^2.0.26

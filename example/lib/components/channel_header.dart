@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:provider/provider.dart';
 import 'package:stream_chat_example/components/channel_name_text.dart';
-
-import '../channel.bloc.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+import '../channel.bloc.dart';
 import 'channel_image.dart';
 
 class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
@@ -19,48 +17,46 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ChannelBloc>(
-        builder: (context, ChannelBloc channelBloc, _) {
-      final channelState = channelBloc.channelState;
-      return AppBar(
-        leading: showBackButton ? _buildBackButton(context) : Container(),
-        actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(right: 10.0),
-            child: Stack(
-              children: <Widget>[
-                Center(child: ChannelImage(channel: channelState.channel)),
-                (channelState.members.isNotEmpty &&
-                        channelState.members.first.user.online)
-                    ? Positioned(
-                        right: 0,
-                        top: 5,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.green,
-                          ),
-                          height: 8,
-                          width: 8,
+    final channelBloc = InheritedChannelBloc.of(context).channelBloc;
+    final channelState = channelBloc.channelState;
+    return AppBar(
+      leading: showBackButton ? _buildBackButton(context) : Container(),
+      actions: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(right: 10.0),
+          child: Stack(
+            children: <Widget>[
+              Center(child: ChannelImage(channel: channelState.channel)),
+              (channelState.members.isNotEmpty &&
+                      channelState.members.first.user.online)
+                  ? Positioned(
+                      right: 0,
+                      top: 5,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.green,
                         ),
-                      )
-                    : Container(),
-              ],
-            ),
+                        height: 8,
+                        width: 8,
+                      ),
+                    )
+                  : Container(),
+            ],
           ),
-        ],
-        centerTitle: true,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            ChannelNameText(
-              channel: channelState.channel,
-            ),
-            _buildLastActive(context, channelState),
-          ],
         ),
-      );
-    });
+      ],
+      centerTitle: true,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          ChannelNameText(
+            channel: channelState.channel,
+          ),
+          _buildLastActive(context, channelState),
+        ],
+      ),
+    );
   }
 
   StatelessWidget _buildLastActive(

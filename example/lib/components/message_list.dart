@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
-import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import '../channel.bloc.dart';
@@ -31,7 +30,7 @@ class _MessageListState extends State<MessageList> {
 
   @override
   Widget build(BuildContext context) {
-    final channelBloc = Provider.of<ChannelBloc>(context);
+    final channelBloc = InheritedChannelBloc.of(context).channelBloc;
 
     /// TODO: find a better solution when (https://github.com/flutter/flutter/issues/21023) is fixed
     return NotificationListener<ScrollNotification>(
@@ -183,7 +182,6 @@ class _MessageListState extends State<MessageList> {
       } else {
         _newMessageList =
             newMessages.toSet().difference(this._messages.toSet()).toList();
-        print('NEWME ${_newMessageList.length}');
       }
     } else if (newMessages.length != oldWidget.messages.length) {
       this._messages = newMessages;

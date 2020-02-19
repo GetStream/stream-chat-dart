@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 
@@ -25,11 +25,10 @@ class ChatBloc with ChangeNotifier {
         'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo');
   }
 
-  final BehaviorSubject<User> _userController = BehaviorSubject();
+  User get user => _userController.value;
 
   Stream<User> get userStream => _userController.stream;
-
-  User get user => _userController.value;
+  final BehaviorSubject<User> _userController = BehaviorSubject();
 
   void setUser(User newUser, [String token]) async {
     _userController.sink.add(null);
@@ -46,12 +45,10 @@ class ChatBloc with ChangeNotifier {
     }
   }
 
-  final List<ChannelState> channels = [];
-
+  Stream<List<ChannelState>> get channelsStream => _channelsController.stream;
   final BehaviorSubject<List<ChannelState>> _channelsController =
       BehaviorSubject();
-
-  Stream<List<ChannelState>> get channelsStream => _channelsController.stream;
+  final List<ChannelState> channels = [];
 
   final BehaviorSubject<bool> _queryChannelsLoadingController =
       BehaviorSubject.seeded(false);
@@ -96,6 +93,7 @@ class ChatBloc with ChangeNotifier {
 
   @override
   void dispose() {
+    channelBlocs.values.forEach((cBloc) => cBloc.dispose());
     client.dispose();
     _subscriptions.forEach((s) => s.cancel());
     _userController.close();
@@ -103,4 +101,25 @@ class ChatBloc with ChangeNotifier {
     _channelsController.close();
     super.dispose();
   }
+}
+
+class InheritedChatBloc extends InheritedWidget {
+  final ChatBloc chatBloc;
+
+  InheritedChatBloc({
+    Key key,
+    @required Widget child,
+    @required this.chatBloc,
+  }) : super(
+          key: key,
+          child: child,
+        );
+
+  @override
+  bool updateShouldNotify(InheritedWidget oldWidget) {
+    return true;
+  }
+
+  static InheritedChatBloc of(BuildContext context) =>
+      context.findAncestorWidgetOfExactType();
 }

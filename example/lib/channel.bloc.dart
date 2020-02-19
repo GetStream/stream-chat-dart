@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 
@@ -98,4 +98,25 @@ class ChannelBloc with ChangeNotifier {
     channelClient.dispose();
     super.dispose();
   }
+}
+
+class InheritedChannelBloc extends InheritedWidget {
+  final ChannelBloc channelBloc;
+
+  InheritedChannelBloc({
+    Key key,
+    @required Widget child,
+    @required this.channelBloc,
+  }) : super(
+          key: key,
+          child: child,
+        );
+
+  @override
+  bool updateShouldNotify(InheritedWidget oldWidget) {
+    return true;
+  }
+
+  static InheritedChannelBloc of(BuildContext context) =>
+      context.findAncestorWidgetOfExactType();
 }

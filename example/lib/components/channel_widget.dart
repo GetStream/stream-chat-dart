@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import '../channel.bloc.dart';
@@ -28,41 +27,38 @@ class _ChannelWidgetState extends State<ChannelWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ChannelBloc>(
-      builder: (context, channelBloc, _) {
-        return Scaffold(
-          resizeToAvoidBottomInset: true,
-          appBar: widget._channelHeader,
-          body: Column(
-            children: <Widget>[
-              ConnectionIndicator(
-                indicatorController: _indicatorController,
-              ),
-              Expanded(
-                child: StreamBuilder<List<Message>>(
-                  stream: channelBloc.messages,
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return Container();
-                    }
-                    final messages = snapshot.data.reversed.toList();
-                    return MessageList(
-                      messages,
-                      key: ValueKey<String>('CHANNEL-MESSAGE-LIST'),
-                      scrollController: _scrollController,
-                    );
-                  },
-                ),
-              ),
-              MessageInput(
-                onMessageSent: (_) {
-                  _scrollController.jumpTo(0);
-                },
-              ),
-            ],
+    final channelBloc = InheritedChannelBloc.of(context).channelBloc;
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      appBar: widget._channelHeader,
+      body: Column(
+        children: <Widget>[
+          ConnectionIndicator(
+            indicatorController: _indicatorController,
           ),
-        );
-      },
+          Expanded(
+            child: StreamBuilder<List<Message>>(
+              stream: channelBloc.messages,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Container();
+                }
+                final messages = snapshot.data.reversed.toList();
+                return MessageList(
+                  messages,
+                  key: ValueKey<String>('CHANNEL-MESSAGE-LIST'),
+                  scrollController: _scrollController,
+                );
+              },
+            ),
+          ),
+          MessageInput(
+            onMessageSent: (_) {
+              _scrollController.jumpTo(0);
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -70,7 +66,7 @@ class _ChannelWidgetState extends State<ChannelWidget> {
   void initState() {
     super.initState();
 
-    final channelBloc = Provider.of<ChannelBloc>(context, listen: false);
+    final channelBloc = InheritedChannelBloc.of(context).channelBloc;
     channelBloc.chatBloc.client.wsConnectionStatus.addListener(() {
       if (channelBloc.chatBloc.client.wsConnectionStatus.value ==
           ConnectionStatus.disconnected) {

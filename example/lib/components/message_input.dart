@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import '../channel.bloc.dart';
@@ -56,7 +55,8 @@ class _MessageInputState extends State<MessageInput> {
                     },
                     controller: _textController,
                     onChanged: (s) {
-                      Provider.of<ChannelBloc>(context, listen: false)
+                      InheritedChannelBloc.of(context)
+                          .channelBloc
                           .channelClient
                           .keyStroke();
                       setState(() {
@@ -117,7 +117,8 @@ class _MessageInputState extends State<MessageInput> {
       _typingStarted = false;
     });
     FocusScope.of(context).unfocus();
-    Provider.of<ChannelBloc>(context, listen: false)
+    InheritedChannelBloc.of(context)
+        .channelBloc
         .channelClient
         .sendMessage(
           Message(text: text),

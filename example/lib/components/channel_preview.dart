@@ -1,7 +1,6 @@
 import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_example/components/channel_image.dart';
 
@@ -25,41 +24,39 @@ class _ChannelPreviewState extends State<ChannelPreview>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Consumer<ChannelBloc>(
-      builder: (context, channelBloc, _) {
-        final channelState = channelBloc.channelState;
-        return ListTile(
-          onTap: () {
-            widget.onTap();
-          },
-          leading: ChannelImage(
-            channel: channelState.channel,
-          ),
-          title: ChannelNameText(
-            channel: channelState.channel,
-          ),
-          subtitle: _buildSubtitle(
-            channelBloc,
-          ),
-          trailing: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: <Widget>[
-              StreamBuilder<DateTime>(
-                  stream: channelBloc.messages
-                      .map((message) => message.last.createdAt),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return SizedBox.fromSize(
-                        size: Size.zero,
-                      );
-                    }
-                    return _buildDate(snapshot.data.toLocal());
-                  }),
-            ],
-          ),
-        );
+
+    final channelBloc = InheritedChannelBloc.of(context).channelBloc;
+    final channelState = channelBloc.channelState;
+    return ListTile(
+      onTap: () {
+        widget.onTap();
       },
+      leading: ChannelImage(
+        channel: channelState.channel,
+      ),
+      title: ChannelNameText(
+        channel: channelState.channel,
+      ),
+      subtitle: _buildSubtitle(
+        channelBloc,
+      ),
+      trailing: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          StreamBuilder<DateTime>(
+              stream:
+                  channelBloc.messages.map((message) => message.last.createdAt),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return SizedBox.fromSize(
+                    size: Size.zero,
+                  );
+                }
+                return _buildDate(snapshot.data.toLocal());
+              }),
+        ],
+      ),
     );
   }
 
