@@ -1,3 +1,9 @@
+## 0.1.3
+
+- Update some api with wrong or incomplete signatures
+
+- Add documentation for public apis
+
 ## 0.1.2
 
 - add websocket reconnection logic

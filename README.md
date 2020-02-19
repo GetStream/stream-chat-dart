@@ -14,7 +14,7 @@ You can sign up for a Stream account at https://getstream.io/chat/
 
 ```yaml
 dependencies:
- stream_chat: ^0.1.2
+ stream_chat: ^0.1.3
 ```
 
 You should then run `flutter packages get`
@@ -68,7 +68,7 @@ var client = Client("stream-chat-api-key", logHandlerFunction: myLogHandlerFunct
 
 ### Releasing a new version
 
-- update the package version on `pubspec.yaml`
+- update the package version on `pubspec.yaml` and `version.dart`
 
 - add a changelog entry on `CHANGELOG.md`
 

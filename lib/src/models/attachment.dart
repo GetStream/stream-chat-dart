@@ -23,6 +23,8 @@ class Attachment {
 
   /// The attachment text. It will be displayed in the channel next to the original message.
   final String text;
+
+  /// Optional text that appears above the attachment block
   final String pretext;
 
   /// The original URL that was used to scrape this attachment.
@@ -44,7 +46,7 @@ class Attachment {
   /// The URL to the audio, video or image related to the URL.
   final String assetUrl;
 
-  /// Actions related to the attachment
+  /// Actions from a command
   final List<Action> actions;
 
   /// Map of custom channel extraData

@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:logging/logging.dart';
+import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
 
 import 'api/channel.dart';
@@ -449,7 +450,7 @@ class Client {
   String get _authType => _anonymous ? 'anonymous' : 'jwt';
 
   // TODO: get the right version of the lib from the build toolchain
-  String get _userAgent => "stream_chat_dart-client-0.0.1";
+  String get _userAgent => "stream_chat_dart-client-$PACKAGE_VERSION";
 
   Map<String, String> get _commonQueryParams => {
         "user_id": user?.id,
