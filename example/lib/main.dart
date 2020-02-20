@@ -56,7 +56,7 @@ class ChatLoader extends StatelessWidget {
   Widget build(BuildContext context) {
     final chatBloc = InheritedChatBloc.of(context).chatBloc;
     return StreamBuilder<User>(
-      stream: chatBloc.client.clientState.userStream,
+      stream: chatBloc.userStream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Scaffold(

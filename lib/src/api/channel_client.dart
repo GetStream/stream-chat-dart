@@ -236,8 +236,10 @@ class ChannelClient {
 
     final response = await query(options: watchOptions);
 
-    channelClientState = ChannelClientState(this, response);
-    _startCleaning();
+    if (channelClientState == null) {
+      channelClientState = ChannelClientState(this, response);
+      _startCleaning();
+    }
 
     return response;
   }
@@ -325,6 +327,9 @@ class ChannelClient {
       id = state.channel.id;
       cid = state.channel.id;
     }
+
+    channelClientState?.updateChannelState(state);
+
     return state;
   }
 
@@ -467,6 +472,39 @@ class ChannelClientState {
         .listen((event) {
       _unreadCountController.add(1);
     });
+  }
+
+  /// Update channelState with updated information
+  void updateChannelState(ChannelState updatedState) {
+    _channelStateController.add(channelState.copyWith(
+      messages: updatedState.messages != null
+          ? updatedState.messages
+                  .where((newMessage) => !channelState.messages.any((m) =>
+                      m.id == newMessage.id &&
+                      m.updatedAt == newMessage.updatedAt))
+                  .toList() +
+              channelState.messages
+          : null,
+      channel: updatedState.channel,
+      watchers: updatedState.watchers != null
+          ? updatedState.watchers
+                  .where((newWatcher) => !channelState.watchers.any((m) =>
+                      m.id == newWatcher.id &&
+                      m.updatedAt == newWatcher.updatedAt))
+                  .toList() +
+              channelState.watchers
+          : null,
+      watcherCount: channelState.watcherCount,
+      members: updatedState.members != null
+          ? updatedState.members
+                  .where((newMember) => !channelState.members.any((m) =>
+                      m.userId == newMember.userId &&
+                      m.updatedAt == newMember.updatedAt))
+                  .toList() +
+              channelState.members
+          : null,
+      read: channelState.read,
+    ));
   }
 
   /// The channel state related to this client
