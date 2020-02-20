@@ -74,10 +74,10 @@ class ChatBloc with ChangeNotifier {
         options: options,
         paginationParams: paginationParams,
       );
-      channels.addAll(res.channels);
-      channels.forEach((c) {
-        if (!channelBlocs.containsKey(c.channel.id)) {
-          channelBlocs[c.channel.id] = ChannelBloc(client, c, this);
+      channels.addAll(res.map((c) => c.channelClientState.channelState));
+      res.forEach((c) {
+        if (!channelBlocs.containsKey(c.id)) {
+          channelBlocs[c.id] = ChannelBloc(this, c);
         }
       });
       _channelsController.sink.add(channels);

@@ -107,4 +107,36 @@ class Channel {
       topLevelFields,
     );
   }
+
+  /// Creates a copy of [Channel] with specified attributes overridden.
+  Channel copyWith({
+    String id,
+    String type,
+    String cid,
+    ChannelConfig config,
+    User createdBy,
+    bool frozen,
+    DateTime lastMessageAt,
+    DateTime createdAt,
+    DateTime updatedAt,
+    DateTime deletedAt,
+    int memberCount,
+    List<Member> members,
+    Map<String, dynamic> extraData,
+  }) =>
+      Channel(
+        id: id ?? this.id,
+        type: type ?? this.type,
+        cid: cid ?? this.cid,
+        config: config ?? this.config,
+        createdBy: createdBy ?? this.createdBy,
+        frozen: frozen ?? this.frozen,
+        lastMessageAt: lastMessageAt ?? this.lastMessageAt,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt ?? this.deletedAt,
+        memberCount: memberCount ?? this.memberCount,
+        members: members ?? this.members,
+        extraData: extraData ?? this.extraData,
+      );
 }

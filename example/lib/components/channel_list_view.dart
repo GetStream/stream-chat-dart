@@ -52,7 +52,7 @@ class ChannelListView extends StatelessWidget {
         channelBloc: channelBloc,
         child: _channelPreviewBuilder(
           context,
-          channelsStates[i],
+          channelBloc.channelState,
         ),
       );
     } else {

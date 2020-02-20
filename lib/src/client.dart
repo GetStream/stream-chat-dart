@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:logging/logging.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
 
@@ -45,11 +46,16 @@ class Client {
     Duration receiveTimeout = const Duration(seconds: 6),
     Dio httpClient,
   }) {
+    clientState = ClientState(this);
+
     _setupLogger();
     _setupDio(httpClient, receiveTimeout, connectTimeout);
 
     logger.info('instantiating new client');
   }
+
+  /// This client state
+  ClientState clientState;
 
   /// By default the Chat Client will write all messages with level Warn or Error to stdout.
   /// During development you might want to enable more logging information, you can change the default log level when constructing the client.
@@ -100,8 +106,7 @@ class Client {
   static const _tokenExpiredErrorCode = 40;
   VoidCallback _connectionStatusListener;
 
-  final StreamController<Event> _controller =
-      StreamController<Event>.broadcast();
+  final BehaviorSubject<Event> _controller = BehaviorSubject<Event>();
 
   /// Stream of [Event] coming from websocket connection
   /// Listen to this or use the [on] method to filter specific event types
@@ -232,6 +237,7 @@ class Client {
     await this.disconnect();
     httpClient.close();
     await _controller.close();
+    clientState.dispose();
   }
 
   Map<String, String> get _httpHeaders => {
@@ -269,7 +275,8 @@ class Client {
 
   /// Method called to add a new event to the [_controller].
   void handleEvent(Event event) {
-    if (event.connectionId != null) {
+    if (event.connectionId != _connectionId) {
+      // ws was just reconnected
       _connectionId = event.connectionId;
     }
     _controller.add(event);
@@ -347,7 +354,10 @@ class Client {
     return decode<QueryChannelsResponse>(
       response.data,
       QueryChannelsResponse.fromJson,
-    )?.channels?.map((channel) => ChannelClient.fromState(this, channel));
+    )
+        ?.channels
+        ?.map((channel) => ChannelClient.fromState(this, channel))
+        ?.toList();
   }
 
   _parseError(DioError error) {
@@ -702,5 +712,66 @@ class Client {
   Future<GetMessageResponse> getMessage(String messageId) async {
     final response = await get("/messages/$messageId");
     return decode(response.data, GetMessageResponse.fromJson);
+  }
+}
+
+/// The class that handles the state of the channel listening to the events
+class ClientState {
+  /// Creates a new instance listening to events and updating the state
+  ClientState(this._client) {
+    _client
+        .on()
+        .where((event) => event.me != null)
+        .map((e) => e.me)
+        .listen((user) {
+      _userController.add(user);
+    });
+
+    _client
+        .on()
+        .where((event) => event.unreadChannels != null)
+        .map((e) => e.unreadChannels)
+        .listen((unreadChannels) {
+      _unreadChannelsController.add(unreadChannels);
+    });
+
+    _client
+        .on()
+        .where((event) => event.totalUnreadCount != null)
+        .map((e) => e.totalUnreadCount)
+        .listen((totalUnreadCount) {
+      _totalUnreadCountController.add(totalUnreadCount);
+    });
+  }
+
+  final Client _client;
+
+  /// The current user
+  User get user => _userController.value;
+
+  /// The current user as a stream
+  Stream<User> get userStream => _userController.stream;
+
+  /// The current unread channels count
+  int get unreadChannels => _unreadChannelsController.value;
+
+  /// The current unread channels count as a stream
+  Stream<int> get unreadChannelsStream => _unreadChannelsController.stream;
+
+  /// The current total unread messages count
+  int get totalUnreadCount => _totalUnreadCountController.value;
+
+  /// The current total unread messages count as a stream
+  Stream<int> get totalUnreadCountStream => _totalUnreadCountController.stream;
+
+  BehaviorSubject<User> _userController = BehaviorSubject();
+  BehaviorSubject<int> _unreadChannelsController = BehaviorSubject();
+  BehaviorSubject<int> _totalUnreadCountController = BehaviorSubject();
+
+  /// Call this method to dispose this object
+  void dispose() {
+    _userController.close();
+    _unreadChannelsController.close();
+    _totalUnreadCountController.close();
   }
 }

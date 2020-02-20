@@ -45,4 +45,22 @@ class ChannelState {
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$ChannelStateToJson(this);
+
+  /// Creates a copy of [ChannelState] with specified attributes overridden.
+  ChannelState copyWith({
+    Channel channel,
+    List<Message> messages,
+    List<Member> members,
+    int watcherCount,
+    List<User> watchers,
+    List<Read> read,
+  }) =>
+      ChannelState(
+        channel: channel ?? this.channel,
+        messages: messages ?? this.messages,
+        members: members ?? this.members,
+        watcherCount: watcherCount ?? this.watcherCount,
+        watchers: watchers ?? this.watchers,
+        read: read ?? this.read,
+      );
 }

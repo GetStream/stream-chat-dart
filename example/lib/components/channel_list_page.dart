@@ -52,6 +52,7 @@ class ChannelListPageState extends State<ChannelListPage> {
               stream: chatBloc.channelsStream,
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
+                  print((snapshot.error as Error).stackTrace);
                   return Center(
                     child: Text(snapshot.error.toString()),
                   );
@@ -77,6 +78,12 @@ class ChannelListPageState extends State<ChannelListPage> {
                         return ChannelPreview(
                           key: ValueKey<String>(
                               'CHANNEL-PREVIEW-${channelState.channel.id}'),
+                          channelState: channelState,
+                          unreadCount: chatBloc
+                              .channelBlocs[channelState.channel.id]
+                              .channelClient
+                              .channelClientState
+                              .unreadCount,
                           onTap: () {
                             _navigateToChannel(
                               context,
@@ -116,8 +123,7 @@ class ChannelListPageState extends State<ChannelListPage> {
                         child: ChannelWidget(
                           key: ValueKey<String>(chatBloc
                               .channelBlocs[_selectedChannelId]
-                              .channelState
-                              .channel
+                              .channelClient
                               .id),
                           channelHeader: ChannelHeader(
                             showBackButton: false,
@@ -133,7 +139,7 @@ class ChannelListPageState extends State<ChannelListPage> {
   void _navigateToChannel(BuildContext context, ChannelBloc channelBloc) {
     if (this.showSplit) {
       setState(() {
-        _selectedChannelId = channelBloc.channelState.channel.id;
+        _selectedChannelId = channelBloc.channelClient.id;
       });
     } else {
       Navigator.of(context).push(

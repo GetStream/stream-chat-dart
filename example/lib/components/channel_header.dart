@@ -18,7 +18,8 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final channelBloc = InheritedChannelBloc.of(context).channelBloc;
-    final channelState = channelBloc.channelState;
+    final channelState =
+        channelBloc.channelClient.channelClientState.channelState;
     return AppBar(
       leading: showBackButton ? _buildBackButton(context) : Container(),
       actions: <Widget>[

@@ -160,9 +160,9 @@ class WebSocket {
 
       if (!_connectionCompleter.isCompleted) {
         _connectionCompleter.complete(event);
-      } else {
-        handler(event);
       }
+
+      handler(event);
 
       _startReconnectionMonitor();
       _startHealthCheck();

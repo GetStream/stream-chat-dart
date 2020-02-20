@@ -38,7 +38,10 @@ class _ChannelWidgetState extends State<ChannelWidget> {
           ),
           Expanded(
             child: StreamBuilder<List<Message>>(
-              stream: channelBloc.messages,
+              stream: channelBloc
+                  .channelClient.channelClientState.channelStateStream
+                  .map((c) => c.messages)
+                  .distinct(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return Container();

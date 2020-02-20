@@ -156,7 +156,7 @@ class _MessageListState extends State<MessageList> {
       onVisibilityChanged: (visibility) {
         this._isBottom = visibility.visibleBounds != Rect.zero;
         if (this._isBottom) {
-          if (!channelBloc.readValue) {
+          if (channelBloc.channelClient.channelClientState.unreadCount > 0) {
             channelBloc.channelClient.markRead();
           }
         }
