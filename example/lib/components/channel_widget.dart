@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_example/stream_chat.dart';
 
-import '../channel.bloc.dart';
+import '../stream_channel.dart';
 import 'connection_indicator.dart';
 import 'message_input.dart';
 import 'message_list.dart';
@@ -27,7 +28,6 @@ class _ChannelWidgetState extends State<ChannelWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final channelBloc = InheritedChannelBloc.of(context).channelBloc;
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: widget._channelHeader,
@@ -37,29 +37,12 @@ class _ChannelWidgetState extends State<ChannelWidget> {
             indicatorController: _indicatorController,
           ),
           Expanded(
-            child: StreamBuilder<List<Message>>(
-              stream: channelBloc
-                  .channelClient.channelClientState.channelStateStream
-                  .map((c) => c.messages)
-                  .distinct(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Container();
-                }
-                final messages = snapshot.data.reversed.toList();
-                return MessageList(
-                  messages,
-                  key: ValueKey<String>('CHANNEL-MESSAGE-LIST'),
-                  scrollController: _scrollController,
-                );
-              },
+            child: MessageList(
+              key: ValueKey<String>('CHANNEL-MESSAGE-LIST'),
+              scrollController: _scrollController,
             ),
           ),
-          MessageInput(
-            onMessageSent: (_) {
-              _scrollController.jumpTo(0);
-            },
-          ),
+          MessageInput(),
         ],
       ),
     );
@@ -69,23 +52,23 @@ class _ChannelWidgetState extends State<ChannelWidget> {
   void initState() {
     super.initState();
 
-    final channelBloc = InheritedChannelBloc.of(context).channelBloc;
-    channelBloc.chatBloc.client.wsConnectionStatus.addListener(() {
-      if (channelBloc.chatBloc.client.wsConnectionStatus.value ==
+    final chatBloc = StreamChat.of(context);
+    chatBloc.client.wsConnectionStatus.addListener(() {
+      if (chatBloc.client.wsConnectionStatus.value ==
           ConnectionStatus.disconnected) {
         _indicatorController.showIndicator(
           duration: Duration(minutes: 1),
           color: Colors.red,
           text: 'Disconnected',
         );
-      } else if (channelBloc.chatBloc.client.wsConnectionStatus.value ==
+      } else if (chatBloc.client.wsConnectionStatus.value ==
           ConnectionStatus.connecting) {
         _indicatorController.showIndicator(
           duration: Duration(minutes: 1),
           color: Colors.yellow,
           text: 'Reconnecting',
         );
-      } else if (channelBloc.chatBloc.client.wsConnectionStatus.value ==
+      } else if (chatBloc.client.wsConnectionStatus.value ==
           ConnectionStatus.connected) {
         _indicatorController.showIndicator(
           duration: Duration(seconds: 5),
@@ -93,6 +76,7 @@ class _ChannelWidgetState extends State<ChannelWidget> {
           text: 'Connected',
         );
 
+        final channelBloc = StreamChannel.of(context);
         channelBloc.queryMessages();
       }
     });

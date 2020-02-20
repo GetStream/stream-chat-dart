@@ -1,42 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_example/channel.bloc.dart';
 import 'package:stream_chat_example/components/channel_widget.dart';
 import 'package:stream_chat_example/components/connection_indicator.dart';
+import 'package:stream_chat_example/stream_channel.dart';
 
-import '../chat.bloc.dart';
+import '../stream_chat.dart';
 import 'channel_header.dart';
 import 'channel_list_app_bar.dart';
 import 'channel_list_view.dart';
-import 'channel_preview.dart';
 
 class ChannelListPage extends StatefulWidget {
-  final Map<String, dynamic> filter;
-  final Map<String, dynamic> options;
-  final List<SortOption> sort;
-  final PaginationParams pagination;
-
-  ChannelListPage({
-    this.filter,
-    this.sort,
-    this.pagination,
-    this.options,
-  });
+  ChannelListPage();
 
   @override
   ChannelListPageState createState() => ChannelListPageState();
 }
 
 class ChannelListPageState extends State<ChannelListPage> {
-  final ScrollController _scrollController = ScrollController();
   String _selectedChannelId;
   bool showSplit;
   IndicatorController _indicatorController = IndicatorController();
 
   @override
   Widget build(BuildContext context) {
-    final chatBloc = InheritedChatBloc.of(context).chatBloc;
+    final streamChat = StreamChat.of(context);
     showSplit = MediaQuery.of(context).size.width > 1000;
     return Flex(
       direction: Axis.horizontal,
@@ -48,53 +36,18 @@ class ChannelListPageState extends State<ChannelListPage> {
               indicatorController: _indicatorController,
             ),
             appBar: ChannelListAppBar(),
-            body: StreamBuilder<List<ChannelState>>(
-              stream: chatBloc.channelsStream,
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  print((snapshot.error as Error).stackTrace);
-                  return Center(
-                    child: Text(snapshot.error.toString()),
-                  );
-                } else if (!snapshot.hasData) {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                } else {
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      chatBloc.clearChannels();
-                      return chatBloc.queryChannels(
-                        widget.filter,
-                        widget.sort,
-                        widget.pagination,
-                        widget.options,
-                      );
-                    },
-                    child: ChannelListView(
-                      scrollController: _scrollController,
-                      channelsStates: snapshot.data,
-                      channelPreviewBuilder: (context, channelState) {
-                        return ChannelPreview(
-                          key: ValueKey<String>(
-                              'CHANNEL-PREVIEW-${channelState.channel.id}'),
-                          channelState: channelState,
-                          unreadCount: chatBloc
-                              .channelBlocs[channelState.channel.id]
-                              .channelClient
-                              .channelClientState
-                              .unreadCount,
-                          onTap: () {
-                            _navigateToChannel(
-                              context,
-                              chatBloc.channelBlocs[channelState.channel.id],
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  );
+            body: ChannelListView(
+              filter: {
+                'members': {
+                  '\$in': [streamChat.user.id],
                 }
+              },
+              sort: [SortOption("last_message_at")],
+              pagination: PaginationParams(
+                limit: 20,
+              ),
+              onChannelTap: (channelState) {
+                _navigateToChannel(context, channelState);
               },
             ),
             floatingActionButton: FloatingActionButton(
@@ -118,16 +71,12 @@ class ChannelListPageState extends State<ChannelListPage> {
                           ),
                         ),
                       )
-                    : InheritedChannelBloc(
-                        channelBloc: chatBloc.channelBlocs[_selectedChannelId],
+                    : StreamChannel(
+                        channelClient: StreamChat.of(context)
+                            .client
+                            .channelClients[_selectedChannelId],
                         child: ChannelWidget(
-                          key: ValueKey<String>(chatBloc
-                              .channelBlocs[_selectedChannelId]
-                              .channelClient
-                              .id),
-                          channelHeader: ChannelHeader(
-                            showBackButton: false,
-                          ),
+                          channelHeader: ChannelHeader(),
                         ),
                       ),
               )
@@ -136,17 +85,19 @@ class ChannelListPageState extends State<ChannelListPage> {
     );
   }
 
-  void _navigateToChannel(BuildContext context, ChannelBloc channelBloc) {
+  void _navigateToChannel(BuildContext context, ChannelState channelState) {
     if (this.showSplit) {
       setState(() {
-        _selectedChannelId = channelBloc.channelClient.id;
+        _selectedChannelId = channelState.channel.id;
       });
     } else {
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) {
-            return InheritedChannelBloc(
-              channelBloc: channelBloc,
+            return StreamChannel(
+              channelClient: StreamChat.of(context)
+                  .client
+                  .channelClients[channelState.channel.id],
               child: ChannelWidget(
                 channelHeader: ChannelHeader(),
               ),
@@ -161,63 +112,33 @@ class ChannelListPageState extends State<ChannelListPage> {
   void initState() {
     super.initState();
 
-    final chatBloc = InheritedChatBloc.of(context).chatBloc;
-    chatBloc.queryChannels(
-      widget.filter,
-      widget.sort,
-      widget.pagination,
-      widget.options,
-    );
-
-    _scrollController.addListener(() {
-      _listenChannelPagination(chatBloc);
-    });
-
-    chatBloc.client.wsConnectionStatus.addListener(() {
-      if (chatBloc.client.wsConnectionStatus.value ==
+    final streamChat = StreamChat.of(context);
+    streamChat.client.wsConnectionStatus.addListener(() {
+      if (streamChat.client.wsConnectionStatus.value ==
           ConnectionStatus.disconnected) {
         _indicatorController.showIndicator(
           duration: Duration(minutes: 1),
           color: Colors.red,
           text: 'Disconnected',
         );
-      } else if (chatBloc.client.wsConnectionStatus.value ==
+      } else if (streamChat.client.wsConnectionStatus.value ==
           ConnectionStatus.connecting) {
         _indicatorController.showIndicator(
           duration: Duration(minutes: 1),
           color: Colors.yellow,
           text: 'Reconnecting',
         );
-      } else if (chatBloc.client.wsConnectionStatus.value ==
+      } else if (streamChat.client.wsConnectionStatus.value ==
           ConnectionStatus.connected) {
         _indicatorController.showIndicator(
           duration: Duration(seconds: 5),
           color: Colors.green,
           text: 'Connected',
         );
-        chatBloc.clearChannels();
+        streamChat.clearChannels();
 
-        chatBloc.queryChannels(
-          widget.filter,
-          widget.sort,
-          widget.pagination,
-          widget.options,
-        );
+        streamChat.queryChannels();
       }
     });
-  }
-
-  void _listenChannelPagination(ChatBloc chatBloc) {
-    if (_scrollController.position.maxScrollExtent ==
-        _scrollController.position.pixels) {
-      chatBloc.queryChannels(
-        widget.filter,
-        widget.sort,
-        widget.pagination.copyWith(
-          offset: chatBloc.channels.length,
-        ),
-        widget.options,
-      );
-    }
   }
 }

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 /// Exception related to api calls
-class ApiError implements Exception {
+class ApiError extends Error {
   /// Raw body of the response
   final String body;
 

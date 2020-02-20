@@ -46,7 +46,7 @@ class Client {
     Duration receiveTimeout = const Duration(seconds: 6),
     Dio httpClient,
   }) {
-    clientState = ClientState(this);
+    state = ClientState(this);
 
     _setupLogger();
     _setupDio(httpClient, receiveTimeout, connectTimeout);
@@ -55,7 +55,10 @@ class Client {
   }
 
   /// This client state
-  ClientState clientState;
+  ClientState state;
+
+  /// A map of <id, channelClient>
+  Map<String, ChannelClient> channelClients = {};
 
   /// By default the Chat Client will write all messages with level Warn or Error to stdout.
   /// During development you might want to enable more logging information, you can change the default log level when constructing the client.
@@ -237,7 +240,8 @@ class Client {
     await this.disconnect();
     httpClient.close();
     await _controller.close();
-    clientState.dispose();
+    channelClients.values.forEach((c) => c.dispose());
+    state.dispose();
   }
 
   Map<String, String> get _httpHeaders => {
@@ -275,7 +279,7 @@ class Client {
 
   /// Method called to add a new event to the [_controller].
   void handleEvent(Event event) {
-    if (event.connectionId != _connectionId) {
+    if (event.connectionId != null) {
       // ws was just reconnected
       _connectionId = event.connectionId;
     }
@@ -351,13 +355,23 @@ class Client {
         "payload": jsonEncode(payload),
       },
     );
-    return decode<QueryChannelsResponse>(
+
+    final newChannelClients = decode<QueryChannelsResponse>(
       response.data,
       QueryChannelsResponse.fromJson,
-    )
-        ?.channels
-        ?.map((channel) => ChannelClient.fromState(this, channel))
-        ?.toList();
+    )?.channels?.map((channelState) {
+      if (channelClients.containsKey(channelState.channel.id)) {
+        final client = channelClients[channelState.channel.id];
+        client.state.updateChannelState(channelState);
+      } else {
+        channelClients[channelState.channel.id] =
+            ChannelClient.fromState(this, channelState);
+      }
+
+      return channelClients[channelState.channel.id];
+    })?.toList();
+
+    return newChannelClients;
   }
 
   _parseError(DioError error) {
@@ -490,6 +504,8 @@ class Client {
 
   /// Closes the websocket connection and resets the client
   Future<void> disconnect() async {
+    logger.info('Client disconnecting');
+
     this._anonymous = false;
     this._connectionId = null;
     await this._ws.disconnect();
@@ -591,7 +607,11 @@ class Client {
     String id,
     Map<String, dynamic> extraData,
   }) {
-    return ChannelClient(this, type, id, extraData);
+    final channelClient = ChannelClient(this, type, id, extraData);
+
+    channelClients[id] = channelClient;
+
+    return channelClient;
   }
 
   /// Update or Create the given user object.

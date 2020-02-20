@@ -4,19 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-import 'chat.bloc.dart';
-
-class ChannelBloc with ChangeNotifier {
+class StreamChannel extends InheritedWidget {
   final ChannelClient channelClient;
-  final ChatBloc chatBloc;
 
-  ChannelState get channelState =>
-      channelClient.channelClientState.channelState;
+  ChannelState get channelState => channelClient.state.channelState;
+  Stream<ChannelState> get channelStateStream =>
+      channelClient.state.channelStateStream;
 
-  ChannelBloc(
-    this.chatBloc,
-    this.channelClient,
-  );
+  StreamChannel({
+    Key key,
+    @required Widget child,
+    @required this.channelClient,
+  }) : super(
+          key: key,
+          child: child,
+        );
 
   final BehaviorSubject<bool> _queryMessageController = BehaviorSubject();
 
@@ -44,31 +46,31 @@ class ChannelBloc with ChangeNotifier {
     });
   }
 
-  @override
   void dispose() {
     _queryMessageController.close();
     channelClient.dispose();
-    super.dispose();
   }
-}
-
-class InheritedChannelBloc extends InheritedWidget {
-  final ChannelBloc channelBloc;
-
-  InheritedChannelBloc({
-    Key key,
-    @required Widget child,
-    @required this.channelBloc,
-  }) : super(
-          key: key,
-          child: child,
-        );
 
   @override
   bool updateShouldNotify(InheritedWidget oldWidget) {
     return true;
   }
 
-  static InheritedChannelBloc of(BuildContext context) =>
-      context.findAncestorWidgetOfExactType();
+  static StreamChannel of(BuildContext context, [bool listen = false]) {
+    StreamChannel streamChannel;
+
+    if (listen) {
+      streamChannel =
+          context.dependOnInheritedWidgetOfExactType<StreamChannel>();
+    } else {
+      streamChannel = context.findAncestorWidgetOfExactType<StreamChannel>();
+    }
+
+    if (streamChannel == null) {
+      throw Exception(
+          'You must have a StreamChat widget at the top of your widget tree');
+    }
+
+    return streamChannel;
+  }
 }

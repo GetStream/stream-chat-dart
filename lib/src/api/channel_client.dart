@@ -22,20 +22,24 @@ class ChannelClient {
     this.type,
     this.id,
     this.extraData,
-  ) : cid = id != null ? "$type:$id" : null;
+  ) : cid = id != null ? "$type:$id" : null {
+    _client.logger.info('New ChannelClient instance not initialized created');
+  }
 
   /// Create a channel client instance from a [ChannelState] object
-  ChannelClient.fromState(this._client, ChannelState state) {
-    cid = state.channel.cid;
-    id = state.channel.id;
-    type = state.channel.type;
+  ChannelClient.fromState(this._client, ChannelState channelState) {
+    cid = channelState.channel.cid;
+    id = channelState.channel.id;
+    type = channelState.channel.type;
 
-    channelClientState = ChannelClientState(this, state);
+    state = ChannelClientState(this, channelState);
     _startCleaning();
+
+    _client.logger.info('New ChannelClient instance initialized created');
   }
 
   /// This client state
-  ChannelClientState channelClientState;
+  ChannelClientState state;
 
   /// The channel type
   String type;
@@ -57,7 +61,7 @@ class ChannelClient {
 
   /// True if this is initialized
   /// Call [watch] to initialize the client or instantiate it using [ChannelClient.fromState]
-  bool get initialized => channelClientState != null;
+  bool get initialized => state != null;
 
   /// Send a message to this channel
   Future<SendMessageResponse> sendMessage(Message message) async {
@@ -236,8 +240,8 @@ class ChannelClient {
 
     final response = await query(options: watchOptions);
 
-    if (channelClientState == null) {
-      channelClientState = ChannelClientState(this, response);
+    if (state == null) {
+      state = ChannelClientState(this, response);
       _startCleaning();
     }
 
@@ -322,15 +326,15 @@ class ChannelClient {
     }
 
     final response = await _client.post(path, data: data);
-    final state = _client.decode(response.data, ChannelState.fromJson);
+    final updatedState = _client.decode(response.data, ChannelState.fromJson);
     if (id == null) {
-      id = state.channel.id;
-      cid = state.channel.id;
+      id = updatedState.channel.id;
+      cid = updatedState.channel.id;
     }
 
-    channelClientState?.updateChannelState(state);
+    state?.updateChannelState(updatedState);
 
-    return state;
+    return updatedState;
   }
 
   /// Bans a user from the channel
@@ -410,14 +414,14 @@ class ChannelClient {
         stopTyping();
       }
 
-      channelClientState._clean();
+      state._clean();
     });
   }
 
   /// Call this method to dispose the channel client
   void dispose() {
     _cleaningTimer.cancel();
-    channelClientState.dispose();
+    state.dispose();
   }
 
   void _checkInitialized() {
@@ -436,46 +440,51 @@ class ChannelClientState {
     _listenTypingEvents();
 
     _channelClient.on('message.new').listen((event) {
-      _channelState = channelState.copyWith(
-        messages: channelState.messages + [event.message],
-        channel: channelState.channel.copyWith(
-          lastMessageAt: event.message.createdAt,
-        ),
-      );
+      _channelState = this.channelState.copyWith(
+            messages: this.channelState.messages + [event.message],
+            channel: this.channelState.channel.copyWith(
+                  lastMessageAt: event.message.createdAt,
+                ),
+          );
     });
 
+    _channelClient
+        .on('message.read')
+        .where((e) => e.user.id == _channelClient.client.state.user.id)
+        .listen((event) {
+      final read = this.channelState.read;
+      final userReadIndex =
+          read.indexWhere((r) => r.user.id == _channelClient.client.user.id);
+      final userRead = read.removeAt(userReadIndex);
+      read.add(Read(user: userRead.user, lastRead: event.createdAt));
+      _channelStateController.add(this.channelState.copyWith(read: read));
+    });
+  }
+
+  int get unreadCount {
+    final userId = _channelClient.client.state?.user?.id;
     final userRead = channelState.read?.firstWhere(
-        (read) => read.user.id == _channelClient.client.clientState?.user?.id,
-        orElse: () => null);
+      (read) {
+        return read.user.id == userId;
+      },
+      orElse: () => null,
+    );
     if (userRead == null) {
-      _unreadCountController.add(channelState.messages?.length ?? 0);
+      return channelState.messages?.length ?? 0;
     } else {
-      final count = channelState.messages.fold<int>(0, (count, message) {
-        if (message.createdAt.isAfter(userRead.lastRead)) {
+      return channelState.messages.fold<int>(0, (count, message) {
+        if (message.user.id != userId &&
+            message.createdAt.isAfter(userRead.lastRead)) {
           return count + 1;
         }
         return count;
       });
-      _unreadCountController.add(count);
     }
-
-    _channelClient
-        .on('message.read')
-        .where((e) => e.user.id == _channelClient.client.clientState.user.id)
-        .listen((event) {
-      _unreadCountController.add(0);
-    });
-
-    _channelClient
-        .on('message.new')
-        .where((e) => e.user.id == _channelClient.client.clientState.user.id)
-        .listen((event) {
-      _unreadCountController.add(1);
-    });
   }
 
   /// Update channelState with updated information
   void updateChannelState(ChannelState updatedState) {
+    print(updatedState.messages.last.text);
     _channelStateController.add(channelState.copyWith(
       messages: updatedState.messages != null
           ? updatedState.messages
@@ -516,13 +525,6 @@ class ChannelClientState {
   set _channelState(v) {
     _channelStateController.add(v);
   }
-
-  /// The channel unread messages by the user a stream
-  Stream<int> get unreadCountStream => _unreadCountController.stream;
-
-  /// The channel unread messages by the user
-  int get unreadCount => _unreadCountController.value;
-  BehaviorSubject<int> _unreadCountController = BehaviorSubject();
 
   /// Channel related typing users last value
   List<User> get typingEvents => _typingEventsController.value;
@@ -570,7 +572,6 @@ class ChannelClientState {
   /// Call this method to dispose this object
   void dispose() {
     _channelStateController.close();
-    _unreadCountController.close();
     _typingEventsController.close();
   }
 }

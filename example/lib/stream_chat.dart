@@ -4,14 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-import 'channel.bloc.dart';
-
-class ChatBloc with ChangeNotifier {
+class StreamChat extends InheritedWidget {
   final Client client;
   final List<StreamSubscription> _subscriptions = [];
-  final Map<String, ChannelBloc> channelBlocs = {};
 
-  ChatBloc(this.client) {
+  StreamChat({
+    Key key,
+    @required this.client,
+    @required Widget child,
+  }) : super(
+          key: key,
+          child: child,
+        ) {
     _subscriptions.add(client.on('message.new').listen((Event e) {
       final index = channels.indexWhere((c) => c.channel.cid == e.cid);
       if (index > 0) {
@@ -20,9 +24,6 @@ class ChatBloc with ChangeNotifier {
         _channelsController.add(channels);
       }
     }));
-
-    setUser(User(id: "wild-breeze-7"),
-        'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo');
   }
 
   User get user => _userController.value;
@@ -56,12 +57,12 @@ class ChatBloc with ChangeNotifier {
   Stream<bool> get queryChannelsLoading =>
       _queryChannelsLoadingController.stream;
 
-  Future<void> queryChannels(
+  Future<void> queryChannels({
     Map<String, dynamic> filter,
     List<SortOption> sortOptions,
     PaginationParams paginationParams,
     Map<String, dynamic> options,
-  ) async {
+  }) async {
     if (_queryChannelsLoadingController.value) {
       return;
     }
@@ -74,12 +75,7 @@ class ChatBloc with ChangeNotifier {
         options: options,
         paginationParams: paginationParams,
       );
-      channels.addAll(res.map((c) => c.channelClientState.channelState));
-      res.forEach((c) {
-        if (!channelBlocs.containsKey(c.id)) {
-          channelBlocs[c.id] = ChannelBloc(this, c);
-        }
-      });
+      channels.addAll(res.map((c) => c.state.channelState));
       _channelsController.sink.add(channels);
       _queryChannelsLoadingController.sink.add(false);
     } catch (e) {
@@ -91,35 +87,33 @@ class ChatBloc with ChangeNotifier {
     channels.clear();
   }
 
-  @override
   void dispose() {
-    channelBlocs.values.forEach((cBloc) => cBloc.dispose());
     client.dispose();
     _subscriptions.forEach((s) => s.cancel());
     _userController.close();
     _queryChannelsLoadingController.close();
     _channelsController.close();
-    super.dispose();
   }
-}
-
-class InheritedChatBloc extends InheritedWidget {
-  final ChatBloc chatBloc;
-
-  InheritedChatBloc({
-    Key key,
-    @required Widget child,
-    @required this.chatBloc,
-  }) : super(
-          key: key,
-          child: child,
-        );
 
   @override
   bool updateShouldNotify(InheritedWidget oldWidget) {
     return true;
   }
 
-  static InheritedChatBloc of(BuildContext context) =>
-      context.findAncestorWidgetOfExactType();
+  static StreamChat of(BuildContext context, [bool listen = false]) {
+    StreamChat streamChat;
+
+    if (listen) {
+      streamChat = context.dependOnInheritedWidgetOfExactType<StreamChat>();
+    } else {
+      streamChat = context.findAncestorWidgetOfExactType<StreamChat>();
+    }
+
+    if (streamChat == null) {
+      throw Exception(
+          'You must have a StreamChat widget at the top of your widget tree');
+    }
+
+    return streamChat;
+  }
 }

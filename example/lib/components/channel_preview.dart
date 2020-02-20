@@ -4,46 +4,47 @@ import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_example/components/channel_image.dart';
 
-import '../channel.bloc.dart';
+import '../stream_channel.dart';
 import 'channel_name_text.dart';
 
 class ChannelPreview extends StatelessWidget {
   final VoidCallback onTap;
-  final ChannelState channelState;
-  final int unreadCount;
 
   const ChannelPreview({
     Key key,
     @required this.onTap,
-    @required this.channelState,
-    @required this.unreadCount,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final channelBloc = InheritedChannelBloc.of(context).channelBloc;
-    final channelState = channelBloc.channelState;
-    return ListTile(
-      onTap: () {
-        onTap();
-      },
-      leading: ChannelImage(
-        channel: channelState.channel,
-      ),
-      title: ChannelNameText(
-        channel: channelState.channel,
-      ),
-      subtitle: _buildSubtitle(
-        channelBloc,
-      ),
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: <Widget>[
-          _buildDate(context, channelState.channel.lastMessageAt),
-        ],
-      ),
-    );
+    final streamChannel = StreamChannel.of(context);
+    return StreamBuilder<ChannelState>(
+        stream: streamChannel.channelClient.state.channelStateStream,
+        initialData: streamChannel.channelState,
+        builder: (context, snapshot) {
+          final channelState = snapshot.data;
+          return ListTile(
+            onTap: () {
+              onTap();
+            },
+            leading: ChannelImage(
+              channel: channelState.channel,
+            ),
+            title: ChannelNameText(
+              channel: channelState.channel,
+            ),
+            subtitle: _buildSubtitle(
+              streamChannel,
+            ),
+            trailing: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                _buildDate(context, channelState.channel.lastMessageAt),
+              ],
+            ),
+          );
+        });
   }
 
   Text _buildDate(BuildContext context, DateTime lastMessageAt) {
@@ -68,54 +69,61 @@ class ChannelPreview extends StatelessWidget {
   }
 
   Widget _buildSubtitle(
-    ChannelBloc channelBloc,
+    StreamChannel streamChannel,
   ) {
     return StreamBuilder<List<User>>(
-        stream: channelBloc.channelClient.channelClientState.typingEventsStream,
+        stream: streamChannel.channelClient.state.typingEventsStream,
         initialData: [],
         builder: (context, snapshot) {
           final typings = snapshot.data;
+          final double opacity =
+              streamChannel.channelClient.state.unreadCount > 0 ? 1 : 0.5;
           return typings.isNotEmpty
-              ? Text(
-                  '${typings.map((u) => u.extraData.containsKey('name') ? u.extraData['name'] : u.id).join(',')} ${typings.length == 1 ? 'is' : 'are'} typing...',
-                  maxLines: 1,
-                  style: Theme.of(context).textTheme.caption.copyWith(
-                        color:
-                            Colors.black.withOpacity(unreadCount > 0 ? 1 : 0.5),
-                      ),
-                )
-              : Builder(builder: (context) {
-                  final lastMessage = channelState.messages.isNotEmpty
-                      ? channelState.messages.last
-                      : null;
-                  if (lastMessage == null) {
-                    return SizedBox.fromSize(
-                      size: Size.zero,
-                    );
-                  }
-
-                  final prefix = lastMessage.attachments
-                      .map((e) {
-                        if (e.type == 'image') {
-                          return '📷';
-                        } else if (e.type == 'video') {
-                          return '🎬';
-                        }
-                        return null;
-                      })
-                      .where((e) => e != null)
-                      .join(' ');
-
-                  return Text(
-                    '$prefix ${lastMessage.text ?? ''}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.caption.copyWith(
-                          color: Colors.black
-                              .withOpacity(unreadCount > 0 ? 1 : 0.5),
-                        ),
-                  );
-                });
+              ? _buildTypings(typings, context, opacity)
+              : _buildLastMessage(context, streamChannel, opacity);
         });
+  }
+
+  Widget _buildLastMessage(
+      BuildContext context, StreamChannel streamChannel, double opacity) {
+    final lastMessage = streamChannel.channelState.messages.isNotEmpty
+        ? streamChannel.channelState.messages.last
+        : null;
+    if (lastMessage == null) {
+      return SizedBox.fromSize(
+        size: Size.zero,
+      );
+    }
+
+    final prefix = lastMessage.attachments
+        .map((e) {
+          if (e.type == 'image') {
+            return '📷';
+          } else if (e.type == 'video') {
+            return '🎬';
+          }
+          return null;
+        })
+        .where((e) => e != null)
+        .join(' ');
+
+    return Text(
+      '$prefix ${lastMessage.text ?? ''}',
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: Theme.of(context).textTheme.caption.copyWith(
+            color: Colors.black.withOpacity(opacity),
+          ),
+    );
+  }
+
+  Text _buildTypings(List<User> typings, BuildContext context, double opacity) {
+    return Text(
+      '${typings.map((u) => u.extraData.containsKey('name') ? u.extraData['name'] : u.id).join(',')} ${typings.length == 1 ? 'is' : 'are'} typing...',
+      maxLines: 1,
+      style: Theme.of(context).textTheme.caption.copyWith(
+            color: Colors.black.withOpacity(opacity),
+          ),
+    );
   }
 }

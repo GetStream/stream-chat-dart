@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-import 'chat.bloc.dart';
 import 'components/channel_list_page.dart';
+import 'stream_chat.dart';
 
 void main() {
   final client = Client(
@@ -10,9 +10,9 @@ void main() {
     logLevel: Level.INFO,
   );
 
-  runApp(InheritedChatBloc(
+  runApp(StreamChat(
     child: MyApp(),
-    chatBloc: ChatBloc(client),
+    client: client,
   ));
 }
 
@@ -45,8 +45,15 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    StreamChat.of(context).setUser(User(id: "wild-breeze-7"),
+        'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo');
+  }
+
+  @override
   void dispose() {
-    InheritedChatBloc.of(context).chatBloc.dispose();
+    StreamChat.of(context).dispose();
     super.dispose();
   }
 }
@@ -54,7 +61,7 @@ class _MyAppState extends State<MyApp> {
 class ChatLoader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final chatBloc = InheritedChatBloc.of(context).chatBloc;
+    final chatBloc = StreamChat.of(context);
     return StreamBuilder<User>(
       stream: chatBloc.userStream,
       builder: (context, snapshot) {
@@ -71,17 +78,7 @@ class ChatLoader extends StatelessWidget {
             ),
           );
         } else {
-          return ChannelListPage(
-            filter: {
-              'members': {
-                '\$in': [snapshot.data.id],
-              }
-            },
-            sort: [SortOption("last_message_at")],
-            pagination: PaginationParams(
-              limit: 20,
-            ),
-          );
+          return ChannelListPage();
         }
       },
     );

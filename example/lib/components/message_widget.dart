@@ -7,10 +7,9 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat/src/models/attachment.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_example/components/user_avatar.dart';
+import 'package:stream_chat_example/stream_chat.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
-
-import '../channel.bloc.dart';
 
 class MessageWidget extends StatefulWidget {
   const MessageWidget({
@@ -51,8 +50,8 @@ class _MessageWidgetState extends State<MessageWidget>
   Widget build(BuildContext context) {
     super.build(context);
 
-    final channelBloc = InheritedChannelBloc.of(context).channelBloc;
-    final currentUserId = channelBloc.chatBloc.user.id;
+    final chatBloc = StreamChat.of(context);
+    final currentUserId = chatBloc.user.id;
     final messageUserId = message.user.id;
     final previousUserId = previousMessage?.user?.id;
     final nextUserId = nextMessage?.user?.id;

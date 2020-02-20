@@ -1,36 +1,36 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_widgets/flutter_widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-import '../channel.bloc.dart';
+import '../stream_channel.dart';
 import 'message_widget.dart';
 
 class MessageList extends StatefulWidget {
-  final List<Message> messages;
   final ScrollController scrollController;
 
-  MessageList(
-    this.messages, {
+  MessageList({
     this.scrollController,
     Key key,
   }) : super(key: key);
 
   @override
-  _MessageListState createState() => _MessageListState(messages);
+  _MessageListState createState() => _MessageListState();
 }
 
 class _MessageListState extends State<MessageList> {
   static const _newMessageLoadingOffset = 100;
   bool _isBottom = true;
   bool _topWasVisible = false;
-  List<Message> _messages;
+  List<Message> _messages = [];
   List<Message> _newMessageList = [];
 
-  _MessageListState(this._messages);
+  _MessageListState();
 
   @override
   Widget build(BuildContext context) {
-    final channelBloc = InheritedChannelBloc.of(context).channelBloc;
+    final channelBloc = StreamChannel.of(context);
 
     /// TODO: find a better solution when (https://github.com/flutter/flutter/issues/21023) is fixed
     return NotificationListener<ScrollNotification>(
@@ -95,7 +95,7 @@ class _MessageListState extends State<MessageList> {
     );
   }
 
-  Container _buildLoadingIndicator(ChannelBloc channelBloc) {
+  Container _buildLoadingIndicator(StreamChannel channelBloc) {
     return Container(
       height: 100,
       child: StreamBuilder<bool>(
@@ -124,7 +124,7 @@ class _MessageListState extends State<MessageList> {
   Widget _buildTopMessage(
     Message message,
     Message nextMessage,
-    ChannelBloc channelBloc,
+    StreamChannel channelBloc,
     BuildContext context,
   ) {
     return VisibilityDetector(
@@ -146,7 +146,7 @@ class _MessageListState extends State<MessageList> {
   }
 
   Widget _buildBottomMessage(
-    ChannelBloc channelBloc,
+    StreamChannel channelBloc,
     Message previousMessage,
     Message message,
     BuildContext context,
@@ -156,7 +156,7 @@ class _MessageListState extends State<MessageList> {
       onVisibilityChanged: (visibility) {
         this._isBottom = visibility.visibleBounds != Rect.zero;
         if (this._isBottom) {
-          if (channelBloc.channelClient.channelClientState.unreadCount > 0) {
+          if (channelBloc.channelClient.state.unreadCount > 0) {
             channelBloc.channelClient.markRead();
           }
         }
@@ -170,21 +170,47 @@ class _MessageListState extends State<MessageList> {
     );
   }
 
+  StreamSubscription _streamListenener;
+
   @override
-  void didUpdateWidget(MessageList oldWidget) {
-    super.didUpdateWidget(oldWidget);
+  void initState() {
+    super.initState();
 
-    final newMessages = this.widget.messages;
-
-    if (newMessages[0].id != oldWidget.messages[0].id) {
-      if (widget.scrollController.offset < _newMessageLoadingOffset) {
-        this._messages = newMessages;
-      } else {
-        _newMessageList =
-            newMessages.toSet().difference(this._messages.toSet()).toList();
+    _streamListenener = StreamChannel.of(context)
+        .channelStateStream
+        .map((c) => c.messages)
+        .distinct()
+        .listen((newMessages) {
+      newMessages = newMessages.reversed.toList();
+      if (_messages.isEmpty || newMessages.first.id != _messages.first.id) {
+        if (!widget.scrollController.hasClients ||
+            widget.scrollController.offset < _newMessageLoadingOffset) {
+          setState(() {
+            this._messages = newMessages;
+          });
+        } else if (newMessages.first.user.id ==
+            StreamChannel.of(context).channelClient.client.user.id) {
+          widget.scrollController.jumpTo(0);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            setState(() {
+              this._messages = newMessages;
+            });
+          });
+        } else {
+          _newMessageList =
+              newMessages.toSet().difference(this._messages.toSet()).toList();
+        }
+      } else if (newMessages.last.id != _messages.last.id) {
+        setState(() {
+          this._messages = newMessages;
+        });
       }
-    } else if (newMessages.length != oldWidget.messages.length) {
-      this._messages = newMessages;
-    }
+    });
+  }
+
+  @override
+  void dispose() {
+    _streamListenener.cancel();
+    super.dispose();
   }
 }
