@@ -439,11 +439,11 @@ class ChannelClientState {
       );
     });
 
-    final userRead = channelState.read.firstWhere(
-        (read) => read.user.id == _channelClient.client.clientState.user.id,
+    final userRead = channelState.read?.firstWhere(
+        (read) => read.user.id == _channelClient.client.clientState?.user?.id,
         orElse: () => null);
     if (userRead == null) {
-      _unreadCountController.add(channelState.messages.length);
+      _unreadCountController.add(channelState.messages?.length ?? 0);
     } else {
       final count = channelState.messages.fold<int>(0, (count, message) {
         if (message.createdAt.isAfter(userRead.lastRead)) {
