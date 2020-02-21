@@ -30,47 +30,63 @@ class ChannelPreview extends StatelessWidget {
             closedColor: Theme.of(context).scaffoldBackgroundColor,
             closedElevation: 0,
             openBuilder: (context, _) {
-              return StreamChannel(
-                channelClient: StreamChat.of(context)
-                    .client
-                    .channelClients[channelState.channel.id],
-                child: MessagePage(),
-              );
+              return _buildMessagePage(context, channelState);
             },
             closedBuilder: (context, openAction) {
-              return StreamChannel(
-                channelClient: StreamChat.of(context)
-                    .client
-                    .channelClients[channelState.channel.id],
-                child: ListTile(
-                  onTap: () {
-                    if (onTap != null) {
-                      onTap();
-                    } else {
-                      openAction();
-                    }
-                  },
-                  leading: ChannelImage(
-                    channel: channelState.channel,
-                  ),
-                  title: ChannelNameText(
-                    channel: channelState.channel,
-                  ),
-                  subtitle: _buildSubtitle(
-                    streamChannel,
-                  ),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: <Widget>[
-                      _buildDate(context, channelState.channel.lastMessageAt),
-                    ],
-                  ),
-                ),
+              return _buildChannelPreview(
+                context,
+                channelState,
+                openAction,
+                streamChannel,
               );
             },
           );
         });
+  }
+
+  StreamChannel _buildChannelPreview(
+      BuildContext context,
+      ChannelState channelState,
+      VoidCallback openAction,
+      StreamChannel streamChannel) {
+    return StreamChannel(
+      channelClient:
+          StreamChat.of(context).client.channelClients[channelState.channel.id],
+      child: ListTile(
+        onTap: () {
+          if (onTap != null) {
+            onTap();
+          } else {
+            openAction();
+          }
+        },
+        leading: ChannelImage(
+          channel: channelState.channel,
+        ),
+        title: ChannelNameText(
+          channel: channelState.channel,
+        ),
+        subtitle: _buildSubtitle(
+          streamChannel,
+        ),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: <Widget>[
+            _buildDate(context, channelState.channel.lastMessageAt),
+          ],
+        ),
+      ),
+    );
+  }
+
+  StreamChannel _buildMessagePage(
+      BuildContext context, ChannelState channelState) {
+    return StreamChannel(
+      channelClient:
+          StreamChat.of(context).client.channelClients[channelState.channel.id],
+      child: MessagePage(),
+    );
   }
 
   Text _buildDate(BuildContext context, DateTime lastMessageAt) {

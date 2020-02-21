@@ -6,7 +6,12 @@ import 'package:stream_chat/stream_chat.dart';
 import '../stream_channel.dart';
 
 class MessageInput extends StatefulWidget {
-  MessageInput({Key key}) : super(key: key);
+  MessageInput({
+    Key key,
+    @required this.onMessageSubmit,
+  }) : super(key: key);
+
+  final void Function(Message) onMessageSubmit;
 
   @override
   _MessageInputState createState() => _MessageInputState();
@@ -112,8 +117,7 @@ class _MessageInputState extends State<MessageInput> {
       _typingStarted = false;
     });
     FocusScope.of(context).unfocus();
-    StreamChannel.of(context).channelClient.sendMessage(
-          Message(text: text),
-        );
+
+    widget.onMessageSubmit(Message(text: text));
   }
 }

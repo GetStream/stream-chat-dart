@@ -27,11 +27,7 @@ class MessageWidget extends StatefulWidget {
   final ParentTapCallback parentTapCallback;
 
   @override
-  _MessageWidgetState createState() => _MessageWidgetState(
-        message,
-        previousMessage,
-        nextMessage,
-      );
+  _MessageWidgetState createState() => _MessageWidgetState();
 }
 
 class _MessageWidgetState extends State<MessageWidget>
@@ -39,25 +35,15 @@ class _MessageWidgetState extends State<MessageWidget>
   final Map<String, ChangeNotifier> _videoControllers = {};
   final Map<String, ChangeNotifier> _chuwieControllers = {};
 
-  final Message previousMessage;
-  final Message message;
-  final Message nextMessage;
-
-  _MessageWidgetState(
-    this.message,
-    this.previousMessage,
-    this.nextMessage,
-  );
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
 
     final chatBloc = StreamChat.of(context);
     final currentUserId = chatBloc.user.id;
-    final messageUserId = message.user.id;
-    final previousUserId = previousMessage?.user?.id;
-    final nextUserId = nextMessage?.user?.id;
+    final messageUserId = widget.message.user.id;
+    final previousUserId = widget.previousMessage?.user?.id;
+    final nextUserId = widget.nextMessage?.user?.id;
     final bool isMyMessage = messageUserId == currentUserId;
     final isLastUser = previousUserId == messageUserId;
     final isNextUser = nextUserId == messageUserId;
@@ -70,17 +56,17 @@ class _MessageWidgetState extends State<MessageWidget>
             isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: <Widget>[
           _buildBubble(context, isMyMessage, isLastUser),
-          message.replyCount > 0
+          widget.message.replyCount > 0
               ? GestureDetector(
                   onTap: () {
-                    widget?.parentTapCallback(message);
+                    widget?.parentTapCallback(widget.message);
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2.0),
                     child: Row(
                       children: <Widget>[
                         Text(
-                          'Replies: ${message.replyCount}',
+                          'Replies: ${widget.message.replyCount}',
                           style: Theme.of(context)
                               .textTheme
                               .subtitle
@@ -107,7 +93,7 @@ class _MessageWidgetState extends State<MessageWidget>
                 left: isMyMessage ? 8.0 : 0,
                 right: isMyMessage ? 0 : 8.0,
               ),
-              child: UserAvatar(user: message.user),
+              child: UserAvatar(user: widget.message.user),
             ),
     ];
 
@@ -119,7 +105,7 @@ class _MessageWidgetState extends State<MessageWidget>
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       margin: EdgeInsets.only(
         top: isLastUser ? 5 : 24,
-        bottom: nextMessage == null ? 30 : 0,
+        bottom: widget.nextMessage == null ? 30 : 0,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -141,7 +127,7 @@ class _MessageWidgetState extends State<MessageWidget>
     final column = Column(
       crossAxisAlignment:
           isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-      children: message.attachments.map((attachment) {
+      children: widget.message.attachments.map((attachment) {
         nOfAttachmentWidgets++;
 
         Widget attachmentWidget;
@@ -231,7 +217,7 @@ class _MessageWidgetState extends State<MessageWidget>
       }).toList(),
     );
 
-    if (message.text.trim().isNotEmpty) {
+    if (widget.message.text.trim().isNotEmpty) {
       column.children.add(Container(
         margin: EdgeInsets.only(
           top: nOfAttachmentWidgets > 0 ? 5 : 0,
@@ -241,7 +227,7 @@ class _MessageWidgetState extends State<MessageWidget>
         padding: EdgeInsets.all(10),
         constraints: BoxConstraints.loose(Size.fromWidth(300)),
         child: MarkdownBody(
-          data: '${message.text}',
+          data: '${widget.message.text}',
           onTapLink: (link) {
             _launchURL(link);
           },
@@ -300,7 +286,8 @@ class _MessageWidgetState extends State<MessageWidget>
     }
 
     return Chewie(
-      key: ValueKey<String>('ATTACHMENT-${attachment.title}-${message.id}'),
+      key: ValueKey<String>(
+          'ATTACHMENT-${attachment.title}-${widget.message.id}'),
       controller: chewieController,
     );
   }
@@ -329,7 +316,7 @@ class _MessageWidgetState extends State<MessageWidget>
     return Padding(
       padding: const EdgeInsets.only(top: 5.0),
       child: Text(
-        formatDate(message.createdAt.toLocal(), [HH, ':', nn]),
+        formatDate(widget.message.createdAt.toLocal(), [HH, ':', nn]),
       ),
     );
   }
@@ -349,6 +336,6 @@ class _MessageWidgetState extends State<MessageWidget>
 
   @override
   bool get wantKeepAlive {
-    return message.attachments.isNotEmpty;
+    return widget.message.attachments.isNotEmpty;
   }
 }

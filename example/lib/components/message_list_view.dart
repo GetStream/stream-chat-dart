@@ -47,7 +47,8 @@ class _MessageListViewState extends State<MessageListView> {
       onNotification: (_) {
         if (_scrollController.offset < 150 && _newMessageList.isNotEmpty) {
           setState(() {
-            _messages.insert(0, _newMessageList.removeLast());
+            _messages.insertAll(0, _newMessageList);
+            _newMessageList.clear();
           });
         }
         return true;
@@ -56,10 +57,6 @@ class _MessageListViewState extends State<MessageListView> {
         physics: AlwaysScrollableScrollPhysics(),
         controller: _scrollController,
         reverse: true,
-        key: widget.parentMessage == null
-            ? PageStorageKey(
-                'CHANNEL-MESSAGE-LIST-${StreamChannel.of(context).channelState.channel.id}-${widget.parentMessage?.id}')
-            : null,
         childrenDelegate: SliverChildBuilderDelegate(
           (context, i) {
             if (i == this._messages.length + 1) {
@@ -224,74 +221,46 @@ class _MessageListViewState extends State<MessageListView> {
       streamChannel.channelClient.markRead();
     }
 
+    Stream<List<Message>> stream;
+
     if (widget.parentMessage == null) {
-      _streamListener = streamChannel.channelStateStream
-          .map((c) => c.messages)
-          .distinct()
-          .listen((newMessages) {
-        newMessages = newMessages.reversed.toList();
-        if (_messages.isEmpty || newMessages.first.id != _messages.first.id) {
-          if (!_scrollController.hasClients ||
-              _scrollController.offset < _newMessageLoadingOffset) {
-            setState(() {
-              this._messages = newMessages;
-            });
-          } else if (newMessages.first.user.id ==
-              streamChannel.channelClient.client.user.id) {
-            _scrollController.jumpTo(0);
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              setState(() {
-                this._messages = newMessages;
-              });
-            });
-          } else {
-            _newMessageList =
-                newMessages.toSet().difference(this._messages.toSet()).toList();
-          }
-        } else if (newMessages.last.id != _messages.last.id) {
-          setState(() {
-            this._messages = newMessages;
-          });
-        }
-      });
+      stream = streamChannel.channelStateStream.map((c) => c.messages);
     } else {
       streamChannel.getReplies(widget.parentMessage.id);
-      _streamListener = streamChannel.channelClient.state.threadsStream
+      stream = streamChannel.channelClient.state.threadsStream
           .where((threads) => threads.containsKey(widget.parentMessage.id))
-          .map((threads) => threads[widget.parentMessage.id])
-          .distinct()
-          .listen((newMessages) {
-        newMessages = newMessages.reversed.toList();
-        if (_messages.isEmpty || newMessages.first.id != _messages.first.id) {
-          if (!_scrollController.hasClients ||
-              _scrollController.offset < _newMessageLoadingOffset) {
-            setState(() {
-              this._messages = newMessages;
-            });
-          } else if (newMessages.first.user.id ==
-              streamChannel.channelClient.client.user.id) {
-            _scrollController.jumpTo(0);
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              setState(() {
-                this._messages = newMessages;
-              });
-            });
-          } else {
-            _newMessageList =
-                newMessages.toSet().difference(this._messages.toSet()).toList();
-          }
-        } else if (newMessages.last.id != _messages.last.id) {
+          .map((threads) => threads[widget.parentMessage.id]);
+    }
+
+    _streamListener = stream.listen((newMessages) {
+      newMessages = newMessages.reversed.toList();
+      if (_messages.isEmpty || newMessages.first.id != _messages.first.id) {
+        if (!_scrollController.hasClients ||
+            _scrollController.offset < _newMessageLoadingOffset) {
           setState(() {
             this._messages = newMessages;
           });
+        } else if (newMessages.first.user.id ==
+            streamChannel.channelClient.client.user.id) {
+          _scrollController.jumpTo(0);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            setState(() {
+              this._messages = newMessages;
+            });
+          });
+        } else {
+          _newMessageList = newMessages;
         }
-      });
-    }
+      } else {
+        setState(() {
+          this._messages = newMessages;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
-    print('DISPOSSSEEEE');
     _streamListener.cancel();
     super.dispose();
   }

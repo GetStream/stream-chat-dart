@@ -6,8 +6,8 @@ import 'package:stream_chat_example/components/message_page.dart';
 import 'package:stream_chat_example/stream_channel.dart';
 
 import '../stream_chat.dart';
-import 'channel_list_app_bar.dart';
 import 'channel_list_view.dart';
+import 'channel_page_app_bar.dart';
 
 class ChannelListPage extends StatefulWidget {
   ChannelListPage({
@@ -43,7 +43,7 @@ class ChannelListPageState extends State<ChannelListPage> {
             bottomNavigationBar: ConnectionIndicator(
               indicatorController: _indicatorController,
             ),
-            appBar: ChannelListAppBar(),
+            appBar: ChannelPageAppBar(),
             body: ChannelListView(
               options: widget.options,
               filter: widget.filter,

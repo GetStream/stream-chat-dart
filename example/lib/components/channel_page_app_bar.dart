@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class ChannelListAppBar extends StatelessWidget implements PreferredSizeWidget {
-  ChannelListAppBar({
+class ChannelPageAppBar extends StatelessWidget implements PreferredSizeWidget {
+  ChannelPageAppBar({
     Key key,
   })  : preferredSize = Size.fromHeight(kToolbarHeight),
         super(key: key);

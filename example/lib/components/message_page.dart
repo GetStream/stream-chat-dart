@@ -40,8 +40,6 @@ class _MessagePageState extends State<MessagePage> {
           Expanded(
             child: MessageListView(
               parentMessage: widget.parentMessage,
-              key: Key(
-                  'CHANNEL-MESSAGE-LIST-${StreamChannel.of(context).channelState.channel.id}-${widget.parentMessage?.id}'),
               parentTapCallback: (message) {
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -57,7 +55,13 @@ class _MessagePageState extends State<MessagePage> {
               },
             ),
           ),
-          MessageInput(),
+          MessageInput(
+            onMessageSubmit: (message) {
+              StreamChannel.of(context).channelClient.sendMessage(
+                    message.copyWith(parentId: widget.parentMessage?.id),
+                  );
+            },
+          ),
         ],
       ),
     );

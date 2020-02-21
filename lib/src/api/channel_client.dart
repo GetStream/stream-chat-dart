@@ -265,7 +265,7 @@ class ChannelClient {
     final repliesResponse = _client.decode<QueryRepliesResponse>(
         response.data, QueryRepliesResponse.fromJson);
 
-    state.updateThreadInfo(parentId, repliesResponse.messages);
+    state?.updateThreadInfo(parentId, repliesResponse.messages);
 
     return repliesResponse;
   }
@@ -445,12 +445,33 @@ class ChannelClientState {
     _listenTypingEvents();
 
     _channelClient.on('message.new').listen((event) {
-      _channelState = this.channelState.copyWith(
-            messages: this.channelState.messages + [event.message],
-            channel: this.channelState.channel.copyWith(
-                  lastMessageAt: event.message.createdAt,
-                ),
-          );
+      if (event.message.parentId == null ||
+          event.message.showInChannel == true) {
+        _channelState = this.channelState.copyWith(
+              messages: this.channelState.messages + [event.message],
+              channel: this.channelState.channel.copyWith(
+                    lastMessageAt: event.message.createdAt,
+                  ),
+            );
+      }
+
+      if (event.message.parentId != null) {
+        final newThreads = threads;
+        newThreads[event.message.parentId].add(event.message);
+        _threads = newThreads;
+
+        _channelState = this.channelState.copyWith(
+              messages: this.channelState.messages.map((message) {
+                if (message.id == event.message.parentId) {
+                  return message.copyWith(
+                    replyCount: message.replyCount + 1,
+                  );
+                }
+
+                return message;
+              }).toList(),
+            );
+      }
     });
 
     _channelClient
