@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -9,6 +10,7 @@ import '../stream_chat.dart';
 import 'channel_header.dart';
 import 'channel_list_app_bar.dart';
 import 'channel_list_view.dart';
+import 'channel_preview.dart';
 
 class ChannelListPage extends StatefulWidget {
   ChannelListPage();
@@ -21,6 +23,7 @@ class ChannelListPageState extends State<ChannelListPage> {
   String _selectedChannelId;
   bool showSplit;
   IndicatorController _indicatorController = IndicatorController();
+  Function _openAction;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +52,7 @@ class ChannelListPageState extends State<ChannelListPage> {
               onChannelTap: (channelState) {
                 _navigateToChannel(context, channelState);
               },
+              channelPreviewBuilder: _buildChannelPreview,
             ),
             floatingActionButton: FloatingActionButton(
               onPressed: () {},
@@ -85,26 +89,45 @@ class ChannelListPageState extends State<ChannelListPage> {
     );
   }
 
+  Widget _buildChannelPreview(context, channelState) {
+    return OpenContainer(
+      closedColor: Theme.of(context).scaffoldBackgroundColor,
+      tappable: false,
+      closedElevation: 0,
+      openBuilder: (context, _) {
+        return StreamChannel(
+          channelClient: StreamChat.of(context)
+              .client
+              .channelClients[channelState.channel.id],
+          child: ChannelWidget(
+            channelHeader: ChannelHeader(),
+          ),
+        );
+      },
+      closedBuilder: (context, openAction) {
+        _openAction = openAction;
+        return StreamChannel(
+          channelClient: StreamChat.of(context)
+              .client
+              .channelClients[channelState.channel.id],
+          child: ChannelPreview(
+            key: ValueKey<String>('CHANNEL-PREVIEW-${channelState.channel.id}'),
+            onTap: () {
+              _navigateToChannel(context, channelState);
+            },
+          ),
+        );
+      },
+    );
+  }
+
   void _navigateToChannel(BuildContext context, ChannelState channelState) {
     if (this.showSplit) {
       setState(() {
         _selectedChannelId = channelState.channel.id;
       });
     } else {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) {
-            return StreamChannel(
-              channelClient: StreamChat.of(context)
-                  .client
-                  .channelClients[channelState.channel.id],
-              child: ChannelWidget(
-                channelHeader: ChannelHeader(),
-              ),
-            );
-          },
-        ),
-      );
+      _openAction();
     }
   }
 

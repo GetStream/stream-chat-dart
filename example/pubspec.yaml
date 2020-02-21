@@ -18,6 +18,7 @@ dependencies:
   url_launcher: ^5.4.1
   video_player: ^0.10.7
   chewie: ^0.9.8+1
+  animations: ^1.0.0+3
 
   stream_chat:
     path: ../

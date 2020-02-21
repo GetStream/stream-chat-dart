@@ -68,7 +68,7 @@ class StreamChannel extends InheritedWidget {
 
     if (streamChannel == null) {
       throw Exception(
-          'You must have a StreamChat widget at the top of your widget tree');
+          'You must have a StreamChannel widget at the top of your widget tree');
     }
 
     return streamChannel;

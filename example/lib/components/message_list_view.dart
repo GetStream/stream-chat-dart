@@ -7,26 +7,24 @@ import 'package:stream_chat/stream_chat.dart';
 import '../stream_channel.dart';
 import 'message_widget.dart';
 
-class MessageList extends StatefulWidget {
+class MessageListView extends StatefulWidget {
   final ScrollController scrollController;
 
-  MessageList({
+  MessageListView({
     this.scrollController,
     Key key,
   }) : super(key: key);
 
   @override
-  _MessageListState createState() => _MessageListState();
+  _MessageListViewState createState() => _MessageListViewState();
 }
 
-class _MessageListState extends State<MessageList> {
+class _MessageListViewState extends State<MessageListView> {
   static const _newMessageLoadingOffset = 100;
   bool _isBottom = true;
   bool _topWasVisible = false;
   List<Message> _messages = [];
   List<Message> _newMessageList = [];
-
-  _MessageListState();
 
   @override
   Widget build(BuildContext context) {

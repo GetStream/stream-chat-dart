@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_example/stream_chat.dart';
 
 import '../stream_channel.dart';
+import '../stream_chat.dart';
 import 'connection_indicator.dart';
 import 'message_input.dart';
-import 'message_list.dart';
+import 'message_list_view.dart';
 
 class ChannelWidget extends StatefulWidget {
   final PreferredSizeWidget _channelHeader;
@@ -37,7 +37,7 @@ class _ChannelWidgetState extends State<ChannelWidget> {
             indicatorController: _indicatorController,
           ),
           Expanded(
-            child: MessageList(
+            child: MessageListView(
               key: ValueKey<String>('CHANNEL-MESSAGE-LIST'),
               scrollController: _scrollController,
             ),
