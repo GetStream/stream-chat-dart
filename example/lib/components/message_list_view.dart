@@ -8,18 +8,23 @@ import '../stream_channel.dart';
 import 'message_widget.dart';
 
 typedef MessageBuilder = Widget Function(BuildContext, Message, int index);
+typedef ParentMessageBuilder = Widget Function(BuildContext, Message);
+typedef ParentTapCallback = void Function(Message parent);
 
 class MessageListView extends StatefulWidget {
-  final ScrollController scrollController;
-
   MessageListView({
-    this.scrollController,
     Key key,
     MessageBuilder messageBuilder,
+    this.parentMessageBuilder,
+    this.parentMessage,
+    this.parentTapCallback,
   })  : _messageBuilder = messageBuilder,
         super(key: key);
 
   final MessageBuilder _messageBuilder;
+  final ParentMessageBuilder parentMessageBuilder;
+  final ParentTapCallback parentTapCallback;
+  final Message parentMessage;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -27,6 +32,7 @@ class MessageListView extends StatefulWidget {
 
 class _MessageListViewState extends State<MessageListView> {
   static const _newMessageLoadingOffset = 100;
+  final ScrollController _scrollController = ScrollController();
   bool _isBottom = true;
   bool _topWasVisible = false;
   List<Message> _messages = [];
@@ -39,8 +45,7 @@ class _MessageListViewState extends State<MessageListView> {
     /// TODO: find a better solution when (https://github.com/flutter/flutter/issues/21023) is fixed
     return NotificationListener<ScrollNotification>(
       onNotification: (_) {
-        if (widget.scrollController.offset < 150 &&
-            _newMessageList.isNotEmpty) {
+        if (_scrollController.offset < 150 && _newMessageList.isNotEmpty) {
           setState(() {
             _messages.insert(0, _newMessageList.removeLast());
           });
@@ -49,10 +54,36 @@ class _MessageListViewState extends State<MessageListView> {
       },
       child: ListView.custom(
         physics: AlwaysScrollableScrollPhysics(),
-        controller: widget.scrollController,
+        controller: _scrollController,
         reverse: true,
+        key: widget.parentMessage == null
+            ? PageStorageKey(
+                'CHANNEL-MESSAGE-LIST-${StreamChannel.of(context).channelState.channel.id}-${widget.parentMessage?.id}')
+            : null,
         childrenDelegate: SliverChildBuilderDelegate(
           (context, i) {
+            if (i == this._messages.length + 1) {
+              if (widget.parentMessage != null) {
+                if (widget.parentMessageBuilder != null) {
+                  return widget.parentMessageBuilder(
+                      context, widget.parentMessage);
+                } else {
+                  return MessageWidget(
+                    key: ValueKey<String>(
+                        'PARENT-MESSAGE-${widget.parentMessage.id}'),
+                    previousMessage: null,
+                    message: widget.parentMessage.copyWith(replyCount: 0),
+                    nextMessage: null,
+                    parentTapCallback: widget.parentTapCallback,
+                  );
+                }
+              } else {
+                return SizedBox.fromSize(
+                  size: Size.zero,
+                );
+              }
+            }
+
             if (i == this._messages.length) {
               return _buildLoadingIndicator(streamChannel);
             }
@@ -89,9 +120,10 @@ class _MessageListViewState extends State<MessageListView> {
               previousMessage: previousMessage,
               message: message,
               nextMessage: nextMessage,
+              parentTapCallback: widget.parentTapCallback,
             );
           },
-          childCount: this._messages.length + 1,
+          childCount: this._messages.length + 2,
           findChildIndexCallback: (key) {
             final ValueKey<String> valueKey = key;
             final index = this
@@ -104,11 +136,11 @@ class _MessageListViewState extends State<MessageListView> {
     );
   }
 
-  Container _buildLoadingIndicator(StreamChannel channelBloc) {
+  Container _buildLoadingIndicator(StreamChannel streamChannel) {
     return Container(
-      height: 100,
+      height: 50,
       child: StreamBuilder<bool>(
-          stream: channelBloc.queryMessage,
+          stream: streamChannel.queryMessage,
           initialData: false,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
@@ -143,6 +175,7 @@ class _MessageListViewState extends State<MessageListView> {
         previousMessage: null,
         message: message,
         nextMessage: nextMessage,
+        parentTapCallback: widget.parentTapCallback,
       ),
       onVisibilityChanged: (visibility) {
         final topIsVisible = visibility.visibleBounds != Rect.zero;
@@ -175,6 +208,7 @@ class _MessageListViewState extends State<MessageListView> {
         previousMessage: previousMessage,
         message: message,
         nextMessage: null,
+        parentTapCallback: widget.parentTapCallback,
       ),
     );
   }
@@ -190,40 +224,74 @@ class _MessageListViewState extends State<MessageListView> {
       streamChannel.channelClient.markRead();
     }
 
-    _streamListener = StreamChannel.of(context)
-        .channelStateStream
-        .map((c) => c.messages)
-        .distinct()
-        .listen((newMessages) {
-      newMessages = newMessages.reversed.toList();
-      if (_messages.isEmpty || newMessages.first.id != _messages.first.id) {
-        if (!widget.scrollController.hasClients ||
-            widget.scrollController.offset < _newMessageLoadingOffset) {
-          setState(() {
-            this._messages = newMessages;
-          });
-        } else if (newMessages.first.user.id ==
-            StreamChannel.of(context).channelClient.client.user.id) {
-          widget.scrollController.jumpTo(0);
-          WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (widget.parentMessage == null) {
+      _streamListener = streamChannel.channelStateStream
+          .map((c) => c.messages)
+          .distinct()
+          .listen((newMessages) {
+        newMessages = newMessages.reversed.toList();
+        if (_messages.isEmpty || newMessages.first.id != _messages.first.id) {
+          if (!_scrollController.hasClients ||
+              _scrollController.offset < _newMessageLoadingOffset) {
             setState(() {
               this._messages = newMessages;
             });
+          } else if (newMessages.first.user.id ==
+              streamChannel.channelClient.client.user.id) {
+            _scrollController.jumpTo(0);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              setState(() {
+                this._messages = newMessages;
+              });
+            });
+          } else {
+            _newMessageList =
+                newMessages.toSet().difference(this._messages.toSet()).toList();
+          }
+        } else if (newMessages.last.id != _messages.last.id) {
+          setState(() {
+            this._messages = newMessages;
           });
-        } else {
-          _newMessageList =
-              newMessages.toSet().difference(this._messages.toSet()).toList();
         }
-      } else if (newMessages.last.id != _messages.last.id) {
-        setState(() {
-          this._messages = newMessages;
-        });
-      }
-    });
+      });
+    } else {
+      streamChannel.getReplies(widget.parentMessage.id);
+      _streamListener = streamChannel.channelClient.state.threadsStream
+          .where((threads) => threads.containsKey(widget.parentMessage.id))
+          .map((threads) => threads[widget.parentMessage.id])
+          .distinct()
+          .listen((newMessages) {
+        newMessages = newMessages.reversed.toList();
+        if (_messages.isEmpty || newMessages.first.id != _messages.first.id) {
+          if (!_scrollController.hasClients ||
+              _scrollController.offset < _newMessageLoadingOffset) {
+            setState(() {
+              this._messages = newMessages;
+            });
+          } else if (newMessages.first.user.id ==
+              streamChannel.channelClient.client.user.id) {
+            _scrollController.jumpTo(0);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              setState(() {
+                this._messages = newMessages;
+              });
+            });
+          } else {
+            _newMessageList =
+                newMessages.toSet().difference(this._messages.toSet()).toList();
+          }
+        } else if (newMessages.last.id != _messages.last.id) {
+          setState(() {
+            this._messages = newMessages;
+          });
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
+    print('DISPOSSSEEEE');
     _streamListener.cancel();
     super.dispose();
   }

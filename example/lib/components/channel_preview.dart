@@ -6,10 +6,9 @@ import 'package:stream_chat/stream_chat.dart';
 
 import '../stream_channel.dart';
 import '../stream_chat.dart';
-import 'channel_header.dart';
 import 'channel_image.dart';
 import 'channel_name_text.dart';
-import 'channel_widget.dart';
+import 'message_page.dart';
 
 class ChannelPreview extends StatelessWidget {
   final VoidCallback onTap;
@@ -35,9 +34,7 @@ class ChannelPreview extends StatelessWidget {
                 channelClient: StreamChat.of(context)
                     .client
                     .channelClients[channelState.channel.id],
-                child: ChannelWidget(
-                  channelHeader: ChannelHeader(),
-                ),
+                child: MessagePage(),
               );
             },
             closedBuilder: (context, openAction) {

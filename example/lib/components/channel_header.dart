@@ -8,10 +8,12 @@ import 'channel_image.dart';
 
 class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   final bool showBackButton;
+  final VoidCallback onTapBack;
 
   ChannelHeader({
     Key key,
     this.showBackButton = true,
+    this.onTapBack,
   })  : preferredSize = Size.fromHeight(kToolbarHeight),
         super(key: key);
 
@@ -85,7 +87,11 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
         disabledElevation: 0,
         hoverElevation: 0,
         onPressed: () {
-          Navigator.of(context).pop();
+          if (onTapBack != null) {
+            onTapBack();
+          } else {
+            Navigator.of(context).pop();
+          }
         },
         fillColor: Colors.black.withOpacity(.1),
         padding: EdgeInsets.all(4),

@@ -10,17 +10,21 @@ import 'package:stream_chat_example/stream_chat.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 
+import 'message_list_view.dart';
+
 class MessageWidget extends StatefulWidget {
   const MessageWidget({
     Key key,
     @required this.previousMessage,
     @required this.message,
     @required this.nextMessage,
+    this.parentTapCallback,
   }) : super(key: key);
 
   final Message previousMessage;
   final Message message;
   final Message nextMessage;
+  final ParentTapCallback parentTapCallback;
 
   @override
   _MessageWidgetState createState() => _MessageWidgetState(
@@ -67,22 +71,27 @@ class _MessageWidgetState extends State<MessageWidget>
         children: <Widget>[
           _buildBubble(context, isMyMessage, isLastUser),
           message.replyCount > 0
-              ? Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2.0),
-                  child: Row(
-                    children: <Widget>[
-                      Text(
-                        'Replies: ${message.replyCount}',
-                        style: Theme.of(context)
-                            .textTheme
-                            .subtitle
-                            .copyWith(color: Colors.blue),
-                      ),
-                      Icon(
-                        Icons.subdirectory_arrow_left,
-                        color: Colors.black12,
-                      ),
-                    ],
+              ? GestureDetector(
+                  onTap: () {
+                    widget?.parentTapCallback(message);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: Row(
+                      children: <Widget>[
+                        Text(
+                          'Replies: ${message.replyCount}',
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle
+                              .copyWith(color: Colors.blue),
+                        ),
+                        Icon(
+                          Icons.subdirectory_arrow_left,
+                          color: Colors.black12,
+                        ),
+                      ],
+                    ),
                   ),
                 )
               : Container(),

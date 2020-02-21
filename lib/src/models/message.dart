@@ -166,4 +166,43 @@ class Message {
       updatedAt.hashCode ^
       user.hashCode ^
       extraData.hashCode;
+
+  Message copyWith({
+    String id,
+    String text,
+    String type,
+    List<Attachment> attachments,
+    List<User> mentionedUsers,
+    Map<String, int> reactionCounts,
+    Map<String, int> reactionScores,
+    List<Reaction> latestReactions,
+    List<Reaction> ownReactions,
+    String parentId,
+    int replyCount,
+    bool showInChannel,
+    String command,
+    DateTime createdAt,
+    DateTime updatedAt,
+    User user,
+    Map<String, dynamic> extraData,
+  }) =>
+      Message(
+        id: id ?? this.id,
+        text: text ?? this.text,
+        type: type ?? this.type,
+        attachments: attachments ?? this.attachments,
+        mentionedUsers: mentionedUsers ?? this.mentionedUsers,
+        reactionCounts: reactionCounts ?? this.reactionCounts,
+        reactionScores: reactionScores ?? this.reactionScores,
+        latestReactions: latestReactions ?? this.latestReactions,
+        ownReactions: ownReactions ?? this.ownReactions,
+        parentId: parentId ?? this.parentId,
+        replyCount: replyCount ?? this.replyCount,
+        showInChannel: showInChannel ?? this.showInChannel,
+        command: command ?? this.command,
+        createdAt: createdAt ?? this.createdAt,
+        extraData: extraData ?? this.extraData,
+        user: user ?? this.user,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
 }

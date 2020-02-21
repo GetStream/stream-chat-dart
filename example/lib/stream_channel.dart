@@ -46,6 +46,29 @@ class StreamChannel extends InheritedWidget {
     });
   }
 
+  Future<void> getReplies(String parentId) async {
+    _queryMessageController.add(true);
+
+    String firstId;
+    if (channelClient.state.threads.containsKey(parentId)) {
+      firstId = channelClient.state.threads[parentId].first.id;
+    }
+
+    return channelClient
+        .getReplies(
+      parentId,
+      PaginationParams(
+        lessThan: firstId,
+        limit: 100,
+      ),
+    )
+        .then((res) {
+      _queryMessageController.add(false);
+    }).catchError((e, stack) {
+      _queryMessageController.addError(e, stack);
+    });
+  }
+
   void dispose() {
     _queryMessageController.close();
     channelClient.dispose();

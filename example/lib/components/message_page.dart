@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_chat_example/components/channel_header.dart';
 
 import '../stream_channel.dart';
 import '../stream_chat.dart';
@@ -8,29 +8,30 @@ import 'connection_indicator.dart';
 import 'message_input.dart';
 import 'message_list_view.dart';
 
-class ChannelWidget extends StatefulWidget {
+class MessagePage extends StatefulWidget {
   final PreferredSizeWidget _channelHeader;
 
-  const ChannelWidget({
+  const MessagePage({
     Key key,
-    @required PreferredSizeWidget channelHeader,
+    PreferredSizeWidget channelHeader,
+    this.parentMessage,
   })  : _channelHeader = channelHeader,
         super(key: key);
 
+  final Message parentMessage;
+
   @override
-  _ChannelWidgetState createState() => _ChannelWidgetState();
+  _MessagePageState createState() => _MessagePageState();
 }
 
-class _ChannelWidgetState extends State<ChannelWidget> {
-  final ScrollController _scrollController = ScrollController();
-
+class _MessagePageState extends State<MessagePage> {
   IndicatorController _indicatorController = IndicatorController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: widget._channelHeader,
+      appBar: widget._channelHeader ?? ChannelHeader(),
       body: Column(
         children: <Widget>[
           ConnectionIndicator(
@@ -38,9 +39,22 @@ class _ChannelWidgetState extends State<ChannelWidget> {
           ),
           Expanded(
             child: MessageListView(
-              key: ValueKey<String>(
-                  'CHANNEL-MESSAGE-LIST-${StreamChannel.of(context).channelState.channel.id}'),
-              scrollController: _scrollController,
+              parentMessage: widget.parentMessage,
+              key: Key(
+                  'CHANNEL-MESSAGE-LIST-${StreamChannel.of(context).channelState.channel.id}-${widget.parentMessage?.id}'),
+              parentTapCallback: (message) {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => StreamChannel(
+                      channelClient: StreamChannel.of(context).channelClient,
+                      child: MessagePage(
+                        parentMessage: message,
+                        channelHeader: widget._channelHeader,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           MessageInput(),

@@ -256,13 +256,18 @@ class ChannelClient {
 
   /// List the message replies for a parent message
   Future<QueryRepliesResponse> getReplies(
-    String parentID,
+    String parentId,
     PaginationParams options,
   ) async {
-    final response = await _client.get("/messages/$parentID/replies",
+    final response = await _client.get("/messages/$parentId/replies",
         queryParameters: options.toJson());
-    return _client.decode<QueryRepliesResponse>(
+
+    final repliesResponse = _client.decode<QueryRepliesResponse>(
         response.data, QueryRepliesResponse.fromJson);
+
+    state.updateThreadInfo(parentId, repliesResponse.messages);
+
+    return repliesResponse;
   }
 
   /// List the reactions for a message in the channel
@@ -482,6 +487,23 @@ class ChannelClientState {
     }
   }
 
+  /// Update threads with updated information about messages
+  void updateThreadInfo(String parentId, List<Message> messages) {
+    final newThreads = threads;
+
+    if (newThreads.containsKey(parentId)) {
+      newThreads[parentId] = newThreads[parentId]
+              .where((newMessage) => !channelState.messages.any((m) =>
+                  m.id == newMessage.id && m.updatedAt == newMessage.updatedAt))
+              .toList() +
+          messages;
+    } else {
+      newThreads[parentId] = messages;
+    }
+
+    _threads = newThreads;
+  }
+
   /// Update channelState with updated information
   void updateChannelState(ChannelState updatedState) {
     print(updatedState.messages.last.text);
@@ -524,6 +546,18 @@ class ChannelClientState {
   BehaviorSubject<ChannelState> _channelStateController;
   set _channelState(v) {
     _channelStateController.add(v);
+  }
+
+  /// The channel threads related to this channel
+  Map<String, List<Message>> get threads => _threadsController.value;
+
+  /// The channel threads related to this channel as a stream
+  Stream<Map<String, List<Message>>> get threadsStream =>
+      _threadsController.stream;
+  BehaviorSubject<Map<String, List<Message>>> _threadsController =
+      BehaviorSubject.seeded({});
+  set _threads(v) {
+    _threadsController.add(v);
   }
 
   /// Channel related typing users last value
@@ -572,6 +606,7 @@ class ChannelClientState {
   /// Call this method to dispose this object
   void dispose() {
     _channelStateController.close();
+    _threadsController.close();
     _typingEventsController.close();
   }
 }

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_example/components/channel_widget.dart';
 import 'package:stream_chat_example/components/connection_indicator.dart';
+import 'package:stream_chat_example/components/message_page.dart';
 import 'package:stream_chat_example/stream_channel.dart';
 
 import '../stream_chat.dart';
-import 'channel_header.dart';
 import 'channel_list_app_bar.dart';
 import 'channel_list_view.dart';
 
@@ -86,9 +85,7 @@ class ChannelListPageState extends State<ChannelListPage> {
               channelClient: StreamChat.of(context)
                   .client
                   .channelClients[_selectedChannelId],
-              child: ChannelWidget(
-                channelHeader: ChannelHeader(),
-              ),
+              child: MessagePage(),
             ),
     );
   }
