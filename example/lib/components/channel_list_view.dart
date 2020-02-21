@@ -18,7 +18,6 @@ class ChannelListView extends StatefulWidget {
     this.pagination,
     this.onChannelTap,
   })  : _channelPreviewBuilder = channelPreviewBuilder,
-        assert(onChannelTap != null || channelPreviewBuilder != null),
         super(key: key);
 
   final Map<String, dynamic> filter;
@@ -103,9 +102,11 @@ class _ChannelListViewState extends State<ChannelListView> {
               streamChat.client.channelClients[channelState.channel.id],
           child: ChannelPreview(
             key: ValueKey<String>('CHANNEL-PREVIEW-${channelState.channel.id}'),
-            onTap: () {
-              widget.onChannelTap(channelState);
-            },
+            onTap: widget?.onChannelTap != null
+                ? () {
+                    widget?.onChannelTap(channelState);
+                  }
+                : null,
           ),
         );
       }

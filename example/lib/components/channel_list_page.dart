@@ -1,4 +1,3 @@
-import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -10,10 +9,19 @@ import '../stream_chat.dart';
 import 'channel_header.dart';
 import 'channel_list_app_bar.dart';
 import 'channel_list_view.dart';
-import 'channel_preview.dart';
 
 class ChannelListPage extends StatefulWidget {
-  ChannelListPage();
+  ChannelListPage({
+    this.filter,
+    this.options,
+    this.sort,
+    this.pagination,
+  });
+
+  final Map<String, dynamic> filter;
+  final Map<String, dynamic> options;
+  final List<SortOption> sort;
+  final PaginationParams pagination;
 
   @override
   ChannelListPageState createState() => ChannelListPageState();
@@ -23,11 +31,9 @@ class ChannelListPageState extends State<ChannelListPage> {
   String _selectedChannelId;
   bool showSplit;
   IndicatorController _indicatorController = IndicatorController();
-  Function _openAction;
 
   @override
   Widget build(BuildContext context) {
-    final streamChat = StreamChat.of(context);
     showSplit = MediaQuery.of(context).size.width > 1000;
     return Flex(
       direction: Axis.horizontal,
@@ -40,19 +46,15 @@ class ChannelListPageState extends State<ChannelListPage> {
             ),
             appBar: ChannelListAppBar(),
             body: ChannelListView(
-              filter: {
-                'members': {
-                  '\$in': [streamChat.user.id],
-                }
-              },
-              sort: [SortOption("last_message_at")],
-              pagination: PaginationParams(
-                limit: 20,
-              ),
-              onChannelTap: (channelState) {
-                _navigateToChannel(context, channelState);
-              },
-              channelPreviewBuilder: _buildChannelPreview,
+              options: widget.options,
+              filter: widget.filter,
+              pagination: widget.pagination,
+              sort: widget.sort,
+              onChannelTap: showSplit
+                  ? (channelState) {
+                      _navigateToChannel(context, channelState);
+                    }
+                  : null,
             ),
             floatingActionButton: FloatingActionButton(
               onPressed: () {},
@@ -63,72 +65,41 @@ class ChannelListPageState extends State<ChannelListPage> {
             ),
           ),
         ),
-        showSplit
-            ? Flexible(
-                flex: 2,
-                child: _selectedChannelId == null
-                    ? Scaffold(
-                        body: Center(
-                          child: Text(
-                            'Pick a channel to show the messages 💬',
-                            style: Theme.of(context).textTheme.headline,
-                          ),
-                        ),
-                      )
-                    : StreamChannel(
-                        channelClient: StreamChat.of(context)
-                            .client
-                            .channelClients[_selectedChannelId],
-                        child: ChannelWidget(
-                          channelHeader: ChannelHeader(),
-                        ),
-                      ),
-              )
-            : Container(),
+        showSplit ? _buildMessageView(context) : Container(),
       ],
     );
   }
 
-  Widget _buildChannelPreview(context, channelState) {
-    return OpenContainer(
-      closedColor: Theme.of(context).scaffoldBackgroundColor,
-      tappable: false,
-      closedElevation: 0,
-      openBuilder: (context, _) {
-        return StreamChannel(
-          channelClient: StreamChat.of(context)
-              .client
-              .channelClients[channelState.channel.id],
-          child: ChannelWidget(
-            channelHeader: ChannelHeader(),
-          ),
-        );
-      },
-      closedBuilder: (context, openAction) {
-        _openAction = openAction;
-        return StreamChannel(
-          channelClient: StreamChat.of(context)
-              .client
-              .channelClients[channelState.channel.id],
-          child: ChannelPreview(
-            key: ValueKey<String>('CHANNEL-PREVIEW-${channelState.channel.id}'),
-            onTap: () {
-              _navigateToChannel(context, channelState);
-            },
-          ),
-        );
-      },
+  Flexible _buildMessageView(BuildContext context) {
+    return Flexible(
+      flex: 2,
+      child: _selectedChannelId == null
+          ? Scaffold(
+              body: Center(
+                child: Text(
+                  'Pick a channel to show the messages 💬',
+                  style: Theme.of(context).textTheme.headline,
+                ),
+              ),
+            )
+          : StreamChannel(
+              channelClient: StreamChat.of(context)
+                  .client
+                  .channelClients[_selectedChannelId],
+              child: ChannelWidget(
+                channelHeader: ChannelHeader(),
+              ),
+            ),
     );
   }
 
-  void _navigateToChannel(BuildContext context, ChannelState channelState) {
-    if (this.showSplit) {
-      setState(() {
-        _selectedChannelId = channelState.channel.id;
-      });
-    } else {
-      _openAction();
-    }
+  void _navigateToChannel(
+    BuildContext context,
+    ChannelState channelState,
+  ) {
+    setState(() {
+      _selectedChannelId = channelState.channel.id;
+    });
   }
 
   @override

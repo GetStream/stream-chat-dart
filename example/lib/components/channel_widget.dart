@@ -38,7 +38,8 @@ class _ChannelWidgetState extends State<ChannelWidget> {
           ),
           Expanded(
             child: MessageListView(
-              key: ValueKey<String>('CHANNEL-MESSAGE-LIST'),
+              key: ValueKey<String>(
+                  'CHANNEL-MESSAGE-LIST-${StreamChannel.of(context).channelState.channel.id}'),
               scrollController: _scrollController,
             ),
           ),

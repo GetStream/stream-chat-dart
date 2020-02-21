@@ -78,7 +78,17 @@ class ChatLoader extends StatelessWidget {
             ),
           );
         } else {
-          return ChannelListPage();
+          return ChannelListPage(
+            filter: {
+              'members': {
+                '\$in': [StreamChat.of(context).user.id],
+              }
+            },
+            sort: [SortOption("last_message_at")],
+            pagination: PaginationParams(
+              limit: 20,
+            ),
+          );
         }
       },
     );

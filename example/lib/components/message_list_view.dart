@@ -28,7 +28,7 @@ class _MessageListViewState extends State<MessageListView> {
 
   @override
   Widget build(BuildContext context) {
-    final channelBloc = StreamChannel.of(context);
+    final streamChannel = StreamChannel.of(context);
 
     /// TODO: find a better solution when (https://github.com/flutter/flutter/issues/21023) is fixed
     return NotificationListener<ScrollNotification>(
@@ -48,7 +48,7 @@ class _MessageListViewState extends State<MessageListView> {
         childrenDelegate: SliverChildBuilderDelegate(
           (context, i) {
             if (i == this._messages.length) {
-              return _buildLoadingIndicator(channelBloc);
+              return _buildLoadingIndicator(streamChannel);
             }
             final message = this._messages[i];
             final previousMessage =
@@ -57,7 +57,7 @@ class _MessageListViewState extends State<MessageListView> {
 
             if (i == 0) {
               return _buildBottomMessage(
-                channelBloc,
+                streamChannel,
                 previousMessage,
                 message,
                 context,
@@ -68,7 +68,7 @@ class _MessageListViewState extends State<MessageListView> {
               return _buildTopMessage(
                 message,
                 nextMessage,
-                channelBloc,
+                streamChannel,
                 context,
               );
             }
@@ -168,13 +168,18 @@ class _MessageListViewState extends State<MessageListView> {
     );
   }
 
-  StreamSubscription _streamListenener;
+  StreamSubscription _streamListener;
 
   @override
   void initState() {
     super.initState();
 
-    _streamListenener = StreamChannel.of(context)
+    final streamChannel = StreamChannel.of(context);
+    if (streamChannel.channelClient.state.unreadCount > 0) {
+      streamChannel.channelClient.markRead();
+    }
+
+    _streamListener = StreamChannel.of(context)
         .channelStateStream
         .map((c) => c.messages)
         .distinct()
@@ -208,7 +213,7 @@ class _MessageListViewState extends State<MessageListView> {
 
   @override
   void dispose() {
-    _streamListenener.cancel();
+    _streamListener.cancel();
     super.dispose();
   }
 }

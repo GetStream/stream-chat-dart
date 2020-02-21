@@ -1,11 +1,15 @@
+import 'package:animations/animations.dart';
 import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_example/components/channel_image.dart';
 
 import '../stream_channel.dart';
+import '../stream_chat.dart';
+import 'channel_header.dart';
+import 'channel_image.dart';
 import 'channel_name_text.dart';
+import 'channel_widget.dart';
 
 class ChannelPreview extends StatelessWidget {
   final VoidCallback onTap;
@@ -23,26 +27,52 @@ class ChannelPreview extends StatelessWidget {
         initialData: streamChannel.channelState,
         builder: (context, snapshot) {
           final channelState = snapshot.data;
-          return ListTile(
-            onTap: () {
-              onTap();
+          return OpenContainer(
+            closedColor: Theme.of(context).scaffoldBackgroundColor,
+            closedElevation: 0,
+            openBuilder: (context, _) {
+              return StreamChannel(
+                channelClient: StreamChat.of(context)
+                    .client
+                    .channelClients[channelState.channel.id],
+                child: ChannelWidget(
+                  channelHeader: ChannelHeader(),
+                ),
+              );
             },
-            leading: ChannelImage(
-              channel: channelState.channel,
-            ),
-            title: ChannelNameText(
-              channel: channelState.channel,
-            ),
-            subtitle: _buildSubtitle(
-              streamChannel,
-            ),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                _buildDate(context, channelState.channel.lastMessageAt),
-              ],
-            ),
+            closedBuilder: (context, openAction) {
+              return StreamChannel(
+                channelClient: StreamChat.of(context)
+                    .client
+                    .channelClients[channelState.channel.id],
+                child: ListTile(
+                  onTap: () {
+                    if (onTap != null) {
+                      onTap();
+                    } else {
+                      print('onTAp');
+                      openAction();
+                    }
+                  },
+                  leading: ChannelImage(
+                    channel: channelState.channel,
+                  ),
+                  title: ChannelNameText(
+                    channel: channelState.channel,
+                  ),
+                  subtitle: _buildSubtitle(
+                    streamChannel,
+                  ),
+                  trailing: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: <Widget>[
+                      _buildDate(context, channelState.channel.lastMessageAt),
+                    ],
+                  ),
+                ),
+              );
+            },
           );
         });
   }
