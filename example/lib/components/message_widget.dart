@@ -66,6 +66,26 @@ class _MessageWidgetState extends State<MessageWidget>
             isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: <Widget>[
           _buildBubble(context, isMyMessage, isLastUser),
+          message.replyCount > 0
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2.0),
+                  child: Row(
+                    children: <Widget>[
+                      Text(
+                        'Replies: ${message.replyCount}',
+                        style: Theme.of(context)
+                            .textTheme
+                            .subtitle
+                            .copyWith(color: Colors.blue),
+                      ),
+                      Icon(
+                        Icons.subdirectory_arrow_left,
+                        color: Colors.black12,
+                      ),
+                    ],
+                  ),
+                )
+              : Container(),
           isNextUser ? Container() : _buildTimestamp(isMyMessage, alignment),
         ],
       ),
