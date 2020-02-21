@@ -7,13 +7,19 @@ import 'package:stream_chat/stream_chat.dart';
 import '../stream_channel.dart';
 import 'message_widget.dart';
 
+typedef MessageBuilder = Widget Function(BuildContext, Message, int index);
+
 class MessageListView extends StatefulWidget {
   final ScrollController scrollController;
 
   MessageListView({
     this.scrollController,
     Key key,
-  }) : super(key: key);
+    MessageBuilder messageBuilder,
+  })  : _messageBuilder = messageBuilder,
+        super(key: key);
+
+  final MessageBuilder _messageBuilder;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -51,6 +57,11 @@ class _MessageListViewState extends State<MessageListView> {
               return _buildLoadingIndicator(streamChannel);
             }
             final message = this._messages[i];
+
+            if (widget._messageBuilder != null) {
+              return widget._messageBuilder(context, message, i);
+            }
+
             final previousMessage =
                 i < this._messages.length - 1 ? this._messages[i + 1] : null;
             final nextMessage = i > 0 ? this._messages[i - 1] : null;

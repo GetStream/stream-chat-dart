@@ -50,7 +50,6 @@ class ChannelPreview extends StatelessWidget {
                     if (onTap != null) {
                       onTap();
                     } else {
-                      print('onTAp');
                       openAction();
                     }
                   },

@@ -4,7 +4,6 @@ import 'package:date_format/date_format.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:stream_chat/src/models/attachment.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_example/components/user_avatar.dart';
 import 'package:stream_chat_example/stream_chat.dart';
