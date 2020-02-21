@@ -123,10 +123,76 @@ class _MessageWidgetState extends State<MessageWidget>
         }
 
         if (attachmentWidget != null) {
-          return Container(
-            child: attachmentWidget,
-            margin: EdgeInsets.only(
-              top: nOfAttachmentWidgets > 1 ? 5 : 0,
+          final boxDecoration = _buildBoxDecoration(isMyMessage, isLastUser)
+              .copyWith(color: Color(0xffebebeb));
+          return ClipRRect(
+            borderRadius: boxDecoration.borderRadius,
+            child: Container(
+              decoration: boxDecoration,
+              constraints: BoxConstraints.loose(Size.fromWidth(300)),
+              child: Stack(
+                children: <Widget>[
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      attachmentWidget,
+                      attachment.title != null
+                          ? Container(
+                              constraints:
+                                  BoxConstraints.loose(Size.fromHeight(70)),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text(
+                                      attachment.title,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .subtitle
+                                          .copyWith(color: Colors.blue),
+                                    ),
+                                    Text(
+                                      Uri.parse(attachment.thumbUrl)
+                                          .authority
+                                          .split('.')
+                                          .reversed
+                                          .take(2)
+                                          .toList()
+                                          .reversed
+                                          .join('.'),
+                                      overflow: TextOverflow.ellipsis,
+                                      style:
+                                          Theme.of(context).textTheme.caption,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              color: Color(0xffebebeb),
+                            )
+                          : Container(),
+                    ],
+                  ),
+                  attachment.titleLink != null
+                      ? Positioned.fill(
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () => _launchURL(attachment.titleLink),
+                            ),
+                          ),
+                        )
+                      : SizedBox.fromSize(
+                          size: Size.zero,
+                        ),
+                ],
+              ),
+              margin: EdgeInsets.only(
+                top: nOfAttachmentWidgets > 1 ? 5 : 0,
+              ),
             ),
           );
         }
@@ -150,6 +216,7 @@ class _MessageWidgetState extends State<MessageWidget>
           onTapLink: (link) {
             _launchURL(link);
           },
+          styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)),
         ),
       ));
     }
@@ -157,22 +224,18 @@ class _MessageWidgetState extends State<MessageWidget>
     return column;
   }
 
-  Container _buildImage(
+  Widget _buildImage(
     bool isMyMessage,
     bool isLastUser,
     Attachment attachment,
   ) {
-    return Container(
-      constraints: BoxConstraints.loose(Size.fromWidth(300)),
-      decoration: _buildBoxDecoration(isMyMessage, isLastUser),
-      child: CachedNetworkImage(
-        imageUrl: attachment.imageUrl ?? attachment.thumbUrl,
-        fit: BoxFit.cover,
-      ),
+    return CachedNetworkImage(
+      imageUrl: attachment.thumbUrl ?? attachment.imageUrl,
+      fit: BoxFit.cover,
     );
   }
 
-  Container _buildVideo(
+  Widget _buildVideo(
     Attachment attachment,
     bool isMyMessage,
     bool isLastUser,
@@ -194,43 +257,22 @@ class _MessageWidgetState extends State<MessageWidget>
           autoInitialize: true,
           errorBuilder: (_, e) {
             return Container(
-              constraints: BoxConstraints.loose(Size.fromWidth(300)),
-              decoration: _buildBoxDecoration(isMyMessage, isLastUser),
-              child: Stack(
-                children: <Widget>[
-                  Container(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: CachedNetworkImageProvider(
-                          attachment.thumbUrl,
-                        ),
-                      ),
-                    ),
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: CachedNetworkImageProvider(
+                    attachment.thumbUrl,
                   ),
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => _launchURL(attachment.assetUrl),
-                    ),
-                  ),
-                ],
+                ),
               ),
             );
           });
       _chuwieControllers[attachment.assetUrl] = chewieController;
     }
 
-    return Container(
-      constraints: BoxConstraints.loose(Size.fromWidth(300)),
-      decoration: _buildBoxDecoration(isMyMessage, isLastUser),
-      child: ClipRRect(
-        borderRadius: _buildBoxDecoration(isMyMessage, isLastUser).borderRadius,
-        child: Chewie(
-          key: ValueKey<String>('ATTACHMENT-${attachment.title}-${message.id}'),
-          controller: chewieController,
-        ),
-      ),
+    return Chewie(
+      key: ValueKey<String>('ATTACHMENT-${attachment.title}-${message.id}'),
+      controller: chewieController,
     );
   }
 
