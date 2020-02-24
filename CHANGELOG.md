@@ -1,3 +1,9 @@
+## 0.1.6
+
+- Add initialized completer
+
+- Update example
+
 ## 0.1.5
 
 - Add `ClientState` and `ChannelClientState` classes to handle channel state updates using events
