@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-import 'components/channel_list_page.dart';
+import 'channel_list_page.dart';
 import 'stream_chat.dart';
 
-void main() {
+void main() async {
   final client = Client(
     "qk4nn7rpcn75",
     logLevel: Level.INFO,
+  );
+
+  await client.setUser(
+    User(id: "wild-breeze-7"),
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo',
   );
 
   runApp(StreamChat(
@@ -42,13 +47,6 @@ class _MyAppState extends State<MyApp> {
         canvasColor: Color(0xfff1f1f3),
       ),
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    StreamChat.of(context).setUser(User(id: "wild-breeze-7"),
-        'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo');
   }
 
   @override

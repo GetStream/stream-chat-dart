@@ -1,21 +1,19 @@
-import 'package:animations/animations.dart';
 import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-import '../stream_channel.dart';
-import '../stream_chat.dart';
 import 'channel_image.dart';
 import 'channel_name_text.dart';
-import 'message_page.dart';
+import 'stream_channel.dart';
+import 'stream_chat.dart';
 
 class ChannelPreview extends StatelessWidget {
-  final VoidCallback onTap;
+  final void Function(ChannelClient) onTap;
 
   const ChannelPreview({
     Key key,
-    @required this.onTap,
+    this.onTap,
   }) : super(key: key);
 
   @override
@@ -26,39 +24,26 @@ class ChannelPreview extends StatelessWidget {
         initialData: streamChannel.channelState,
         builder: (context, snapshot) {
           final channelState = snapshot.data;
-          return OpenContainer(
-            closedColor: Theme.of(context).scaffoldBackgroundColor,
-            closedElevation: 0,
-            openBuilder: (context, _) {
-              return _buildMessagePage(context, channelState);
-            },
-            closedBuilder: (context, openAction) {
-              return _buildChannelPreview(
-                context,
-                channelState,
-                openAction,
-                streamChannel,
-              );
-            },
+          return _buildChannelPreview(
+            context,
+            channelState,
+            streamChannel,
           );
         });
   }
 
   StreamChannel _buildChannelPreview(
-      BuildContext context,
-      ChannelState channelState,
-      VoidCallback openAction,
-      StreamChannel streamChannel) {
+    BuildContext context,
+    ChannelState channelState,
+    StreamChannelState streamChannel,
+  ) {
+    final channelClient =
+        StreamChat.of(context).client.channelClients[channelState.channel.id];
     return StreamChannel(
-      channelClient:
-          StreamChat.of(context).client.channelClients[channelState.channel.id],
+      channelClient: channelClient,
       child: ListTile(
         onTap: () {
-          if (onTap != null) {
-            onTap();
-          } else {
-            openAction();
-          }
+          onTap(channelClient);
         },
         leading: ChannelImage(
           channel: channelState.channel,
@@ -77,15 +62,6 @@ class ChannelPreview extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  StreamChannel _buildMessagePage(
-      BuildContext context, ChannelState channelState) {
-    return StreamChannel(
-      channelClient:
-          StreamChat.of(context).client.channelClients[channelState.channel.id],
-      child: MessagePage(),
     );
   }
 
@@ -111,15 +87,15 @@ class ChannelPreview extends StatelessWidget {
   }
 
   Widget _buildSubtitle(
-    StreamChannel streamChannel,
+    StreamChannelState streamChannel,
   ) {
     return StreamBuilder<List<User>>(
         stream: streamChannel.channelClient.state.typingEventsStream,
         initialData: [],
         builder: (context, snapshot) {
           final typings = snapshot.data;
-          final double opacity =
-              streamChannel.channelClient.state.unreadCount > 0 ? 1 : 0.5;
+          final opacity =
+              streamChannel.channelClient.state.unreadCount > .0 ? 1.0 : 0.5;
           return typings.isNotEmpty
               ? _buildTypings(typings, context, opacity)
               : _buildLastMessage(context, streamChannel, opacity);
@@ -127,7 +103,7 @@ class ChannelPreview extends StatelessWidget {
   }
 
   Widget _buildLastMessage(
-      BuildContext context, StreamChannel streamChannel, double opacity) {
+      BuildContext context, StreamChannelState streamChannel, double opacity) {
     final lastMessage = streamChannel.channelState.messages.isNotEmpty
         ? streamChannel.channelState.messages.last
         : null;

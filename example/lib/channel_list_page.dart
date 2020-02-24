@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_example/components/connection_indicator.dart';
-import 'package:stream_chat_example/components/message_page.dart';
+import 'package:stream_chat_example/connection_indicator.dart';
+import 'package:stream_chat_example/message_page.dart';
 import 'package:stream_chat_example/stream_channel.dart';
 
-import '../stream_chat.dart';
 import 'channel_list_view.dart';
 import 'channel_page_app_bar.dart';
+import 'stream_chat.dart';
 
 class ChannelListPage extends StatefulWidget {
   ChannelListPage({
@@ -45,13 +45,15 @@ class ChannelListPageState extends State<ChannelListPage> {
             ),
             appBar: ChannelPageAppBar(),
             body: ChannelListView(
+              channelWidget: MessagePage(),
               options: widget.options,
               filter: widget.filter,
               pagination: widget.pagination,
               sort: widget.sort,
               onChannelTap: showSplit
-                  ? (channelState) {
-                      _navigateToChannel(context, channelState);
+                  ? (channelClient, _) {
+                      _navigateToChannel(
+                          context, channelClient.state.channelState);
                     }
                   : null,
             ),

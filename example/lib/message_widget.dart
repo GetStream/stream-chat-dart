@@ -5,12 +5,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_example/components/user_avatar.dart';
-import 'package:stream_chat_example/stream_chat.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 
 import 'message_list_view.dart';
+import 'stream_chat.dart';
+import 'user_avatar.dart';
 
 class MessageWidget extends StatefulWidget {
   const MessageWidget({
@@ -18,13 +18,13 @@ class MessageWidget extends StatefulWidget {
     @required this.previousMessage,
     @required this.message,
     @required this.nextMessage,
-    this.parentTapCallback,
+    this.onThreadSelect,
   }) : super(key: key);
 
   final Message previousMessage;
   final Message message;
   final Message nextMessage;
-  final ParentTapCallback parentTapCallback;
+  final OnThreadSelectCallback onThreadSelect;
 
   @override
   _MessageWidgetState createState() => _MessageWidgetState();
@@ -44,13 +44,13 @@ class _MessageWidgetState extends State<MessageWidget>
     final messageUserId = widget.message.user.id;
     final previousUserId = widget.previousMessage?.user?.id;
     final nextUserId = widget.nextMessage?.user?.id;
-    final bool isMyMessage = messageUserId == currentUserId;
+    final isMyMessage = messageUserId == currentUserId;
     final isLastUser = previousUserId == messageUserId;
     final isNextUser = nextUserId == messageUserId;
     final alignment =
         isMyMessage ? Alignment.centerRight : Alignment.centerLeft;
 
-    List<Widget> row = <Widget>[
+    var row = <Widget>[
       Column(
         crossAxisAlignment:
             isMyMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
@@ -59,7 +59,9 @@ class _MessageWidgetState extends State<MessageWidget>
           widget.message.replyCount > 0
               ? GestureDetector(
                   onTap: () {
-                    widget?.parentTapCallback(widget.message);
+                    if (widget.onThreadSelect != null) {
+                      widget.onThreadSelect(widget.message);
+                    }
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2.0),
@@ -122,7 +124,7 @@ class _MessageWidgetState extends State<MessageWidget>
     bool isMyMessage,
     bool isLastUser,
   ) {
-    int nOfAttachmentWidgets = 0;
+    var nOfAttachmentWidgets = 0;
 
     final column = Column(
       crossAxisAlignment:
@@ -302,7 +304,7 @@ class _MessageWidgetState extends State<MessageWidget>
     );
   }
 
-  _launchURL(String url) async {
+  Future<void> _launchURL(String url) async {
     if (await canLaunch(url)) {
       await launch(url);
     } else {

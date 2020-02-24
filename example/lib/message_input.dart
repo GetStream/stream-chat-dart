@@ -3,15 +3,17 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-import '../stream_channel.dart';
+import 'stream_channel.dart';
 
 class MessageInput extends StatefulWidget {
   MessageInput({
     Key key,
-    @required this.onMessageSubmit,
+    this.onMessageSent,
+    this.parent,
   }) : super(key: key);
 
-  final void Function(Message) onMessageSubmit;
+  final void Function(Message) onMessageSent;
+  final Message parent;
 
   @override
   _MessageInputState createState() => _MessageInputState();
@@ -118,6 +120,18 @@ class _MessageInputState extends State<MessageInput> {
     });
     FocusScope.of(context).unfocus();
 
-    widget.onMessageSubmit(Message(text: text));
+    StreamChannel.of(context)
+        .channelClient
+        .sendMessage(
+          Message(
+            parentId: widget.parent?.id,
+            text: text,
+          ),
+        )
+        .then((_) {
+      if (widget.onMessageSent != null) {
+        widget.onMessageSent(Message(text: text));
+      }
+    });
   }
 }

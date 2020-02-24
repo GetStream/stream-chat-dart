@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-import '../stream_channel.dart';
-import '../stream_chat.dart';
 import 'channel_preview.dart';
+import 'stream_channel.dart';
+import 'stream_chat.dart';
 
-typedef ChannelPreviewBuilder = Widget Function(BuildContext, ChannelState);
-typedef ChannelTapCallback = void Function(ChannelState);
+typedef ChannelTapCallback = void Function(ChannelClient, Widget);
 
 class ChannelListView extends StatefulWidget {
   ChannelListView({
     Key key,
-    ChannelPreviewBuilder channelPreviewBuilder,
     this.filter,
     this.options,
     this.sort,
     this.pagination,
     this.onChannelTap,
-  })  : _channelPreviewBuilder = channelPreviewBuilder,
+    this.channelWidget,
+    this.channelPreview,
+  })  : assert(channelWidget != null || onChannelTap != null),
         super(key: key);
 
   final Map<String, dynamic> filter;
@@ -26,8 +26,8 @@ class ChannelListView extends StatefulWidget {
   final PaginationParams pagination;
   final ScrollController _scrollController = ScrollController();
   final ChannelTapCallback onChannelTap;
-
-  final ChannelPreviewBuilder _channelPreviewBuilder;
+  final Widget channelWidget;
+  final Widget channelPreview;
 
   @override
   _ChannelListViewState createState() => _ChannelListViewState();
@@ -94,22 +94,59 @@ class _ChannelListViewState extends State<ChannelListView> {
     final streamChat = StreamChat.of(context);
     if (i < channelsStates.length) {
       final channelState = channelsStates[i];
-      if (widget._channelPreviewBuilder != null) {
-        return widget._channelPreviewBuilder(context, channelState);
+
+      final channelClient =
+          streamChat.client.channelClients[channelState.channel.id];
+
+      ChannelTapCallback onTap;
+      if (widget.onChannelTap != null) {
+        onTap = widget.onChannelTap;
       } else {
-        return StreamChannel(
-          channelClient:
-              streamChat.client.channelClients[channelState.channel.id],
-          child: ChannelPreview(
-            key: ValueKey<String>('CHANNEL-PREVIEW-${channelState.channel.id}'),
-            onTap: widget?.onChannelTap != null
-                ? () {
-                    widget?.onChannelTap(channelState);
-                  }
-                : null,
-          ),
+        onTap = (client, _) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) {
+                return StreamChannel(
+                  child: widget.channelWidget,
+                  channelClient: client,
+                );
+              },
+            ),
+          );
+        };
+      }
+
+      Widget child;
+      if (widget.channelPreview != null) {
+        child = Stack(
+          children: [
+            widget.channelPreview,
+            Positioned.fill(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    onTap(channelClient, widget.channelWidget);
+                  },
+                ),
+              ),
+            ),
+          ],
+        );
+      } else {
+        child = ChannelPreview(
+          onTap: (channelClient) {
+            onTap(channelClient, widget.channelWidget);
+          },
         );
       }
+
+      return StreamChannel(
+        key: ValueKey<String>('CHANNEL-${channelClient.id}'),
+        child: child,
+        channelClient: channelClient,
+      );
     } else {
       return _buildQueryProgressIndicator(context, streamChat);
     }

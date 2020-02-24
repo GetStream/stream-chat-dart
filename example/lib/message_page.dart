@@ -1,13 +1,13 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_example/components/channel_header.dart';
+import 'package:stream_chat_example/channel_header.dart';
 
-import '../stream_channel.dart';
-import '../stream_chat.dart';
 import 'connection_indicator.dart';
 import 'message_input.dart';
 import 'message_list_view.dart';
+import 'stream_channel.dart';
+import 'stream_chat.dart';
 
 class MessagePage extends StatefulWidget {
   final PreferredSizeWidget _channelHeader;
@@ -41,7 +41,7 @@ class _MessagePageState extends State<MessagePage> {
           Expanded(
             child: MessageListView(
               parentMessage: widget.parentMessage,
-              parentTapCallback: (message) {
+              onThreadSelect: (message) {
                 Navigator.of(context).push(
                   PageRouteBuilder(
                     pageBuilder: (_, __, ___) => StreamChannel(
@@ -68,13 +68,7 @@ class _MessagePageState extends State<MessagePage> {
               },
             ),
           ),
-          MessageInput(
-            onMessageSubmit: (message) {
-              StreamChannel.of(context).channelClient.sendMessage(
-                    message.copyWith(parentId: widget.parentMessage?.id),
-                  );
-            },
-          ),
+          MessageInput(),
         ],
       ),
     );

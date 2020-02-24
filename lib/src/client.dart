@@ -115,9 +115,6 @@ class Client {
   /// Listen to this or use the [on] method to filter specific event types
   Stream<Event> get stream => _controller.stream;
 
-  /// The current user
-  User user;
-
   /// This notifies the connection status of the websocket connection.
   /// Listen to this to get notified when the websocket tries to reconnect.
   final ValueNotifier<ConnectionStatus> wsConnectionStatus =
@@ -177,7 +174,7 @@ class Client {
 
       if (this.tokenProvider != null) {
         _tokenExpiredCompleter = Completer();
-        final userId = this.user.id;
+        final userId = state.user.id;
 
         _ws.connectionStatus.removeListener(_connectionStatusListener);
 
@@ -253,7 +250,7 @@ class Client {
   /// Set the current user, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
   Future<Event> setUser(User user, String token) async {
-    this.user = user;
+    state.user = user;
     _token = token;
     _anonymous = false;
     return _connect();
@@ -289,14 +286,14 @@ class Client {
   Future<Event> _connect() async {
     _ws = WebSocket(
       baseUrl: baseURL,
-      user: user,
+      user: state.user,
       connectParams: {
         "api_key": apiKey,
         "authorization": _token,
         "stream-auth-type": _authType,
       },
       connectPayload: {
-        "user_id": user.id,
+        "user_id": state.user.id,
         "server_determines_connection_id": true,
       },
       handler: handleEvent,
@@ -332,7 +329,7 @@ class Client {
     Map<String, dynamic> payload = {
       "filter_conditions": filter,
       "sort": sort,
-      "user_details": this.user,
+      "user_details": state.user,
     };
 
     if (messageLimit != null) {
@@ -477,7 +474,7 @@ class Client {
   String get _userAgent => "stream_chat_dart-client-$PACKAGE_VERSION";
 
   Map<String, String> get _commonQueryParams => {
-        "user_id": user?.id,
+        "user_id": state.user?.id,
         "api_key": apiKey,
         "connection_id": _connectionId,
       };
@@ -487,7 +484,7 @@ class Client {
   Future<Event> setAnonymousUser() async {
     this._anonymous = true;
     final uuid = Uuid();
-    this.user = User(id: uuid.v4());
+    state.user = User(id: uuid.v4());
     return _connect();
   }
 
@@ -510,7 +507,7 @@ class Client {
     this._connectionId = null;
     await this._ws.disconnect();
     this._token = null;
-    this.user = null;
+    state.user = null;
   }
 
   /// Requests users with a given query.
@@ -765,6 +762,11 @@ class ClientState {
   }
 
   final Client _client;
+
+  /// Update user information
+  set user(User user) {
+    _userController.add(user);
+  }
 
   /// The current user
   User get user => _userController.value;

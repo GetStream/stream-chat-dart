@@ -33,6 +33,7 @@ class ChannelClient {
     type = channelState.channel.type;
 
     state = ChannelClientState(this, channelState);
+    _initializedCompleter.complete(true);
     _startCleaning();
 
     _client.logger.info('New ChannelClient instance initialized created');
@@ -59,9 +60,11 @@ class ChannelClient {
 
   String get _channelURL => "/channels/$type/$id";
 
+  Completer<bool> _initializedCompleter = Completer();
+
   /// True if this is initialized
   /// Call [watch] to initialize the client or instantiate it using [ChannelClient.fromState]
-  bool get initialized => state != null;
+  Future<bool> get initialized => _initializedCompleter.future;
 
   /// Send a message to this channel
   Future<SendMessageResponse> sendMessage(Message message) async {
@@ -238,10 +241,18 @@ class ChannelClient {
     })
       ..addAll(options);
 
-    final response = await query(options: watchOptions);
+    var response;
+
+    try {
+      response = await query(options: watchOptions);
+    } catch (error, stackTrace) {
+      _initializedCompleter.completeError(error, stackTrace);
+      rethrow;
+    }
 
     if (state == null) {
       state = ChannelClientState(this, response);
+      _initializedCompleter.complete(true);
       _startCleaning();
     }
 
@@ -430,7 +441,7 @@ class ChannelClient {
   }
 
   void _checkInitialized() {
-    if (!this.initialized) {
+    if (!_initializedCompleter.isCompleted) {
       throw Exception(
           "Channel ${this.cid} hasn't been initialized yet. Make sure to call .watch() or to instantiate the client using [ChannelClient.fromState]");
     }
@@ -481,8 +492,8 @@ class ChannelClientState {
         .where((e) => e.user.id == _channelClient.client.state.user.id)
         .listen((event) {
       final read = this.channelState.read;
-      final userReadIndex =
-          read?.indexWhere((r) => r.user.id == _channelClient.client.user.id);
+      final userReadIndex = read
+          ?.indexWhere((r) => r.user.id == _channelClient.client.state.user.id);
 
       if (userReadIndex != null && userReadIndex != -1) {
         final userRead = read.removeAt(userReadIndex);
@@ -599,14 +610,14 @@ class ChannelClientState {
 
   void _listenTypingEvents() {
     this._channelClient.on(EventType.typingStart).listen((event) {
-      if (event.user != _channelClient.client.user) {
+      if (event.user != _channelClient.client.state.user) {
         _typings[event.user] = DateTime.now();
         _typingEventsController.add(_typings.keys.toList());
       }
     });
 
     this._channelClient.on(EventType.typingStop).listen((event) {
-      if (event.user != _channelClient.client.user) {
+      if (event.user != _channelClient.client.state.user) {
         _typings.remove(event.user);
         _typingEventsController.add(_typings.keys.toList());
       }
