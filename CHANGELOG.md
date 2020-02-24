@@ -1,3 +1,9 @@
+## 0.1.5
+
+- Add `ClientState` and `ChannelClientState` classes to handle channel state updates using events
+
+- Update example supporting threads
+
 ## 0.1.4
 
 - Update some api with wrong or incomplete signatures
