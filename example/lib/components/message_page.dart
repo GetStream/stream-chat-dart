@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_example/components/channel_header.dart';
@@ -42,13 +43,25 @@ class _MessagePageState extends State<MessagePage> {
               parentMessage: widget.parentMessage,
               parentTapCallback: (message) {
                 Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => StreamChannel(
+                  PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => StreamChannel(
                       channelClient: StreamChannel.of(context).channelClient,
                       child: MessagePage(
                         parentMessage: message,
                         channelHeader: widget._channelHeader,
                       ),
+                    ),
+                    transitionsBuilder: (
+                      _,
+                      animation,
+                      secondaryAnimation,
+                      child,
+                    ) =>
+                        SharedAxisTransition(
+                      child: child,
+                      animation: animation,
+                      secondaryAnimation: secondaryAnimation,
+                      transitionType: SharedAxisTransitionType.horizontal,
                     ),
                   ),
                 );

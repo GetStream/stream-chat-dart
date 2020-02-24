@@ -65,13 +65,29 @@ class _MessageListViewState extends State<MessageListView> {
                   return widget.parentMessageBuilder(
                       context, widget.parentMessage);
                 } else {
-                  return MessageWidget(
-                    key: ValueKey<String>(
-                        'PARENT-MESSAGE-${widget.parentMessage.id}'),
-                    previousMessage: null,
-                    message: widget.parentMessage.copyWith(replyCount: 0),
-                    nextMessage: null,
-                    parentTapCallback: widget.parentTapCallback,
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      MessageWidget(
+                        key: ValueKey<String>(
+                            'PARENT-MESSAGE-${widget.parentMessage.id}'),
+                        previousMessage: null,
+                        message: widget.parentMessage.copyWith(replyCount: 0),
+                        nextMessage: null,
+                        parentTapCallback: widget.parentTapCallback,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 32),
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          child: Text(
+                            'Start of a new thread',
+                            textAlign: TextAlign.center,
+                          ),
+                          color: Theme.of(context).primaryColorLight,
+                        ),
+                      ),
+                    ],
                   );
                 }
               } else {

@@ -191,7 +191,7 @@ class _MessageWidgetState extends State<MessageWidget>
                           : Container(),
                     ],
                   ),
-                  attachment.titleLink != null
+                  attachment.type == 'image' && attachment.titleLink != null
                       ? Positioned.fill(
                           child: Material(
                             color: Colors.transparent,
@@ -271,15 +271,25 @@ class _MessageWidgetState extends State<MessageWidget>
           videoPlayerController: videoController,
           autoInitialize: true,
           errorBuilder: (_, e) {
-            return Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  fit: BoxFit.cover,
-                  image: CachedNetworkImageProvider(
-                    attachment.thumbUrl,
+            return Stack(
+              children: <Widget>[
+                Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: CachedNetworkImageProvider(
+                        attachment.thumbUrl,
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => _launchURL(attachment.titleLink),
+                  ),
+                ),
+              ],
             );
           });
       _chuwieControllers[attachment.assetUrl] = chewieController;

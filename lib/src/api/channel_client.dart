@@ -457,8 +457,10 @@ class ChannelClientState {
 
       if (event.message.parentId != null) {
         final newThreads = threads;
-        newThreads[event.message.parentId].add(event.message);
-        _threads = newThreads;
+        if (newThreads.containsKey(event.message.parentId)) {
+          newThreads[event.message.parentId].add(event.message);
+          _threads = newThreads;
+        }
 
         _channelState = this.channelState.copyWith(
               messages: this.channelState.messages.map((message) {
@@ -480,10 +482,13 @@ class ChannelClientState {
         .listen((event) {
       final read = this.channelState.read;
       final userReadIndex =
-          read.indexWhere((r) => r.user.id == _channelClient.client.user.id);
-      final userRead = read.removeAt(userReadIndex);
-      read.add(Read(user: userRead.user, lastRead: event.createdAt));
-      _channelStateController.add(this.channelState.copyWith(read: read));
+          read?.indexWhere((r) => r.user.id == _channelClient.client.user.id);
+
+      if (userReadIndex != null && userReadIndex != -1) {
+        final userRead = read.removeAt(userReadIndex);
+        read.add(Read(user: userRead.user, lastRead: event.createdAt));
+        _channelStateController.add(this.channelState.copyWith(read: read));
+      }
     });
   }
 
@@ -527,7 +532,6 @@ class ChannelClientState {
 
   /// Update channelState with updated information
   void updateChannelState(ChannelState updatedState) {
-    print(updatedState.messages.last.text);
     _channelStateController.add(channelState.copyWith(
       messages: updatedState.messages != null
           ? updatedState.messages

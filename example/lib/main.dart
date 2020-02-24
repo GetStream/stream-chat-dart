@@ -79,11 +79,11 @@ class ChatLoader extends StatelessWidget {
           );
         } else {
           return ChannelListPage(
-            filter: {
-              'members': {
-                '\$in': [StreamChat.of(context).user.id],
-              }
-            },
+//            filter: {
+//              'members': {
+//                '\$in': [StreamChat.of(context).user.id],
+//              }
+//            },
             sort: [SortOption("last_message_at")],
             pagination: PaginationParams(
               limit: 20,
