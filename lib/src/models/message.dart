@@ -124,6 +124,7 @@ class Message {
   Map<String, dynamic> toJson() =>
       Serialization.moveKeysToMapInPlace(_$MessageToJson(this), topLevelFields);
 
+  /// Creates a copy of [Message] with specified attributes overridden.
   Message copyWith({
     String id,
     String text,

@@ -492,6 +492,7 @@ class ChannelClientState {
     });
   }
 
+  /// Unread count getter
   int get unreadCount {
     final userId = _channelClient.client.state?.user?.id;
     final userRead = channelState.read?.firstWhere(
