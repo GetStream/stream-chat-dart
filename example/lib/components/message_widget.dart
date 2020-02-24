@@ -39,8 +39,8 @@ class _MessageWidgetState extends State<MessageWidget>
   Widget build(BuildContext context) {
     super.build(context);
 
-    final chatBloc = StreamChat.of(context);
-    final currentUserId = chatBloc.user.id;
+    final streamChat = StreamChat.of(context);
+    final currentUserId = streamChat.user.id;
     final messageUserId = widget.message.user.id;
     final previousUserId = widget.previousMessage?.user?.id;
     final nextUserId = widget.nextMessage?.user?.id;

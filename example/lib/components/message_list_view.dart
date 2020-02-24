@@ -178,7 +178,7 @@ class _MessageListViewState extends State<MessageListView> {
   Widget _buildTopMessage(
     Message message,
     Message nextMessage,
-    StreamChannel channelBloc,
+    StreamChannel streamChat,
     BuildContext context,
   ) {
     return VisibilityDetector(
@@ -193,7 +193,7 @@ class _MessageListViewState extends State<MessageListView> {
       onVisibilityChanged: (visibility) {
         final topIsVisible = visibility.visibleBounds != Rect.zero;
         if (topIsVisible && !_topWasVisible) {
-          channelBloc.queryMessages();
+          streamChat.queryMessages();
         }
         _topWasVisible = topIsVisible;
       },
@@ -201,7 +201,7 @@ class _MessageListViewState extends State<MessageListView> {
   }
 
   Widget _buildBottomMessage(
-    StreamChannel channelBloc,
+    StreamChannel streamChat,
     Message previousMessage,
     Message message,
     BuildContext context,
@@ -211,8 +211,8 @@ class _MessageListViewState extends State<MessageListView> {
       onVisibilityChanged: (visibility) {
         this._isBottom = visibility.visibleBounds != Rect.zero;
         if (this._isBottom) {
-          if (channelBloc.channelClient.state.unreadCount > 0) {
-            channelBloc.channelClient.markRead();
+          if (streamChat.channelClient.state.unreadCount > 0) {
+            streamChat.channelClient.markRead();
           }
         }
       },

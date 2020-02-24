@@ -138,14 +138,14 @@ class _ChannelListViewState extends State<ChannelListView> {
     );
   }
 
-  void _listenChannelPagination(StreamChat chatBloc) {
+  void _listenChannelPagination(StreamChat streamChat) {
     if (widget._scrollController.position.maxScrollExtent ==
         widget._scrollController.position.pixels) {
-      chatBloc.queryChannels(
+      streamChat.queryChannels(
         filter: widget.filter,
         sortOptions: widget.sort,
         paginationParams: widget.pagination.copyWith(
-          offset: chatBloc.channels.length,
+          offset: streamChat.channels.length,
         ),
         options: widget.options,
       );

@@ -19,10 +19,10 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final channelBloc = StreamChannel.of(context);
+    final streamChat = StreamChannel.of(context);
     return StreamBuilder<ChannelState>(
-        stream: channelBloc.channelStateStream,
-        initialData: channelBloc.channelState,
+        stream: streamChat.channelStateStream,
+        initialData: streamChat.channelState,
         builder: (context, snapshot) {
           final channelState = snapshot.data;
           return AppBar(

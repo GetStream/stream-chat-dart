@@ -84,23 +84,23 @@ class _MessagePageState extends State<MessagePage> {
   void initState() {
     super.initState();
 
-    final chatBloc = StreamChat.of(context);
-    chatBloc.client.wsConnectionStatus.addListener(() {
-      if (chatBloc.client.wsConnectionStatus.value ==
+    final streamChat = StreamChat.of(context);
+    streamChat.client.wsConnectionStatus.addListener(() {
+      if (streamChat.client.wsConnectionStatus.value ==
           ConnectionStatus.disconnected) {
         _indicatorController.showIndicator(
           duration: Duration(minutes: 1),
           color: Colors.red,
           text: 'Disconnected',
         );
-      } else if (chatBloc.client.wsConnectionStatus.value ==
+      } else if (streamChat.client.wsConnectionStatus.value ==
           ConnectionStatus.connecting) {
         _indicatorController.showIndicator(
           duration: Duration(minutes: 1),
           color: Colors.yellow,
           text: 'Reconnecting',
         );
-      } else if (chatBloc.client.wsConnectionStatus.value ==
+      } else if (streamChat.client.wsConnectionStatus.value ==
           ConnectionStatus.connected) {
         _indicatorController.showIndicator(
           duration: Duration(seconds: 5),
@@ -108,8 +108,8 @@ class _MessagePageState extends State<MessagePage> {
           text: 'Connected',
         );
 
-        final channelBloc = StreamChannel.of(context);
-        channelBloc.queryMessages();
+        final streamChat = StreamChannel.of(context);
+        streamChat.queryMessages();
       }
     });
   }

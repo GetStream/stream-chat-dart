@@ -61,9 +61,9 @@ class _MyAppState extends State<MyApp> {
 class ChatLoader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final chatBloc = StreamChat.of(context);
+    final streamChat = StreamChat.of(context);
     return StreamBuilder<User>(
-      stream: chatBloc.userStream,
+      stream: streamChat.userStream,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Scaffold(
