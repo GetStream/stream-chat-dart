@@ -534,27 +534,7 @@ class ChannelClientState {
         _channelState = this._channelState.copyWith(
               messages: this._channelState.messages.map((message) {
                 if (message.id == event.message.id) {
-                  final newMessage = message.copyWith(
-                    latestReactions: message.latestReactions
-                      ..add(event.reaction),
-                    reactionCounts: message.reactionCounts
-                      ..addAll({
-                        event.reaction.type: (message.reactionCounts == null
-                                ? 0
-                                : message.reactionCounts[event.reaction.type] ??
-                                    0) +
-                            1,
-                      }),
-                  );
-
-                  if (event.user.id ==
-                      this._channelClient.client.state.user.id) {
-                    return newMessage.copyWith(
-                      ownReactions: message.ownReactions..add(event.reaction),
-                    );
-                  }
-
-                  return newMessage;
+                  return _addReactionToMessage(message, event);
                 }
                 return message;
               }).toList(),
@@ -570,10 +550,41 @@ class ChannelClientState {
           newThreads[event.message.parentId] =
               newThreads[event.message.parentId].map((message) {
             if (message.id == event.message.id) {
-              return event.message;
+              return _addReactionToMessage(message, event);
             }
             return message;
-          });
+          }).toList();
+          _threads = newThreads;
+        }
+      }
+    });
+
+    _channelClient.on('reaction.deleted').listen((event) {
+      if (event.message.parentId == null ||
+          event.message.showInChannel == true) {
+        _channelState = this._channelState.copyWith(
+              messages: this._channelState.messages.map((message) {
+                if (message.id == event.message.id) {
+                  return _removeReactionRemoveMessage(message, event);
+                }
+                return message;
+              }).toList(),
+              channel: this._channelState.channel.copyWith(
+                    lastMessageAt: event.message.createdAt,
+                  ),
+            );
+      }
+
+      if (event.message.parentId != null) {
+        final newThreads = threads;
+        if (newThreads.containsKey(event.message.parentId)) {
+          newThreads[event.message.parentId] =
+              newThreads[event.message.parentId].map((message) {
+            if (message.id == event.message.id) {
+              return _removeReactionRemoveMessage(message, event);
+            }
+            return message;
+          }).toList();
           _threads = newThreads;
         }
       }
@@ -593,6 +604,50 @@ class ChannelClientState {
         _channelStateController.add(this._channelState.copyWith(read: read));
       }
     });
+  }
+
+  Message _addReactionToMessage(Message message, Event event) {
+    final newMessage = message.copyWith(
+      latestReactions: message.latestReactions..add(event.reaction),
+      reactionCounts: message.reactionCounts
+        ..addAll({
+          event.reaction.type: (message.reactionCounts == null
+                  ? 0
+                  : message.reactionCounts[event.reaction.type] ?? 0) +
+              1,
+        }),
+    );
+
+    if (event.user.id == this._channelClient.client.state.user.id) {
+      return newMessage.copyWith(
+        ownReactions: message.ownReactions..add(event.reaction),
+      );
+    }
+
+    return newMessage;
+  }
+
+  Message _removeReactionRemoveMessage(Message message, Event event) {
+    final newMessage = message.copyWith(
+      latestReactions: message.latestReactions
+        ..removeWhere((r) => r.type == event.reaction.type),
+      reactionCounts: message.reactionCounts
+        ..addAll({
+          event.reaction.type:
+              (message.reactionCounts[event.reaction.type]) - 1,
+        }),
+    );
+
+    newMessage.reactionCounts.removeWhere((_, v) => v == 0);
+
+    if (event.user.id == this._channelClient.client.state.user.id) {
+      return newMessage.copyWith(
+        ownReactions: message.ownReactions
+          ..removeWhere((r) => r.type == event.reaction.type),
+      );
+    }
+
+    return newMessage;
   }
 
   List<Message> get messages => _channelState.messages;
