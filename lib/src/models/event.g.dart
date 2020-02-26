@@ -25,6 +25,9 @@ Event _$EventFromJson(Map<String, dynamic> json) {
         : Message.fromJson(json['message'] as Map<String, dynamic>),
     totalUnreadCount: json['total_unread_count'] as int,
     unreadChannels: json['unread_channels'] as int,
+    reaction: json['reaction'] == null
+        ? null
+        : Reaction.fromJson(json['reaction'] as Map<String, dynamic>),
   );
 }
 
@@ -36,6 +39,7 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'me': instance.me?.toJson(),
       'user': instance.user?.toJson(),
       'message': instance.message?.toJson(),
+      'reaction': instance.reaction?.toJson(),
       'total_unread_count': instance.totalUnreadCount,
       'unread_channels': instance.unreadChannels,
     };

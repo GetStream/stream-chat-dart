@@ -534,7 +534,27 @@ class ChannelClientState {
         _channelState = this._channelState.copyWith(
               messages: this._channelState.messages.map((message) {
                 if (message.id == event.message.id) {
-                  return event.message;
+                  final newMessage = message.copyWith(
+                    latestReactions: message.latestReactions
+                      ..add(event.reaction),
+                    reactionCounts: message.reactionCounts
+                      ..addAll({
+                        event.reaction.type: (message.reactionCounts == null
+                                ? 0
+                                : message.reactionCounts[event.reaction.type] ??
+                                    0) +
+                            1,
+                      }),
+                  );
+
+                  if (event.user.id ==
+                      this._channelClient.client.state.user.id) {
+                    return newMessage.copyWith(
+                      ownReactions: message.ownReactions..add(event.reaction),
+                    );
+                  }
+
+                  return newMessage;
                 }
                 return message;
               }).toList(),

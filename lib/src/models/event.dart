@@ -1,9 +1,10 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/models/message.dart';
 
-import 'own_user.dart';
-import 'user.dart';
 import '../event_type.dart';
+import 'own_user.dart';
+import 'reaction.dart';
+import 'user.dart';
 
 part 'event.g.dart';
 
@@ -32,6 +33,9 @@ class Event {
   /// The message sent with the event
   final Message message;
 
+  /// The reaction sent with the event
+  final Reaction reaction;
+
   /// The number of unread messages for current user
   final int totalUnreadCount;
 
@@ -49,6 +53,7 @@ class Event {
     this.message,
     this.totalUnreadCount,
     this.unreadChannels,
+    this.reaction,
   });
 
   /// Create a new instance from a json
