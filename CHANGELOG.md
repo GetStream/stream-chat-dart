@@ -1,3 +1,7 @@
+## 0.1.7
+
+- Add reaction handling
+
 ## 0.1.6
 
 - Add initialized completer
