@@ -609,7 +609,7 @@ class ChannelClientState {
   Message _addReactionToMessage(Message message, Event event) {
     final newMessage = message.copyWith(
       latestReactions: message.latestReactions..add(event.reaction),
-      reactionCounts: message.reactionCounts
+      reactionCounts: (message.reactionCounts ?? {})
         ..addAll({
           event.reaction.type: (message.reactionCounts == null
                   ? 0
