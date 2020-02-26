@@ -528,6 +528,49 @@ class ChannelClientState {
       }
     });
 
+    _channelClient.on('message.deleted').listen((event) {
+      if (event.message.parentId == null ||
+          event.message.showInChannel == true) {
+        _channelState = this._channelState.copyWith(
+            messages: this._channelState.messages.map((message) {
+              if (message.id == event.message.id) {
+                return event.message;
+              }
+
+              return message;
+            }).toList(),
+            channel: this._channelState.channel.copyWith(
+                  lastMessageAt: event.message.createdAt,
+                ));
+      }
+
+      if (event.message.parentId != null) {
+        final newThreads = threads;
+        if (newThreads.containsKey(event.message.parentId)) {
+          newThreads[event.message.parentId].map((message) {
+            if (message.id == event.message.id) {
+              return event.message;
+            }
+
+            return message;
+          });
+          _threads = newThreads;
+        }
+
+        _channelState = this._channelState.copyWith(
+              messages: this._channelState.messages.map((message) {
+                if (message.id == event.message.parentId) {
+                  return message.copyWith(
+                    replyCount: message.replyCount - 1,
+                  );
+                }
+
+                return message;
+              }).toList(),
+            );
+      }
+    });
+
     _channelClient.on('reaction.new').listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
