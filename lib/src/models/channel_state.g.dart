@@ -10,7 +10,7 @@ ChannelState _$ChannelStateFromJson(Map<String, dynamic> json) {
   return ChannelState(
     channel: json['channel'] == null
         ? null
-        : Channel.fromJson(json['channel'] as Map<String, dynamic>),
+        : ChannelModel.fromJson(json['channel'] as Map<String, dynamic>),
     messages: (json['messages'] as List)
         ?.map((e) =>
             e == null ? null : Message.fromJson(e as Map<String, dynamic>))

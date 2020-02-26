@@ -1,5 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_chat/src/api/channel_client.dart';
 import 'package:stream_chat/src/client.dart';
 import 'package:stream_chat/src/models/device.dart';
 
@@ -192,7 +191,7 @@ class GetMessagesByIdResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class UpdateChannelResponse extends _BaseResponse {
   /// Updated channel
-  Channel channel;
+  ChannelModel channel;
 
   /// Channel members
   List<Member> members;
@@ -209,7 +208,7 @@ class UpdateChannelResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class InviteMembersResponse extends _BaseResponse {
   /// Updated channel
-  Channel channel;
+  ChannelModel channel;
 
   /// Channel members
   List<Member> members;
@@ -226,7 +225,7 @@ class InviteMembersResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class RemoveMembersResponse extends _BaseResponse {
   /// Updated channel
-  Channel channel;
+  ChannelModel channel;
 
   /// Channel members
   List<Member> members;
@@ -254,7 +253,7 @@ class SendActionResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class AddMembersResponse extends _BaseResponse {
   /// Updated channel
-  Channel channel;
+  ChannelModel channel;
 
   /// Channel members
   List<Member> members;
@@ -271,7 +270,7 @@ class AddMembersResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class AcceptInviteResponse extends _BaseResponse {
   /// Updated channel
-  Channel channel;
+  ChannelModel channel;
 
   /// Channel members
   List<Member> members;
@@ -288,7 +287,7 @@ class AcceptInviteResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class RejectInviteResponse extends _BaseResponse {
   /// Updated channel
-  Channel channel;
+  ChannelModel channel;
 
   /// Channel members
   List<Member> members;
@@ -313,7 +312,7 @@ class EmptyResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class ChannelStateResponse extends _BaseResponse {
   /// Updated channel
-  Channel channel;
+  ChannelModel channel;
 
   /// List of messages returned by the api call
   List<Message> messages;

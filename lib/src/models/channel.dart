@@ -9,7 +9,7 @@ part 'channel.g.dart';
 
 /// The class that contains the information about a channel
 @JsonSerializable()
-class Channel {
+class ChannelModel {
   /// The id of this channel
   final String id;
 
@@ -78,7 +78,7 @@ class Channel {
   ];
 
   /// Constructor used for json serialization
-  Channel({
+  ChannelModel({
     this.id,
     this.type,
     this.cid,
@@ -95,21 +95,21 @@ class Channel {
   });
 
   /// Create a new instance from a json
-  factory Channel.fromJson(Map<String, dynamic> json) {
-    return _$ChannelFromJson(
+  factory ChannelModel.fromJson(Map<String, dynamic> json) {
+    return _$ChannelModelFromJson(
         Serialization.moveKeysToRoot(json, topLevelFields));
   }
 
   /// Serialize to json
   Map<String, dynamic> toJson() {
     return Serialization.moveKeysToMapInPlace(
-      _$ChannelToJson(this),
+      _$ChannelModelToJson(this),
       topLevelFields,
     );
   }
 
-  /// Creates a copy of [Channel] with specified attributes overridden.
-  Channel copyWith({
+  /// Creates a copy of [ChannelModel] with specified attributes overridden.
+  ChannelModel copyWith({
     String id,
     String type,
     String cid,
@@ -124,7 +124,7 @@ class Channel {
     List<Member> members,
     Map<String, dynamic> extraData,
   }) =>
-      Channel(
+      ChannelModel(
         id: id ?? this.id,
         type: type ?? this.type,
         cid: cid ?? this.cid,

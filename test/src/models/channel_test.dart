@@ -1,7 +1,7 @@
-import 'package:stream_chat/src/models/channel.dart';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:stream_chat/src/models/channel.dart';
 
 void main() {
   group('src/models/channel', () {
@@ -16,7 +16,7 @@ void main() {
       ''';
 
     test('should parse json correctly', () {
-      final channel = Channel.fromJson(json.decode(jsonExample));
+      final channel = ChannelModel.fromJson(json.decode(jsonExample));
       expect(channel.id, equals("test"));
       expect(channel.type, equals("livestream"));
       expect(channel.cid, equals("test:livestream"));
@@ -25,7 +25,7 @@ void main() {
     });
 
     test('should serialize to json correctly', () {
-      final channel = Channel(
+      final channel = ChannelModel(
         type: "type",
         id: "id",
         cid: "a:a",
@@ -39,7 +39,7 @@ void main() {
     });
 
     test('should serialize to json correctly when frozen is provided', () {
-      final channel = Channel(
+      final channel = ChannelModel(
         type: "type",
         id: "id",
         cid: "a:a",

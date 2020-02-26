@@ -87,7 +87,6 @@ void main() {
         final channelClient = client.channel('type', id: 'id', extraData: data);
         expect(channelClient.type, 'type');
         expect(channelClient.id, 'id');
-        expect(channelClient.extraData, data);
       });
     });
 

@@ -15,21 +15,21 @@ import 'requests.dart';
 import 'responses.dart';
 
 /// This a the class that manages a specific channel.
-class ChannelClient {
+class Channel {
   /// Create a channel client instance.
-  ChannelClient(
+  Channel(
     this._client,
     this.type,
-    this.id,
-    this.extraData,
-  ) : cid = id != null ? "$type:$id" : null {
+    this._id,
+    this._extraData,
+  ) : _cid = _id != null ? "$type:$_id" : null {
     _client.logger.info('New ChannelClient instance not initialized created');
   }
 
   /// Create a channel client instance from a [ChannelState] object
-  ChannelClient.fromState(this._client, ChannelState channelState) {
-    cid = channelState.channel.cid;
-    id = channelState.channel.id;
+  Channel.fromState(this._client, ChannelState channelState) {
+    _cid = channelState.channel.cid;
+    _id = channelState.channel.id;
     type = channelState.channel.type;
 
     state = ChannelClientState(this, channelState);
@@ -45,14 +45,58 @@ class ChannelClient {
   /// The channel type
   String type;
 
-  /// The channel id
-  String id;
+  String _id;
+  String _cid;
+  Map<String, dynamic> _extraData;
 
-  /// The channel cid
-  String cid;
+  ChannelConfig get config => state?._channelState?.channel?.config;
+  Stream<ChannelConfig> get configStream =>
+      state?.channelStateStream?.map((cs) => cs.channel?.config);
 
-  /// Custom channel extraData
-  Map<String, dynamic> extraData;
+  User get createdBy => state?._channelState?.channel?.createdBy;
+  Stream<User> get createdByStream =>
+      state?.channelStateStream?.map((cs) => cs.channel?.createdBy);
+
+  bool get frozen => state?._channelState?.channel?.frozen;
+  Stream<bool> get frozenStream =>
+      state?.channelStateStream?.map((cs) => cs.channel?.frozen);
+
+  DateTime get createdAt => state?._channelState?.channel?.createdAt;
+  Stream<DateTime> get createdAtStream =>
+      state?.channelStateStream?.map((cs) => cs.channel?.createdAt);
+
+  DateTime get lastMessageAt => state?._channelState?.channel?.lastMessageAt;
+  Stream<DateTime> get lastMessageAtStream =>
+      state?.channelStateStream?.map((cs) => cs.channel?.lastMessageAt);
+
+  DateTime get updatedAt => state?._channelState?.channel?.updatedAt;
+  Stream<DateTime> get updatedAtStream =>
+      state?.channelStateStream?.map((cs) => cs.channel?.updatedAt);
+
+  DateTime get deletedAt => state?._channelState?.channel?.deletedAt;
+  Stream<DateTime> get deletedAtStream =>
+      state?.channelStateStream?.map((cs) => cs.channel?.deletedAt);
+
+  int get memberCount => state?._channelState?.channel?.memberCount;
+  Stream<int> get memberCountStream =>
+      state?.channelStateStream?.map((cs) => cs.channel?.memberCount);
+
+  String get id => state?._channelState?.channel?.id ?? _id;
+  Stream<String> get idStream =>
+      state?.channelStateStream?.map((cs) => cs.channel?.id ?? _id);
+
+  String get cid => state?._channelState?.channel?.cid ?? _cid;
+  Stream<String> get cidStream =>
+      state?.channelStateStream?.map((cs) => cs.channel?.cid ?? _cid);
+
+  Map<String, dynamic> get extraData =>
+      state?._channelState?.channel?.extraData;
+  Stream<Map<String, dynamic>> get extraDataStream =>
+      state?.channelStateStream?.map((cs) => cs.channel?.extraData);
+
+  List<Member> get members => state?._channelState?.channel?.members;
+  Stream<List<Member>> get membersStream =>
+      state?.channelStateStream?.map((cs) => cs.channel?.members);
 
   /// The main Stream chat client
   Client get client => _client;
@@ -63,7 +107,7 @@ class ChannelClient {
   Completer<bool> _initializedCompleter = Completer();
 
   /// True if this is initialized
-  /// Call [watch] to initialize the client or instantiate it using [ChannelClient.fromState]
+  /// Call [watch] to initialize the client or instantiate it using [Channel.fromState]
   Future<bool> get initialized => _initializedCompleter.future;
 
   /// Send a message to this channel
@@ -326,27 +370,24 @@ class ChannelClient {
       path = "$path/$id/query";
     }
 
-    final data = Map<String, dynamic>.from({
+    final payload = Map<String, dynamic>.from({
       "state": true,
+      "data": _extraData,
     })
       ..addAll(options);
 
     if (messagesPagination != null) {
-      data['messages'] = messagesPagination.toJson();
+      payload['messages'] = messagesPagination.toJson();
     }
     if (membersPagination != null) {
-      data['members'] = membersPagination.toJson();
+      payload['members'] = membersPagination.toJson();
     }
     if (watchersPagination != null) {
-      data['watchers'] = watchersPagination.toJson();
+      payload['watchers'] = watchersPagination.toJson();
     }
 
-    final response = await _client.post(path, data: data);
+    final response = await _client.post(path, data: payload);
     final updatedState = _client.decode(response.data, ChannelState.fromJson);
-    if (id == null) {
-      id = updatedState.channel.id;
-      cid = updatedState.channel.id;
-    }
 
     state?.updateChannelState(updatedState);
 
@@ -458,9 +499,9 @@ class ChannelClientState {
     _channelClient.on('message.new').listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
-        _channelState = this.channelState.copyWith(
-              messages: this.channelState.messages + [event.message],
-              channel: this.channelState.channel.copyWith(
+        _channelState = this._channelState.copyWith(
+              messages: this._channelState.messages + [event.message],
+              channel: this._channelState.channel.copyWith(
                     lastMessageAt: event.message.createdAt,
                   ),
             );
@@ -473,8 +514,8 @@ class ChannelClientState {
           _threads = newThreads;
         }
 
-        _channelState = this.channelState.copyWith(
-              messages: this.channelState.messages.map((message) {
+        _channelState = this._channelState.copyWith(
+              messages: this._channelState.messages.map((message) {
                 if (message.id == event.message.parentId) {
                   return message.copyWith(
                     replyCount: message.replyCount + 1,
@@ -487,35 +528,79 @@ class ChannelClientState {
       }
     });
 
+    _channelClient.on('reaction.new').listen((event) {
+      if (event.message.parentId == null ||
+          event.message.showInChannel == true) {
+        _channelState = this._channelState.copyWith(
+              messages: this._channelState.messages.map((message) {
+                if (message.id == event.message.id) {
+                  return event.message;
+                }
+                return message;
+              }).toList(),
+              channel: this._channelState.channel.copyWith(
+                    lastMessageAt: event.message.createdAt,
+                  ),
+            );
+      }
+
+      if (event.message.parentId != null) {
+        final newThreads = threads;
+        if (newThreads.containsKey(event.message.parentId)) {
+          newThreads[event.message.parentId] =
+              newThreads[event.message.parentId].map((message) {
+            if (message.id == event.message.id) {
+              return event.message;
+            }
+            return message;
+          });
+          _threads = newThreads;
+        }
+      }
+    });
+
     _channelClient
         .on('message.read')
         .where((e) => e.user.id == _channelClient.client.state.user.id)
         .listen((event) {
-      final read = this.channelState.read;
+      final read = this._channelState.read;
       final userReadIndex = read
           ?.indexWhere((r) => r.user.id == _channelClient.client.state.user.id);
 
       if (userReadIndex != null && userReadIndex != -1) {
         final userRead = read.removeAt(userReadIndex);
         read.add(Read(user: userRead.user, lastRead: event.createdAt));
-        _channelStateController.add(this.channelState.copyWith(read: read));
+        _channelStateController.add(this._channelState.copyWith(read: read));
       }
     });
   }
 
+  List<Message> get messages => _channelState.messages;
+  Stream<List<Message>> get messagesStream =>
+      channelStateStream.map((cs) => cs.messages);
+  List<Member> get members => _channelState.members;
+  Stream<List<Member>> get membersStream =>
+      channelStateStream.map((cs) => cs.members);
+  int get watcherCount => _channelState.watcherCount;
+  Stream<int> get watcherCountStream =>
+      channelStateStream.map((cs) => cs.watcherCount);
+  List<User> get watchers => _channelState.watchers;
+  Stream<List<User>> get watchersStream =>
+      channelStateStream.map((cs) => cs.watchers);
+  List<Read> get read => _channelState.read;
+  Stream<List<Read>> get readStream => channelStateStream.map((cs) => cs.read);
+
   /// Unread count getter
   int get unreadCount {
     final userId = _channelClient.client.state?.user?.id;
-    final userRead = channelState.read?.firstWhere(
-      (read) {
-        return read.user.id == userId;
-      },
+    final userRead = _channelState.read?.firstWhere(
+      (read) => read.user.id == userId,
       orElse: () => null,
     );
     if (userRead == null) {
-      return channelState.messages?.length ?? 0;
+      return _channelState.messages?.length ?? 0;
     } else {
-      return channelState.messages.fold<int>(0, (count, message) {
+      return _channelState.messages.fold<int>(0, (count, message) {
         if (message.user.id != userId &&
             message.createdAt.isAfter(userRead.lastRead)) {
           return count + 1;
@@ -531,7 +616,7 @@ class ChannelClientState {
 
     if (newThreads.containsKey(parentId)) {
       newThreads[parentId] = newThreads[parentId]
-              .where((newMessage) => !channelState.messages.any((m) =>
+              .where((newMessage) => !_channelState.messages.any((m) =>
                   m.id == newMessage.id && m.updatedAt == newMessage.updatedAt))
               .toList() +
           messages;
@@ -544,39 +629,39 @@ class ChannelClientState {
 
   /// Update channelState with updated information
   void updateChannelState(ChannelState updatedState) {
-    _channelStateController.add(channelState.copyWith(
+    _channelStateController.add(_channelState.copyWith(
       messages: updatedState.messages != null
           ? updatedState.messages
-                  .where((newMessage) => !channelState.messages.any((m) =>
+                  .where((newMessage) => !_channelState.messages.any((m) =>
                       m.id == newMessage.id &&
                       m.updatedAt == newMessage.updatedAt))
                   .toList() +
-              channelState.messages
+              _channelState.messages
           : null,
       channel: updatedState.channel,
       watchers: updatedState.watchers != null
           ? updatedState.watchers
-                  .where((newWatcher) => !channelState.watchers.any((m) =>
+                  .where((newWatcher) => !_channelState.watchers.any((m) =>
                       m.id == newWatcher.id &&
                       m.updatedAt == newWatcher.updatedAt))
                   .toList() +
-              channelState.watchers
+              _channelState.watchers
           : null,
-      watcherCount: channelState.watcherCount,
+      watcherCount: _channelState.watcherCount,
       members: updatedState.members != null
           ? updatedState.members
-                  .where((newMember) => !channelState.members.any((m) =>
+                  .where((newMember) => !_channelState.members.any((m) =>
                       m.userId == newMember.userId &&
                       m.updatedAt == newMember.updatedAt))
                   .toList() +
-              channelState.members
+              _channelState.members
           : null,
-      read: channelState.read,
+      read: _channelState.read,
     ));
   }
 
   /// The channel state related to this client
-  ChannelState get channelState => _channelStateController.value;
+  ChannelState get _channelState => _channelStateController.value;
 
   /// The channel state related to this client as a stream
   Stream<ChannelState> get channelStateStream => _channelStateController.stream;
@@ -605,7 +690,7 @@ class ChannelClientState {
   BehaviorSubject<List<User>> _typingEventsController =
       BehaviorSubject.seeded([]);
 
-  final ChannelClient _channelClient;
+  final Channel _channelClient;
   final Map<User, DateTime> _typings = {};
 
   void _listenTypingEvents() {

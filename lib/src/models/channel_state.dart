@@ -12,7 +12,7 @@ part 'channel_state.g.dart';
 @JsonSerializable()
 class ChannelState {
   /// The channel to which this state belongs
-  final Channel channel;
+  final ChannelModel channel;
 
   /// A paginated list of channel messages
   final List<Message> messages;
@@ -48,7 +48,7 @@ class ChannelState {
 
   /// Creates a copy of [ChannelState] with specified attributes overridden.
   ChannelState copyWith({
-    Channel channel,
+    ChannelModel channel,
     List<Message> messages,
     List<Member> members,
     int watcherCount,

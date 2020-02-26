@@ -6,8 +6,8 @@ part of 'channel.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Channel _$ChannelFromJson(Map<String, dynamic> json) {
-  return Channel(
+ChannelModel _$ChannelModelFromJson(Map<String, dynamic> json) {
+  return ChannelModel(
     id: json['id'] as String,
     type: json['type'] as String,
     cid: json['cid'] as String,
@@ -39,7 +39,7 @@ Channel _$ChannelFromJson(Map<String, dynamic> json) {
   );
 }
 
-Map<String, dynamic> _$ChannelToJson(Channel instance) {
+Map<String, dynamic> _$ChannelModelToJson(ChannelModel instance) {
   final val = <String, dynamic>{
     'id': instance.id,
     'type': instance.type,

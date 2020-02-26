@@ -915,7 +915,7 @@ void main() {
       ''';
       final j = jsonDecode(jsonExample);
       final channelState = ChannelState(
-        channel: Channel.fromJson(j['channel']),
+        channel: ChannelModel.fromJson(j['channel']),
         members: [],
         messages:
             (j['messages'] as List).map((m) => Message.fromJson(m)).toList(),

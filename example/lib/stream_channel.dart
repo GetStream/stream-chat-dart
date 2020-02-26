@@ -14,7 +14,7 @@ class StreamChannel extends StatefulWidget {
         );
 
   final Widget child;
-  final ChannelClient channelClient;
+  final Channel channelClient;
 
   static StreamChannelState of(BuildContext context) {
     StreamChannelState streamChannelState;
@@ -36,7 +36,7 @@ class StreamChannel extends StatefulWidget {
 class StreamChannelState extends State<StreamChannel> {
   StreamChannelState();
 
-  ChannelClient get channelClient => widget.channelClient;
+  Channel get channelClient => widget.channelClient;
 
   ChannelState get channelState => widget.channelClient.state.channelState;
 

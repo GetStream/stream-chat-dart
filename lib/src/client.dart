@@ -8,7 +8,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
 
-import 'api/channel_client.dart';
+import 'api/channel.dart';
 import 'api/connection_status.dart';
 import 'api/requests.dart';
 import 'api/responses.dart';
@@ -58,7 +58,7 @@ class Client {
   ClientState state;
 
   /// A map of <id, channelClient>
-  Map<String, ChannelClient> channelClients = {};
+  Map<String, Channel> channelClients = {};
 
   /// By default the Chat Client will write all messages with level Warn or Error to stdout.
   /// During development you might want to enable more logging information, you can change the default log level when constructing the client.
@@ -313,7 +313,7 @@ class Client {
   }
 
   /// Requests channels with a given query.
-  Future<List<ChannelClient>> queryChannels({
+  Future<List<Channel>> queryChannels({
     Map<String, dynamic> filter,
     List<SortOption> sort,
     Map<String, dynamic> options,
@@ -362,7 +362,7 @@ class Client {
         client.state.updateChannelState(channelState);
       } else {
         channelClients[channelState.channel.id] =
-            ChannelClient.fromState(this, channelState);
+            Channel.fromState(this, channelState);
       }
 
       return channelClients[channelState.channel.id];
@@ -599,12 +599,12 @@ class Client {
   }
 
   /// Returns a channel client with the given type, id and custom data.
-  ChannelClient channel(
+  Channel channel(
     String type, {
     String id,
     Map<String, dynamic> extraData,
   }) {
-    final channelClient = ChannelClient(this, type, id, extraData);
+    final channelClient = Channel(this, type, id, extraData);
 
     channelClients[id] = channelClient;
 
