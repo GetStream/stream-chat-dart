@@ -69,6 +69,7 @@ void main() {
           'created_at': '2020-01-29T03:22:47.636130Z',
           'me': {'id': 'id2'},
           'user': {'id': 'id'},
+          'reaction': null,
           'message': null,
           'total_unread_count': 1,
           'unread_channels': 1,

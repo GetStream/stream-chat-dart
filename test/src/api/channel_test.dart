@@ -521,7 +521,8 @@ void main() {
           };
 
           when(mockDio.post<String>('/channels/messaging', data: options))
-              .thenAnswer((_) async => Response(data: r'''
+              .thenAnswer((_) async {
+            return Response(data: r'''
             {
             "channel": {
                 "id": "!members-0LOcD0mZtTan60zHobLmELjdndXsonnBVNzZnB5mTt0",
@@ -807,14 +808,15 @@ void main() {
                 }
             ]
         }
-            ''', statusCode: 200));
+            ''', statusCode: 200);
+          });
 
           final response = await channelClient.query(options: options);
 
           verify(mockDio.post<String>('/channels/messaging', data: options))
               .called(1);
           expect(channelClient.id, response.channel.id);
-          expect(channelClient.cid, response.channel.id);
+          expect(channelClient.cid, response.channel.cid);
         });
 
         test('with id', () async {
@@ -1443,7 +1445,7 @@ void main() {
         verify(mockDio.post<String>('/channels/messaging', data: options))
             .called(1);
         expect(channelClient.id, response.channel.id);
-        expect(channelClient.cid, response.channel.id);
+        expect(channelClient.cid, response.channel.cid);
       });
 
       test('watch', () async {
@@ -1758,7 +1760,7 @@ void main() {
         verify(mockDio.post<String>('/channels/messaging', data: options))
             .called(1);
         expect(channelClient.id, response.channel.id);
-        expect(channelClient.cid, response.channel.id);
+        expect(channelClient.cid, response.channel.cid);
       });
 
       test('stopWatching', () async {

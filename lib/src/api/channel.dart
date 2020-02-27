@@ -372,9 +372,12 @@ class Channel {
 
     final payload = Map<String, dynamic>.from({
       "state": true,
-      "data": _extraData,
     })
       ..addAll(options);
+
+    if (_extraData != null) {
+      payload['data'] = _extraData;
+    }
 
     if (messagesPagination != null) {
       payload['messages'] = messagesPagination.toJson();
@@ -388,6 +391,11 @@ class Channel {
 
     final response = await _client.post(path, data: payload);
     final updatedState = _client.decode(response.data, ChannelState.fromJson);
+
+    if (_id == null) {
+      _id = updatedState.channel.id;
+      _cid = updatedState.channel.cid;
+    }
 
     state?.updateChannelState(updatedState);
 
