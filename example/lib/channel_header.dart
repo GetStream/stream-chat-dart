@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_example/channel_name_text.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+import './channel_name_text.dart';
 import 'channel_image.dart';
 import 'stream_channel.dart';
 

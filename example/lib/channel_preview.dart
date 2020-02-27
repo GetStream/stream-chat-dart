@@ -9,7 +9,7 @@ import 'stream_channel.dart';
 import 'stream_chat.dart';
 
 class ChannelPreview extends StatelessWidget {
-  final void Function(ChannelClient) onTap;
+  final void Function(Channel) onTap;
 
   const ChannelPreview({
     Key key,

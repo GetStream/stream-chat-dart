@@ -1,8 +1,8 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_example/channel_header.dart';
 
+import './channel_header.dart';
 import 'connection_indicator.dart';
 import 'message_input.dart';
 import 'message_list_view.dart';

@@ -5,7 +5,7 @@ import 'channel_preview.dart';
 import 'stream_channel.dart';
 import 'stream_chat.dart';
 
-typedef ChannelTapCallback = void Function(ChannelClient, Widget);
+typedef ChannelTapCallback = void Function(Channel, Widget);
 
 class ChannelListView extends StatefulWidget {
   ChannelListView({

@@ -1,3 +1,7 @@
+## 0.1.8
+
+- Add delete message handling
+
 ## 0.1.7
 
 - Add reaction handling

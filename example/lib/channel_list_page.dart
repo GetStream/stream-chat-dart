@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_example/connection_indicator.dart';
-import 'package:stream_chat_example/message_page.dart';
-import 'package:stream_chat_example/stream_channel.dart';
 
+import './connection_indicator.dart';
+import './message_page.dart';
+import './stream_channel.dart';
 import 'channel_list_view.dart';
 import 'channel_page_app_bar.dart';
 import 'stream_chat.dart';
