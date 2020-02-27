@@ -540,16 +540,14 @@ class ChannelClientState {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
         _channelState = this._channelState.copyWith(
-            messages: this._channelState.messages.map((message) {
-              if (message.id == event.message.id) {
-                return event.message;
-              }
+              messages: this._channelState.messages.map((message) {
+                if (message.id == event.message.id) {
+                  return event.message;
+                }
 
-              return message;
-            }).toList(),
-            channel: this._channelState.channel.copyWith(
-                  lastMessageAt: event.message.createdAt,
-                ));
+                return message;
+              }).toList(),
+            );
       }
 
       if (event.message.parentId != null) {
@@ -589,9 +587,6 @@ class ChannelClientState {
                 }
                 return message;
               }).toList(),
-              channel: this._channelState.channel.copyWith(
-                    lastMessageAt: event.message.createdAt,
-                  ),
             );
       }
 
@@ -620,9 +615,6 @@ class ChannelClientState {
                 }
                 return message;
               }).toList(),
-              channel: this._channelState.channel.copyWith(
-                    lastMessageAt: event.message.createdAt,
-                  ),
             );
       }
 
