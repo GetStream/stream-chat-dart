@@ -1,3 +1,7 @@
+## 0.1.9
+
+- Fix channel update on message delete
+
 ## 0.1.8
 
 - Add delete message handling
