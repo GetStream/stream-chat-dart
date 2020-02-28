@@ -14,7 +14,7 @@ You can sign up for a Stream account at https://getstream.io/chat/
 
 ```yaml
 dependencies:
- stream_chat: ^0.1.10
+ stream_chat: ^0.1.11
 ```
 
 You should then run `flutter packages get`

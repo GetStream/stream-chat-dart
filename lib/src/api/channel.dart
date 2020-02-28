@@ -451,6 +451,10 @@ class Channel {
   /// First of the [EventType.typingStart] and [EventType.typingStop] events based on the users keystrokes.
   /// Call this on every keystroke.
   Future<void> keyStroke() async {
+    if (config?.typingEvents == false) {
+      return;
+    }
+
     client.logger.info('start typing');
     final now = DateTime.now();
 
@@ -463,6 +467,10 @@ class Channel {
 
   /// Sets last typing to null and sends the typing.stop event
   Future<void> stopTyping() async {
+    if (config?.typingEvents == false) {
+      return;
+    }
+
     client.logger.info('stop typing');
     _lastTypingEvent = null;
     await sendEvent(Event(type: EventType.typingStop));
@@ -471,6 +479,10 @@ class Channel {
   Timer _cleaningTimer;
 
   void _startCleaning() {
+    if (config?.typingEvents == false) {
+      return;
+    }
+
     _cleaningTimer = Timer.periodic(Duration(milliseconds: 500), (_) {
       final now = DateTime.now();
 
@@ -632,6 +644,14 @@ class ChannelClientState {
         }
       }
     });
+
+    _listenReadEvents();
+  }
+
+  void _listenReadEvents() {
+    if (_channel.config?.readEvents == false) {
+      return;
+    }
 
     _channel
         .on('message.read')
@@ -812,6 +832,10 @@ class ChannelClientState {
   final Map<User, DateTime> _typings = {};
 
   void _listenTypingEvents() {
+    if (_channel.config?.typingEvents == false) {
+      return;
+    }
+
     this._channel.on(EventType.typingStart).listen((event) {
       if (event.user != _channel.client.state.user) {
         _typings[event.user] = DateTime.now();

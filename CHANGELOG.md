@@ -1,3 +1,7 @@
+## 0.1.11
+
+- Add channel config checks
+
 ## 0.1.10
 
 - Rename Channel.channelClients to channels
