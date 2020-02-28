@@ -353,7 +353,7 @@ class Client {
       },
     );
 
-    final newChannelClients = decode<QueryChannelsResponse>(
+    final newChannels = decode<QueryChannelsResponse>(
       response.data,
       QueryChannelsResponse.fromJson,
     )?.channels?.map((channelState) {
@@ -368,7 +368,7 @@ class Client {
       return channels[channelState.channel.id];
     })?.toList();
 
-    return newChannelClients;
+    return newChannels;
   }
 
   _parseError(DioError error) {
@@ -604,11 +604,11 @@ class Client {
     String id,
     Map<String, dynamic> extraData,
   }) {
-    final channelClient = Channel(this, type, id, extraData);
+    final channel = Channel(this, type, id, extraData);
 
-    channels[id] = channelClient;
+    channels[id] = channel;
 
-    return channelClient;
+    return channel;
   }
 
   /// Update or Create the given user object.

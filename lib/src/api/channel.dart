@@ -23,7 +23,7 @@ class Channel {
     this._id,
     this._extraData,
   ) : _cid = _id != null ? "$type:$_id" : null {
-    _client.logger.info('New ChannelClient instance not initialized created');
+    _client.logger.info('New Channel instance not initialized created');
   }
 
   /// Create a channel client instance from a [ChannelState] object
@@ -36,7 +36,7 @@ class Channel {
     _initializedCompleter.complete(true);
     _startCleaning();
 
-    _client.logger.info('New ChannelClient instance initialized created');
+    _client.logger.info('New Channel instance initialized created');
   }
 
   /// This client state
@@ -492,7 +492,7 @@ class Channel {
   void _checkInitialized() {
     if (!_initializedCompleter.isCompleted) {
       throw Exception(
-          "Channel ${this.cid} hasn't been initialized yet. Make sure to call .watch() or to instantiate the client using [ChannelClient.fromState]");
+          "Channel ${this.cid} hasn't been initialized yet. Make sure to call .watch() or to instantiate the client using [Channel.fromState]");
     }
   }
 }
@@ -500,11 +500,11 @@ class Channel {
 /// The class that handles the state of the channel listening to the events
 class ChannelClientState {
   /// Creates a new instance listening to events and updating the state
-  ChannelClientState(this._channelClient, ChannelState channelState) {
+  ChannelClientState(this._channel, ChannelState channelState) {
     _channelStateController = BehaviorSubject.seeded(channelState);
     _listenTypingEvents();
 
-    _channelClient.on('message.new').listen((event) {
+    _channel.on('message.new').listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
         _channelState = this._channelState.copyWith(
@@ -536,7 +536,7 @@ class ChannelClientState {
       }
     });
 
-    _channelClient.on('message.deleted').listen((event) {
+    _channel.on('message.deleted').listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
         _channelState = this._channelState.copyWith(
@@ -577,7 +577,7 @@ class ChannelClientState {
       }
     });
 
-    _channelClient.on('reaction.new').listen((event) {
+    _channel.on('reaction.new').listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
         _channelState = this._channelState.copyWith(
@@ -605,7 +605,7 @@ class ChannelClientState {
       }
     });
 
-    _channelClient.on('reaction.deleted').listen((event) {
+    _channel.on('reaction.deleted').listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
         _channelState = this._channelState.copyWith(
@@ -633,13 +633,13 @@ class ChannelClientState {
       }
     });
 
-    _channelClient
+    _channel
         .on('message.read')
-        .where((e) => e.user.id == _channelClient.client.state.user.id)
+        .where((e) => e.user.id == _channel.client.state.user.id)
         .listen((event) {
       final read = this._channelState.read;
-      final userReadIndex = read
-          ?.indexWhere((r) => r.user.id == _channelClient.client.state.user.id);
+      final userReadIndex =
+          read?.indexWhere((r) => r.user.id == _channel.client.state.user.id);
 
       if (userReadIndex != null && userReadIndex != -1) {
         final userRead = read.removeAt(userReadIndex);
@@ -661,7 +661,7 @@ class ChannelClientState {
         }),
     );
 
-    if (event.user.id == this._channelClient.client.state.user.id) {
+    if (event.user.id == this._channel.client.state.user.id) {
       return newMessage.copyWith(
         ownReactions: message.ownReactions..add(event.reaction),
       );
@@ -683,7 +683,7 @@ class ChannelClientState {
 
     newMessage.reactionCounts.removeWhere((_, v) => v == 0);
 
-    if (event.user.id == this._channelClient.client.state.user.id) {
+    if (event.user.id == this._channel.client.state.user.id) {
       return newMessage.copyWith(
         ownReactions: message.ownReactions
           ..removeWhere((r) => r.type == event.reaction.type),
@@ -710,7 +710,7 @@ class ChannelClientState {
 
   /// Unread count getter
   int get unreadCount {
-    final userId = _channelClient.client.state?.user?.id;
+    final userId = _channel.client.state?.user?.id;
     final userRead = _channelState.read?.firstWhere(
       (read) => read.user.id == userId,
       orElse: () => null,
@@ -808,19 +808,19 @@ class ChannelClientState {
   BehaviorSubject<List<User>> _typingEventsController =
       BehaviorSubject.seeded([]);
 
-  final Channel _channelClient;
+  final Channel _channel;
   final Map<User, DateTime> _typings = {};
 
   void _listenTypingEvents() {
-    this._channelClient.on(EventType.typingStart).listen((event) {
-      if (event.user != _channelClient.client.state.user) {
+    this._channel.on(EventType.typingStart).listen((event) {
+      if (event.user != _channel.client.state.user) {
         _typings[event.user] = DateTime.now();
         _typingEventsController.add(_typings.keys.toList());
       }
     });
 
-    this._channelClient.on(EventType.typingStop).listen((event) {
-      if (event.user != _channelClient.client.state.user) {
+    this._channel.on(EventType.typingStop).listen((event) {
+      if (event.user != _channel.client.state.user) {
         _typings.remove(event.user);
         _typingEventsController.add(_typings.keys.toList());
       }
@@ -831,11 +831,11 @@ class ChannelClientState {
     final now = DateTime.now();
     _typings.forEach((user, lastTypingEvent) {
       if (now.difference(lastTypingEvent).inSeconds > 7) {
-        this._channelClient.client.handleEvent(
+        this._channel.client.handleEvent(
               Event(
                 type: EventType.typingStop,
                 user: user,
-                cid: _channelClient.cid,
+                cid: _channel.cid,
               ),
             );
       }

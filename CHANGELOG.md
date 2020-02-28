@@ -1,3 +1,7 @@
+## 0.1.10
+
+- Rename Channel.channelClients to channels
+
 ## 0.1.9
 
 - Fix channel update on message delete

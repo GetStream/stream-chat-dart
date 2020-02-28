@@ -2,7 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/client.dart';
 import 'package:stream_chat/src/models/device.dart';
 
-import '../models/channel.dart';
+import '../models/channel_model.dart';
 import '../models/channel_state.dart';
 import '../models/member.dart';
 import '../models/message.dart';
@@ -38,7 +38,7 @@ class QueryUsersResponse extends _BaseResponse {
       _$QueryUsersResponseFromJson(json);
 }
 
-/// Model response for [ChannelClient.getReactions] api call
+/// Model response for [channel.getReactions] api call
 @JsonSerializable(createToJson: false)
 class QueryReactionsResponse extends _BaseResponse {
   /// List of reactions returned by the query
@@ -49,7 +49,7 @@ class QueryReactionsResponse extends _BaseResponse {
       _$QueryReactionsResponseFromJson(json);
 }
 
-/// Model response for [ChannelClient.getReplies] api call
+/// Model response for [Channel.getReplies] api call
 @JsonSerializable(createToJson: false)
 class QueryRepliesResponse extends _BaseResponse {
   /// List of messages returned by the api call
@@ -71,7 +71,7 @@ class ListDevicesResponse extends _BaseResponse {
       _$ListDevicesResponseFromJson(json);
 }
 
-/// Model response for [ChannelClient.sendFile] api call
+/// Model response for [Channel.sendFile] api call
 @JsonSerializable(createToJson: false)
 class SendFileResponse extends _BaseResponse {
   /// The url of the uploaded file
@@ -82,7 +82,7 @@ class SendFileResponse extends _BaseResponse {
       _$SendFileResponseFromJson(json);
 }
 
-/// Model response for [ChannelClient.sendImage] api call
+/// Model response for [Channel.sendImage] api call
 @JsonSerializable(createToJson: false)
 class SendImageResponse extends _BaseResponse {
   /// The url of the uploaded file
@@ -93,7 +93,7 @@ class SendImageResponse extends _BaseResponse {
       _$SendImageResponseFromJson(json);
 }
 
-/// Model response for [ChannelClient.sendReaction] api call
+/// Model response for [Channel.sendReaction] api call
 @JsonSerializable(createToJson: false)
 class SendReactionResponse extends _BaseResponse {
   /// Message returned by the api call
@@ -143,7 +143,7 @@ class UpdateMessageResponse extends _BaseResponse {
       _$UpdateMessageResponseFromJson(json);
 }
 
-/// Model response for [ChannelClient.sendMessage] api call
+/// Model response for [Channel.sendMessage] api call
 @JsonSerializable(createToJson: false)
 class SendMessageResponse extends _BaseResponse {
   /// Message returned by the api call
@@ -176,7 +176,7 @@ class SearchMessagesResponse extends _BaseResponse {
       _$SearchMessagesResponseFromJson(json);
 }
 
-/// Model response for [ChannelClient.getMessagesById] api call
+/// Model response for [Channel.getMessagesById] api call
 @JsonSerializable(createToJson: false)
 class GetMessagesByIdResponse extends _BaseResponse {
   /// Message returned by the api call
@@ -187,7 +187,7 @@ class GetMessagesByIdResponse extends _BaseResponse {
       _$GetMessagesByIdResponseFromJson(json);
 }
 
-/// Model response for [ChannelClient.update] api call
+/// Model response for [Channel.update] api call
 @JsonSerializable(createToJson: false)
 class UpdateChannelResponse extends _BaseResponse {
   /// Updated channel
@@ -204,7 +204,7 @@ class UpdateChannelResponse extends _BaseResponse {
       _$UpdateChannelResponseFromJson(json);
 }
 
-/// Model response for [ChannelClient.inviteMembers] api call
+/// Model response for [Channel.inviteMembers] api call
 @JsonSerializable(createToJson: false)
 class InviteMembersResponse extends _BaseResponse {
   /// Updated channel
@@ -221,7 +221,7 @@ class InviteMembersResponse extends _BaseResponse {
       _$InviteMembersResponseFromJson(json);
 }
 
-/// Model response for [ChannelClient.removeMembers] api call
+/// Model response for [Channel.removeMembers] api call
 @JsonSerializable(createToJson: false)
 class RemoveMembersResponse extends _BaseResponse {
   /// Updated channel
@@ -238,7 +238,7 @@ class RemoveMembersResponse extends _BaseResponse {
       _$RemoveMembersResponseFromJson(json);
 }
 
-/// Model response for [ChannelClient.sendAction] api call
+/// Model response for [Channel.sendAction] api call
 @JsonSerializable(createToJson: false)
 class SendActionResponse extends _BaseResponse {
   /// Message returned by the api call
@@ -249,7 +249,7 @@ class SendActionResponse extends _BaseResponse {
       _$SendActionResponseFromJson(json);
 }
 
-/// Model response for [ChannelClient.addMembers] api call
+/// Model response for [Channel.addMembers] api call
 @JsonSerializable(createToJson: false)
 class AddMembersResponse extends _BaseResponse {
   /// Updated channel
@@ -266,7 +266,7 @@ class AddMembersResponse extends _BaseResponse {
       _$AddMembersResponseFromJson(json);
 }
 
-/// Model response for [ChannelClient.acceptInvite] api call
+/// Model response for [Channel.acceptInvite] api call
 @JsonSerializable(createToJson: false)
 class AcceptInviteResponse extends _BaseResponse {
   /// Updated channel
@@ -283,7 +283,7 @@ class AcceptInviteResponse extends _BaseResponse {
       _$AcceptInviteResponseFromJson(json);
 }
 
-/// Model response for [ChannelClient.rejectInvite] api call
+/// Model response for [Channel.rejectInvite] api call
 @JsonSerializable(createToJson: false)
 class RejectInviteResponse extends _BaseResponse {
   /// Updated channel
@@ -308,7 +308,7 @@ class EmptyResponse extends _BaseResponse {
       _$EmptyResponseFromJson(json);
 }
 
-/// Model response for [ChannelClient.query] api call
+/// Model response for [Channel.query] api call
 @JsonSerializable(createToJson: false)
 class ChannelStateResponse extends _BaseResponse {
   /// Updated channel
