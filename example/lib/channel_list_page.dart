@@ -84,9 +84,8 @@ class ChannelListPageState extends State<ChannelListPage> {
               ),
             )
           : StreamChannel(
-              channelClient: StreamChat.of(context)
-                  .client
-                  .channelClients[_selectedChannelId],
+              channelClient:
+                  StreamChat.of(context).client.channels[_selectedChannelId],
               child: MessagePage(),
             ),
     );

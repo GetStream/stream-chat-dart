@@ -57,8 +57,8 @@ class Client {
   /// This client state
   ClientState state;
 
-  /// A map of <id, channelClient>
-  Map<String, Channel> channelClients = {};
+  /// A map of <id, channel>
+  Map<String, Channel> channels = {};
 
   /// By default the Chat Client will write all messages with level Warn or Error to stdout.
   /// During development you might want to enable more logging information, you can change the default log level when constructing the client.
@@ -237,7 +237,7 @@ class Client {
     await this.disconnect();
     httpClient.close();
     await _controller.close();
-    channelClients.values.forEach((c) => c.dispose());
+    channels.values.forEach((c) => c.dispose());
     state.dispose();
   }
 
@@ -357,15 +357,15 @@ class Client {
       response.data,
       QueryChannelsResponse.fromJson,
     )?.channels?.map((channelState) {
-      if (channelClients.containsKey(channelState.channel.id)) {
-        final client = channelClients[channelState.channel.id];
+      if (channels.containsKey(channelState.channel.id)) {
+        final client = channels[channelState.channel.id];
         client.state.updateChannelState(channelState);
       } else {
-        channelClients[channelState.channel.id] =
+        channels[channelState.channel.id] =
             Channel.fromState(this, channelState);
       }
 
-      return channelClients[channelState.channel.id];
+      return channels[channelState.channel.id];
     })?.toList();
 
     return newChannelClients;
@@ -606,7 +606,7 @@ class Client {
   }) {
     final channelClient = Channel(this, type, id, extraData);
 
-    channelClients[id] = channelClient;
+    channels[id] = channelClient;
 
     return channelClient;
   }

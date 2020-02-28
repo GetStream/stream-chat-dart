@@ -38,7 +38,7 @@ class ChannelPreview extends StatelessWidget {
     StreamChannelState streamChannel,
   ) {
     final channelClient =
-        StreamChat.of(context).client.channelClients[channelState.channel.id];
+        StreamChat.of(context).client.channels[channelState.channel.id];
     return StreamChannel(
       channelClient: channelClient,
       child: ListTile(
