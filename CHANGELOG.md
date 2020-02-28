@@ -1,3 +1,7 @@
+## 0.1.12
+
+- Add export multipart_file from dio
+
 ## 0.1.11
 
 - Add channel config checks
