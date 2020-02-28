@@ -148,12 +148,19 @@ class Client {
             options.queryParameters.addAll(_commonQueryParams);
             options.headers.addAll(_httpHeaders);
 
+            String stringData = options.data.toString();
+
+            if (options.data is FormData) {
+              final multiPart = (options.data as FormData).files[0]?.value;
+              stringData = '${multiPart?.filename} - ${multiPart?.contentType}';
+            }
+
             logger.info('''
     
           method: ${options.method}
           url: ${options.uri} 
           headers: ${options.headers}
-          data: ${options.data.toString()}
+          data: $stringData
     
         ''');
 
