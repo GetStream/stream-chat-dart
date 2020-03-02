@@ -589,6 +589,35 @@ class ChannelClientState {
       }
     });
 
+    _channel.on('message.updated').listen((event) {
+      if (event.message.parentId == null ||
+          event.message.showInChannel == true) {
+        _channelState = this._channelState.copyWith(
+              messages: this._channelState.messages.map((message) {
+                if (message.id == event.message.id) {
+                  return event.message;
+                }
+
+                return message;
+              }).toList(),
+            );
+      }
+
+      if (event.message.parentId != null) {
+        final newThreads = threads;
+        if (newThreads.containsKey(event.message.parentId)) {
+          newThreads[event.message.parentId].map((message) {
+            if (message.id == event.message.id) {
+              return event.message;
+            }
+
+            return message;
+          });
+          _threads = newThreads;
+        }
+      }
+    });
+
     _channel.on('reaction.new').listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {

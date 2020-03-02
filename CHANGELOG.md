@@ -1,3 +1,7 @@
+## 0.1.13
+
+- Add message.updated event handling
+
 ## 0.1.12
 
 - Add export multipart_file from dio
