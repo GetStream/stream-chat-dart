@@ -1,3 +1,7 @@
+## 0.1.14
+
+- Handle message modification and commands
+
 ## 0.1.13
 
 - Add message.updated event handling

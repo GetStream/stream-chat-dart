@@ -116,7 +116,16 @@ class Channel {
       "$_channelURL/message",
       data: {"message": message.toJson()},
     );
-    return _client.decode(response.data, SendMessageResponse.fromJson);
+
+    final res = _client.decode(response.data, SendMessageResponse.fromJson);
+
+    _client.handleEvent(Event(
+      type: 'message.new',
+      message: res.message,
+      cid: cid,
+    ));
+
+    return res;
   }
 
   /// Send a file to this channel
@@ -260,13 +269,31 @@ class Channel {
 
   /// Send action for a specific message of this channel
   Future<SendActionResponse> sendAction(
-    String messageID,
+    String messageId,
     Map<String, dynamic> formData,
   ) async {
     _checkInitialized();
-    final response = await _client.post("/messages/$messageID/action",
-        data: {'id': id, 'type': type, 'form_data': formData});
-    return _client.decode(response.data, SendActionResponse.fromJson);
+    final response = await _client.post("/messages/$messageId/action", data: {
+      'id': id,
+      'type': type,
+      'form_data': formData,
+      'message_id': messageId,
+    });
+
+    final res = _client.decode(response.data, SendActionResponse.fromJson);
+
+    if (res.message != null) {
+      _client.handleEvent(Event(
+        message: res.message,
+        type: 'message.new',
+        cid: cid,
+      ));
+    } else {
+      state.updateChannelState(state._channelState.copyWith(
+          messages: state.messages..removeWhere((m) => m.id == messageId)));
+    }
+
+    return res;
   }
 
   /// Mark all channel messages as read
@@ -519,8 +546,18 @@ class ChannelClientState {
     _channel.on('message.new').listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
+        final newMessages = this._channelState.messages;
+
+        final oldIndex =
+            newMessages.indexWhere((m) => m.id == event.message.id);
+        if (oldIndex != -1) {
+          newMessages[oldIndex] = event.message;
+        } else {
+          newMessages.add(event.message);
+        }
+
         _channelState = this._channelState.copyWith(
-              messages: this._channelState.messages + [event.message],
+              messages: newMessages,
               channel: this._channelState.channel.copyWith(
                     lastMessageAt: event.message.createdAt,
                   ),
