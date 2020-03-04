@@ -115,13 +115,13 @@ class Channel {
 
     final res = _client.decode(response.data, SendMessageResponse.fromJson);
 
-    _client.handleEvent(Event(
-      type: 'message.new',
-      message: res.message,
-      cid: cid,
-    ));
-
-    print('res.message: ${res.message.mentionedUsers}');
+    if (res.message.type == 'ephemeral') {
+      _client.handleEvent(Event(
+        type: 'message.new',
+        message: res.message,
+        cid: cid,
+      ));
+    }
 
     return res;
   }
@@ -289,8 +289,23 @@ class Channel {
         cid: cid,
       ));
     } else {
-      state.updateChannelState(state._channelState.copyWith(
-          messages: state.messages..removeWhere((m) => m.id == messageId)));
+      final oldIndex = state.messages.indexWhere((m) => m.id == messageId);
+
+      Message oldMessage;
+      if (oldIndex != -1) {
+        oldMessage = state.messages[oldIndex];
+        state.updateChannelState(state._channelState.copyWith(
+          messages: state.messages..remove(oldMessage),
+        ));
+      } else {
+        oldMessage = state.threads.values
+            .expand((messages) => messages)
+            .firstWhere((m) => m.id == messageId);
+        if (oldMessage.parentId != null) {
+          state.updateThreadInfo(oldMessage.parentId,
+              state.threads[oldMessage.parentId]..remove(oldMessage));
+        }
+      }
     }
 
     return res;
@@ -567,16 +582,20 @@ class ChannelClientState {
       if (event.message.parentId != null) {
         final newThreads = threads;
         if (newThreads.containsKey(event.message.parentId)) {
-          newThreads[event.message.parentId].add(event.message);
+          final oldIndex = newThreads[event.message.parentId]
+              .indexWhere((m) => m.id == event.message.id);
+          if (oldIndex != -1) {
+            newThreads[event.message.parentId][oldIndex] = event.message;
+          } else {
+            newThreads[event.message.parentId].add(event.message);
+          }
           _threads = newThreads;
         }
 
         _channelState = this._channelState.copyWith(
               messages: this._channelState.messages.map((message) {
                 if (message.id == event.message.parentId) {
-                  return message.copyWith(
-                    replyCount: message.replyCount + 1,
-                  );
+                  return message;
                 }
 
                 return message;
@@ -602,22 +621,21 @@ class ChannelClientState {
       if (event.message.parentId != null) {
         final newThreads = threads;
         if (newThreads.containsKey(event.message.parentId)) {
-          newThreads[event.message.parentId].map((message) {
+          newThreads[event.message.parentId] =
+              newThreads[event.message.parentId].map((message) {
             if (message.id == event.message.id) {
               return event.message;
             }
 
             return message;
-          });
+          }).toList();
           _threads = newThreads;
         }
 
         _channelState = this._channelState.copyWith(
               messages: this._channelState.messages.map((message) {
                 if (message.id == event.message.parentId) {
-                  return message.copyWith(
-                    replyCount: message.replyCount - 1,
-                  );
+                  return message;
                 }
 
                 return message;
@@ -643,13 +661,14 @@ class ChannelClientState {
       if (event.message.parentId != null) {
         final newThreads = threads;
         if (newThreads.containsKey(event.message.parentId)) {
-          newThreads[event.message.parentId].map((message) {
+          newThreads[event.message.parentId] =
+              newThreads[event.message.parentId].map((message) {
             if (message.id == event.message.id) {
               return event.message;
             }
 
             return message;
-          });
+          }).toList();
           _threads = newThreads;
         }
       }
@@ -819,11 +838,13 @@ class ChannelClientState {
     final newThreads = threads;
 
     if (newThreads.containsKey(parentId)) {
-      newThreads[parentId] = newThreads[parentId]
-              .where((newMessage) => !_channelState.messages.any((m) =>
-                  m.id == newMessage.id && m.updatedAt == newMessage.updatedAt))
-              .toList() +
-          messages;
+      newThreads[parentId] = [
+        ...messages,
+        ...newThreads[parentId]
+            .where((newMessage) =>
+                !newThreads[parentId].any((m) => m.id == newMessage.id))
+            .toList(),
+      ];
     } else {
       newThreads[parentId] = messages;
     }
@@ -833,37 +854,47 @@ class ChannelClientState {
 
   /// Update channelState with updated information
   void updateChannelState(ChannelState updatedState) {
+    List<Message> newMessages = [
+      ...updatedState?.messages ?? [],
+      ..._channelState?.messages
+              ?.where((m) =>
+                  updatedState.messages
+                      ?.any((newMessage) => newMessage.id == m.id) ==
+                  false)
+              ?.toList() ??
+          [],
+    ];
+
+    newMessages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+    List<User> newWatchers = [
+      ...updatedState?.watchers ?? [],
+      ..._channelState?.watchers
+              ?.where((w) =>
+                  updatedState.watchers
+                      ?.any((newWatcher) => newWatcher.id == w.id) ==
+                  false)
+              ?.toList() ??
+          [],
+    ];
+
+    List<Member> newMembers = [
+      ...updatedState?.members ?? [],
+      ..._channelState?.members
+              ?.where((m) =>
+                  updatedState.members
+                      ?.any((newMember) => newMember.userId == m.userId) ==
+                  false)
+              ?.toList() ??
+          [],
+    ];
+
     _channelStateController.add(_channelState.copyWith(
-      messages: updatedState.messages != null
-          ? updatedState.messages
-                  .where((newMessage) => !_channelState.messages.any((m) =>
-                      m.id == newMessage.id &&
-                      m.updatedAt == newMessage.updatedAt))
-                  .toList() +
-              (_channelState?.messages ?? [])
-          : null,
+      messages: newMessages,
       channel: updatedState.channel,
-      watchers: updatedState.watchers != null
-          ? updatedState.watchers
-                  .where((newWatcher) =>
-                      _channelState.watchers?.any((m) =>
-                          m.id == newWatcher.id &&
-                          m.updatedAt == newWatcher.updatedAt) ==
-                      false)
-                  .toList() +
-              (_channelState?.watchers ?? [])
-          : null,
+      watchers: newWatchers,
       watcherCount: _channelState.watcherCount,
-      members: updatedState.members != null
-          ? updatedState.members
-                  .where((newMember) =>
-                      _channelState.members?.any((m) =>
-                          m.userId == newMember.userId &&
-                          m.updatedAt == newMember.updatedAt) ==
-                      false)
-                  .toList() +
-              (_channelState?.members ?? [])
-          : null,
+      members: newMembers,
       read: _channelState.read,
     ));
   }
