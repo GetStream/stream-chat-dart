@@ -133,6 +133,7 @@ void main() {
                 "asset_url": "https://media.giphy.com/media/5zvN79uTGfLMOVfQaA/giphy.mp4"
               }
             ],
+            "mentioned_users": null,
             "parent_id": "parentId",
             "show_in_channel": true,
             "hey": "test"

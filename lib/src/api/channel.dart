@@ -115,7 +115,7 @@ class Channel {
 
     final res = _client.decode(response.data, SendMessageResponse.fromJson);
 
-    if (res.message.type == 'ephemeral') {
+    if (res.message?.type == 'ephemeral') {
       _client.handleEvent(Event(
         type: 'message.new',
         message: res.message,
@@ -289,10 +289,10 @@ class Channel {
         cid: cid,
       ));
     } else {
-      final oldIndex = state.messages.indexWhere((m) => m.id == messageId);
+      final oldIndex = state.messages?.indexWhere((m) => m.id == messageId);
 
       Message oldMessage;
-      if (oldIndex != -1) {
+      if (oldIndex != null && oldIndex != -1) {
         oldMessage = state.messages[oldIndex];
         state.updateChannelState(state._channelState.copyWith(
           messages: state.messages..remove(oldMessage),
@@ -300,8 +300,8 @@ class Channel {
       } else {
         oldMessage = state.threads.values
             .expand((messages) => messages)
-            .firstWhere((m) => m.id == messageId);
-        if (oldMessage.parentId != null) {
+            .firstWhere((m) => m.id == messageId, orElse: () => null);
+        if (oldMessage?.parentId != null) {
           state.updateThreadInfo(oldMessage.parentId,
               state.threads[oldMessage.parentId]..remove(oldMessage));
         }

@@ -121,15 +121,21 @@ void main() {
 
         final Map<String, dynamic> data = {'test': true};
 
-        when(mockDio.post<String>('/messages/messageid/action',
-                data: {'id': 'testid', 'type': 'messaging', 'form_data': data}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(mockDio.post<String>('/messages/messageid/action', data: {
+          'id': 'testid',
+          'type': 'messaging',
+          'form_data': data,
+          'message_id': 'messageid',
+        })).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await channelClient.sendAction('messageid', data);
 
-        verify(mockDio.post<String>('/messages/messageid/action',
-                data: {'id': 'testid', 'type': 'messaging', 'form_data': data}))
-            .called(1);
+        verify(mockDio.post<String>('/messages/messageid/action', data: {
+          'id': 'testid',
+          'type': 'messaging',
+          'form_data': data,
+          'message_id': 'messageid',
+        })).called(1);
       });
 
       test('getMessagesById', () async {

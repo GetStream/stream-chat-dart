@@ -9,7 +9,7 @@ class Serialization {
   static const Function readOnly = readonly;
 
   static List<String> userIds(List<User> users) {
-    return users.map((u) => u.id).toList();
+    return users?.map((u) => u.id)?.toList();
   }
 
   /// Takes values in `extra_data` key and puts them on the root level of the json map
