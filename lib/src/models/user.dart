@@ -73,6 +73,10 @@ class User {
     this.banned,
   });
 
+  /// Shortcut for user name
+  String get name =>
+      extraData?.containsKey('name') == true ? extraData['name'] : id;
+
   /// Create a new instance from a json
   factory User.fromJson(Map<String, dynamic> json) {
     return _$UserFromJson(Serialization.moveKeysToRoot(json, topLevelFields));

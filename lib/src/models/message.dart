@@ -25,7 +25,7 @@ class Message {
   final List<Attachment> attachments;
 
   /// The list of user mentioned in the message
-  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  @JsonKey(toJson: Serialization.userIds)
   final List<User> mentionedUsers;
 
   /// A map describing the count of number of every reaction

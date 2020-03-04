@@ -1,3 +1,5 @@
+import 'user.dart';
+
 /// Used to avoid to serialize properties to json
 readonly(_) => null;
 
@@ -5,6 +7,10 @@ readonly(_) => null;
 class Serialization {
   /// Used to avoid to serialize properties to json
   static const Function readOnly = readonly;
+
+  static List<String> userIds(List<User> users) {
+    return users.map((u) => u.id).toList();
+  }
 
   /// Takes values in `extra_data` key and puts them on the root level of the json map
   static Map<String, dynamic> moveKeysToRoot(

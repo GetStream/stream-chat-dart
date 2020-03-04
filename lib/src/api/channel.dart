@@ -94,10 +94,6 @@ class Channel {
   Stream<Map<String, dynamic>> get extraDataStream =>
       state?.channelStateStream?.map((cs) => cs.channel?.extraData);
 
-  List<Member> get members => state?._channelState?.channel?.members;
-  Stream<List<Member>> get membersStream =>
-      state?.channelStateStream?.map((cs) => cs.channel?.members);
-
   /// The main Stream chat client
   Client get client => _client;
   Client _client;
@@ -124,6 +120,8 @@ class Channel {
       message: res.message,
       cid: cid,
     ));
+
+    print('res.message: ${res.message.mentionedUsers}');
 
     return res;
   }
@@ -237,7 +235,9 @@ class Channel {
 
   /// Add members to the channel
   Future<AddMembersResponse> addMembers(
-      List<Member> members, Message message) async {
+    List<Member> members,
+    Message message,
+  ) async {
     final res = await _client.post(_channelURL, data: {
       "add_members": members.map((m) => m.toJson()),
       "message": message.toJson(),
@@ -840,25 +840,29 @@ class ChannelClientState {
                       m.id == newMessage.id &&
                       m.updatedAt == newMessage.updatedAt))
                   .toList() +
-              _channelState.messages
+              (_channelState?.messages ?? [])
           : null,
       channel: updatedState.channel,
       watchers: updatedState.watchers != null
           ? updatedState.watchers
-                  .where((newWatcher) => !_channelState.watchers.any((m) =>
-                      m.id == newWatcher.id &&
-                      m.updatedAt == newWatcher.updatedAt))
+                  .where((newWatcher) =>
+                      _channelState.watchers?.any((m) =>
+                          m.id == newWatcher.id &&
+                          m.updatedAt == newWatcher.updatedAt) ==
+                      false)
                   .toList() +
-              _channelState.watchers
+              (_channelState?.watchers ?? [])
           : null,
       watcherCount: _channelState.watcherCount,
       members: updatedState.members != null
           ? updatedState.members
-                  .where((newMember) => !_channelState.members.any((m) =>
-                      m.userId == newMember.userId &&
-                      m.updatedAt == newMember.updatedAt))
+                  .where((newMember) =>
+                      _channelState.members?.any((m) =>
+                          m.userId == newMember.userId &&
+                          m.updatedAt == newMember.updatedAt) ==
+                      false)
                   .toList() +
-              _channelState.members
+              (_channelState?.members ?? [])
           : null,
       read: _channelState.read,
     ));

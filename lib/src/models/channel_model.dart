@@ -5,7 +5,7 @@ import 'member.dart';
 import 'serialization.dart';
 import 'user.dart';
 
-part 'channel.g.dart';
+part 'channel_model.g.dart';
 
 /// The class that contains the information about a channel
 @JsonSerializable()

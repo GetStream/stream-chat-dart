@@ -65,7 +65,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   writeNotNull('type', readonly(instance.type));
   writeNotNull(
       'attachments', instance.attachments?.map((e) => e?.toJson())?.toList());
-  writeNotNull('mentioned_users', readonly(instance.mentionedUsers));
+  val['mentioned_users'] = Serialization.userIds(instance.mentionedUsers);
   writeNotNull('reaction_counts', readonly(instance.reactionCounts));
   writeNotNull('reaction_scores', readonly(instance.reactionScores));
   writeNotNull('latest_reactions', readonly(instance.latestReactions));

@@ -1,3 +1,7 @@
+## 0.1.15
+
+- Fix mentions handling
+
 ## 0.1.14
 
 - Handle message modification and commands
