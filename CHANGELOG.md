@@ -1,3 +1,7 @@
+## 0.1.16
+
+- Fix message update
+
 ## 0.1.15
 
 - Fix mentions handling
