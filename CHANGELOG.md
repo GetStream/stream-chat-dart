@@ -1,3 +1,9 @@
+## 0.1.17
+
+- Ignore current user typing events
+
+- Add event types
+
 ## 0.1.16
 
 - Fix message update

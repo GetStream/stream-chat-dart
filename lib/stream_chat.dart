@@ -9,6 +9,7 @@ export './src/api/requests.dart';
 export './src/api/requests.dart';
 export './src/api/responses.dart';
 export './src/client.dart';
+export './src/event_type.dart';
 export './src/models/action.dart';
 export './src/models/attachment.dart';
 export './src/models/channel_config.dart';

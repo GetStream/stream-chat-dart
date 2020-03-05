@@ -117,7 +117,7 @@ class Channel {
 
     if (res.message?.type == 'ephemeral') {
       _client.handleEvent(Event(
-        type: 'message.new',
+        type: EventType.messageNew,
         message: res.message,
         cid: cid,
       ));
@@ -285,7 +285,7 @@ class Channel {
     if (res.message != null) {
       _client.handleEvent(Event(
         message: res.message,
-        type: 'message.new',
+        type: EventType.messageNew,
         cid: cid,
       ));
     } else {
@@ -558,7 +558,7 @@ class ChannelClientState {
     _channelStateController = BehaviorSubject.seeded(channelState);
     _listenTypingEvents();
 
-    _channel.on('message.new').listen((event) {
+    _channel.on(EventType.messageNew).listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
         final newMessages = this._channelState.messages;
@@ -644,7 +644,7 @@ class ChannelClientState {
       }
     });
 
-    _channel.on('message.updated').listen((event) {
+    _channel.on(EventType.messageUpdated).listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
         _channelState = this._channelState.copyWith(
@@ -674,7 +674,7 @@ class ChannelClientState {
       }
     });
 
-    _channel.on('reaction.new').listen((event) {
+    _channel.on(EventType.reactionNew).listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
         _channelState = this._channelState.copyWith(
@@ -702,7 +702,7 @@ class ChannelClientState {
       }
     });
 
-    _channel.on('reaction.deleted').listen((event) {
+    _channel.on(EventType.reactionDeleted).listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
         _channelState = this._channelState.copyWith(
@@ -739,7 +739,7 @@ class ChannelClientState {
     }
 
     _channel
-        .on('message.read')
+        .on(EventType.messageRead)
         .where((e) => e.user.id == _channel.client.state.user.id)
         .listen((event) {
       final read = this._channelState.read;
@@ -938,14 +938,14 @@ class ChannelClientState {
     }
 
     this._channel.on(EventType.typingStart).listen((event) {
-      if (event.user != _channel.client.state.user) {
+      if (event.user.id != _channel.client.state.user.id) {
         _typings[event.user] = DateTime.now();
         _typingEventsController.add(_typings.keys.toList());
       }
     });
 
     this._channel.on(EventType.typingStop).listen((event) {
-      if (event.user != _channel.client.state.user) {
+      if (event.user.id != _channel.client.state.user.id) {
         _typings.remove(event.user);
         _typingEventsController.add(_typings.keys.toList());
       }
