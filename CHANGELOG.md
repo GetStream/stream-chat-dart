@@ -1,3 +1,7 @@
+## 0.1.18
+
+- Export dio error
+
 ## 0.1.17
 
 - Ignore current user typing events

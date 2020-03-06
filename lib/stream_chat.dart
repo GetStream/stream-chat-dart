@@ -1,5 +1,6 @@
 library stream_chat;
 
+export 'package:dio/src/dio_error.dart';
 export 'package:dio/src/multipart_file.dart';
 export 'package:logging/src/level.dart';
 
