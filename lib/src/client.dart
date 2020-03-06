@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
 
@@ -742,8 +743,16 @@ class Client {
   }
 
   /// Deletes the given message
-  Future<EmptyResponse> deleteMessage(String messageId) async {
-    final response = await delete("/messages/$messageId");
+  Future<EmptyResponse> deleteMessage(Message message, [String cid]) async {
+    if (message.status == MessageSendingStatus.FAILED) {
+      handleEvent(Event(
+        message: message.copyWith(type: 'deleted'),
+        type: EventType.messageDeleted,
+        cid: cid,
+      ));
+      return EmptyResponse();
+    }
+    final response = await delete("/messages/${message.id}");
     return decode(response.data, EmptyResponse.fromJson);
   }
 

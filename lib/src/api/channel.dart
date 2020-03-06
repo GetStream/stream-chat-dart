@@ -133,7 +133,7 @@ class Channel {
             .toJson()
       },
     ).catchError((error) {
-      state.updateChannelState(
+      state?.updateChannelState(
         ChannelState(
           messages: [
             newMessage.copyWith(
@@ -145,7 +145,7 @@ class Channel {
       throw error;
     });
 
-    state.updateChannelState(
+    state?.updateChannelState(
       ChannelState(
         messages: [
           newMessage.copyWith(

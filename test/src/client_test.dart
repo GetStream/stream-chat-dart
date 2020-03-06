@@ -670,7 +670,7 @@ void main() {
         when(mockDio.delete<String>('/messages/$messageId'))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
-        await client.deleteMessage(messageId);
+        await client.deleteMessage(Message(id: messageId));
 
         verify(mockDio.delete<String>('/messages/$messageId')).called(1);
       });

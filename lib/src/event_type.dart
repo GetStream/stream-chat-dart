@@ -12,6 +12,9 @@ class EventType {
   /// Event sent when receiving a new message
   static const String messageNew = "message.new";
 
+  /// Event sent when deleting a new message
+  static const String messageDeleted = "message.deleted";
+
   /// Event sent when receiving a new reaction
   static const String reactionNew = "reaction.new";
 

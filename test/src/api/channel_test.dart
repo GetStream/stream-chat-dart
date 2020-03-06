@@ -28,7 +28,10 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final message = Message(text: 'hey');
+        final message = Message(
+          text: 'hey',
+          id: 'test',
+        );
 
         when(mockDio.post<String>('/channels/messaging/testid/message',
                 data: {'message': message.toJson()}))
