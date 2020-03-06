@@ -6,6 +6,7 @@ import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/models/channel_state.dart';
 import 'package:stream_chat/src/models/user.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:uuid/uuid.dart';
 
 import '../client.dart';
 import '../models/event.dart';
@@ -108,9 +109,50 @@ class Channel {
 
   /// Send a message to this channel
   Future<SendMessageResponse> sendMessage(Message message) async {
+    final messageId = message.id ?? Uuid().v4();
+    final newMessage = message.copyWith(
+      createdAt: DateTime.now(),
+      user: _client.state.user,
+      id: messageId,
+      status: MessageSendingStatus.SENDING,
+    );
+
+    _client.handleEvent(Event(
+      type: EventType.messageNew,
+      message: newMessage,
+      cid: cid,
+    ));
+
     final response = await _client.post(
       "$_channelURL/message",
-      data: {"message": message.toJson()},
+      data: {
+        "message": message
+            .copyWith(
+              id: messageId,
+            )
+            .toJson()
+      },
+    ).catchError((error) {
+      state.updateChannelState(
+        ChannelState(
+          messages: [
+            newMessage.copyWith(
+              status: MessageSendingStatus.FAILED,
+            )
+          ],
+        ),
+      );
+      throw error;
+    });
+
+    state.updateChannelState(
+      ChannelState(
+        messages: [
+          newMessage.copyWith(
+            status: MessageSendingStatus.SENT,
+          )
+        ],
+      ),
     );
 
     final res = _client.decode(response.data, SendMessageResponse.fromJson);
@@ -865,7 +907,17 @@ class ChannelClientState {
           [],
     ];
 
-    newMessages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    newMessages.sort((a, b) {
+      if (a.createdAt == null) {
+        return 1;
+      }
+
+      if (b.createdAt == null) {
+        return -1;
+      }
+
+      return a.createdAt.compareTo(b.createdAt);
+    });
 
     List<User> newWatchers = [
       ...updatedState?.watchers ?? [],

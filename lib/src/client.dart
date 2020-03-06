@@ -310,6 +310,21 @@ class Client {
     _connectionStatusListener = () {
       final value = _ws.connectionStatus.value;
       this.wsConnectionStatus.value = value;
+
+      if (value == ConnectionStatus.connected && channels?.isNotEmpty == true) {
+        queryChannels(filter: {
+          'cid': {
+            '\$in': channels.keys.toList(),
+          },
+        }, options: {
+          'recovery': true,
+          'last_message_ids':
+              channels.map<String, String>((cid, c) => MapEntry<String, String>(
+                    cid,
+                    c.state.messages?.last?.id,
+                  ))
+        });
+      }
     };
 
     _ws.connectionStatus.addListener(_connectionStatusListener);
@@ -364,15 +379,15 @@ class Client {
       response.data,
       QueryChannelsResponse.fromJson,
     )?.channels?.map((channelState) {
-      if (channels.containsKey(channelState.channel.id)) {
-        final client = channels[channelState.channel.id];
+      if (channels.containsKey(channelState.channel.cid)) {
+        final client = channels[channelState.channel.cid];
         client.state.updateChannelState(channelState);
       } else {
-        channels[channelState.channel.id] =
+        channels[channelState.channel.cid] =
             Channel.fromState(this, channelState);
       }
 
-      return channels[channelState.channel.id];
+      return channels[channelState.channel.cid];
     })?.toList();
 
     return newChannels;
@@ -613,7 +628,7 @@ class Client {
   }) {
     final channel = Channel(this, type, id, extraData);
 
-    channels[id] = channel;
+    channels[channel.cid] = channel;
 
     return channel;
   }

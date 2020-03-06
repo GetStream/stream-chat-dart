@@ -7,6 +7,12 @@ import 'user.dart';
 
 part 'message.g.dart';
 
+enum MessageSendingStatus {
+  SENDING,
+  SENT,
+  FAILED,
+}
+
 /// The class that contains the information about a message
 @JsonSerializable()
 class Message {
@@ -15,6 +21,9 @@ class Message {
 
   /// The text of this message
   final String text;
+
+  /// The status of a sending message
+  final MessageSendingStatus status;
 
   /// The message type
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
@@ -107,13 +116,14 @@ class Message {
     this.latestReactions,
     this.ownReactions,
     this.parentId,
-    this.replyCount,
+    this.replyCount = 0,
     this.showInChannel,
     this.command,
     this.createdAt,
     this.updatedAt,
     this.user,
     this.extraData,
+    this.status = MessageSendingStatus.SENT,
   });
 
   /// Create a new instance from a json
@@ -143,6 +153,7 @@ class Message {
     DateTime updatedAt,
     User user,
     Map<String, dynamic> extraData,
+    MessageSendingStatus status,
   }) =>
       Message(
         id: id ?? this.id,
@@ -162,5 +173,6 @@ class Message {
         extraData: extraData ?? this.extraData,
         user: user ?? this.user,
         updatedAt: updatedAt ?? this.updatedAt,
+        status: status ?? this.status,
       );
 }
