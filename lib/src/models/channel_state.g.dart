@@ -3,6 +3,49 @@
 part of 'channel_state.dart';
 
 // **************************************************************************
+// TypeAdapterGenerator
+// **************************************************************************
+
+class ChannelStateAdapter extends TypeAdapter<ChannelState> {
+  @override
+  final typeId = 0;
+
+  @override
+  ChannelState read(BinaryReader reader) {
+    var numOfFields = reader.readByte();
+    var fields = <int, dynamic>{
+      for (var i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return ChannelState(
+      channel: fields[0] as ChannelModel,
+      messages: (fields[1] as List)?.cast<Message>(),
+      members: (fields[2] as List)?.cast<Member>(),
+      watcherCount: fields[3] as int,
+      watchers: (fields[4] as List)?.cast<User>(),
+      read: (fields[5] as List)?.cast<Read>(),
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, ChannelState obj) {
+    writer
+      ..writeByte(6)
+      ..writeByte(0)
+      ..write(obj.channel)
+      ..writeByte(1)
+      ..write(obj.messages)
+      ..writeByte(2)
+      ..write(obj.members)
+      ..writeByte(3)
+      ..write(obj.watcherCount)
+      ..writeByte(4)
+      ..write(obj.watchers)
+      ..writeByte(5)
+      ..write(obj.read);
+  }
+}
+
+// **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
