@@ -20,57 +20,31 @@ class ChannelHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final streamChat = StreamChannel.of(context);
-    return StreamBuilder<ChannelState>(
-        stream: streamChat.channelStateStream,
-        initialData: streamChat.channelState,
-        builder: (context, snapshot) {
-          final channelState = snapshot.data;
-          return AppBar(
-            leading: showBackButton ? _buildBackButton(context) : Container(),
-            actions: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(right: 10.0),
-                child: Stack(
-                  children: <Widget>[
-                    Center(child: ChannelImage(channel: channelState.channel)),
-                    (channelState.members.isNotEmpty &&
-                            channelState.members.first.user.online)
-                        ? Positioned(
-                            right: 0,
-                            top: 5,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.green,
-                              ),
-                              height: 8,
-                              width: 8,
-                            ),
-                          )
-                        : Container(),
-                  ],
-                ),
-              ),
-            ],
-            centerTitle: true,
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                ChannelNameText(
-                  channel: channelState.channel,
-                ),
-                _buildLastActive(context, channelState),
-              ],
-            ),
-          );
-        });
+    return AppBar(
+      leading: showBackButton ? _buildBackButton(context) : Container(),
+      actions: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(right: 10.0),
+          child: ChannelImage(channel: streamChat.channel),
+        ),
+      ],
+      centerTitle: true,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          ChannelNameText(
+            channel: streamChat.channel,
+          ),
+          _buildLastActive(context, streamChat.channel),
+        ],
+      ),
+    );
   }
 
-  StatelessWidget _buildLastActive(
-      BuildContext context, ChannelState channelState) {
-    return (channelState.channel.lastMessageAt != null)
+  StatelessWidget _buildLastActive(BuildContext context, Channel channel) {
+    return (channel.lastMessageAt != null)
         ? Text(
-            'Active ${timeago.format(channelState.channel.lastMessageAt)}',
+            'Active ${timeago.format(channel.lastMessageAt)}',
             style: Theme.of(context).textTheme.caption,
           )
         : Container();

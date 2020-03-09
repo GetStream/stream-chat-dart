@@ -52,8 +52,7 @@ class ChannelListPageState extends State<ChannelListPage> {
               sort: widget.sort,
               onChannelTap: showSplit
                   ? (channelClient, _) {
-                      _navigateToChannel(
-                          context, channelClient.state.channelState);
+                      _navigateToChannel(context, channelClient);
                     }
                   : null,
             ),
@@ -93,10 +92,10 @@ class ChannelListPageState extends State<ChannelListPage> {
 
   void _navigateToChannel(
     BuildContext context,
-    ChannelState channelState,
+    Channel channel,
   ) {
     setState(() {
-      _selectedChannelId = channelState.channel.id;
+      _selectedChannelId = channel.id;
     });
   }
 

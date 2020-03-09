@@ -38,7 +38,7 @@ class StreamChannelState extends State<StreamChannel> {
 
   Channel get channelClient => widget.channelClient;
 
-  ChannelState get channelState => widget.channelClient.state.channelState;
+  Channel get channel => widget.channelClient;
 
   Stream<ChannelState> get channelStateStream =>
       widget.channelClient.state.channelStateStream;
@@ -51,8 +51,8 @@ class StreamChannelState extends State<StreamChannel> {
     _queryMessageController.add(true);
 
     String firstId;
-    if (channelState.messages.isNotEmpty) {
-      firstId = channelState.messages.first.id;
+    if (channel.state.messages.isNotEmpty) {
+      firstId = channel.state.messages.first.id;
     }
 
     widget.channelClient

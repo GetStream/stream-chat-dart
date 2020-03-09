@@ -83,6 +83,12 @@ class Message {
   @JsonKey(includeIfNull: false)
   final Map<String, dynamic> extraData;
 
+  /// True is the message has been deleted
+  bool get isDeleted => type == 'deleted';
+
+  /// True is the message is ephemeral
+  bool get isEphemeral => type == 'ephemeral';
+
   /// Known top level fields.
   /// Useful for [Serialization] methods.
   static const topLevelFields = [

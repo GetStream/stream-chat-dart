@@ -47,7 +47,7 @@ class _ChannelListViewState extends State<ChannelListView> {
           options: widget.options,
         );
       },
-      child: StreamBuilder<List<ChannelState>>(
+      child: StreamBuilder<List<Channel>>(
           stream: streamChat.channelsStream,
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
@@ -74,8 +74,8 @@ class _ChannelListViewState extends State<ChannelListView> {
                 childCount: (channelsStates.length * 2) + 1,
                 findChildIndexCallback: (key) {
                   final ValueKey<String> valueKey = key;
-                  final index = channelsStates.indexWhere(
-                      (cs) => 'CHANNEL-${cs.channel.id}' == valueKey.value);
+                  final index = channelsStates
+                      .indexWhere((cs) => 'CHANNEL-${cs.id}' == valueKey.value);
                   return index != -1 ? (index * 2) : null;
                 },
               ),
@@ -84,7 +84,7 @@ class _ChannelListViewState extends State<ChannelListView> {
     );
   }
 
-  Widget _itemBuilder(context, int i, List<ChannelState> channelsStates) {
+  Widget _itemBuilder(context, int i, List<Channel> channelsStates) {
     if (i % 2 != 0) {
       return _separatorBuilder(context, i);
     }
@@ -95,7 +95,7 @@ class _ChannelListViewState extends State<ChannelListView> {
     if (i < channelsStates.length) {
       final channelState = channelsStates[i];
 
-      final channelClient = streamChat.client.channels[channelState.channel.id];
+      final channelClient = streamChat.client.channels[channelState.id];
 
       ChannelTapCallback onTap;
       if (widget.onChannelTap != null) {
@@ -142,7 +142,7 @@ class _ChannelListViewState extends State<ChannelListView> {
       }
 
       return StreamChannel(
-        key: ValueKey<String>('CHANNEL-${channelClient.id}'),
+        key: ValueKey<String>('CHANNEL-${channelClient?.id}'),
         child: child,
         channelClient: channelClient,
       );

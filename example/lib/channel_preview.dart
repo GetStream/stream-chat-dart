@@ -19,26 +19,18 @@ class ChannelPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final streamChannel = StreamChannel.of(context);
-    return StreamBuilder<ChannelState>(
-        stream: streamChannel.channelClient.state.channelStateStream,
-        initialData: streamChannel.channelState,
-        builder: (context, snapshot) {
-          final channelState = snapshot.data;
-          return _buildChannelPreview(
-            context,
-            channelState,
-            streamChannel,
-          );
-        });
+    return _buildChannelPreview(
+      context,
+      streamChannel,
+    );
   }
 
   StreamChannel _buildChannelPreview(
     BuildContext context,
-    ChannelState channelState,
     StreamChannelState streamChannel,
   ) {
     final channelClient =
-        StreamChat.of(context).client.channels[channelState.channel.id];
+        StreamChat.of(context).client.channels[streamChannel.channel.cid];
     return StreamChannel(
       channelClient: channelClient,
       child: ListTile(
@@ -46,10 +38,10 @@ class ChannelPreview extends StatelessWidget {
           onTap(channelClient);
         },
         leading: ChannelImage(
-          channel: channelState.channel,
+          channel: streamChannel.channel,
         ),
         title: ChannelNameText(
-          channel: channelState.channel,
+          channel: streamChannel.channel,
         ),
         subtitle: _buildSubtitle(
           streamChannel,
@@ -58,7 +50,7 @@ class ChannelPreview extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
-            _buildDate(context, channelState.channel.lastMessageAt),
+            _buildDate(context, streamChannel.channel.lastMessageAt),
           ],
         ),
       ),
@@ -104,8 +96,8 @@ class ChannelPreview extends StatelessWidget {
 
   Widget _buildLastMessage(
       BuildContext context, StreamChannelState streamChannel, double opacity) {
-    final lastMessage = streamChannel.channelState.messages.isNotEmpty
-        ? streamChannel.channelState.messages.last
+    final lastMessage = streamChannel.channel.state.messages.isNotEmpty
+        ? streamChannel.channel.state.messages.last
         : null;
     if (lastMessage == null) {
       return SizedBox.fromSize(
