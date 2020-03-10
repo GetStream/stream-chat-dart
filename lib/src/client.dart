@@ -11,10 +11,10 @@ import 'package:uuid/uuid.dart';
 
 import 'api/channel.dart';
 import 'api/connection_status.dart';
-import 'api/offline_database.dart';
 import 'api/requests.dart';
 import 'api/responses.dart';
 import 'api/websocket.dart';
+import 'db/offline_database.dart';
 import 'exceptions.dart';
 import 'models/event.dart';
 import 'models/message.dart';
@@ -49,8 +49,6 @@ class Client {
     Dio httpClient,
   }) {
     state = ClientState(this);
-
-    offlineDatabase = OfflineDatabase();
 
     _setupLogger();
     _setupDio(httpClient, receiveTimeout, connectTimeout);
@@ -260,6 +258,8 @@ class Client {
   /// Set the current user, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
   Future<Event> setUser(User user, String token) async {
+    offlineDatabase = OfflineDatabase(user.id);
+
     state.user = user;
     _token = token;
     _anonymous = false;
@@ -373,7 +373,13 @@ class Client {
       payload.addAll(paginationParams.toJson());
     }
 
-    final offlineChannels = await offlineDatabase.getChannelStates() ?? [];
+    final offlineChannels = await offlineDatabase.getChannelStates(
+          filter: filter,
+          sort: sort,
+          paginationParams: paginationParams,
+          messageLimit: messageLimit,
+        ) ??
+        [];
     var newChannels = List<Channel>.from(state.channels ?? []);
     offlineChannels?.forEach((channelState) {
       final index =
@@ -414,7 +420,7 @@ class Client {
     });
     state.channels = newChannels;
 
-    offlineDatabase.updateChannelStates(res.channels);
+    offlineDatabase.updateChannelStates(res.channels, filter);
   }
 
   _parseError(DioError error) {

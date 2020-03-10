@@ -749,7 +749,7 @@ class ChannelClientState {
     _channel.on(EventType.messageNew).listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
-        final newMessages = this._channelState.messages;
+        final newMessages = List<Message>.from(this._channelState.messages);
 
         final oldIndex =
             newMessages.indexWhere((m) => m.id == event.message.id);

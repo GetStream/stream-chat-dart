@@ -28,7 +28,7 @@ class _Channel extends DataClass implements Insertable<_Channel> {
       @required this.createdAt,
       @required this.updatedAt,
       this.deletedAt,
-      @required this.memberCount,
+      this.memberCount,
       this.extraData,
       this.createdBy});
   factory _Channel.fromData(Map<String, dynamic> data, GeneratedDatabase db,
@@ -242,15 +242,14 @@ class _ChannelsCompanion extends UpdateCompanion<_Channel> {
     @required DateTime createdAt,
     @required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
-    @required int memberCount,
+    this.memberCount = const Value.absent(),
     this.extraData = const Value.absent(),
     this.createdBy = const Value.absent(),
   })  : id = Value(id),
         type = Value(type),
         cid = Value(cid),
         createdAt = Value(createdAt),
-        updatedAt = Value(updatedAt),
-        memberCount = Value(memberCount);
+        updatedAt = Value(updatedAt);
   _ChannelsCompanion copyWith(
       {Value<String> id,
       Value<String> type,
@@ -389,7 +388,7 @@ class $_ChannelsTable extends _Channels
     return GeneratedIntColumn(
       'member_count',
       $tableName,
-      false,
+      true,
     );
   }
 
@@ -486,8 +485,6 @@ class $_ChannelsTable extends _Channels
     if (d.memberCount.present) {
       context.handle(_memberCountMeta,
           memberCount.isAcceptableValue(d.memberCount.value, _memberCountMeta));
-    } else if (isInserting) {
-      context.missing(_memberCountMeta);
     }
     context.handle(_extraDataMeta, const VerificationResult.success());
     if (d.createdBy.present) {
@@ -2380,14 +2377,14 @@ class _Attachment extends DataClass implements Insertable<_Attachment> {
   final Map<String, dynamic> extraData;
   _Attachment(
       {@required this.messageId,
-      this.type,
-      this.titleLink,
+      @required this.type,
+      @required this.titleLink,
       this.title,
-      this.thumbUrl,
+      @required this.thumbUrl,
       this.attachmentText,
       this.pretext,
       this.ogScrapeUrl,
-      this.imageUrl,
+      @required this.imageUrl,
       this.footerIcon,
       this.footer,
       this.fallback,
@@ -2395,7 +2392,7 @@ class _Attachment extends DataClass implements Insertable<_Attachment> {
       this.authorName,
       this.authorLink,
       this.authorIcon,
-      this.assetUrl,
+      @required this.assetUrl,
       this.extraData});
   factory _Attachment.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
@@ -2794,11 +2791,8 @@ class $_AttachmentsTable extends _Attachments
   @override
   GeneratedTextColumn get type => _type ??= _constructType();
   GeneratedTextColumn _constructType() {
-    return GeneratedTextColumn(
-      'type',
-      $tableName,
-      true,
-    );
+    return GeneratedTextColumn('type', $tableName, false,
+        defaultValue: Constant(''));
   }
 
   final VerificationMeta _titleLinkMeta = const VerificationMeta('titleLink');
@@ -2806,11 +2800,8 @@ class $_AttachmentsTable extends _Attachments
   @override
   GeneratedTextColumn get titleLink => _titleLink ??= _constructTitleLink();
   GeneratedTextColumn _constructTitleLink() {
-    return GeneratedTextColumn(
-      'title_link',
-      $tableName,
-      true,
-    );
+    return GeneratedTextColumn('title_link', $tableName, false,
+        defaultValue: Constant(''));
   }
 
   final VerificationMeta _titleMeta = const VerificationMeta('title');
@@ -2830,11 +2821,8 @@ class $_AttachmentsTable extends _Attachments
   @override
   GeneratedTextColumn get thumbUrl => _thumbUrl ??= _constructThumbUrl();
   GeneratedTextColumn _constructThumbUrl() {
-    return GeneratedTextColumn(
-      'thumb_url',
-      $tableName,
-      true,
-    );
+    return GeneratedTextColumn('thumb_url', $tableName, false,
+        defaultValue: Constant(''));
   }
 
   final VerificationMeta _attachmentTextMeta =
@@ -2882,11 +2870,8 @@ class $_AttachmentsTable extends _Attachments
   @override
   GeneratedTextColumn get imageUrl => _imageUrl ??= _constructImageUrl();
   GeneratedTextColumn _constructImageUrl() {
-    return GeneratedTextColumn(
-      'image_url',
-      $tableName,
-      true,
-    );
+    return GeneratedTextColumn('image_url', $tableName, false,
+        defaultValue: Constant(''));
   }
 
   final VerificationMeta _footerIconMeta = const VerificationMeta('footerIcon');
@@ -2978,11 +2963,8 @@ class $_AttachmentsTable extends _Attachments
   @override
   GeneratedTextColumn get assetUrl => _assetUrl ??= _constructAssetUrl();
   GeneratedTextColumn _constructAssetUrl() {
-    return GeneratedTextColumn(
-      'asset_url',
-      $tableName,
-      true,
-    );
+    return GeneratedTextColumn('asset_url', $tableName, false,
+        defaultValue: Constant(''));
   }
 
   final VerificationMeta _extraDataMeta = const VerificationMeta('extraData');
@@ -3105,7 +3087,8 @@ class $_AttachmentsTable extends _Attachments
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {messageId, assetUrl, imageUrl, type};
+  Set<GeneratedColumn> get $primaryKey =>
+      {messageId, imageUrl, assetUrl, type, thumbUrl, titleLink};
   @override
   _Attachment map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
@@ -3184,8 +3167,179 @@ class $_AttachmentsTable extends _Attachments
       _ExtraDataConverter();
 }
 
+class ChannelQuery extends DataClass implements Insertable<ChannelQuery> {
+  final String queryHash;
+  final String channelCid;
+  ChannelQuery({@required this.queryHash, @required this.channelCid});
+  factory ChannelQuery.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final stringType = db.typeSystem.forDartType<String>();
+    return ChannelQuery(
+      queryHash: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}query_hash']),
+      channelCid: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid']),
+    );
+  }
+  factory ChannelQuery.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return ChannelQuery(
+      queryHash: serializer.fromJson<String>(json['queryHash']),
+      channelCid: serializer.fromJson<String>(json['channelCid']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'queryHash': serializer.toJson<String>(queryHash),
+      'channelCid': serializer.toJson<String>(channelCid),
+    };
+  }
+
+  @override
+  _ChannelQueriesCompanion createCompanion(bool nullToAbsent) {
+    return _ChannelQueriesCompanion(
+      queryHash: queryHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(queryHash),
+      channelCid: channelCid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(channelCid),
+    );
+  }
+
+  ChannelQuery copyWith({String queryHash, String channelCid}) => ChannelQuery(
+        queryHash: queryHash ?? this.queryHash,
+        channelCid: channelCid ?? this.channelCid,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('ChannelQuery(')
+          ..write('queryHash: $queryHash, ')
+          ..write('channelCid: $channelCid')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(queryHash.hashCode, channelCid.hashCode));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is ChannelQuery &&
+          other.queryHash == this.queryHash &&
+          other.channelCid == this.channelCid);
+}
+
+class _ChannelQueriesCompanion extends UpdateCompanion<ChannelQuery> {
+  final Value<String> queryHash;
+  final Value<String> channelCid;
+  const _ChannelQueriesCompanion({
+    this.queryHash = const Value.absent(),
+    this.channelCid = const Value.absent(),
+  });
+  _ChannelQueriesCompanion.insert({
+    @required String queryHash,
+    @required String channelCid,
+  })  : queryHash = Value(queryHash),
+        channelCid = Value(channelCid);
+  _ChannelQueriesCompanion copyWith(
+      {Value<String> queryHash, Value<String> channelCid}) {
+    return _ChannelQueriesCompanion(
+      queryHash: queryHash ?? this.queryHash,
+      channelCid: channelCid ?? this.channelCid,
+    );
+  }
+}
+
+class $_ChannelQueriesTable extends _ChannelQueries
+    with TableInfo<$_ChannelQueriesTable, ChannelQuery> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  $_ChannelQueriesTable(this._db, [this._alias]);
+  final VerificationMeta _queryHashMeta = const VerificationMeta('queryHash');
+  GeneratedTextColumn _queryHash;
+  @override
+  GeneratedTextColumn get queryHash => _queryHash ??= _constructQueryHash();
+  GeneratedTextColumn _constructQueryHash() {
+    return GeneratedTextColumn(
+      'query_hash',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _channelCidMeta = const VerificationMeta('channelCid');
+  GeneratedTextColumn _channelCid;
+  @override
+  GeneratedTextColumn get channelCid => _channelCid ??= _constructChannelCid();
+  GeneratedTextColumn _constructChannelCid() {
+    return GeneratedTextColumn(
+      'channel_cid',
+      $tableName,
+      false,
+    );
+  }
+
+  @override
+  List<GeneratedColumn> get $columns => [queryHash, channelCid];
+  @override
+  $_ChannelQueriesTable get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'channel_queries';
+  @override
+  final String actualTableName = 'channel_queries';
+  @override
+  VerificationContext validateIntegrity(_ChannelQueriesCompanion d,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    if (d.queryHash.present) {
+      context.handle(_queryHashMeta,
+          queryHash.isAcceptableValue(d.queryHash.value, _queryHashMeta));
+    } else if (isInserting) {
+      context.missing(_queryHashMeta);
+    }
+    if (d.channelCid.present) {
+      context.handle(_channelCidMeta,
+          channelCid.isAcceptableValue(d.channelCid.value, _channelCidMeta));
+    } else if (isInserting) {
+      context.missing(_channelCidMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {queryHash, channelCid};
+  @override
+  ChannelQuery map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return ChannelQuery.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  Map<String, Variable> entityToSql(_ChannelQueriesCompanion d) {
+    final map = <String, Variable>{};
+    if (d.queryHash.present) {
+      map['query_hash'] = Variable<String, StringType>(d.queryHash.value);
+    }
+    if (d.channelCid.present) {
+      map['channel_cid'] = Variable<String, StringType>(d.channelCid.value);
+    }
+    return map;
+  }
+
+  @override
+  $_ChannelQueriesTable createAlias(String alias) {
+    return $_ChannelQueriesTable(_db, alias);
+  }
+}
+
 abstract class _$OfflineDatabase extends GeneratedDatabase {
   _$OfflineDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
+  _$OfflineDatabase.connect(DatabaseConnection c) : super.connect(c);
   $_ChannelsTable _channels;
   $_ChannelsTable get channels => _channels ??= $_ChannelsTable(this);
   $_UsersTable _users;
@@ -3199,9 +3353,12 @@ abstract class _$OfflineDatabase extends GeneratedDatabase {
   $_AttachmentsTable _attachments;
   $_AttachmentsTable get attachments =>
       _attachments ??= $_AttachmentsTable(this);
+  $_ChannelQueriesTable _channelQueries;
+  $_ChannelQueriesTable get channelQueries =>
+      _channelQueries ??= $_ChannelQueriesTable(this);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [channels, users, messages, reads, members, attachments];
+      [channels, users, messages, reads, members, attachments, channelQueries];
 }
