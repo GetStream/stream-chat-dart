@@ -1,4 +1,3 @@
-import 'package:hive/hive.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../models/read.dart';
@@ -11,30 +10,23 @@ part 'channel_state.g.dart';
 
 /// The class that contains the information about a command
 @JsonSerializable()
-@HiveType(typeId: 0)
-class ChannelState extends HiveObject {
+class ChannelState {
   /// The channel to which this state belongs
-  @HiveField(0)
   final ChannelModel channel;
 
   /// A paginated list of channel messages
-  @HiveField(1)
   final List<Message> messages;
 
   /// A paginated list of channel members
-  @HiveField(2)
   final List<Member> members;
 
   /// The count of users watching the channel
-  @HiveField(3)
   final int watcherCount;
 
   /// A paginated list of users watching the channel
-  @HiveField(4)
   final List<User> watchers;
 
   /// The list of channel reads
-  @HiveField(5)
   final List<Read> read;
 
   /// Constructor used for json serialization

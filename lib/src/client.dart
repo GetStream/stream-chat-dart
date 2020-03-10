@@ -11,6 +11,7 @@ import 'package:uuid/uuid.dart';
 
 import 'api/channel.dart';
 import 'api/connection_status.dart';
+import 'api/offline_database.dart';
 import 'api/requests.dart';
 import 'api/responses.dart';
 import 'api/websocket.dart';
@@ -49,17 +50,18 @@ class Client {
   }) {
     state = ClientState(this);
 
+    offlineDatabase = OfflineDatabase();
+
     _setupLogger();
     _setupDio(httpClient, receiveTimeout, connectTimeout);
 
     logger.info('instantiating new client');
   }
 
+  OfflineDatabase offlineDatabase;
+
   /// This client state
   ClientState state;
-
-  /// A map of <id, channel>
-  Map<String, Channel> channels = {};
 
   /// By default the Chat Client will write all messages with level Warn or Error to stdout.
   /// During development you might want to enable more logging information, you can change the default log level when constructing the client.
@@ -245,7 +247,7 @@ class Client {
     await this.disconnect();
     httpClient.close();
     await _controller.close();
-    channels.values.forEach((c) => c.dispose());
+    state.channels.forEach((c) => c.dispose());
     state.dispose();
   }
 
@@ -312,18 +314,20 @@ class Client {
       final value = _ws.connectionStatus.value;
       this.wsConnectionStatus.value = value;
 
-      if (value == ConnectionStatus.connected && channels?.isNotEmpty == true) {
+      if (value == ConnectionStatus.connected &&
+          state.channels?.isNotEmpty == true) {
         queryChannels(filter: {
           'cid': {
-            '\$in': channels.keys.toList(),
+            '\$in': state.channels.map((c) => c.cid).toList(),
           },
         }, options: {
           'recovery': true,
-          'last_message_ids':
-              channels.map<String, String>((cid, c) => MapEntry<String, String>(
-                    cid,
-                    c.state.messages?.last?.id,
-                  ))
+          'last_message_ids': state.channels.map(
+            (c) => MapEntry<String, String>(
+              c.cid,
+              c.state.messages?.last?.id,
+            ),
+          ),
         });
       }
     };
@@ -336,7 +340,7 @@ class Client {
   }
 
   /// Requests channels with a given query.
-  Future<List<Channel>> queryChannels({
+  void queryChannels({
     Map<String, dynamic> filter,
     List<SortOption> sort,
     Map<String, dynamic> options,
@@ -369,6 +373,21 @@ class Client {
       payload.addAll(paginationParams.toJson());
     }
 
+    final offlineChannels = await offlineDatabase.getChannelStates() ?? [];
+    var newChannels = List<Channel>.from(state.channels ?? []);
+    offlineChannels?.forEach((channelState) {
+      final index =
+          newChannels.indexWhere((c) => c.cid == channelState.channel.cid);
+      if (index != -1) {
+        final client = newChannels[index];
+        client.state.updateChannelState(channelState);
+      } else {
+        newChannels.add(Channel.fromState(this, channelState));
+      }
+    });
+
+    state.channels = newChannels;
+
     final response = await get(
       "/channels",
       queryParameters: {
@@ -376,27 +395,33 @@ class Client {
       },
     );
 
-    final newChannels = decode<QueryChannelsResponse>(
+    final res = decode<QueryChannelsResponse>(
       response.data,
       QueryChannelsResponse.fromJson,
-    )?.channels?.map((channelState) {
-      if (channels.containsKey(channelState.channel.cid)) {
-        final client = channels[channelState.channel.cid];
+    );
+
+    newChannels = List<Channel>.from(state.channels ?? []);
+    res?.channels?.forEach((channelState) {
+      final index =
+          newChannels.indexWhere((c) => c.cid == channelState.channel.cid);
+      if (index != -1) {
+        final client = newChannels[index];
         client.state.updateChannelState(channelState);
       } else {
-        channels[channelState.channel.cid] =
-            Channel.fromState(this, channelState);
+        newChannels.add(Channel.fromState(this, channelState));
       }
+    });
+    state.channels = newChannels;
 
-      return channels[channelState.channel.cid];
-    })?.toList();
-
-    return newChannels;
+    offlineDatabase.updateChannelStates(res.channels);
   }
 
   _parseError(DioError error) {
     if (error.type == DioErrorType.RESPONSE) {
-      return ApiError(error.response?.data, error.response?.statusCode);
+      final apiError =
+          ApiError(error.response?.data, error.response?.statusCode);
+      logger.severe('apiError: ${apiError.toString()}');
+      return apiError;
     }
 
     return error;
@@ -629,7 +654,10 @@ class Client {
   }) {
     final channel = Channel(this, type, id, extraData);
 
-    channels[channel.cid] = channel;
+    state.channels = [
+      ...state.channels,
+      channel,
+    ];
 
     return channel;
   }
@@ -790,6 +818,16 @@ class ClientState {
         .listen((totalUnreadCount) {
       _totalUnreadCountController.add(totalUnreadCount);
     });
+
+    _client.on(EventType.messageNew).listen((e) {
+      final newChannels = channels;
+      final index = newChannels.indexWhere((c) => c.cid == e.cid);
+      if (index > 0) {
+        final channel = newChannels.removeAt(index);
+        newChannels.insert(0, channel);
+        channels = newChannels;
+      }
+    });
   }
 
   final Client _client;
@@ -817,6 +855,14 @@ class ClientState {
   /// The current total unread messages count as a stream
   Stream<int> get totalUnreadCountStream => _totalUnreadCountController.stream;
 
+  Stream<List<Channel>> get channelsStream => _channelsController.stream;
+  List<Channel> get channels => _channelsController.value;
+
+  set channels(List<Channel> v) {
+    _channelsController.add(v);
+  }
+
+  BehaviorSubject<List<Channel>> _channelsController = BehaviorSubject();
   BehaviorSubject<User> _userController = BehaviorSubject();
   BehaviorSubject<int> _unreadChannelsController = BehaviorSubject();
   BehaviorSubject<int> _totalUnreadCountController = BehaviorSubject();
@@ -826,5 +872,6 @@ class ClientState {
     _userController.close();
     _unreadChannelsController.close();
     _totalUnreadCountController.close();
+    _channelsController.close();
   }
 }

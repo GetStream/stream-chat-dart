@@ -600,6 +600,154 @@ class ChannelClientState {
     _channelStateController = BehaviorSubject.seeded(channelState);
     _listenTypingEvents();
 
+    _listenMessageNew();
+
+    _listenMessageDeleted();
+
+    _listenMessageUpdated();
+
+    _listenReactionNew();
+
+    _listenReactionDeleted();
+
+    _listenReadEvents();
+  }
+
+  void _listenReactionDeleted() {
+    _channel.on(EventType.reactionDeleted).listen((event) {
+      if (event.message.parentId == null ||
+          event.message.showInChannel == true) {
+        _channelState = this._channelState.copyWith(
+              messages: this._channelState.messages.map((message) {
+                if (message.id == event.message.id) {
+                  return _removeReactionRemoveMessage(message, event);
+                }
+                return message;
+              }).toList(),
+            );
+      }
+
+      if (event.message.parentId != null) {
+        final newThreads = threads;
+        if (newThreads.containsKey(event.message.parentId)) {
+          newThreads[event.message.parentId] =
+              newThreads[event.message.parentId].map((message) {
+            if (message.id == event.message.id) {
+              return _removeReactionRemoveMessage(message, event);
+            }
+            return message;
+          }).toList();
+          _threads = newThreads;
+        }
+      }
+    });
+  }
+
+  void _listenReactionNew() {
+    _channel.on(EventType.reactionNew).listen((event) {
+      if (event.message.parentId == null ||
+          event.message.showInChannel == true) {
+        _channelState = this._channelState.copyWith(
+              messages: this._channelState.messages.map((message) {
+                if (message.id == event.message.id) {
+                  return _addReactionToMessage(message, event);
+                }
+                return message;
+              }).toList(),
+            );
+      }
+
+      if (event.message.parentId != null) {
+        final newThreads = threads;
+        if (newThreads.containsKey(event.message.parentId)) {
+          newThreads[event.message.parentId] =
+              newThreads[event.message.parentId].map((message) {
+            if (message.id == event.message.id) {
+              return _addReactionToMessage(message, event);
+            }
+            return message;
+          }).toList();
+          _threads = newThreads;
+        }
+      }
+    });
+  }
+
+  void _listenMessageUpdated() {
+    _channel.on(EventType.messageUpdated).listen((event) {
+      if (event.message.parentId == null ||
+          event.message.showInChannel == true) {
+        _channelState = this._channelState.copyWith(
+              messages: this._channelState.messages.map((message) {
+                if (message.id == event.message.id) {
+                  return event.message;
+                }
+
+                return message;
+              }).toList(),
+            );
+      }
+
+      if (event.message.parentId != null) {
+        final newThreads = threads;
+        if (newThreads.containsKey(event.message.parentId)) {
+          newThreads[event.message.parentId] =
+              newThreads[event.message.parentId].map((message) {
+            if (message.id == event.message.id) {
+              return event.message;
+            }
+
+            return message;
+          }).toList();
+          _threads = newThreads;
+        }
+      }
+    });
+  }
+
+  void _listenMessageDeleted() {
+    _channel.on('message.deleted').listen((event) {
+      if (event.message.parentId == null ||
+          event.message.showInChannel == true) {
+        _channelState = this._channelState.copyWith(
+              messages: this._channelState.messages.map((message) {
+                if (message.id == event.message.id) {
+                  return event.message;
+                }
+
+                return message;
+              }).toList(),
+            );
+      }
+
+      if (event.message.parentId != null) {
+        final newThreads = threads;
+        if (newThreads.containsKey(event.message.parentId)) {
+          newThreads[event.message.parentId] =
+              newThreads[event.message.parentId].map((message) {
+            if (message.id == event.message.id) {
+              return event.message;
+            }
+
+            return message;
+          }).toList();
+          _threads = newThreads;
+        }
+
+        _channelState = this._channelState.copyWith(
+              messages: this._channelState.messages.map((message) {
+                if (message.id == event.message.parentId) {
+                  return message;
+                }
+
+                return message;
+              }).toList(),
+            );
+      }
+    });
+  }
+
+  void _listenMessageNew() {
     _channel.on(EventType.messageNew).listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
@@ -645,134 +793,6 @@ class ChannelClientState {
             );
       }
     });
-
-    _channel.on('message.deleted').listen((event) {
-      if (event.message.parentId == null ||
-          event.message.showInChannel == true) {
-        _channelState = this._channelState.copyWith(
-              messages: this._channelState.messages.map((message) {
-                if (message.id == event.message.id) {
-                  return event.message;
-                }
-
-                return message;
-              }).toList(),
-            );
-      }
-
-      if (event.message.parentId != null) {
-        final newThreads = threads;
-        if (newThreads.containsKey(event.message.parentId)) {
-          newThreads[event.message.parentId] =
-              newThreads[event.message.parentId].map((message) {
-            if (message.id == event.message.id) {
-              return event.message;
-            }
-
-            return message;
-          }).toList();
-          _threads = newThreads;
-        }
-
-        _channelState = this._channelState.copyWith(
-              messages: this._channelState.messages.map((message) {
-                if (message.id == event.message.parentId) {
-                  return message;
-                }
-
-                return message;
-              }).toList(),
-            );
-      }
-    });
-
-    _channel.on(EventType.messageUpdated).listen((event) {
-      if (event.message.parentId == null ||
-          event.message.showInChannel == true) {
-        _channelState = this._channelState.copyWith(
-              messages: this._channelState.messages.map((message) {
-                if (message.id == event.message.id) {
-                  return event.message;
-                }
-
-                return message;
-              }).toList(),
-            );
-      }
-
-      if (event.message.parentId != null) {
-        final newThreads = threads;
-        if (newThreads.containsKey(event.message.parentId)) {
-          newThreads[event.message.parentId] =
-              newThreads[event.message.parentId].map((message) {
-            if (message.id == event.message.id) {
-              return event.message;
-            }
-
-            return message;
-          }).toList();
-          _threads = newThreads;
-        }
-      }
-    });
-
-    _channel.on(EventType.reactionNew).listen((event) {
-      if (event.message.parentId == null ||
-          event.message.showInChannel == true) {
-        _channelState = this._channelState.copyWith(
-              messages: this._channelState.messages.map((message) {
-                if (message.id == event.message.id) {
-                  return _addReactionToMessage(message, event);
-                }
-                return message;
-              }).toList(),
-            );
-      }
-
-      if (event.message.parentId != null) {
-        final newThreads = threads;
-        if (newThreads.containsKey(event.message.parentId)) {
-          newThreads[event.message.parentId] =
-              newThreads[event.message.parentId].map((message) {
-            if (message.id == event.message.id) {
-              return _addReactionToMessage(message, event);
-            }
-            return message;
-          }).toList();
-          _threads = newThreads;
-        }
-      }
-    });
-
-    _channel.on(EventType.reactionDeleted).listen((event) {
-      if (event.message.parentId == null ||
-          event.message.showInChannel == true) {
-        _channelState = this._channelState.copyWith(
-              messages: this._channelState.messages.map((message) {
-                if (message.id == event.message.id) {
-                  return _removeReactionRemoveMessage(message, event);
-                }
-                return message;
-              }).toList(),
-            );
-      }
-
-      if (event.message.parentId != null) {
-        final newThreads = threads;
-        if (newThreads.containsKey(event.message.parentId)) {
-          newThreads[event.message.parentId] =
-              newThreads[event.message.parentId].map((message) {
-            if (message.id == event.message.id) {
-              return _removeReactionRemoveMessage(message, event);
-            }
-            return message;
-          }).toList();
-          _threads = newThreads;
-        }
-      }
-    });
-
-    _listenReadEvents();
   }
 
   void _listenReadEvents() {
@@ -791,7 +811,7 @@ class ChannelClientState {
       if (userReadIndex != null && userReadIndex != -1) {
         final userRead = read.removeAt(userReadIndex);
         read.add(Read(user: userRead.user, lastRead: event.createdAt));
-        _channelStateController.add(this._channelState.copyWith(read: read));
+        _channelState = this._channelState.copyWith(read: read);
       }
     });
   }
@@ -941,14 +961,14 @@ class ChannelClientState {
           [],
     ];
 
-    _channelStateController.add(_channelState.copyWith(
+    _channelState = _channelState.copyWith(
       messages: newMessages,
       channel: updatedState.channel,
       watchers: newWatchers,
-      watcherCount: _channelState.watcherCount,
+      watcherCount: updatedState.watcherCount,
       members: newMembers,
-      read: _channelState.read,
-    ));
+      read: updatedState.read,
+    );
   }
 
   /// The channel state related to this client
@@ -958,6 +978,7 @@ class ChannelClientState {
   Stream<ChannelState> get channelStateStream => _channelStateController.stream;
   BehaviorSubject<ChannelState> _channelStateController;
   set _channelState(v) {
+    _channel._client.offlineDatabase.updateChannelState(v);
     _channelStateController.add(v);
   }
 
