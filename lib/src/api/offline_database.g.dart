@@ -981,7 +981,7 @@ class _Message extends DataClass implements Insertable<_Message> {
       {@required this.id,
       this.messageText,
       this.status,
-      @required this.type,
+      this.type,
       this.reactionCounts,
       this.reactionScores,
       this.parentId,
@@ -1005,7 +1005,7 @@ class _Message extends DataClass implements Insertable<_Message> {
       messageText: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}message_text']),
       status: $_MessagesTable.$converter0.mapToDart(
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}status'])),
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}status'])),
       type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
       reactionCounts: $_MessagesTable.$converter1.mapToDart(stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}reaction_counts'])),
@@ -1265,7 +1265,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
     @required String id,
     this.messageText = const Value.absent(),
     this.status = const Value.absent(),
-    @required String type,
+    this.type = const Value.absent(),
     this.reactionCounts = const Value.absent(),
     this.reactionScores = const Value.absent(),
     this.parentId = const Value.absent(),
@@ -1278,7 +1278,6 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
     this.channelCid = const Value.absent(),
     this.extraData = const Value.absent(),
   })  : id = Value(id),
-        type = Value(type),
         createdAt = Value(createdAt);
   _MessagesCompanion copyWith(
       {Value<String> id,
@@ -1348,11 +1347,11 @@ class $_MessagesTable extends _Messages
   }
 
   final VerificationMeta _statusMeta = const VerificationMeta('status');
-  GeneratedTextColumn _status;
+  GeneratedIntColumn _status;
   @override
-  GeneratedTextColumn get status => _status ??= _constructStatus();
-  GeneratedTextColumn _constructStatus() {
-    return GeneratedTextColumn(
+  GeneratedIntColumn get status => _status ??= _constructStatus();
+  GeneratedIntColumn _constructStatus() {
+    return GeneratedIntColumn(
       'status',
       $tableName,
       true,
@@ -1367,7 +1366,7 @@ class $_MessagesTable extends _Messages
     return GeneratedTextColumn(
       'type',
       $tableName,
-      false,
+      true,
     );
   }
 
@@ -1550,8 +1549,6 @@ class $_MessagesTable extends _Messages
     if (d.type.present) {
       context.handle(
           _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
-    } else if (isInserting) {
-      context.missing(_typeMeta);
     }
     context.handle(_reactionCountsMeta, const VerificationResult.success());
     context.handle(_reactionScoresMeta, const VerificationResult.success());
@@ -1615,7 +1612,7 @@ class $_MessagesTable extends _Messages
     if (d.status.present) {
       final converter = $_MessagesTable.$converter0;
       map['status'] =
-          Variable<String, StringType>(converter.mapToSql(d.status.value));
+          Variable<int, IntType>(converter.mapToSql(d.status.value));
     }
     if (d.type.present) {
       map['type'] = Variable<String, StringType>(d.type.value);
@@ -1667,7 +1664,7 @@ class $_MessagesTable extends _Messages
     return $_MessagesTable(_db, alias);
   }
 
-  static TypeConverter<MessageSendingStatus, String> $converter0 =
+  static TypeConverter<MessageSendingStatus, int> $converter0 =
       _MessageSendingStatusConverter();
   static TypeConverter<Map<String, int>, String> $converter1 =
       _ExtraDataConverter<int>();

@@ -123,49 +123,47 @@ class Channel {
       cid: cid,
     ));
 
-    final response = await _client.post(
-      "$_channelURL/message",
-      data: {
-        "message": message
-            .copyWith(
-              id: messageId,
-            )
-            .toJson()
-      },
-    ).catchError((error) {
-      state?.updateChannelState(
-        ChannelState(
-          messages: [
-            newMessage.copyWith(
-              status: MessageSendingStatus.FAILED,
-            )
-          ],
-        ),
+    try {
+      final response = await _client.post(
+        "$_channelURL/message",
+        data: {
+          "message": message
+              .copyWith(
+                id: messageId,
+              )
+              .toJson()
+        },
       );
-      throw error;
-    });
 
-    state?.updateChannelState(
-      ChannelState(
-        messages: [
-          newMessage.copyWith(
-            status: MessageSendingStatus.SENT,
-          )
-        ],
-      ),
-    );
-
-    final res = _client.decode(response.data, SendMessageResponse.fromJson);
-
-    if (res.message?.type == 'ephemeral') {
       _client.handleEvent(Event(
         type: EventType.messageNew,
-        message: res.message,
+        message: newMessage.copyWith(
+          status: MessageSendingStatus.SENT,
+        ),
         cid: cid,
       ));
-    }
 
-    return res;
+      final res = _client.decode(response.data, SendMessageResponse.fromJson);
+
+      if (res.message?.type == 'ephemeral') {
+        _client.handleEvent(Event(
+          type: EventType.messageNew,
+          message: res.message,
+          cid: cid,
+        ));
+      }
+
+      return res;
+    } catch (error) {
+      _client.handleEvent(Event(
+        type: EventType.messageNew,
+        message: newMessage.copyWith(
+          status: MessageSendingStatus.FAILED,
+        ),
+        cid: cid,
+      ));
+      rethrow;
+    }
   }
 
   /// Send a file to this channel

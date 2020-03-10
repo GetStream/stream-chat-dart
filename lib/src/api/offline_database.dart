@@ -83,12 +83,11 @@ class _Messages extends Table {
 
   TextColumn get messageText => text().nullable()();
 
-  TextColumn get status =>
-      text().nullable().map(_MessageSendingStatusConverter())();
+  IntColumn get status =>
+      integer().map(_MessageSendingStatusConverter()).nullable()();
 
-  TextColumn get type => text()();
+  TextColumn get type => text().nullable()();
 
-//  List<Attachment> attachments;
   List<User> mentionedUsers;
 
   TextColumn get reactionCounts =>
@@ -196,6 +195,9 @@ class _Attachments extends Table {
 class _ExtraDataConverter<T> extends TypeConverter<Map<String, T>, String> {
   @override
   Map<String, T> mapToDart(fromDb) {
+    if (fromDb == null) {
+      return null;
+    }
     return Map<String, T>.from(jsonDecode(fromDb) ?? {});
   }
 
@@ -206,15 +208,15 @@ class _ExtraDataConverter<T> extends TypeConverter<Map<String, T>, String> {
 }
 
 class _MessageSendingStatusConverter
-    extends TypeConverter<MessageSendingStatus, String> {
+    extends TypeConverter<MessageSendingStatus, int> {
   @override
-  MessageSendingStatus mapToDart(fromDb) {
+  MessageSendingStatus mapToDart(int fromDb) {
     switch (fromDb) {
-      case 'SENDING':
+      case 0:
         return MessageSendingStatus.SENDING;
-      case 'SENT':
+      case 1:
         return MessageSendingStatus.SENT;
-      case 'FAILED':
+      case 2:
         return MessageSendingStatus.FAILED;
       default:
         return null;
@@ -222,8 +224,17 @@ class _MessageSendingStatusConverter
   }
 
   @override
-  String mapToSql(value) {
-    return jsonEncode(value);
+  int mapToSql(MessageSendingStatus value) {
+    switch (value) {
+      case MessageSendingStatus.SENDING:
+        return 0;
+      case MessageSendingStatus.SENT:
+        return 1;
+      case MessageSendingStatus.FAILED:
+        return 2;
+      default:
+        return null;
+    }
   }
 }
 
@@ -234,7 +245,9 @@ LazyDatabase _openConnection() {
     // for your app.
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = File(p.join(dbFolder.path, 'db.sqlite'));
-    return VmDatabase(file);
+    return VmDatabase(
+      file,
+    );
   });
 }
 
@@ -274,7 +287,9 @@ class OfflineDatabase extends _$OfflineDatabase {
       );
 
   Future<List<ChannelState>> getChannelStates() async {
-    return Future.wait(await select(channels).join([
+    return Future.wait(await (select(channels)
+          ..orderBy([(c) => OrderingTerm.desc(c.lastMessageAt)]))
+        .join([
       leftOuterJoin(users, channels.createdBy.equalsExp(users.id)),
     ]).map((row) async {
       final channelRow = row.readTable(channels);
@@ -430,23 +445,27 @@ class OfflineDatabase extends _$OfflineDatabase {
       batch.insertAll(
         messages,
         channelStates
-            .map((cs) => cs.messages.map((m) => _Message(
-                  id: m.id,
-                  channelCid: cs.channel.cid,
-                  type: m.type,
-                  parentId: m.parentId,
-                  command: m.command,
-                  createdAt: m.createdAt,
-                  showInChannel: m.showInChannel,
-                  replyCount: m.replyCount,
-                  reactionScores: m.reactionScores,
-                  reactionCounts: m.reactionCounts,
-                  status: m.status,
-                  updatedAt: m.updatedAt,
-                  extraData: m.extraData,
-                  userId: m.user.id,
-                  messageText: m.text,
-                )))
+            .map((cs) => cs.messages.map(
+                  (m) {
+                    return _Message(
+                      id: m.id,
+                      channelCid: cs.channel.cid,
+                      type: m.type,
+                      parentId: m.parentId,
+                      command: m.command,
+                      createdAt: m.createdAt,
+                      showInChannel: m.showInChannel,
+                      replyCount: m.replyCount,
+                      reactionScores: m.reactionScores,
+                      reactionCounts: m.reactionCounts,
+                      status: m.status,
+                      updatedAt: m.updatedAt,
+                      extraData: m.extraData,
+                      userId: m.user.id,
+                      messageText: m.text,
+                    );
+                  },
+                ))
             .expand((v) => v)
             .toList(),
         mode: InsertMode.insertOrReplace,
