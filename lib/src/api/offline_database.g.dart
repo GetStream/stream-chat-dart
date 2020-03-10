@@ -2362,6 +2362,831 @@ class $_MembersTable extends _Members with TableInfo<$_MembersTable, _Member> {
   }
 }
 
+class _Attachment extends DataClass implements Insertable<_Attachment> {
+  final String messageId;
+  final String type;
+  final String titleLink;
+  final String title;
+  final String thumbUrl;
+  final String attachmentText;
+  final String pretext;
+  final String ogScrapeUrl;
+  final String imageUrl;
+  final String footerIcon;
+  final String footer;
+  final String fallback;
+  final String color;
+  final String authorName;
+  final String authorLink;
+  final String authorIcon;
+  final String assetUrl;
+  final Map<String, dynamic> extraData;
+  _Attachment(
+      {@required this.messageId,
+      this.type,
+      this.titleLink,
+      this.title,
+      this.thumbUrl,
+      this.attachmentText,
+      this.pretext,
+      this.ogScrapeUrl,
+      this.imageUrl,
+      this.footerIcon,
+      this.footer,
+      this.fallback,
+      this.color,
+      this.authorName,
+      this.authorLink,
+      this.authorIcon,
+      this.assetUrl,
+      this.extraData});
+  factory _Attachment.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final stringType = db.typeSystem.forDartType<String>();
+    return _Attachment(
+      messageId: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}message_id']),
+      type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
+      titleLink: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}title_link']),
+      title:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}title']),
+      thumbUrl: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}thumb_url']),
+      attachmentText: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}attachment_text']),
+      pretext:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}pretext']),
+      ogScrapeUrl: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}og_scrape_url']),
+      imageUrl: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}image_url']),
+      footerIcon: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}footer_icon']),
+      footer:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}footer']),
+      fallback: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}fallback']),
+      color:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}color']),
+      authorName: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}author_name']),
+      authorLink: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}author_link']),
+      authorIcon: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}author_icon']),
+      assetUrl: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}asset_url']),
+      extraData: $_AttachmentsTable.$converter0.mapToDart(stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
+    );
+  }
+  factory _Attachment.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return _Attachment(
+      messageId: serializer.fromJson<String>(json['messageId']),
+      type: serializer.fromJson<String>(json['type']),
+      titleLink: serializer.fromJson<String>(json['titleLink']),
+      title: serializer.fromJson<String>(json['title']),
+      thumbUrl: serializer.fromJson<String>(json['thumbUrl']),
+      attachmentText: serializer.fromJson<String>(json['attachmentText']),
+      pretext: serializer.fromJson<String>(json['pretext']),
+      ogScrapeUrl: serializer.fromJson<String>(json['ogScrapeUrl']),
+      imageUrl: serializer.fromJson<String>(json['imageUrl']),
+      footerIcon: serializer.fromJson<String>(json['footerIcon']),
+      footer: serializer.fromJson<String>(json['footer']),
+      fallback: serializer.fromJson<String>(json['fallback']),
+      color: serializer.fromJson<String>(json['color']),
+      authorName: serializer.fromJson<String>(json['authorName']),
+      authorLink: serializer.fromJson<String>(json['authorLink']),
+      authorIcon: serializer.fromJson<String>(json['authorIcon']),
+      assetUrl: serializer.fromJson<String>(json['assetUrl']),
+      extraData: serializer.fromJson<Map<String, dynamic>>(json['extraData']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'messageId': serializer.toJson<String>(messageId),
+      'type': serializer.toJson<String>(type),
+      'titleLink': serializer.toJson<String>(titleLink),
+      'title': serializer.toJson<String>(title),
+      'thumbUrl': serializer.toJson<String>(thumbUrl),
+      'attachmentText': serializer.toJson<String>(attachmentText),
+      'pretext': serializer.toJson<String>(pretext),
+      'ogScrapeUrl': serializer.toJson<String>(ogScrapeUrl),
+      'imageUrl': serializer.toJson<String>(imageUrl),
+      'footerIcon': serializer.toJson<String>(footerIcon),
+      'footer': serializer.toJson<String>(footer),
+      'fallback': serializer.toJson<String>(fallback),
+      'color': serializer.toJson<String>(color),
+      'authorName': serializer.toJson<String>(authorName),
+      'authorLink': serializer.toJson<String>(authorLink),
+      'authorIcon': serializer.toJson<String>(authorIcon),
+      'assetUrl': serializer.toJson<String>(assetUrl),
+      'extraData': serializer.toJson<Map<String, dynamic>>(extraData),
+    };
+  }
+
+  @override
+  _AttachmentsCompanion createCompanion(bool nullToAbsent) {
+    return _AttachmentsCompanion(
+      messageId: messageId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(messageId),
+      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
+      titleLink: titleLink == null && nullToAbsent
+          ? const Value.absent()
+          : Value(titleLink),
+      title:
+          title == null && nullToAbsent ? const Value.absent() : Value(title),
+      thumbUrl: thumbUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbUrl),
+      attachmentText: attachmentText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(attachmentText),
+      pretext: pretext == null && nullToAbsent
+          ? const Value.absent()
+          : Value(pretext),
+      ogScrapeUrl: ogScrapeUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ogScrapeUrl),
+      imageUrl: imageUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imageUrl),
+      footerIcon: footerIcon == null && nullToAbsent
+          ? const Value.absent()
+          : Value(footerIcon),
+      footer:
+          footer == null && nullToAbsent ? const Value.absent() : Value(footer),
+      fallback: fallback == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fallback),
+      color:
+          color == null && nullToAbsent ? const Value.absent() : Value(color),
+      authorName: authorName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(authorName),
+      authorLink: authorLink == null && nullToAbsent
+          ? const Value.absent()
+          : Value(authorLink),
+      authorIcon: authorIcon == null && nullToAbsent
+          ? const Value.absent()
+          : Value(authorIcon),
+      assetUrl: assetUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(assetUrl),
+      extraData: extraData == null && nullToAbsent
+          ? const Value.absent()
+          : Value(extraData),
+    );
+  }
+
+  _Attachment copyWith(
+          {String messageId,
+          String type,
+          String titleLink,
+          String title,
+          String thumbUrl,
+          String attachmentText,
+          String pretext,
+          String ogScrapeUrl,
+          String imageUrl,
+          String footerIcon,
+          String footer,
+          String fallback,
+          String color,
+          String authorName,
+          String authorLink,
+          String authorIcon,
+          String assetUrl,
+          Map<String, dynamic> extraData}) =>
+      _Attachment(
+        messageId: messageId ?? this.messageId,
+        type: type ?? this.type,
+        titleLink: titleLink ?? this.titleLink,
+        title: title ?? this.title,
+        thumbUrl: thumbUrl ?? this.thumbUrl,
+        attachmentText: attachmentText ?? this.attachmentText,
+        pretext: pretext ?? this.pretext,
+        ogScrapeUrl: ogScrapeUrl ?? this.ogScrapeUrl,
+        imageUrl: imageUrl ?? this.imageUrl,
+        footerIcon: footerIcon ?? this.footerIcon,
+        footer: footer ?? this.footer,
+        fallback: fallback ?? this.fallback,
+        color: color ?? this.color,
+        authorName: authorName ?? this.authorName,
+        authorLink: authorLink ?? this.authorLink,
+        authorIcon: authorIcon ?? this.authorIcon,
+        assetUrl: assetUrl ?? this.assetUrl,
+        extraData: extraData ?? this.extraData,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('_Attachment(')
+          ..write('messageId: $messageId, ')
+          ..write('type: $type, ')
+          ..write('titleLink: $titleLink, ')
+          ..write('title: $title, ')
+          ..write('thumbUrl: $thumbUrl, ')
+          ..write('attachmentText: $attachmentText, ')
+          ..write('pretext: $pretext, ')
+          ..write('ogScrapeUrl: $ogScrapeUrl, ')
+          ..write('imageUrl: $imageUrl, ')
+          ..write('footerIcon: $footerIcon, ')
+          ..write('footer: $footer, ')
+          ..write('fallback: $fallback, ')
+          ..write('color: $color, ')
+          ..write('authorName: $authorName, ')
+          ..write('authorLink: $authorLink, ')
+          ..write('authorIcon: $authorIcon, ')
+          ..write('assetUrl: $assetUrl, ')
+          ..write('extraData: $extraData')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      messageId.hashCode,
+      $mrjc(
+          type.hashCode,
+          $mrjc(
+              titleLink.hashCode,
+              $mrjc(
+                  title.hashCode,
+                  $mrjc(
+                      thumbUrl.hashCode,
+                      $mrjc(
+                          attachmentText.hashCode,
+                          $mrjc(
+                              pretext.hashCode,
+                              $mrjc(
+                                  ogScrapeUrl.hashCode,
+                                  $mrjc(
+                                      imageUrl.hashCode,
+                                      $mrjc(
+                                          footerIcon.hashCode,
+                                          $mrjc(
+                                              footer.hashCode,
+                                              $mrjc(
+                                                  fallback.hashCode,
+                                                  $mrjc(
+                                                      color.hashCode,
+                                                      $mrjc(
+                                                          authorName.hashCode,
+                                                          $mrjc(
+                                                              authorLink
+                                                                  .hashCode,
+                                                              $mrjc(
+                                                                  authorIcon
+                                                                      .hashCode,
+                                                                  $mrjc(
+                                                                      assetUrl
+                                                                          .hashCode,
+                                                                      extraData
+                                                                          .hashCode))))))))))))))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is _Attachment &&
+          other.messageId == this.messageId &&
+          other.type == this.type &&
+          other.titleLink == this.titleLink &&
+          other.title == this.title &&
+          other.thumbUrl == this.thumbUrl &&
+          other.attachmentText == this.attachmentText &&
+          other.pretext == this.pretext &&
+          other.ogScrapeUrl == this.ogScrapeUrl &&
+          other.imageUrl == this.imageUrl &&
+          other.footerIcon == this.footerIcon &&
+          other.footer == this.footer &&
+          other.fallback == this.fallback &&
+          other.color == this.color &&
+          other.authorName == this.authorName &&
+          other.authorLink == this.authorLink &&
+          other.authorIcon == this.authorIcon &&
+          other.assetUrl == this.assetUrl &&
+          other.extraData == this.extraData);
+}
+
+class _AttachmentsCompanion extends UpdateCompanion<_Attachment> {
+  final Value<String> messageId;
+  final Value<String> type;
+  final Value<String> titleLink;
+  final Value<String> title;
+  final Value<String> thumbUrl;
+  final Value<String> attachmentText;
+  final Value<String> pretext;
+  final Value<String> ogScrapeUrl;
+  final Value<String> imageUrl;
+  final Value<String> footerIcon;
+  final Value<String> footer;
+  final Value<String> fallback;
+  final Value<String> color;
+  final Value<String> authorName;
+  final Value<String> authorLink;
+  final Value<String> authorIcon;
+  final Value<String> assetUrl;
+  final Value<Map<String, dynamic>> extraData;
+  const _AttachmentsCompanion({
+    this.messageId = const Value.absent(),
+    this.type = const Value.absent(),
+    this.titleLink = const Value.absent(),
+    this.title = const Value.absent(),
+    this.thumbUrl = const Value.absent(),
+    this.attachmentText = const Value.absent(),
+    this.pretext = const Value.absent(),
+    this.ogScrapeUrl = const Value.absent(),
+    this.imageUrl = const Value.absent(),
+    this.footerIcon = const Value.absent(),
+    this.footer = const Value.absent(),
+    this.fallback = const Value.absent(),
+    this.color = const Value.absent(),
+    this.authorName = const Value.absent(),
+    this.authorLink = const Value.absent(),
+    this.authorIcon = const Value.absent(),
+    this.assetUrl = const Value.absent(),
+    this.extraData = const Value.absent(),
+  });
+  _AttachmentsCompanion.insert({
+    @required String messageId,
+    this.type = const Value.absent(),
+    this.titleLink = const Value.absent(),
+    this.title = const Value.absent(),
+    this.thumbUrl = const Value.absent(),
+    this.attachmentText = const Value.absent(),
+    this.pretext = const Value.absent(),
+    this.ogScrapeUrl = const Value.absent(),
+    this.imageUrl = const Value.absent(),
+    this.footerIcon = const Value.absent(),
+    this.footer = const Value.absent(),
+    this.fallback = const Value.absent(),
+    this.color = const Value.absent(),
+    this.authorName = const Value.absent(),
+    this.authorLink = const Value.absent(),
+    this.authorIcon = const Value.absent(),
+    this.assetUrl = const Value.absent(),
+    this.extraData = const Value.absent(),
+  }) : messageId = Value(messageId);
+  _AttachmentsCompanion copyWith(
+      {Value<String> messageId,
+      Value<String> type,
+      Value<String> titleLink,
+      Value<String> title,
+      Value<String> thumbUrl,
+      Value<String> attachmentText,
+      Value<String> pretext,
+      Value<String> ogScrapeUrl,
+      Value<String> imageUrl,
+      Value<String> footerIcon,
+      Value<String> footer,
+      Value<String> fallback,
+      Value<String> color,
+      Value<String> authorName,
+      Value<String> authorLink,
+      Value<String> authorIcon,
+      Value<String> assetUrl,
+      Value<Map<String, dynamic>> extraData}) {
+    return _AttachmentsCompanion(
+      messageId: messageId ?? this.messageId,
+      type: type ?? this.type,
+      titleLink: titleLink ?? this.titleLink,
+      title: title ?? this.title,
+      thumbUrl: thumbUrl ?? this.thumbUrl,
+      attachmentText: attachmentText ?? this.attachmentText,
+      pretext: pretext ?? this.pretext,
+      ogScrapeUrl: ogScrapeUrl ?? this.ogScrapeUrl,
+      imageUrl: imageUrl ?? this.imageUrl,
+      footerIcon: footerIcon ?? this.footerIcon,
+      footer: footer ?? this.footer,
+      fallback: fallback ?? this.fallback,
+      color: color ?? this.color,
+      authorName: authorName ?? this.authorName,
+      authorLink: authorLink ?? this.authorLink,
+      authorIcon: authorIcon ?? this.authorIcon,
+      assetUrl: assetUrl ?? this.assetUrl,
+      extraData: extraData ?? this.extraData,
+    );
+  }
+}
+
+class $_AttachmentsTable extends _Attachments
+    with TableInfo<$_AttachmentsTable, _Attachment> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  $_AttachmentsTable(this._db, [this._alias]);
+  final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
+  GeneratedTextColumn _messageId;
+  @override
+  GeneratedTextColumn get messageId => _messageId ??= _constructMessageId();
+  GeneratedTextColumn _constructMessageId() {
+    return GeneratedTextColumn(
+      'message_id',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _typeMeta = const VerificationMeta('type');
+  GeneratedTextColumn _type;
+  @override
+  GeneratedTextColumn get type => _type ??= _constructType();
+  GeneratedTextColumn _constructType() {
+    return GeneratedTextColumn(
+      'type',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _titleLinkMeta = const VerificationMeta('titleLink');
+  GeneratedTextColumn _titleLink;
+  @override
+  GeneratedTextColumn get titleLink => _titleLink ??= _constructTitleLink();
+  GeneratedTextColumn _constructTitleLink() {
+    return GeneratedTextColumn(
+      'title_link',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _titleMeta = const VerificationMeta('title');
+  GeneratedTextColumn _title;
+  @override
+  GeneratedTextColumn get title => _title ??= _constructTitle();
+  GeneratedTextColumn _constructTitle() {
+    return GeneratedTextColumn(
+      'title',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _thumbUrlMeta = const VerificationMeta('thumbUrl');
+  GeneratedTextColumn _thumbUrl;
+  @override
+  GeneratedTextColumn get thumbUrl => _thumbUrl ??= _constructThumbUrl();
+  GeneratedTextColumn _constructThumbUrl() {
+    return GeneratedTextColumn(
+      'thumb_url',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _attachmentTextMeta =
+      const VerificationMeta('attachmentText');
+  GeneratedTextColumn _attachmentText;
+  @override
+  GeneratedTextColumn get attachmentText =>
+      _attachmentText ??= _constructAttachmentText();
+  GeneratedTextColumn _constructAttachmentText() {
+    return GeneratedTextColumn(
+      'attachment_text',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _pretextMeta = const VerificationMeta('pretext');
+  GeneratedTextColumn _pretext;
+  @override
+  GeneratedTextColumn get pretext => _pretext ??= _constructPretext();
+  GeneratedTextColumn _constructPretext() {
+    return GeneratedTextColumn(
+      'pretext',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _ogScrapeUrlMeta =
+      const VerificationMeta('ogScrapeUrl');
+  GeneratedTextColumn _ogScrapeUrl;
+  @override
+  GeneratedTextColumn get ogScrapeUrl =>
+      _ogScrapeUrl ??= _constructOgScrapeUrl();
+  GeneratedTextColumn _constructOgScrapeUrl() {
+    return GeneratedTextColumn(
+      'og_scrape_url',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _imageUrlMeta = const VerificationMeta('imageUrl');
+  GeneratedTextColumn _imageUrl;
+  @override
+  GeneratedTextColumn get imageUrl => _imageUrl ??= _constructImageUrl();
+  GeneratedTextColumn _constructImageUrl() {
+    return GeneratedTextColumn(
+      'image_url',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _footerIconMeta = const VerificationMeta('footerIcon');
+  GeneratedTextColumn _footerIcon;
+  @override
+  GeneratedTextColumn get footerIcon => _footerIcon ??= _constructFooterIcon();
+  GeneratedTextColumn _constructFooterIcon() {
+    return GeneratedTextColumn(
+      'footer_icon',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _footerMeta = const VerificationMeta('footer');
+  GeneratedTextColumn _footer;
+  @override
+  GeneratedTextColumn get footer => _footer ??= _constructFooter();
+  GeneratedTextColumn _constructFooter() {
+    return GeneratedTextColumn(
+      'footer',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _fallbackMeta = const VerificationMeta('fallback');
+  GeneratedTextColumn _fallback;
+  @override
+  GeneratedTextColumn get fallback => _fallback ??= _constructFallback();
+  GeneratedTextColumn _constructFallback() {
+    return GeneratedTextColumn(
+      'fallback',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _colorMeta = const VerificationMeta('color');
+  GeneratedTextColumn _color;
+  @override
+  GeneratedTextColumn get color => _color ??= _constructColor();
+  GeneratedTextColumn _constructColor() {
+    return GeneratedTextColumn(
+      'color',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _authorNameMeta = const VerificationMeta('authorName');
+  GeneratedTextColumn _authorName;
+  @override
+  GeneratedTextColumn get authorName => _authorName ??= _constructAuthorName();
+  GeneratedTextColumn _constructAuthorName() {
+    return GeneratedTextColumn(
+      'author_name',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _authorLinkMeta = const VerificationMeta('authorLink');
+  GeneratedTextColumn _authorLink;
+  @override
+  GeneratedTextColumn get authorLink => _authorLink ??= _constructAuthorLink();
+  GeneratedTextColumn _constructAuthorLink() {
+    return GeneratedTextColumn(
+      'author_link',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _authorIconMeta = const VerificationMeta('authorIcon');
+  GeneratedTextColumn _authorIcon;
+  @override
+  GeneratedTextColumn get authorIcon => _authorIcon ??= _constructAuthorIcon();
+  GeneratedTextColumn _constructAuthorIcon() {
+    return GeneratedTextColumn(
+      'author_icon',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _assetUrlMeta = const VerificationMeta('assetUrl');
+  GeneratedTextColumn _assetUrl;
+  @override
+  GeneratedTextColumn get assetUrl => _assetUrl ??= _constructAssetUrl();
+  GeneratedTextColumn _constructAssetUrl() {
+    return GeneratedTextColumn(
+      'asset_url',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _extraDataMeta = const VerificationMeta('extraData');
+  GeneratedTextColumn _extraData;
+  @override
+  GeneratedTextColumn get extraData => _extraData ??= _constructExtraData();
+  GeneratedTextColumn _constructExtraData() {
+    return GeneratedTextColumn(
+      'extra_data',
+      $tableName,
+      true,
+    );
+  }
+
+  @override
+  List<GeneratedColumn> get $columns => [
+        messageId,
+        type,
+        titleLink,
+        title,
+        thumbUrl,
+        attachmentText,
+        pretext,
+        ogScrapeUrl,
+        imageUrl,
+        footerIcon,
+        footer,
+        fallback,
+        color,
+        authorName,
+        authorLink,
+        authorIcon,
+        assetUrl,
+        extraData
+      ];
+  @override
+  $_AttachmentsTable get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'attachments';
+  @override
+  final String actualTableName = 'attachments';
+  @override
+  VerificationContext validateIntegrity(_AttachmentsCompanion d,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    if (d.messageId.present) {
+      context.handle(_messageIdMeta,
+          messageId.isAcceptableValue(d.messageId.value, _messageIdMeta));
+    } else if (isInserting) {
+      context.missing(_messageIdMeta);
+    }
+    if (d.type.present) {
+      context.handle(
+          _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
+    }
+    if (d.titleLink.present) {
+      context.handle(_titleLinkMeta,
+          titleLink.isAcceptableValue(d.titleLink.value, _titleLinkMeta));
+    }
+    if (d.title.present) {
+      context.handle(
+          _titleMeta, title.isAcceptableValue(d.title.value, _titleMeta));
+    }
+    if (d.thumbUrl.present) {
+      context.handle(_thumbUrlMeta,
+          thumbUrl.isAcceptableValue(d.thumbUrl.value, _thumbUrlMeta));
+    }
+    if (d.attachmentText.present) {
+      context.handle(
+          _attachmentTextMeta,
+          attachmentText.isAcceptableValue(
+              d.attachmentText.value, _attachmentTextMeta));
+    }
+    if (d.pretext.present) {
+      context.handle(_pretextMeta,
+          pretext.isAcceptableValue(d.pretext.value, _pretextMeta));
+    }
+    if (d.ogScrapeUrl.present) {
+      context.handle(_ogScrapeUrlMeta,
+          ogScrapeUrl.isAcceptableValue(d.ogScrapeUrl.value, _ogScrapeUrlMeta));
+    }
+    if (d.imageUrl.present) {
+      context.handle(_imageUrlMeta,
+          imageUrl.isAcceptableValue(d.imageUrl.value, _imageUrlMeta));
+    }
+    if (d.footerIcon.present) {
+      context.handle(_footerIconMeta,
+          footerIcon.isAcceptableValue(d.footerIcon.value, _footerIconMeta));
+    }
+    if (d.footer.present) {
+      context.handle(
+          _footerMeta, footer.isAcceptableValue(d.footer.value, _footerMeta));
+    }
+    if (d.fallback.present) {
+      context.handle(_fallbackMeta,
+          fallback.isAcceptableValue(d.fallback.value, _fallbackMeta));
+    }
+    if (d.color.present) {
+      context.handle(
+          _colorMeta, color.isAcceptableValue(d.color.value, _colorMeta));
+    }
+    if (d.authorName.present) {
+      context.handle(_authorNameMeta,
+          authorName.isAcceptableValue(d.authorName.value, _authorNameMeta));
+    }
+    if (d.authorLink.present) {
+      context.handle(_authorLinkMeta,
+          authorLink.isAcceptableValue(d.authorLink.value, _authorLinkMeta));
+    }
+    if (d.authorIcon.present) {
+      context.handle(_authorIconMeta,
+          authorIcon.isAcceptableValue(d.authorIcon.value, _authorIconMeta));
+    }
+    if (d.assetUrl.present) {
+      context.handle(_assetUrlMeta,
+          assetUrl.isAcceptableValue(d.assetUrl.value, _assetUrlMeta));
+    }
+    context.handle(_extraDataMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {messageId, assetUrl, imageUrl, type};
+  @override
+  _Attachment map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return _Attachment.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  Map<String, Variable> entityToSql(_AttachmentsCompanion d) {
+    final map = <String, Variable>{};
+    if (d.messageId.present) {
+      map['message_id'] = Variable<String, StringType>(d.messageId.value);
+    }
+    if (d.type.present) {
+      map['type'] = Variable<String, StringType>(d.type.value);
+    }
+    if (d.titleLink.present) {
+      map['title_link'] = Variable<String, StringType>(d.titleLink.value);
+    }
+    if (d.title.present) {
+      map['title'] = Variable<String, StringType>(d.title.value);
+    }
+    if (d.thumbUrl.present) {
+      map['thumb_url'] = Variable<String, StringType>(d.thumbUrl.value);
+    }
+    if (d.attachmentText.present) {
+      map['attachment_text'] =
+          Variable<String, StringType>(d.attachmentText.value);
+    }
+    if (d.pretext.present) {
+      map['pretext'] = Variable<String, StringType>(d.pretext.value);
+    }
+    if (d.ogScrapeUrl.present) {
+      map['og_scrape_url'] = Variable<String, StringType>(d.ogScrapeUrl.value);
+    }
+    if (d.imageUrl.present) {
+      map['image_url'] = Variable<String, StringType>(d.imageUrl.value);
+    }
+    if (d.footerIcon.present) {
+      map['footer_icon'] = Variable<String, StringType>(d.footerIcon.value);
+    }
+    if (d.footer.present) {
+      map['footer'] = Variable<String, StringType>(d.footer.value);
+    }
+    if (d.fallback.present) {
+      map['fallback'] = Variable<String, StringType>(d.fallback.value);
+    }
+    if (d.color.present) {
+      map['color'] = Variable<String, StringType>(d.color.value);
+    }
+    if (d.authorName.present) {
+      map['author_name'] = Variable<String, StringType>(d.authorName.value);
+    }
+    if (d.authorLink.present) {
+      map['author_link'] = Variable<String, StringType>(d.authorLink.value);
+    }
+    if (d.authorIcon.present) {
+      map['author_icon'] = Variable<String, StringType>(d.authorIcon.value);
+    }
+    if (d.assetUrl.present) {
+      map['asset_url'] = Variable<String, StringType>(d.assetUrl.value);
+    }
+    if (d.extraData.present) {
+      final converter = $_AttachmentsTable.$converter0;
+      map['extra_data'] =
+          Variable<String, StringType>(converter.mapToSql(d.extraData.value));
+    }
+    return map;
+  }
+
+  @override
+  $_AttachmentsTable createAlias(String alias) {
+    return $_AttachmentsTable(_db, alias);
+  }
+
+  static TypeConverter<Map<String, dynamic>, String> $converter0 =
+      _ExtraDataConverter();
+}
+
 abstract class _$OfflineDatabase extends GeneratedDatabase {
   _$OfflineDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   $_ChannelsTable _channels;
@@ -2374,9 +3199,12 @@ abstract class _$OfflineDatabase extends GeneratedDatabase {
   $_ReadsTable get reads => _reads ??= $_ReadsTable(this);
   $_MembersTable _members;
   $_MembersTable get members => _members ??= $_MembersTable(this);
+  $_AttachmentsTable _attachments;
+  $_AttachmentsTable get attachments =>
+      _attachments ??= $_AttachmentsTable(this);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [channels, users, messages, reads, members];
+      [channels, users, messages, reads, members, attachments];
 }

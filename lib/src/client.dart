@@ -408,6 +408,7 @@ class Client {
         final client = newChannels[index];
         client.state.updateChannelState(channelState);
       } else {
+        print('NEW2');
         newChannels.add(Channel.fromState(this, channelState));
       }
     });

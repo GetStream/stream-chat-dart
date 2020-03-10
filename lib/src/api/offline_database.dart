@@ -5,6 +5,7 @@ import 'package:moor/moor.dart';
 import 'package:moor_ffi/moor_ffi.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:stream_chat/src/models/attachment.dart';
 import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:stream_chat/src/models/member.dart';
 import 'package:stream_chat/src/models/message.dart';
@@ -65,7 +66,9 @@ class _Users extends Table {
 
 class _Reads extends Table {
   DateTimeColumn get lastRead => dateTime()();
+
   TextColumn get userId => text()();
+
   TextColumn get channelCid => text()();
 
   @override
@@ -120,19 +123,73 @@ class _Messages extends Table {
 
 class _Members extends Table {
   TextColumn get userId => text()();
+
   TextColumn get channelCid => text()();
+
   TextColumn get role => text().nullable()();
+
   DateTimeColumn get inviteAcceptedAt => dateTime().nullable()();
+
   DateTimeColumn get inviteRejectedAt => dateTime().nullable()();
+
   BoolColumn get invited => boolean().nullable()();
+
   BoolColumn get isModerator => boolean().nullable()();
+
   DateTimeColumn get createdAt => dateTime()();
+
   DateTimeColumn get updatedAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {
         userId,
         channelCid,
+      };
+}
+
+class _Attachments extends Table {
+  TextColumn get messageId => text()();
+
+  TextColumn get type => text().nullable()();
+
+  TextColumn get titleLink => text().nullable()();
+
+  TextColumn get title => text().nullable()();
+
+  TextColumn get thumbUrl => text().nullable()();
+
+  TextColumn get attachmentText => text().nullable()();
+
+  TextColumn get pretext => text().nullable()();
+
+  TextColumn get ogScrapeUrl => text().nullable()();
+
+  TextColumn get imageUrl => text().nullable()();
+
+  TextColumn get footerIcon => text().nullable()();
+
+  TextColumn get footer => text().nullable()();
+
+  TextColumn get fallback => text().nullable()();
+
+  TextColumn get color => text().nullable()();
+
+  TextColumn get authorName => text().nullable()();
+
+  TextColumn get authorLink => text().nullable()();
+
+  TextColumn get authorIcon => text().nullable()();
+
+  TextColumn get assetUrl => text().nullable()();
+
+  TextColumn get extraData => text().nullable().map(_ExtraDataConverter())();
+
+  @override
+  Set<Column> get primaryKey => {
+        messageId,
+        assetUrl,
+        imageUrl,
+        type,
       };
 }
 
@@ -187,6 +244,7 @@ LazyDatabase _openConnection() {
   _Messages,
   _Reads,
   _Members,
+  _Attachments,
 ])
 class OfflineDatabase extends _$OfflineDatabase {
   // we tell the database where to store the data with this constructor
@@ -250,17 +308,42 @@ class OfflineDatabase extends _$OfflineDatabase {
   }
 
   Future<List<Message>> _getChannelMessages(_Channel channelRow) async {
-    final rowMessages = await (select(messages).join([
+    final rowMessages = await Future.wait(await (select(messages).join([
       leftOuterJoin(users, messages.userId.equalsExp(users.id)),
     ])
           ..where(messages.channelCid.equals(channelRow.cid))
           ..orderBy([
             OrderingTerm.asc(messages.createdAt),
           ]))
-        .map((row) {
+        .map((row) async {
       final messageRow = row.readTable(messages);
       final userRow = row.readTable(users);
+
+      final attachmentsRow = await (select(attachments)
+            ..where((a) => a.messageId.equals(messageRow.id)))
+          .map((attachmentRow) => Attachment(
+                extraData: attachmentRow.extraData,
+                text: attachmentRow.attachmentText,
+                type: attachmentRow.type,
+                color: attachmentRow.color,
+                assetUrl: attachmentRow.assetUrl,
+                title: attachmentRow.title,
+                authorIcon: attachmentRow.authorIcon,
+                authorLink: attachmentRow.authorLink,
+                authorName: attachmentRow.authorName,
+                fallback: attachmentRow.fallback,
+                footer: attachmentRow.footer,
+                footerIcon: attachmentRow.footerIcon,
+                imageUrl: attachmentRow.imageUrl,
+                ogScrapeUrl: attachmentRow.ogScrapeUrl,
+                pretext: attachmentRow.pretext,
+                thumbUrl: attachmentRow.thumbUrl,
+                titleLink: attachmentRow.titleLink,
+              ))
+          .get();
+
       return Message(
+        attachments: attachmentsRow,
         createdAt: messageRow.createdAt,
         extraData: messageRow.extraData,
         updatedAt: messageRow.updatedAt,
@@ -276,7 +359,7 @@ class OfflineDatabase extends _$OfflineDatabase {
         text: messageRow.messageText,
         user: _userFromUserRow(userRow),
       );
-    }).get();
+    }).get());
     return rowMessages;
   }
 
@@ -378,6 +461,36 @@ class OfflineDatabase extends _$OfflineDatabase {
                   ...cs.read.map((r) => _userDataFromUser(r.user)),
                   ...cs.members.map((m) => _userDataFromUser(m.user)),
                 ])
+            .expand((v) => v)
+            .toList(),
+        mode: InsertMode.insertOrReplace,
+      );
+
+      batch.insertAll(
+        attachments,
+        channelStates
+            .map((cs) => cs.messages
+                .map((m) => m.attachments.map((a) => _Attachment(
+                      messageId: m.id,
+                      titleLink: a.titleLink,
+                      thumbUrl: a.thumbUrl,
+                      pretext: a.pretext,
+                      ogScrapeUrl: a.ogScrapeUrl,
+                      imageUrl: a.imageUrl,
+                      footerIcon: a.footerIcon,
+                      footer: a.footer,
+                      fallback: a.fallback,
+                      authorName: a.authorName,
+                      authorLink: a.authorLink,
+                      authorIcon: a.authorIcon,
+                      title: a.title,
+                      assetUrl: a.assetUrl,
+                      color: a.color,
+                      type: a.type,
+                      extraData: a.extraData,
+                      attachmentText: a.text,
+                    )))
+                .expand((v) => v))
             .expand((v) => v)
             .toList(),
         mode: InsertMode.insertOrReplace,
