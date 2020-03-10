@@ -6,6 +6,7 @@ import 'package:moor_ffi/moor_ffi.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat/src/models/channel_model.dart';
+import 'package:stream_chat/src/models/member.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/read.dart';
 import 'package:stream_chat/src/models/user.dart';
@@ -117,6 +118,24 @@ class _Messages extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+class _Members extends Table {
+  TextColumn get userId => text()();
+  TextColumn get channelCid => text()();
+  TextColumn get role => text().nullable()();
+  DateTimeColumn get inviteAcceptedAt => dateTime().nullable()();
+  DateTimeColumn get inviteRejectedAt => dateTime().nullable()();
+  BoolColumn get invited => boolean().nullable()();
+  BoolColumn get isModerator => boolean().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {
+        userId,
+        channelCid,
+      };
+}
+
 class _ExtraDataConverter<T> extends TypeConverter<Map<String, T>, String> {
   @override
   Map<String, T> mapToDart(fromDb) {
@@ -167,6 +186,7 @@ LazyDatabase _openConnection() {
   _Users,
   _Messages,
   _Reads,
+  _Members,
 ])
 class OfflineDatabase extends _$OfflineDatabase {
   // we tell the database where to store the data with this constructor
@@ -204,8 +224,10 @@ class OfflineDatabase extends _$OfflineDatabase {
 
       List<Message> rowMessages = await _getChannelMessages(channelRow);
       List<Read> rowReads = await _getChannelReads(channelRow);
+      List<Member> rowMembers = await _getChannelMembers(channelRow);
 
       return ChannelState(
+        members: rowMembers,
         read: rowReads,
         messages: rowMessages,
         channel: ChannelModel(
@@ -277,6 +299,32 @@ class OfflineDatabase extends _$OfflineDatabase {
     return rowReads;
   }
 
+  Future<List<Member>> _getChannelMembers(_Channel channelRow) async {
+    final rowMembers = await (select(members).join([
+      leftOuterJoin(users, members.userId.equalsExp(users.id)),
+    ])
+          ..where(members.channelCid.equals(channelRow.cid))
+          ..orderBy([
+            OrderingTerm.asc(members.createdAt),
+          ]))
+        .map((row) {
+      final userRow = row.readTable(users);
+      final memberRow = row.readTable(members);
+      return Member(
+        user: _userFromUserRow(userRow),
+        userId: userRow.id,
+        updatedAt: memberRow.updatedAt,
+        createdAt: memberRow.createdAt,
+        role: memberRow.role,
+        inviteAcceptedAt: memberRow.inviteAcceptedAt,
+        invited: memberRow.invited,
+        inviteRejectedAt: memberRow.inviteRejectedAt,
+        isModerator: memberRow.isModerator,
+      );
+    }).get();
+    return rowMembers;
+  }
+
   User _userFromUserRow(_User userRow) {
     return User(
       updatedAt: userRow.updatedAt,
@@ -328,6 +376,7 @@ class OfflineDatabase extends _$OfflineDatabase {
                   _userDataFromUser(cs.channel.createdBy),
                   ...cs.messages.map((m) => _userDataFromUser(m.user)),
                   ...cs.read.map((r) => _userDataFromUser(r.user)),
+                  ...cs.members.map((m) => _userDataFromUser(m.user)),
                 ])
             .expand((v) => v)
             .toList(),
@@ -341,6 +390,25 @@ class OfflineDatabase extends _$OfflineDatabase {
                   lastRead: r.lastRead,
                   userId: r.user.id,
                   channelCid: cs.channel.cid,
+                )))
+            .expand((v) => v)
+            .toList(),
+        mode: InsertMode.insertOrReplace,
+      );
+
+      batch.insertAll(
+        members,
+        channelStates
+            .map((cs) => cs.members.map((m) => _Member(
+                  userId: m.user.id,
+                  channelCid: cs.channel.cid,
+                  createdAt: m.createdAt,
+                  isModerator: m.isModerator,
+                  inviteRejectedAt: m.inviteRejectedAt,
+                  invited: m.invited,
+                  inviteAcceptedAt: m.inviteAcceptedAt,
+                  role: m.role,
+                  updatedAt: m.updatedAt,
                 )))
             .expand((v) => v)
             .toList(),

@@ -1890,6 +1890,478 @@ class $_ReadsTable extends _Reads with TableInfo<$_ReadsTable, _Read> {
   }
 }
 
+class _Member extends DataClass implements Insertable<_Member> {
+  final String userId;
+  final String channelCid;
+  final String role;
+  final DateTime inviteAcceptedAt;
+  final DateTime inviteRejectedAt;
+  final bool invited;
+  final bool isModerator;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  _Member(
+      {@required this.userId,
+      @required this.channelCid,
+      this.role,
+      this.inviteAcceptedAt,
+      this.inviteRejectedAt,
+      this.invited,
+      this.isModerator,
+      @required this.createdAt,
+      this.updatedAt});
+  factory _Member.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    final boolType = db.typeSystem.forDartType<bool>();
+    return _Member(
+      userId:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
+      channelCid: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid']),
+      role: stringType.mapFromDatabaseResponse(data['${effectivePrefix}role']),
+      inviteAcceptedAt: dateTimeType.mapFromDatabaseResponse(
+          data['${effectivePrefix}invite_accepted_at']),
+      inviteRejectedAt: dateTimeType.mapFromDatabaseResponse(
+          data['${effectivePrefix}invite_rejected_at']),
+      invited:
+          boolType.mapFromDatabaseResponse(data['${effectivePrefix}invited']),
+      isModerator: boolType
+          .mapFromDatabaseResponse(data['${effectivePrefix}is_moderator']),
+      createdAt: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
+      updatedAt: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}updated_at']),
+    );
+  }
+  factory _Member.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return _Member(
+      userId: serializer.fromJson<String>(json['userId']),
+      channelCid: serializer.fromJson<String>(json['channelCid']),
+      role: serializer.fromJson<String>(json['role']),
+      inviteAcceptedAt: serializer.fromJson<DateTime>(json['inviteAcceptedAt']),
+      inviteRejectedAt: serializer.fromJson<DateTime>(json['inviteRejectedAt']),
+      invited: serializer.fromJson<bool>(json['invited']),
+      isModerator: serializer.fromJson<bool>(json['isModerator']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'userId': serializer.toJson<String>(userId),
+      'channelCid': serializer.toJson<String>(channelCid),
+      'role': serializer.toJson<String>(role),
+      'inviteAcceptedAt': serializer.toJson<DateTime>(inviteAcceptedAt),
+      'inviteRejectedAt': serializer.toJson<DateTime>(inviteRejectedAt),
+      'invited': serializer.toJson<bool>(invited),
+      'isModerator': serializer.toJson<bool>(isModerator),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  @override
+  _MembersCompanion createCompanion(bool nullToAbsent) {
+    return _MembersCompanion(
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      channelCid: channelCid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(channelCid),
+      role: role == null && nullToAbsent ? const Value.absent() : Value(role),
+      inviteAcceptedAt: inviteAcceptedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(inviteAcceptedAt),
+      inviteRejectedAt: inviteRejectedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(inviteRejectedAt),
+      invited: invited == null && nullToAbsent
+          ? const Value.absent()
+          : Value(invited),
+      isModerator: isModerator == null && nullToAbsent
+          ? const Value.absent()
+          : Value(isModerator),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+    );
+  }
+
+  _Member copyWith(
+          {String userId,
+          String channelCid,
+          String role,
+          DateTime inviteAcceptedAt,
+          DateTime inviteRejectedAt,
+          bool invited,
+          bool isModerator,
+          DateTime createdAt,
+          DateTime updatedAt}) =>
+      _Member(
+        userId: userId ?? this.userId,
+        channelCid: channelCid ?? this.channelCid,
+        role: role ?? this.role,
+        inviteAcceptedAt: inviteAcceptedAt ?? this.inviteAcceptedAt,
+        inviteRejectedAt: inviteRejectedAt ?? this.inviteRejectedAt,
+        invited: invited ?? this.invited,
+        isModerator: isModerator ?? this.isModerator,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('_Member(')
+          ..write('userId: $userId, ')
+          ..write('channelCid: $channelCid, ')
+          ..write('role: $role, ')
+          ..write('inviteAcceptedAt: $inviteAcceptedAt, ')
+          ..write('inviteRejectedAt: $inviteRejectedAt, ')
+          ..write('invited: $invited, ')
+          ..write('isModerator: $isModerator, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      userId.hashCode,
+      $mrjc(
+          channelCid.hashCode,
+          $mrjc(
+              role.hashCode,
+              $mrjc(
+                  inviteAcceptedAt.hashCode,
+                  $mrjc(
+                      inviteRejectedAt.hashCode,
+                      $mrjc(
+                          invited.hashCode,
+                          $mrjc(
+                              isModerator.hashCode,
+                              $mrjc(createdAt.hashCode,
+                                  updatedAt.hashCode)))))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is _Member &&
+          other.userId == this.userId &&
+          other.channelCid == this.channelCid &&
+          other.role == this.role &&
+          other.inviteAcceptedAt == this.inviteAcceptedAt &&
+          other.inviteRejectedAt == this.inviteRejectedAt &&
+          other.invited == this.invited &&
+          other.isModerator == this.isModerator &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class _MembersCompanion extends UpdateCompanion<_Member> {
+  final Value<String> userId;
+  final Value<String> channelCid;
+  final Value<String> role;
+  final Value<DateTime> inviteAcceptedAt;
+  final Value<DateTime> inviteRejectedAt;
+  final Value<bool> invited;
+  final Value<bool> isModerator;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  const _MembersCompanion({
+    this.userId = const Value.absent(),
+    this.channelCid = const Value.absent(),
+    this.role = const Value.absent(),
+    this.inviteAcceptedAt = const Value.absent(),
+    this.inviteRejectedAt = const Value.absent(),
+    this.invited = const Value.absent(),
+    this.isModerator = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+  });
+  _MembersCompanion.insert({
+    @required String userId,
+    @required String channelCid,
+    this.role = const Value.absent(),
+    this.inviteAcceptedAt = const Value.absent(),
+    this.inviteRejectedAt = const Value.absent(),
+    this.invited = const Value.absent(),
+    this.isModerator = const Value.absent(),
+    @required DateTime createdAt,
+    this.updatedAt = const Value.absent(),
+  })  : userId = Value(userId),
+        channelCid = Value(channelCid),
+        createdAt = Value(createdAt);
+  _MembersCompanion copyWith(
+      {Value<String> userId,
+      Value<String> channelCid,
+      Value<String> role,
+      Value<DateTime> inviteAcceptedAt,
+      Value<DateTime> inviteRejectedAt,
+      Value<bool> invited,
+      Value<bool> isModerator,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt}) {
+    return _MembersCompanion(
+      userId: userId ?? this.userId,
+      channelCid: channelCid ?? this.channelCid,
+      role: role ?? this.role,
+      inviteAcceptedAt: inviteAcceptedAt ?? this.inviteAcceptedAt,
+      inviteRejectedAt: inviteRejectedAt ?? this.inviteRejectedAt,
+      invited: invited ?? this.invited,
+      isModerator: isModerator ?? this.isModerator,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+}
+
+class $_MembersTable extends _Members with TableInfo<$_MembersTable, _Member> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  $_MembersTable(this._db, [this._alias]);
+  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  GeneratedTextColumn _userId;
+  @override
+  GeneratedTextColumn get userId => _userId ??= _constructUserId();
+  GeneratedTextColumn _constructUserId() {
+    return GeneratedTextColumn(
+      'user_id',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _channelCidMeta = const VerificationMeta('channelCid');
+  GeneratedTextColumn _channelCid;
+  @override
+  GeneratedTextColumn get channelCid => _channelCid ??= _constructChannelCid();
+  GeneratedTextColumn _constructChannelCid() {
+    return GeneratedTextColumn(
+      'channel_cid',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _roleMeta = const VerificationMeta('role');
+  GeneratedTextColumn _role;
+  @override
+  GeneratedTextColumn get role => _role ??= _constructRole();
+  GeneratedTextColumn _constructRole() {
+    return GeneratedTextColumn(
+      'role',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _inviteAcceptedAtMeta =
+      const VerificationMeta('inviteAcceptedAt');
+  GeneratedDateTimeColumn _inviteAcceptedAt;
+  @override
+  GeneratedDateTimeColumn get inviteAcceptedAt =>
+      _inviteAcceptedAt ??= _constructInviteAcceptedAt();
+  GeneratedDateTimeColumn _constructInviteAcceptedAt() {
+    return GeneratedDateTimeColumn(
+      'invite_accepted_at',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _inviteRejectedAtMeta =
+      const VerificationMeta('inviteRejectedAt');
+  GeneratedDateTimeColumn _inviteRejectedAt;
+  @override
+  GeneratedDateTimeColumn get inviteRejectedAt =>
+      _inviteRejectedAt ??= _constructInviteRejectedAt();
+  GeneratedDateTimeColumn _constructInviteRejectedAt() {
+    return GeneratedDateTimeColumn(
+      'invite_rejected_at',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _invitedMeta = const VerificationMeta('invited');
+  GeneratedBoolColumn _invited;
+  @override
+  GeneratedBoolColumn get invited => _invited ??= _constructInvited();
+  GeneratedBoolColumn _constructInvited() {
+    return GeneratedBoolColumn(
+      'invited',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _isModeratorMeta =
+      const VerificationMeta('isModerator');
+  GeneratedBoolColumn _isModerator;
+  @override
+  GeneratedBoolColumn get isModerator =>
+      _isModerator ??= _constructIsModerator();
+  GeneratedBoolColumn _constructIsModerator() {
+    return GeneratedBoolColumn(
+      'is_moderator',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  GeneratedDateTimeColumn _createdAt;
+  @override
+  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedDateTimeColumn _constructCreatedAt() {
+    return GeneratedDateTimeColumn(
+      'created_at',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
+  GeneratedDateTimeColumn _updatedAt;
+  @override
+  GeneratedDateTimeColumn get updatedAt => _updatedAt ??= _constructUpdatedAt();
+  GeneratedDateTimeColumn _constructUpdatedAt() {
+    return GeneratedDateTimeColumn(
+      'updated_at',
+      $tableName,
+      true,
+    );
+  }
+
+  @override
+  List<GeneratedColumn> get $columns => [
+        userId,
+        channelCid,
+        role,
+        inviteAcceptedAt,
+        inviteRejectedAt,
+        invited,
+        isModerator,
+        createdAt,
+        updatedAt
+      ];
+  @override
+  $_MembersTable get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'members';
+  @override
+  final String actualTableName = 'members';
+  @override
+  VerificationContext validateIntegrity(_MembersCompanion d,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    if (d.userId.present) {
+      context.handle(
+          _userIdMeta, userId.isAcceptableValue(d.userId.value, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (d.channelCid.present) {
+      context.handle(_channelCidMeta,
+          channelCid.isAcceptableValue(d.channelCid.value, _channelCidMeta));
+    } else if (isInserting) {
+      context.missing(_channelCidMeta);
+    }
+    if (d.role.present) {
+      context.handle(
+          _roleMeta, role.isAcceptableValue(d.role.value, _roleMeta));
+    }
+    if (d.inviteAcceptedAt.present) {
+      context.handle(
+          _inviteAcceptedAtMeta,
+          inviteAcceptedAt.isAcceptableValue(
+              d.inviteAcceptedAt.value, _inviteAcceptedAtMeta));
+    }
+    if (d.inviteRejectedAt.present) {
+      context.handle(
+          _inviteRejectedAtMeta,
+          inviteRejectedAt.isAcceptableValue(
+              d.inviteRejectedAt.value, _inviteRejectedAtMeta));
+    }
+    if (d.invited.present) {
+      context.handle(_invitedMeta,
+          invited.isAcceptableValue(d.invited.value, _invitedMeta));
+    }
+    if (d.isModerator.present) {
+      context.handle(_isModeratorMeta,
+          isModerator.isAcceptableValue(d.isModerator.value, _isModeratorMeta));
+    }
+    if (d.createdAt.present) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableValue(d.createdAt.value, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (d.updatedAt.present) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableValue(d.updatedAt.value, _updatedAtMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {userId, channelCid};
+  @override
+  _Member map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return _Member.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  Map<String, Variable> entityToSql(_MembersCompanion d) {
+    final map = <String, Variable>{};
+    if (d.userId.present) {
+      map['user_id'] = Variable<String, StringType>(d.userId.value);
+    }
+    if (d.channelCid.present) {
+      map['channel_cid'] = Variable<String, StringType>(d.channelCid.value);
+    }
+    if (d.role.present) {
+      map['role'] = Variable<String, StringType>(d.role.value);
+    }
+    if (d.inviteAcceptedAt.present) {
+      map['invite_accepted_at'] =
+          Variable<DateTime, DateTimeType>(d.inviteAcceptedAt.value);
+    }
+    if (d.inviteRejectedAt.present) {
+      map['invite_rejected_at'] =
+          Variable<DateTime, DateTimeType>(d.inviteRejectedAt.value);
+    }
+    if (d.invited.present) {
+      map['invited'] = Variable<bool, BoolType>(d.invited.value);
+    }
+    if (d.isModerator.present) {
+      map['is_moderator'] = Variable<bool, BoolType>(d.isModerator.value);
+    }
+    if (d.createdAt.present) {
+      map['created_at'] = Variable<DateTime, DateTimeType>(d.createdAt.value);
+    }
+    if (d.updatedAt.present) {
+      map['updated_at'] = Variable<DateTime, DateTimeType>(d.updatedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  $_MembersTable createAlias(String alias) {
+    return $_MembersTable(_db, alias);
+  }
+}
+
 abstract class _$OfflineDatabase extends GeneratedDatabase {
   _$OfflineDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   $_ChannelsTable _channels;
@@ -1900,9 +2372,11 @@ abstract class _$OfflineDatabase extends GeneratedDatabase {
   $_MessagesTable get messages => _messages ??= $_MessagesTable(this);
   $_ReadsTable _reads;
   $_ReadsTable get reads => _reads ??= $_ReadsTable(this);
+  $_MembersTable _members;
+  $_MembersTable get members => _members ??= $_MembersTable(this);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [channels, users, messages, reads];
+      [channels, users, messages, reads, members];
 }
