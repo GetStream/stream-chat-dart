@@ -7,7 +7,7 @@ part of 'offline_database.dart';
 // **************************************************************************
 
 // ignore_for_file: unnecessary_brace_in_string_interps, unnecessary_this
-class _ChannelData extends DataClass implements Insertable<_ChannelData> {
+class _Channel extends DataClass implements Insertable<_Channel> {
   final String id;
   final String type;
   final String cid;
@@ -19,7 +19,7 @@ class _ChannelData extends DataClass implements Insertable<_ChannelData> {
   final int memberCount;
   final Map<String, dynamic> extraData;
   final String createdBy;
-  _ChannelData(
+  _Channel(
       {@required this.id,
       @required this.type,
       @required this.cid,
@@ -31,14 +31,14 @@ class _ChannelData extends DataClass implements Insertable<_ChannelData> {
       @required this.memberCount,
       this.extraData,
       this.createdBy});
-  factory _ChannelData.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+  factory _Channel.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final boolType = db.typeSystem.forDartType<bool>();
     final dateTimeType = db.typeSystem.forDartType<DateTime>();
     final intType = db.typeSystem.forDartType<int>();
-    return _ChannelData(
+    return _Channel(
       id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
       type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
       cid: stringType.mapFromDatabaseResponse(data['${effectivePrefix}cid']),
@@ -54,16 +54,16 @@ class _ChannelData extends DataClass implements Insertable<_ChannelData> {
           .mapFromDatabaseResponse(data['${effectivePrefix}deleted_at']),
       memberCount: intType
           .mapFromDatabaseResponse(data['${effectivePrefix}member_count']),
-      extraData: $_ChannelTable.$converter0.mapToDart(stringType
+      extraData: $_ChannelsTable.$converter0.mapToDart(stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
       createdBy: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_by']),
     );
   }
-  factory _ChannelData.fromJson(Map<String, dynamic> json,
+  factory _Channel.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
-    return _ChannelData(
+    return _Channel(
       id: serializer.fromJson<String>(json['id']),
       type: serializer.fromJson<String>(json['type']),
       cid: serializer.fromJson<String>(json['cid']),
@@ -96,8 +96,8 @@ class _ChannelData extends DataClass implements Insertable<_ChannelData> {
   }
 
   @override
-  _ChannelCompanion createCompanion(bool nullToAbsent) {
-    return _ChannelCompanion(
+  _ChannelsCompanion createCompanion(bool nullToAbsent) {
+    return _ChannelsCompanion(
       id: id == null && nullToAbsent ? const Value.absent() : Value(id),
       type: type == null && nullToAbsent ? const Value.absent() : Value(type),
       cid: cid == null && nullToAbsent ? const Value.absent() : Value(cid),
@@ -127,7 +127,7 @@ class _ChannelData extends DataClass implements Insertable<_ChannelData> {
     );
   }
 
-  _ChannelData copyWith(
+  _Channel copyWith(
           {String id,
           String type,
           String cid,
@@ -139,7 +139,7 @@ class _ChannelData extends DataClass implements Insertable<_ChannelData> {
           int memberCount,
           Map<String, dynamic> extraData,
           String createdBy}) =>
-      _ChannelData(
+      _Channel(
         id: id ?? this.id,
         type: type ?? this.type,
         cid: cid ?? this.cid,
@@ -154,7 +154,7 @@ class _ChannelData extends DataClass implements Insertable<_ChannelData> {
       );
   @override
   String toString() {
-    return (StringBuffer('_ChannelData(')
+    return (StringBuffer('_Channel(')
           ..write('id: $id, ')
           ..write('type: $type, ')
           ..write('cid: $cid, ')
@@ -194,7 +194,7 @@ class _ChannelData extends DataClass implements Insertable<_ChannelData> {
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
-      (other is _ChannelData &&
+      (other is _Channel &&
           other.id == this.id &&
           other.type == this.type &&
           other.cid == this.cid &&
@@ -208,7 +208,7 @@ class _ChannelData extends DataClass implements Insertable<_ChannelData> {
           other.createdBy == this.createdBy);
 }
 
-class _ChannelCompanion extends UpdateCompanion<_ChannelData> {
+class _ChannelsCompanion extends UpdateCompanion<_Channel> {
   final Value<String> id;
   final Value<String> type;
   final Value<String> cid;
@@ -220,7 +220,7 @@ class _ChannelCompanion extends UpdateCompanion<_ChannelData> {
   final Value<int> memberCount;
   final Value<Map<String, dynamic>> extraData;
   final Value<String> createdBy;
-  const _ChannelCompanion({
+  const _ChannelsCompanion({
     this.id = const Value.absent(),
     this.type = const Value.absent(),
     this.cid = const Value.absent(),
@@ -233,7 +233,7 @@ class _ChannelCompanion extends UpdateCompanion<_ChannelData> {
     this.extraData = const Value.absent(),
     this.createdBy = const Value.absent(),
   });
-  _ChannelCompanion.insert({
+  _ChannelsCompanion.insert({
     @required String id,
     @required String type,
     @required String cid,
@@ -251,7 +251,7 @@ class _ChannelCompanion extends UpdateCompanion<_ChannelData> {
         createdAt = Value(createdAt),
         updatedAt = Value(updatedAt),
         memberCount = Value(memberCount);
-  _ChannelCompanion copyWith(
+  _ChannelsCompanion copyWith(
       {Value<String> id,
       Value<String> type,
       Value<String> cid,
@@ -263,7 +263,7 @@ class _ChannelCompanion extends UpdateCompanion<_ChannelData> {
       Value<int> memberCount,
       Value<Map<String, dynamic>> extraData,
       Value<String> createdBy}) {
-    return _ChannelCompanion(
+    return _ChannelsCompanion(
       id: id ?? this.id,
       type: type ?? this.type,
       cid: cid ?? this.cid,
@@ -279,11 +279,11 @@ class _ChannelCompanion extends UpdateCompanion<_ChannelData> {
   }
 }
 
-class $_ChannelTable extends _Channel
-    with TableInfo<$_ChannelTable, _ChannelData> {
+class $_ChannelsTable extends _Channels
+    with TableInfo<$_ChannelsTable, _Channel> {
   final GeneratedDatabase _db;
   final String _alias;
-  $_ChannelTable(this._db, [this._alias]);
+  $_ChannelsTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   GeneratedTextColumn _id;
   @override
@@ -432,13 +432,13 @@ class $_ChannelTable extends _Channel
         createdBy
       ];
   @override
-  $_ChannelTable get asDslTable => this;
+  $_ChannelsTable get asDslTable => this;
   @override
-  String get $tableName => _alias ?? 'channel';
+  String get $tableName => _alias ?? 'channels';
   @override
-  final String actualTableName = 'channel';
+  final String actualTableName = 'channels';
   @override
-  VerificationContext validateIntegrity(_ChannelCompanion d,
+  VerificationContext validateIntegrity(_ChannelsCompanion d,
       {bool isInserting = false}) {
     final context = VerificationContext();
     if (d.id.present) {
@@ -500,13 +500,13 @@ class $_ChannelTable extends _Channel
   @override
   Set<GeneratedColumn> get $primaryKey => {cid};
   @override
-  _ChannelData map(Map<String, dynamic> data, {String tablePrefix}) {
+  _Channel map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return _ChannelData.fromData(data, _db, prefix: effectivePrefix);
+    return _Channel.fromData(data, _db, prefix: effectivePrefix);
   }
 
   @override
-  Map<String, Variable> entityToSql(_ChannelCompanion d) {
+  Map<String, Variable> entityToSql(_ChannelsCompanion d) {
     final map = <String, Variable>{};
     if (d.id.present) {
       map['id'] = Variable<String, StringType>(d.id.value);
@@ -537,7 +537,7 @@ class $_ChannelTable extends _Channel
       map['member_count'] = Variable<int, IntType>(d.memberCount.value);
     }
     if (d.extraData.present) {
-      final converter = $_ChannelTable.$converter0;
+      final converter = $_ChannelsTable.$converter0;
       map['extra_data'] =
           Variable<String, StringType>(converter.mapToSql(d.extraData.value));
     }
@@ -548,15 +548,15 @@ class $_ChannelTable extends _Channel
   }
 
   @override
-  $_ChannelTable createAlias(String alias) {
-    return $_ChannelTable(_db, alias);
+  $_ChannelsTable createAlias(String alias) {
+    return $_ChannelsTable(_db, alias);
   }
 
   static TypeConverter<Map<String, dynamic>, String> $converter0 =
       _ExtraDataConverter();
 }
 
-class _UserData extends DataClass implements Insertable<_UserData> {
+class _User extends DataClass implements Insertable<_User> {
   final String id;
   final String role;
   final DateTime createdAt;
@@ -565,7 +565,7 @@ class _UserData extends DataClass implements Insertable<_UserData> {
   final bool online;
   final bool banned;
   final Map<String, dynamic> extraData;
-  _UserData(
+  _User(
       {@required this.id,
       this.role,
       @required this.createdAt,
@@ -574,13 +574,13 @@ class _UserData extends DataClass implements Insertable<_UserData> {
       this.online,
       this.banned,
       this.extraData});
-  factory _UserData.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+  factory _User.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final dateTimeType = db.typeSystem.forDartType<DateTime>();
     final boolType = db.typeSystem.forDartType<bool>();
-    return _UserData(
+    return _User(
       id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
       role: stringType.mapFromDatabaseResponse(data['${effectivePrefix}role']),
       createdAt: dateTimeType
@@ -593,14 +593,14 @@ class _UserData extends DataClass implements Insertable<_UserData> {
           boolType.mapFromDatabaseResponse(data['${effectivePrefix}online']),
       banned:
           boolType.mapFromDatabaseResponse(data['${effectivePrefix}banned']),
-      extraData: $_UserTable.$converter0.mapToDart(stringType
+      extraData: $_UsersTable.$converter0.mapToDart(stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
     );
   }
-  factory _UserData.fromJson(Map<String, dynamic> json,
+  factory _User.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
-    return _UserData(
+    return _User(
       id: serializer.fromJson<String>(json['id']),
       role: serializer.fromJson<String>(json['role']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -627,8 +627,8 @@ class _UserData extends DataClass implements Insertable<_UserData> {
   }
 
   @override
-  _UserCompanion createCompanion(bool nullToAbsent) {
-    return _UserCompanion(
+  _UsersCompanion createCompanion(bool nullToAbsent) {
+    return _UsersCompanion(
       id: id == null && nullToAbsent ? const Value.absent() : Value(id),
       role: role == null && nullToAbsent ? const Value.absent() : Value(role),
       createdAt: createdAt == null && nullToAbsent
@@ -650,7 +650,7 @@ class _UserData extends DataClass implements Insertable<_UserData> {
     );
   }
 
-  _UserData copyWith(
+  _User copyWith(
           {String id,
           String role,
           DateTime createdAt,
@@ -659,7 +659,7 @@ class _UserData extends DataClass implements Insertable<_UserData> {
           bool online,
           bool banned,
           Map<String, dynamic> extraData}) =>
-      _UserData(
+      _User(
         id: id ?? this.id,
         role: role ?? this.role,
         createdAt: createdAt ?? this.createdAt,
@@ -671,7 +671,7 @@ class _UserData extends DataClass implements Insertable<_UserData> {
       );
   @override
   String toString() {
-    return (StringBuffer('_UserData(')
+    return (StringBuffer('_User(')
           ..write('id: $id, ')
           ..write('role: $role, ')
           ..write('createdAt: $createdAt, ')
@@ -700,7 +700,7 @@ class _UserData extends DataClass implements Insertable<_UserData> {
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
-      (other is _UserData &&
+      (other is _User &&
           other.id == this.id &&
           other.role == this.role &&
           other.createdAt == this.createdAt &&
@@ -711,7 +711,7 @@ class _UserData extends DataClass implements Insertable<_UserData> {
           other.extraData == this.extraData);
 }
 
-class _UserCompanion extends UpdateCompanion<_UserData> {
+class _UsersCompanion extends UpdateCompanion<_User> {
   final Value<String> id;
   final Value<String> role;
   final Value<DateTime> createdAt;
@@ -720,7 +720,7 @@ class _UserCompanion extends UpdateCompanion<_UserData> {
   final Value<bool> online;
   final Value<bool> banned;
   final Value<Map<String, dynamic>> extraData;
-  const _UserCompanion({
+  const _UsersCompanion({
     this.id = const Value.absent(),
     this.role = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -730,7 +730,7 @@ class _UserCompanion extends UpdateCompanion<_UserData> {
     this.banned = const Value.absent(),
     this.extraData = const Value.absent(),
   });
-  _UserCompanion.insert({
+  _UsersCompanion.insert({
     @required String id,
     this.role = const Value.absent(),
     @required DateTime createdAt,
@@ -741,7 +741,7 @@ class _UserCompanion extends UpdateCompanion<_UserData> {
     this.extraData = const Value.absent(),
   })  : id = Value(id),
         createdAt = Value(createdAt);
-  _UserCompanion copyWith(
+  _UsersCompanion copyWith(
       {Value<String> id,
       Value<String> role,
       Value<DateTime> createdAt,
@@ -750,7 +750,7 @@ class _UserCompanion extends UpdateCompanion<_UserData> {
       Value<bool> online,
       Value<bool> banned,
       Value<Map<String, dynamic>> extraData}) {
-    return _UserCompanion(
+    return _UsersCompanion(
       id: id ?? this.id,
       role: role ?? this.role,
       createdAt: createdAt ?? this.createdAt,
@@ -763,10 +763,10 @@ class _UserCompanion extends UpdateCompanion<_UserData> {
   }
 }
 
-class $_UserTable extends _User with TableInfo<$_UserTable, _UserData> {
+class $_UsersTable extends _Users with TableInfo<$_UsersTable, _User> {
   final GeneratedDatabase _db;
   final String _alias;
-  $_UserTable(this._db, [this._alias]);
+  $_UsersTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   GeneratedTextColumn _id;
   @override
@@ -868,13 +868,13 @@ class $_UserTable extends _User with TableInfo<$_UserTable, _UserData> {
   List<GeneratedColumn> get $columns =>
       [id, role, createdAt, updatedAt, lastActive, online, banned, extraData];
   @override
-  $_UserTable get asDslTable => this;
+  $_UsersTable get asDslTable => this;
   @override
-  String get $tableName => _alias ?? 'user';
+  String get $tableName => _alias ?? 'users';
   @override
-  final String actualTableName = 'user';
+  final String actualTableName = 'users';
   @override
-  VerificationContext validateIntegrity(_UserCompanion d,
+  VerificationContext validateIntegrity(_UsersCompanion d,
       {bool isInserting = false}) {
     final context = VerificationContext();
     if (d.id.present) {
@@ -915,13 +915,13 @@ class $_UserTable extends _User with TableInfo<$_UserTable, _UserData> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  _UserData map(Map<String, dynamic> data, {String tablePrefix}) {
+  _User map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return _UserData.fromData(data, _db, prefix: effectivePrefix);
+    return _User.fromData(data, _db, prefix: effectivePrefix);
   }
 
   @override
-  Map<String, Variable> entityToSql(_UserCompanion d) {
+  Map<String, Variable> entityToSql(_UsersCompanion d) {
     final map = <String, Variable>{};
     if (d.id.present) {
       map['id'] = Variable<String, StringType>(d.id.value);
@@ -945,7 +945,7 @@ class $_UserTable extends _User with TableInfo<$_UserTable, _UserData> {
       map['banned'] = Variable<bool, BoolType>(d.banned.value);
     }
     if (d.extraData.present) {
-      final converter = $_UserTable.$converter0;
+      final converter = $_UsersTable.$converter0;
       map['extra_data'] =
           Variable<String, StringType>(converter.mapToSql(d.extraData.value));
     }
@@ -953,15 +953,15 @@ class $_UserTable extends _User with TableInfo<$_UserTable, _UserData> {
   }
 
   @override
-  $_UserTable createAlias(String alias) {
-    return $_UserTable(_db, alias);
+  $_UsersTable createAlias(String alias) {
+    return $_UsersTable(_db, alias);
   }
 
   static TypeConverter<Map<String, dynamic>, String> $converter0 =
       _ExtraDataConverter();
 }
 
-class _MessageData extends DataClass implements Insertable<_MessageData> {
+class _Message extends DataClass implements Insertable<_Message> {
   final String id;
   final String messageText;
   final MessageSendingStatus status;
@@ -975,9 +975,9 @@ class _MessageData extends DataClass implements Insertable<_MessageData> {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String userId;
-  final String channelId;
+  final String channelCid;
   final Map<String, dynamic> extraData;
-  _MessageData(
+  _Message(
       {@required this.id,
       this.messageText,
       this.status,
@@ -991,25 +991,25 @@ class _MessageData extends DataClass implements Insertable<_MessageData> {
       @required this.createdAt,
       this.updatedAt,
       this.userId,
-      this.channelId,
+      this.channelCid,
       this.extraData});
-  factory _MessageData.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+  factory _Message.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final intType = db.typeSystem.forDartType<int>();
     final boolType = db.typeSystem.forDartType<bool>();
     final dateTimeType = db.typeSystem.forDartType<DateTime>();
-    return _MessageData(
+    return _Message(
       id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
       messageText: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}message_text']),
-      status: $_MessageTable.$converter0.mapToDart(
+      status: $_MessagesTable.$converter0.mapToDart(
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}status'])),
       type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
-      reactionCounts: $_MessageTable.$converter1.mapToDart(stringType
+      reactionCounts: $_MessagesTable.$converter1.mapToDart(stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}reaction_counts'])),
-      reactionScores: $_MessageTable.$converter2.mapToDart(stringType
+      reactionScores: $_MessagesTable.$converter2.mapToDart(stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}reaction_scores'])),
       parentId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}parent_id']),
@@ -1025,16 +1025,16 @@ class _MessageData extends DataClass implements Insertable<_MessageData> {
           .mapFromDatabaseResponse(data['${effectivePrefix}updated_at']),
       userId:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
-      channelId: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}channel_id']),
-      extraData: $_MessageTable.$converter3.mapToDart(stringType
+      channelCid: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid']),
+      extraData: $_MessagesTable.$converter3.mapToDart(stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
     );
   }
-  factory _MessageData.fromJson(Map<String, dynamic> json,
+  factory _Message.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
-    return _MessageData(
+    return _Message(
       id: serializer.fromJson<String>(json['id']),
       messageText: serializer.fromJson<String>(json['messageText']),
       status: serializer.fromJson<MessageSendingStatus>(json['status']),
@@ -1050,7 +1050,7 @@ class _MessageData extends DataClass implements Insertable<_MessageData> {
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       userId: serializer.fromJson<String>(json['userId']),
-      channelId: serializer.fromJson<String>(json['channelId']),
+      channelCid: serializer.fromJson<String>(json['channelCid']),
       extraData: serializer.fromJson<Map<String, dynamic>>(json['extraData']),
     );
   }
@@ -1071,14 +1071,14 @@ class _MessageData extends DataClass implements Insertable<_MessageData> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'userId': serializer.toJson<String>(userId),
-      'channelId': serializer.toJson<String>(channelId),
+      'channelCid': serializer.toJson<String>(channelCid),
       'extraData': serializer.toJson<Map<String, dynamic>>(extraData),
     };
   }
 
   @override
-  _MessageCompanion createCompanion(bool nullToAbsent) {
-    return _MessageCompanion(
+  _MessagesCompanion createCompanion(bool nullToAbsent) {
+    return _MessagesCompanion(
       id: id == null && nullToAbsent ? const Value.absent() : Value(id),
       messageText: messageText == null && nullToAbsent
           ? const Value.absent()
@@ -1112,16 +1112,16 @@ class _MessageData extends DataClass implements Insertable<_MessageData> {
           : Value(updatedAt),
       userId:
           userId == null && nullToAbsent ? const Value.absent() : Value(userId),
-      channelId: channelId == null && nullToAbsent
+      channelCid: channelCid == null && nullToAbsent
           ? const Value.absent()
-          : Value(channelId),
+          : Value(channelCid),
       extraData: extraData == null && nullToAbsent
           ? const Value.absent()
           : Value(extraData),
     );
   }
 
-  _MessageData copyWith(
+  _Message copyWith(
           {String id,
           String messageText,
           MessageSendingStatus status,
@@ -1135,9 +1135,9 @@ class _MessageData extends DataClass implements Insertable<_MessageData> {
           DateTime createdAt,
           DateTime updatedAt,
           String userId,
-          String channelId,
+          String channelCid,
           Map<String, dynamic> extraData}) =>
-      _MessageData(
+      _Message(
         id: id ?? this.id,
         messageText: messageText ?? this.messageText,
         status: status ?? this.status,
@@ -1151,12 +1151,12 @@ class _MessageData extends DataClass implements Insertable<_MessageData> {
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         userId: userId ?? this.userId,
-        channelId: channelId ?? this.channelId,
+        channelCid: channelCid ?? this.channelCid,
         extraData: extraData ?? this.extraData,
       );
   @override
   String toString() {
-    return (StringBuffer('_MessageData(')
+    return (StringBuffer('_Message(')
           ..write('id: $id, ')
           ..write('messageText: $messageText, ')
           ..write('status: $status, ')
@@ -1170,7 +1170,7 @@ class _MessageData extends DataClass implements Insertable<_MessageData> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('userId: $userId, ')
-          ..write('channelId: $channelId, ')
+          ..write('channelCid: $channelCid, ')
           ..write('extraData: $extraData')
           ..write(')'))
         .toString();
@@ -1204,13 +1204,13 @@ class _MessageData extends DataClass implements Insertable<_MessageData> {
                                                   $mrjc(
                                                       userId.hashCode,
                                                       $mrjc(
-                                                          channelId.hashCode,
+                                                          channelCid.hashCode,
                                                           extraData
                                                               .hashCode)))))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
-      (other is _MessageData &&
+      (other is _Message &&
           other.id == this.id &&
           other.messageText == this.messageText &&
           other.status == this.status &&
@@ -1224,11 +1224,11 @@ class _MessageData extends DataClass implements Insertable<_MessageData> {
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.userId == this.userId &&
-          other.channelId == this.channelId &&
+          other.channelCid == this.channelCid &&
           other.extraData == this.extraData);
 }
 
-class _MessageCompanion extends UpdateCompanion<_MessageData> {
+class _MessagesCompanion extends UpdateCompanion<_Message> {
   final Value<String> id;
   final Value<String> messageText;
   final Value<MessageSendingStatus> status;
@@ -1242,9 +1242,9 @@ class _MessageCompanion extends UpdateCompanion<_MessageData> {
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<String> userId;
-  final Value<String> channelId;
+  final Value<String> channelCid;
   final Value<Map<String, dynamic>> extraData;
-  const _MessageCompanion({
+  const _MessagesCompanion({
     this.id = const Value.absent(),
     this.messageText = const Value.absent(),
     this.status = const Value.absent(),
@@ -1258,10 +1258,10 @@ class _MessageCompanion extends UpdateCompanion<_MessageData> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.userId = const Value.absent(),
-    this.channelId = const Value.absent(),
+    this.channelCid = const Value.absent(),
     this.extraData = const Value.absent(),
   });
-  _MessageCompanion.insert({
+  _MessagesCompanion.insert({
     @required String id,
     this.messageText = const Value.absent(),
     this.status = const Value.absent(),
@@ -1275,12 +1275,12 @@ class _MessageCompanion extends UpdateCompanion<_MessageData> {
     @required DateTime createdAt,
     this.updatedAt = const Value.absent(),
     this.userId = const Value.absent(),
-    this.channelId = const Value.absent(),
+    this.channelCid = const Value.absent(),
     this.extraData = const Value.absent(),
   })  : id = Value(id),
         type = Value(type),
         createdAt = Value(createdAt);
-  _MessageCompanion copyWith(
+  _MessagesCompanion copyWith(
       {Value<String> id,
       Value<String> messageText,
       Value<MessageSendingStatus> status,
@@ -1294,9 +1294,9 @@ class _MessageCompanion extends UpdateCompanion<_MessageData> {
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<String> userId,
-      Value<String> channelId,
+      Value<String> channelCid,
       Value<Map<String, dynamic>> extraData}) {
-    return _MessageCompanion(
+    return _MessagesCompanion(
       id: id ?? this.id,
       messageText: messageText ?? this.messageText,
       status: status ?? this.status,
@@ -1310,17 +1310,17 @@ class _MessageCompanion extends UpdateCompanion<_MessageData> {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       userId: userId ?? this.userId,
-      channelId: channelId ?? this.channelId,
+      channelCid: channelCid ?? this.channelCid,
       extraData: extraData ?? this.extraData,
     );
   }
 }
 
-class $_MessageTable extends _Message
-    with TableInfo<$_MessageTable, _MessageData> {
+class $_MessagesTable extends _Messages
+    with TableInfo<$_MessagesTable, _Message> {
   final GeneratedDatabase _db;
   final String _alias;
-  $_MessageTable(this._db, [this._alias]);
+  $_MessagesTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
   GeneratedTextColumn _id;
   @override
@@ -1485,13 +1485,13 @@ class $_MessageTable extends _Message
     );
   }
 
-  final VerificationMeta _channelIdMeta = const VerificationMeta('channelId');
-  GeneratedTextColumn _channelId;
+  final VerificationMeta _channelCidMeta = const VerificationMeta('channelCid');
+  GeneratedTextColumn _channelCid;
   @override
-  GeneratedTextColumn get channelId => _channelId ??= _constructChannelId();
-  GeneratedTextColumn _constructChannelId() {
+  GeneratedTextColumn get channelCid => _channelCid ??= _constructChannelCid();
+  GeneratedTextColumn _constructChannelCid() {
     return GeneratedTextColumn(
-      'channel_id',
+      'channel_cid',
       $tableName,
       true,
     );
@@ -1524,17 +1524,17 @@ class $_MessageTable extends _Message
         createdAt,
         updatedAt,
         userId,
-        channelId,
+        channelCid,
         extraData
       ];
   @override
-  $_MessageTable get asDslTable => this;
+  $_MessagesTable get asDslTable => this;
   @override
-  String get $tableName => _alias ?? 'message';
+  String get $tableName => _alias ?? 'messages';
   @override
-  final String actualTableName = 'message';
+  final String actualTableName = 'messages';
   @override
-  VerificationContext validateIntegrity(_MessageCompanion d,
+  VerificationContext validateIntegrity(_MessagesCompanion d,
       {bool isInserting = false}) {
     final context = VerificationContext();
     if (d.id.present) {
@@ -1587,9 +1587,9 @@ class $_MessageTable extends _Message
       context.handle(
           _userIdMeta, userId.isAcceptableValue(d.userId.value, _userIdMeta));
     }
-    if (d.channelId.present) {
-      context.handle(_channelIdMeta,
-          channelId.isAcceptableValue(d.channelId.value, _channelIdMeta));
+    if (d.channelCid.present) {
+      context.handle(_channelCidMeta,
+          channelCid.isAcceptableValue(d.channelCid.value, _channelCidMeta));
     }
     context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
@@ -1598,13 +1598,13 @@ class $_MessageTable extends _Message
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  _MessageData map(Map<String, dynamic> data, {String tablePrefix}) {
+  _Message map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return _MessageData.fromData(data, _db, prefix: effectivePrefix);
+    return _Message.fromData(data, _db, prefix: effectivePrefix);
   }
 
   @override
-  Map<String, Variable> entityToSql(_MessageCompanion d) {
+  Map<String, Variable> entityToSql(_MessagesCompanion d) {
     final map = <String, Variable>{};
     if (d.id.present) {
       map['id'] = Variable<String, StringType>(d.id.value);
@@ -1613,7 +1613,7 @@ class $_MessageTable extends _Message
       map['message_text'] = Variable<String, StringType>(d.messageText.value);
     }
     if (d.status.present) {
-      final converter = $_MessageTable.$converter0;
+      final converter = $_MessagesTable.$converter0;
       map['status'] =
           Variable<String, StringType>(converter.mapToSql(d.status.value));
     }
@@ -1621,12 +1621,12 @@ class $_MessageTable extends _Message
       map['type'] = Variable<String, StringType>(d.type.value);
     }
     if (d.reactionCounts.present) {
-      final converter = $_MessageTable.$converter1;
+      final converter = $_MessagesTable.$converter1;
       map['reaction_counts'] = Variable<String, StringType>(
           converter.mapToSql(d.reactionCounts.value));
     }
     if (d.reactionScores.present) {
-      final converter = $_MessageTable.$converter2;
+      final converter = $_MessagesTable.$converter2;
       map['reaction_scores'] = Variable<String, StringType>(
           converter.mapToSql(d.reactionScores.value));
     }
@@ -1651,11 +1651,11 @@ class $_MessageTable extends _Message
     if (d.userId.present) {
       map['user_id'] = Variable<String, StringType>(d.userId.value);
     }
-    if (d.channelId.present) {
-      map['channel_id'] = Variable<String, StringType>(d.channelId.value);
+    if (d.channelCid.present) {
+      map['channel_cid'] = Variable<String, StringType>(d.channelCid.value);
     }
     if (d.extraData.present) {
-      final converter = $_MessageTable.$converter3;
+      final converter = $_MessagesTable.$converter3;
       map['extra_data'] =
           Variable<String, StringType>(converter.mapToSql(d.extraData.value));
     }
@@ -1663,8 +1663,8 @@ class $_MessageTable extends _Message
   }
 
   @override
-  $_MessageTable createAlias(String alias) {
-    return $_MessageTable(_db, alias);
+  $_MessagesTable createAlias(String alias) {
+    return $_MessagesTable(_db, alias);
   }
 
   static TypeConverter<MessageSendingStatus, String> $converter0 =
@@ -1677,16 +1677,232 @@ class $_MessageTable extends _Message
       _ExtraDataConverter();
 }
 
+class _Read extends DataClass implements Insertable<_Read> {
+  final DateTime lastRead;
+  final String userId;
+  final String channelCid;
+  _Read(
+      {@required this.lastRead,
+      @required this.userId,
+      @required this.channelCid});
+  factory _Read.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    final stringType = db.typeSystem.forDartType<String>();
+    return _Read(
+      lastRead: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}last_read']),
+      userId:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
+      channelCid: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid']),
+    );
+  }
+  factory _Read.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return _Read(
+      lastRead: serializer.fromJson<DateTime>(json['lastRead']),
+      userId: serializer.fromJson<String>(json['userId']),
+      channelCid: serializer.fromJson<String>(json['channelCid']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'lastRead': serializer.toJson<DateTime>(lastRead),
+      'userId': serializer.toJson<String>(userId),
+      'channelCid': serializer.toJson<String>(channelCid),
+    };
+  }
+
+  @override
+  _ReadsCompanion createCompanion(bool nullToAbsent) {
+    return _ReadsCompanion(
+      lastRead: lastRead == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastRead),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      channelCid: channelCid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(channelCid),
+    );
+  }
+
+  _Read copyWith({DateTime lastRead, String userId, String channelCid}) =>
+      _Read(
+        lastRead: lastRead ?? this.lastRead,
+        userId: userId ?? this.userId,
+        channelCid: channelCid ?? this.channelCid,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('_Read(')
+          ..write('lastRead: $lastRead, ')
+          ..write('userId: $userId, ')
+          ..write('channelCid: $channelCid')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf(
+      $mrjc(lastRead.hashCode, $mrjc(userId.hashCode, channelCid.hashCode)));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is _Read &&
+          other.lastRead == this.lastRead &&
+          other.userId == this.userId &&
+          other.channelCid == this.channelCid);
+}
+
+class _ReadsCompanion extends UpdateCompanion<_Read> {
+  final Value<DateTime> lastRead;
+  final Value<String> userId;
+  final Value<String> channelCid;
+  const _ReadsCompanion({
+    this.lastRead = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.channelCid = const Value.absent(),
+  });
+  _ReadsCompanion.insert({
+    @required DateTime lastRead,
+    @required String userId,
+    @required String channelCid,
+  })  : lastRead = Value(lastRead),
+        userId = Value(userId),
+        channelCid = Value(channelCid);
+  _ReadsCompanion copyWith(
+      {Value<DateTime> lastRead,
+      Value<String> userId,
+      Value<String> channelCid}) {
+    return _ReadsCompanion(
+      lastRead: lastRead ?? this.lastRead,
+      userId: userId ?? this.userId,
+      channelCid: channelCid ?? this.channelCid,
+    );
+  }
+}
+
+class $_ReadsTable extends _Reads with TableInfo<$_ReadsTable, _Read> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  $_ReadsTable(this._db, [this._alias]);
+  final VerificationMeta _lastReadMeta = const VerificationMeta('lastRead');
+  GeneratedDateTimeColumn _lastRead;
+  @override
+  GeneratedDateTimeColumn get lastRead => _lastRead ??= _constructLastRead();
+  GeneratedDateTimeColumn _constructLastRead() {
+    return GeneratedDateTimeColumn(
+      'last_read',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  GeneratedTextColumn _userId;
+  @override
+  GeneratedTextColumn get userId => _userId ??= _constructUserId();
+  GeneratedTextColumn _constructUserId() {
+    return GeneratedTextColumn(
+      'user_id',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _channelCidMeta = const VerificationMeta('channelCid');
+  GeneratedTextColumn _channelCid;
+  @override
+  GeneratedTextColumn get channelCid => _channelCid ??= _constructChannelCid();
+  GeneratedTextColumn _constructChannelCid() {
+    return GeneratedTextColumn(
+      'channel_cid',
+      $tableName,
+      false,
+    );
+  }
+
+  @override
+  List<GeneratedColumn> get $columns => [lastRead, userId, channelCid];
+  @override
+  $_ReadsTable get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'reads';
+  @override
+  final String actualTableName = 'reads';
+  @override
+  VerificationContext validateIntegrity(_ReadsCompanion d,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    if (d.lastRead.present) {
+      context.handle(_lastReadMeta,
+          lastRead.isAcceptableValue(d.lastRead.value, _lastReadMeta));
+    } else if (isInserting) {
+      context.missing(_lastReadMeta);
+    }
+    if (d.userId.present) {
+      context.handle(
+          _userIdMeta, userId.isAcceptableValue(d.userId.value, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (d.channelCid.present) {
+      context.handle(_channelCidMeta,
+          channelCid.isAcceptableValue(d.channelCid.value, _channelCidMeta));
+    } else if (isInserting) {
+      context.missing(_channelCidMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {userId, channelCid};
+  @override
+  _Read map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return _Read.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  Map<String, Variable> entityToSql(_ReadsCompanion d) {
+    final map = <String, Variable>{};
+    if (d.lastRead.present) {
+      map['last_read'] = Variable<DateTime, DateTimeType>(d.lastRead.value);
+    }
+    if (d.userId.present) {
+      map['user_id'] = Variable<String, StringType>(d.userId.value);
+    }
+    if (d.channelCid.present) {
+      map['channel_cid'] = Variable<String, StringType>(d.channelCid.value);
+    }
+    return map;
+  }
+
+  @override
+  $_ReadsTable createAlias(String alias) {
+    return $_ReadsTable(_db, alias);
+  }
+}
+
 abstract class _$OfflineDatabase extends GeneratedDatabase {
   _$OfflineDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
-  $_ChannelTable _channel;
-  $_ChannelTable get channel => _channel ??= $_ChannelTable(this);
-  $_UserTable _user;
-  $_UserTable get user => _user ??= $_UserTable(this);
-  $_MessageTable _message;
-  $_MessageTable get message => _message ??= $_MessageTable(this);
+  $_ChannelsTable _channels;
+  $_ChannelsTable get channels => _channels ??= $_ChannelsTable(this);
+  $_UsersTable _users;
+  $_UsersTable get users => _users ??= $_UsersTable(this);
+  $_MessagesTable _messages;
+  $_MessagesTable get messages => _messages ??= $_MessagesTable(this);
+  $_ReadsTable _reads;
+  $_ReadsTable get reads => _reads ??= $_ReadsTable(this);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [channel, user, message];
+  List<DatabaseSchemaEntity> get allSchemaEntities =>
+      [channels, users, messages, reads];
 }

@@ -7,13 +7,14 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:stream_chat/src/models/message.dart';
+import 'package:stream_chat/src/models/read.dart';
 import 'package:stream_chat/src/models/user.dart';
 
 import '../models/channel_state.dart';
 
 part 'offline_database.g.dart';
 
-class _Channel extends Table {
+class _Channels extends Table {
   TextColumn get id => text()();
 
   TextColumn get type => text()();
@@ -40,7 +41,7 @@ class _Channel extends Table {
   Set<Column> get primaryKey => {cid};
 }
 
-class _User extends Table {
+class _Users extends Table {
   TextColumn get id => text()();
 
   TextColumn get role => text().nullable()();
@@ -61,7 +62,19 @@ class _User extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-class _Message extends Table {
+class _Reads extends Table {
+  DateTimeColumn get lastRead => dateTime()();
+  TextColumn get userId => text()();
+  TextColumn get channelCid => text()();
+
+  @override
+  Set<Column> get primaryKey => {
+        userId,
+        channelCid,
+      };
+}
+
+class _Messages extends Table {
   TextColumn get id => text()();
 
   TextColumn get messageText => text().nullable()();
@@ -96,7 +109,7 @@ class _Message extends Table {
 
   TextColumn get userId => text().nullable()();
 
-  TextColumn get channelId => text().nullable()();
+  TextColumn get channelCid => text().nullable()();
 
   TextColumn get extraData => text().nullable().map(_ExtraDataConverter())();
 
@@ -150,9 +163,10 @@ LazyDatabase _openConnection() {
 }
 
 @UseMoor(tables: [
-  _Channel,
-  _User,
-  _Message,
+  _Channels,
+  _Users,
+  _Messages,
+  _Reads,
 ])
 class OfflineDatabase extends _$OfflineDatabase {
   // we tell the database where to store the data with this constructor
@@ -182,42 +196,18 @@ class OfflineDatabase extends _$OfflineDatabase {
       );
 
   Future<List<ChannelState>> getChannelStates() async {
-    return Future.wait(await select(channel).join([
-      leftOuterJoin(user, channel.createdBy.equalsExp(user.id)),
+    return Future.wait(await select(channels).join([
+      leftOuterJoin(users, channels.createdBy.equalsExp(users.id)),
     ]).map((row) async {
-      final channelRow = row.readTable(channel);
-      final userRow = row.readTable(user);
+      final channelRow = row.readTable(channels);
+      final userRow = row.readTable(users);
 
-      final messages = await (select(message).join([
-        leftOuterJoin(user, message.userId.equalsExp(user.id)),
-      ])
-            ..where(message.channelId.equals(channelRow.id))
-            ..orderBy([
-              OrderingTerm.asc(message.createdAt),
-            ]))
-          .map((row) {
-        final messageRow = row.readTable(message);
-        final userRow = row.readTable(user);
-        return Message(
-          createdAt: messageRow.createdAt,
-          extraData: messageRow.extraData,
-          updatedAt: messageRow.updatedAt,
-          id: messageRow.id,
-          type: messageRow.type,
-          status: messageRow.status,
-          command: messageRow.command,
-          parentId: messageRow.parentId,
-          reactionCounts: messageRow.reactionCounts,
-          reactionScores: messageRow.reactionScores,
-          replyCount: messageRow.replyCount,
-          showInChannel: messageRow.showInChannel,
-          text: messageRow.messageText,
-          user: _userFromUserRow(userRow),
-        );
-      }).get();
+      List<Message> rowMessages = await _getChannelMessages(channelRow);
+      List<Read> rowReads = await _getChannelReads(channelRow);
 
       return ChannelState(
-        messages: messages,
+        read: rowReads,
+        messages: rowMessages,
         channel: ChannelModel(
           id: channelRow.id,
           type: channelRow.type,
@@ -237,7 +227,57 @@ class OfflineDatabase extends _$OfflineDatabase {
     }).get());
   }
 
-  User _userFromUserRow(_UserData userRow) {
+  Future<List<Message>> _getChannelMessages(_Channel channelRow) async {
+    final rowMessages = await (select(messages).join([
+      leftOuterJoin(users, messages.userId.equalsExp(users.id)),
+    ])
+          ..where(messages.channelCid.equals(channelRow.cid))
+          ..orderBy([
+            OrderingTerm.asc(messages.createdAt),
+          ]))
+        .map((row) {
+      final messageRow = row.readTable(messages);
+      final userRow = row.readTable(users);
+      return Message(
+        createdAt: messageRow.createdAt,
+        extraData: messageRow.extraData,
+        updatedAt: messageRow.updatedAt,
+        id: messageRow.id,
+        type: messageRow.type,
+        status: messageRow.status,
+        command: messageRow.command,
+        parentId: messageRow.parentId,
+        reactionCounts: messageRow.reactionCounts,
+        reactionScores: messageRow.reactionScores,
+        replyCount: messageRow.replyCount,
+        showInChannel: messageRow.showInChannel,
+        text: messageRow.messageText,
+        user: _userFromUserRow(userRow),
+      );
+    }).get();
+    return rowMessages;
+  }
+
+  Future<List<Read>> _getChannelReads(_Channel channelRow) async {
+    final rowReads = await (select(reads).join([
+      leftOuterJoin(users, reads.userId.equalsExp(users.id)),
+    ])
+          ..where(reads.channelCid.equals(channelRow.cid))
+          ..orderBy([
+            OrderingTerm.asc(reads.lastRead),
+          ]))
+        .map((row) {
+      final userRow = row.readTable(users);
+      final readRow = row.readTable(reads);
+      return Read(
+        user: _userFromUserRow(userRow),
+        lastRead: readRow.lastRead,
+      );
+    }).get();
+    return rowReads;
+  }
+
+  User _userFromUserRow(_User userRow) {
     return User(
       updatedAt: userRow.updatedAt,
       role: userRow.role,
@@ -257,11 +297,11 @@ class OfflineDatabase extends _$OfflineDatabase {
   Future<void> updateChannelStates(List<ChannelState> channelStates) async {
     await batch((batch) {
       batch.insertAll(
-        message,
+        messages,
         channelStates
-            .map((cs) => cs.messages.map((m) => _MessageData(
+            .map((cs) => cs.messages.map((m) => _Message(
                   id: m.id,
-                  channelId: cs.channel.id,
+                  channelCid: cs.channel.cid,
                   type: m.type,
                   parentId: m.parentId,
                   command: m.command,
@@ -282,11 +322,12 @@ class OfflineDatabase extends _$OfflineDatabase {
       );
 
       batch.insertAll(
-        user,
+        users,
         channelStates
             .map((cs) => [
                   _userDataFromUser(cs.channel.createdBy),
                   ...cs.messages.map((m) => _userDataFromUser(m.user)),
+                  ...cs.read.map((r) => _userDataFromUser(r.user)),
                 ])
             .expand((v) => v)
             .toList(),
@@ -294,7 +335,20 @@ class OfflineDatabase extends _$OfflineDatabase {
       );
 
       batch.insertAll(
-        channel,
+        reads,
+        channelStates
+            .map((cs) => cs.read.map((r) => _Read(
+                  lastRead: r.lastRead,
+                  userId: r.user.id,
+                  channelCid: cs.channel.cid,
+                )))
+            .expand((v) => v)
+            .toList(),
+        mode: InsertMode.insertOrReplace,
+      );
+
+      batch.insertAll(
+        channels,
         channelStates.map((cs) {
           final channel = cs.channel;
           return _channelDataFromChannelModel(channel);
@@ -304,8 +358,8 @@ class OfflineDatabase extends _$OfflineDatabase {
     });
   }
 
-  _UserData _userDataFromUser(User user) {
-    return _UserData(
+  _User _userDataFromUser(User user) {
+    return _User(
       id: user.id,
       createdAt: user.createdAt,
       banned: user.banned,
@@ -317,8 +371,8 @@ class OfflineDatabase extends _$OfflineDatabase {
     );
   }
 
-  _ChannelData _channelDataFromChannelModel(ChannelModel channel) {
-    return _ChannelData(
+  _Channel _channelDataFromChannelModel(ChannelModel channel) {
+    return _Channel(
       id: channel.id,
       type: channel.type,
       frozen: channel.frozen,
