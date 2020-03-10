@@ -45,6 +45,9 @@ class OfflineDatabase extends _$OfflineDatabase {
   // we tell the database where to store the data with this constructor
   OfflineDatabase(String userId) : super(_openConnection(userId));
 
+  OfflineDatabase.connect(DatabaseConnection connection)
+      : super.connect(connection);
+
   // you should bump this number whenever you change or add a table definition. Migrations
   // are covered later in this readme.
   @override
