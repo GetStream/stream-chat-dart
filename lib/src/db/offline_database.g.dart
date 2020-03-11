@@ -607,7 +607,7 @@ class _User extends DataClass implements Insertable<_User> {
   _User(
       {@required this.id,
       this.role,
-      @required this.createdAt,
+      this.createdAt,
       this.updatedAt,
       this.lastActive,
       this.online,
@@ -772,14 +772,13 @@ class _UsersCompanion extends UpdateCompanion<_User> {
   _UsersCompanion.insert({
     @required String id,
     this.role = const Value.absent(),
-    @required DateTime createdAt,
+    this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.lastActive = const Value.absent(),
     this.online = const Value.absent(),
     this.banned = const Value.absent(),
     this.extraData = const Value.absent(),
-  })  : id = Value(id),
-        createdAt = Value(createdAt);
+  }) : id = Value(id);
   _UsersCompanion copyWith(
       {Value<String> id,
       Value<String> role,
@@ -838,7 +837,7 @@ class $_UsersTable extends _Users with TableInfo<$_UsersTable, _User> {
     return GeneratedDateTimeColumn(
       'created_at',
       $tableName,
-      false,
+      true,
     );
   }
 
@@ -928,8 +927,6 @@ class $_UsersTable extends _Users with TableInfo<$_UsersTable, _User> {
     if (d.createdAt.present) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableValue(d.createdAt.value, _createdAtMeta));
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
     }
     if (d.updatedAt.present) {
       context.handle(_updatedAtMeta,

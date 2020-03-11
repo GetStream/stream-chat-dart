@@ -371,26 +371,30 @@ class OfflineDatabase extends _$OfflineDatabase {
             .expand((v) => v)),
       );
 
-      batch.insertAll(
-        reactions,
-        channelStates
-            .map((cs) => cs.messages.map((m) {
-                  final ownReactions = m.ownReactions.map(
-                    (r) => _reactionDataFromReaction(m, r),
-                  );
-                  final latestReactions = m.latestReactions.map(
-                    (r) => _reactionDataFromReaction(m, r),
-                  );
+      final newReactions = channelStates
+          .map((cs) => cs.messages.map((m) {
+                final ownReactions = m.ownReactions?.map(
+                      (r) => _reactionDataFromReaction(m, r),
+                    ) ??
+                    [];
+                final latestReactions = m.latestReactions?.map(
+                      (r) => _reactionDataFromReaction(m, r),
+                    ) ??
+                    [];
+                return [
+                  ...ownReactions,
+                  ...latestReactions,
+                ];
+              }).expand((v) => v))
+          .expand((v) => v);
 
-                  return [
-                    ...ownReactions,
-                    ...latestReactions,
-                  ];
-                }).expand((v) => v))
-            .expand((v) => v)
-            .toList(),
-        mode: InsertMode.insertOrReplace,
-      );
+      if (newReactions.isNotEmpty) {
+        batch.insertAll(
+          reactions,
+          newReactions.toList(),
+          mode: InsertMode.insertOrReplace,
+        );
+      }
 
       batch.insertAll(
         users,
@@ -401,10 +405,12 @@ class OfflineDatabase extends _$OfflineDatabase {
                     ...cs.messages
                         .map((m) => [
                               _userDataFromUser(m.user),
-                              ...m.latestReactions
-                                  .map((r) => _userDataFromUser(r.user)),
-                              ...m.ownReactions
-                                  .map((r) => _userDataFromUser(r.user)),
+                              if (m.latestReactions != null)
+                                ...m.latestReactions
+                                    .map((r) => _userDataFromUser(r.user)),
+                              if (m.ownReactions != null)
+                                ...m.ownReactions
+                                    .map((r) => _userDataFromUser(r.user)),
                             ])
                         .expand((v) => v),
                   if (cs.read != null)

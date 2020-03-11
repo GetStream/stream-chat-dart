@@ -47,7 +47,7 @@ class _Users extends Table {
 
   TextColumn get role => text().nullable()();
 
-  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get createdAt => dateTime().nullable()();
 
   DateTimeColumn get updatedAt => dateTime().nullable()();
 

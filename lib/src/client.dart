@@ -289,6 +289,9 @@ class Client {
       // ws was just reconnected
       _connectionId = event.connectionId;
     }
+    if (event.me != null) {
+      state.user = event.me;
+    }
     _controller.add(event);
   }
 
@@ -415,7 +418,6 @@ class Client {
         final client = newChannels[index];
         client.state.updateChannelState(channelState);
       } else {
-        print('NEW2');
         newChannels.add(Channel.fromState(this, channelState));
       }
     });
