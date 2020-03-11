@@ -621,27 +621,38 @@ class ChannelClientState {
 
     _listenReadEvents();
 
-    _retryFailedMessages();
+    retryFailedMessages();
   }
 
-  void _retryFailedMessages() {
-    messages.reversed
+  Future<void> retryFailedMessages() {
+    _channel._client.logger.info('_retryFailedMessages');
+    return Future.wait(messages.reversed
         .where((message) =>
-            (message.status == MessageSendingStatus.FAILED ||
-                message.status == MessageSendingStatus.FAILED_UPDATE) &&
-            !message.isDeleted)
-        .forEach((message) {
-      if (message.status == MessageSendingStatus.FAILED_UPDATE) {
-        _channel._client.updateMessage(
+            message.status != null &&
+            message.status != MessageSendingStatus.SENT)
+        .map((message) {
+      final List<Future> futures = [];
+      if (message.status == MessageSendingStatus.FAILED_UPDATE ||
+          message.status == MessageSendingStatus.UPDATING) {
+        futures.add(_channel._client.updateMessage(
           message,
           _channel.cid,
-        );
-      } else {
-        _channel.sendMessage(
+        ));
+      } else if (message.status == MessageSendingStatus.FAILED ||
+          message.status == MessageSendingStatus.SENDING) {
+        futures.add(_channel.sendMessage(
           message,
-        );
+        ));
+      } else if (message.status == MessageSendingStatus.FAILED_DELETE ||
+          message.status == MessageSendingStatus.DELETING) {
+        futures.add(_channel._client.deleteMessage(
+          message,
+          _channel.cid,
+        ));
       }
-    });
+
+      return futures;
+    }).expand((v) => v));
   }
 
   void _listenReactionDeleted() {
@@ -1009,8 +1020,6 @@ class ChannelClientState {
       members: newMembers,
       read: updatedState.read,
     );
-
-    _retryFailedMessages();
   }
 
   /// The channel state related to this client

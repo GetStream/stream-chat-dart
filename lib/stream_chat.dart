@@ -2,6 +2,7 @@ library stream_chat;
 
 export 'package:dio/src/dio_error.dart';
 export 'package:dio/src/multipart_file.dart';
+export 'package:http_parser/src/media_type.dart';
 export 'package:logging/src/level.dart';
 
 export './src/api/channel.dart';

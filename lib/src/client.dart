@@ -316,12 +316,14 @@ class Client {
       logger: Logger('WS'),
     );
 
-    _connectionStatusListener = () {
+    _connectionStatusListener = () async {
       final value = _ws.connectionStatus.value;
       this.wsConnectionStatus.value = value;
 
       if (value == ConnectionStatus.connected &&
           state.channels?.isNotEmpty == true) {
+        await Future.wait(state.channels
+            .map((channel) => channel.state.retryFailedMessages()));
         queryChannels(filter: {
           'cid': {
             '\$in': state.channels.map((c) => c.cid).toList(),
@@ -833,8 +835,31 @@ class Client {
       ));
       return EmptyResponse();
     }
-    final response = await delete("/messages/${message.id}");
-    return decode(response.data, EmptyResponse.fromJson);
+
+    try {
+      handleEvent(Event(
+        message: message.copyWith(
+          type: 'deleted',
+          status: MessageSendingStatus.DELETING,
+        ),
+        type: EventType.messageDeleted,
+        cid: cid,
+      ));
+
+      final response = await delete("/messages/${message.id}");
+      return decode(response.data, EmptyResponse.fromJson);
+    } catch (error) {
+      handleEvent(Event(
+        message: message.copyWith(
+          type: 'deleted',
+          status: MessageSendingStatus.FAILED_DELETE,
+        ),
+        type: EventType.messageUpdated,
+        cid: cid,
+      ));
+
+      rethrow;
+    }
   }
 
   /// Get a message by id

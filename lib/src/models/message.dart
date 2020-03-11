@@ -10,8 +10,10 @@ part 'message.g.dart';
 enum MessageSendingStatus {
   SENDING,
   UPDATING,
+  DELETING,
   FAILED,
   FAILED_UPDATE,
+  FAILED_DELETE,
   SENT,
 }
 
