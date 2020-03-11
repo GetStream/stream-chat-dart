@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
+import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
 import 'package:moor_ffi/moor_ffi.dart';
 import 'package:path/path.dart' as p;
@@ -18,18 +20,43 @@ import '../models/channel_state.dart';
 part 'models.dart';
 part 'offline_database.g.dart';
 
-LazyDatabase _openConnection(String userId) {
-  // the LazyDatabase util lets us find the right location for the file async.
-  return LazyDatabase(() async {
-    // put the database file, called db.sqlite here, into the documents folder
-    // for your app.
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'db_$userId.sqlite'));
-    return VmDatabase(
-      file,
-//      logStatements: true,
-    );
+Future<MoorIsolate> _createMoorIsolate(String userId) async {
+  final dir = await getApplicationDocumentsDirectory();
+  final path = p.join(dir.path, 'db_$userId.sqlite');
+  final receivePort = ReceivePort();
+
+  await Isolate.spawn(
+    _startBackground,
+    _IsolateStartRequest(receivePort.sendPort, path),
+  );
+
+  return (await receivePort.first as MoorIsolate);
+}
+
+void _startBackground(_IsolateStartRequest request) {
+  final executor = LazyDatabase(() async {
+    return VmDatabase(File(request.targetPath));
   });
+  final moorIsolate = MoorIsolate.inCurrent(
+    () => DatabaseConnection.fromExecutor(executor),
+  );
+  request.sendMoorIsolate.send(moorIsolate);
+}
+
+Future connectDatabase(User user) async {
+  final isolate = await _createMoorIsolate(user.id);
+  final connection = await isolate.connect();
+  return OfflineDatabase.connect(
+    connection,
+    user.id,
+  );
+}
+
+class _IsolateStartRequest {
+  final SendPort sendMoorIsolate;
+  final String targetPath;
+
+  _IsolateStartRequest(this.sendMoorIsolate, this.targetPath);
 }
 
 @UseMoor(tables: [
@@ -38,15 +65,16 @@ LazyDatabase _openConnection(String userId) {
   _Messages,
   _Reads,
   _Members,
-  _Attachments,
   _ChannelQueries,
+  _Reactions,
 ])
 class OfflineDatabase extends _$OfflineDatabase {
-  // we tell the database where to store the data with this constructor
-  OfflineDatabase(String userId) : super(_openConnection(userId));
+  OfflineDatabase.connect(
+    DatabaseConnection connection,
+    this._userId,
+  ) : super.connect(connection);
 
-  OfflineDatabase.connect(DatabaseConnection connection)
-      : super.connect(connection);
+  final String _userId;
 
   // you should bump this number whenever you change or add a table definition. Migrations
   // are covered later in this readme.
@@ -128,7 +156,7 @@ class OfflineDatabase extends _$OfflineDatabase {
             deletedAt: channelRow.deletedAt,
             extraData: channelRow.extraData,
             members: [],
-            config: null,
+            config: ChannelConfig.fromJson(jsonDecode(channelRow.config)),
             createdBy: _userFromUserRow(userRow),
           ),
         );
@@ -158,39 +186,16 @@ class OfflineDatabase extends _$OfflineDatabase {
       final messageRow = row.readTable(messages);
       final userRow = row.readTable(users);
 
-      final attachmentsRow = await (select(attachments)
-            ..where((a) => a.messageId.equals(messageRow.id)))
-          .map((attachmentRow) => Attachment(
-                extraData: attachmentRow.extraData,
-                text: attachmentRow.attachmentText,
-                type: attachmentRow.type == '' ? null : attachmentRow.type,
-                color: attachmentRow.color,
-                assetUrl: attachmentRow.assetUrl == ''
-                    ? null
-                    : attachmentRow.assetUrl,
-                title: attachmentRow.title,
-                authorIcon: attachmentRow.authorIcon,
-                authorLink: attachmentRow.authorLink,
-                authorName: attachmentRow.authorName,
-                fallback: attachmentRow.fallback,
-                footer: attachmentRow.footer,
-                footerIcon: attachmentRow.footerIcon,
-                imageUrl: attachmentRow.imageUrl == ''
-                    ? null
-                    : attachmentRow.imageUrl,
-                ogScrapeUrl: attachmentRow.ogScrapeUrl,
-                pretext: attachmentRow.pretext,
-                thumbUrl: attachmentRow.thumbUrl == ''
-                    ? null
-                    : attachmentRow.thumbUrl,
-                titleLink: attachmentRow.titleLink == ''
-                    ? null
-                    : attachmentRow.titleLink,
-              ))
-          .get();
+      final latestReactions = await _getLatestReactions(messageRow);
+      final ownReactions = await _getOwnReactions(messageRow);
 
       return Message(
-        attachments: attachmentsRow,
+        latestReactions: latestReactions,
+        ownReactions: ownReactions,
+        attachments: List<Map<String, dynamic>>.from(
+                jsonDecode(messageRow.attachmentJson))
+            .map((j) => Attachment.fromJson(j))
+            .toList(),
         createdAt: messageRow.createdAt,
         extraData: messageRow.extraData,
         updatedAt: messageRow.updatedAt,
@@ -208,6 +213,45 @@ class OfflineDatabase extends _$OfflineDatabase {
       );
     }).get());
     return rowMessages;
+  }
+
+  Future<List<Reaction>> _getLatestReactions(_Message messageRow) async {
+    return await (select(reactions).join([
+      leftOuterJoin(users, reactions.userId.equalsExp(users.id)),
+    ])
+          ..where(reactions.messageId.equals(messageRow.id))
+          ..orderBy([OrderingTerm.asc(reactions.createdAt)]))
+        .map((row) {
+      final r = row.readTable(reactions);
+      final u = row.readTable(users);
+      return _reactionFromRow(r, u);
+    }).get();
+  }
+
+  Reaction _reactionFromRow(_Reaction r, _User u) {
+    return Reaction(
+      extraData: r.extraData,
+      type: r.type,
+      createdAt: r.createdAt,
+      userId: r.userId,
+      user: _userFromUserRow(u),
+      messageId: r.messageId,
+      score: r.score,
+    );
+  }
+
+  Future<List<Reaction>> _getOwnReactions(_Message messageRow) async {
+    return await (select(reactions).join([
+      leftOuterJoin(users, reactions.userId.equalsExp(users.id)),
+    ])
+          ..where(reactions.userId.equals(_userId))
+          ..where(reactions.messageId.equals(messageRow.id))
+          ..orderBy([OrderingTerm.asc(reactions.createdAt)]))
+        .map((row) {
+      final r = row.readTable(reactions);
+      final u = row.readTable(users);
+      return _reactionFromRow(r, u);
+    }).get();
   }
 
   Future<List<Read>> _getChannelReads(_Channel channelRow) async {
@@ -296,6 +340,8 @@ class OfflineDatabase extends _$OfflineDatabase {
                   (m) {
                     return _Message(
                       id: m.id,
+                      attachmentJson: jsonEncode(
+                          m.attachments.map((a) => a.toJson()).toList()),
                       channelCid: cs.channel.cid,
                       type: m.type,
                       parentId: m.parentId,
@@ -318,49 +364,54 @@ class OfflineDatabase extends _$OfflineDatabase {
         mode: InsertMode.insertOrReplace,
       );
 
+      batch.deleteWhere<_Reactions, _Reaction>(
+        reactions,
+        (r) => r.messageId.isIn(channelStates
+            .map((cs) => cs.messages.map((m) => m.id))
+            .expand((v) => v)),
+      );
+
       batch.insertAll(
-        users,
+        reactions,
         channelStates
-            .map((cs) => [
-                  _userDataFromUser(cs.channel.createdBy),
-                  if (cs.messages != null)
-                    ...cs.messages.map((m) => _userDataFromUser(m.user)),
-                  if (cs.read != null)
-                    ...cs.read.map((r) => _userDataFromUser(r.user)),
-                  if (cs.members != null)
-                    ...cs.members.map((m) => _userDataFromUser(m.user)),
-                ])
+            .map((cs) => cs.messages.map((m) {
+                  final ownReactions = m.ownReactions.map(
+                    (r) => _reactionDataFromReaction(m, r),
+                  );
+                  final latestReactions = m.latestReactions.map(
+                    (r) => _reactionDataFromReaction(m, r),
+                  );
+
+                  return [
+                    ...ownReactions,
+                    ...latestReactions,
+                  ];
+                }).expand((v) => v))
             .expand((v) => v)
             .toList(),
         mode: InsertMode.insertOrReplace,
       );
 
       batch.insertAll(
-        attachments,
+        users,
         channelStates
-            .map((cs) => cs.messages.map((m) {
-                  final attachments = m.attachments.map((a) => _Attachment(
-                        messageId: m.id,
-                        titleLink: a.titleLink,
-                        thumbUrl: a.thumbUrl,
-                        pretext: a.pretext,
-                        ogScrapeUrl: a.ogScrapeUrl,
-                        imageUrl: a.imageUrl,
-                        footerIcon: a.footerIcon,
-                        footer: a.footer,
-                        fallback: a.fallback,
-                        authorName: a.authorName,
-                        authorLink: a.authorLink,
-                        authorIcon: a.authorIcon,
-                        title: a.title,
-                        assetUrl: a.assetUrl,
-                        color: a.color,
-                        type: a.type,
-                        extraData: a.extraData,
-                        attachmentText: a.text,
-                      ));
-                  return attachments;
-                }).expand((v) => v))
+            .map((cs) => [
+                  _userDataFromUser(cs.channel.createdBy),
+                  if (cs.messages != null)
+                    ...cs.messages
+                        .map((m) => [
+                              _userDataFromUser(m.user),
+                              ...m.latestReactions
+                                  .map((r) => _userDataFromUser(r.user)),
+                              ...m.ownReactions
+                                  .map((r) => _userDataFromUser(r.user)),
+                            ])
+                        .expand((v) => v),
+                  if (cs.read != null)
+                    ...cs.read.map((r) => _userDataFromUser(r.user)),
+                  if (cs.members != null)
+                    ...cs.members.map((m) => _userDataFromUser(m.user)),
+                ])
             .expand((v) => v)
             .toList(),
         mode: InsertMode.insertOrReplace,
@@ -416,6 +467,17 @@ class OfflineDatabase extends _$OfflineDatabase {
     });
   }
 
+  _Reaction _reactionDataFromReaction(Message m, Reaction r) {
+    return _Reaction(
+      messageId: m.id,
+      type: r.type,
+      extraData: r.extraData,
+      score: r.score,
+      createdAt: r.createdAt,
+      userId: r.user.id,
+    );
+  }
+
   _User _userDataFromUser(User user) {
     return _User(
       id: user.id,
@@ -432,6 +494,7 @@ class OfflineDatabase extends _$OfflineDatabase {
   _Channel _channelDataFromChannelModel(ChannelModel channel) {
     return _Channel(
       id: channel.id,
+      config: jsonEncode(channel.config.toJson()),
       type: channel.type,
       frozen: channel.frozen,
       createdAt: channel.createdAt,

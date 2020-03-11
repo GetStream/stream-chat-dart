@@ -3,6 +3,7 @@ part of './offline_database.dart';
 @DataClassName("ChannelQuery")
 class _ChannelQueries extends Table {
   TextColumn get queryHash => text()();
+
   TextColumn get channelCid => text()();
 
   @override
@@ -18,6 +19,8 @@ class _Channels extends Table {
   TextColumn get type => text()();
 
   TextColumn get cid => text()();
+
+  TextColumn get config => text()();
 
   BoolColumn get frozen => boolean().withDefault(Constant(false))();
 
@@ -74,10 +77,33 @@ class _Reads extends Table {
       };
 }
 
+class _Reactions extends Table {
+  TextColumn get messageId => text()();
+
+  TextColumn get type => text()();
+
+  DateTimeColumn get createdAt => dateTime()();
+
+  IntColumn get score => integer().nullable()();
+
+  TextColumn get userId => text()();
+
+  TextColumn get extraData => text().nullable().map(_ExtraDataConverter())();
+
+  @override
+  Set<Column> get primaryKey => {
+        messageId,
+        type,
+        userId,
+      };
+}
+
 class _Messages extends Table {
   TextColumn get id => text()();
 
   TextColumn get messageText => text().nullable()();
+
+  TextColumn get attachmentJson => text().nullable()();
 
   IntColumn get status =>
       integer().map(_MessageSendingStatusConverter()).nullable()();
@@ -92,8 +118,6 @@ class _Messages extends Table {
   TextColumn get reactionScores =>
       text().nullable().map(_ExtraDataConverter<int>())();
 
-//  List<Reaction> latestReactions;
-//  List<Reaction> ownReactions;
   TextColumn get parentId => text().nullable()();
 
   IntColumn get replyCount => integer().nullable()();
@@ -139,54 +163,6 @@ class _Members extends Table {
   Set<Column> get primaryKey => {
         userId,
         channelCid,
-      };
-}
-
-class _Attachments extends Table {
-  TextColumn get messageId => text()();
-
-  TextColumn get type => text().withDefault(Constant(''))();
-
-  TextColumn get titleLink => text().withDefault(Constant(''))();
-
-  TextColumn get title => text().nullable()();
-
-  TextColumn get thumbUrl => text().withDefault(Constant(''))();
-
-  TextColumn get attachmentText => text().nullable()();
-
-  TextColumn get pretext => text().nullable()();
-
-  TextColumn get ogScrapeUrl => text().nullable()();
-
-  TextColumn get imageUrl => text().withDefault(Constant(''))();
-
-  TextColumn get footerIcon => text().nullable()();
-
-  TextColumn get footer => text().nullable()();
-
-  TextColumn get fallback => text().nullable()();
-
-  TextColumn get color => text().nullable()();
-
-  TextColumn get authorName => text().nullable()();
-
-  TextColumn get authorLink => text().nullable()();
-
-  TextColumn get authorIcon => text().nullable()();
-
-  TextColumn get assetUrl => text().withDefault(Constant(''))();
-
-  TextColumn get extraData => text().nullable().map(_ExtraDataConverter())();
-
-  @override
-  Set<Column> get primaryKey => {
-        messageId,
-        imageUrl,
-        assetUrl,
-        type,
-        thumbUrl,
-        titleLink,
       };
 }
 

@@ -11,6 +11,7 @@ class _Channel extends DataClass implements Insertable<_Channel> {
   final String id;
   final String type;
   final String cid;
+  final String config;
   final bool frozen;
   final DateTime lastMessageAt;
   final DateTime createdAt;
@@ -23,6 +24,7 @@ class _Channel extends DataClass implements Insertable<_Channel> {
       {@required this.id,
       @required this.type,
       @required this.cid,
+      @required this.config,
       @required this.frozen,
       this.lastMessageAt,
       @required this.createdAt,
@@ -42,6 +44,8 @@ class _Channel extends DataClass implements Insertable<_Channel> {
       id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
       type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
       cid: stringType.mapFromDatabaseResponse(data['${effectivePrefix}cid']),
+      config:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}config']),
       frozen:
           boolType.mapFromDatabaseResponse(data['${effectivePrefix}frozen']),
       lastMessageAt: dateTimeType
@@ -67,6 +71,7 @@ class _Channel extends DataClass implements Insertable<_Channel> {
       id: serializer.fromJson<String>(json['id']),
       type: serializer.fromJson<String>(json['type']),
       cid: serializer.fromJson<String>(json['cid']),
+      config: serializer.fromJson<String>(json['config']),
       frozen: serializer.fromJson<bool>(json['frozen']),
       lastMessageAt: serializer.fromJson<DateTime>(json['lastMessageAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -84,6 +89,7 @@ class _Channel extends DataClass implements Insertable<_Channel> {
       'id': serializer.toJson<String>(id),
       'type': serializer.toJson<String>(type),
       'cid': serializer.toJson<String>(cid),
+      'config': serializer.toJson<String>(config),
       'frozen': serializer.toJson<bool>(frozen),
       'lastMessageAt': serializer.toJson<DateTime>(lastMessageAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -101,6 +107,8 @@ class _Channel extends DataClass implements Insertable<_Channel> {
       id: id == null && nullToAbsent ? const Value.absent() : Value(id),
       type: type == null && nullToAbsent ? const Value.absent() : Value(type),
       cid: cid == null && nullToAbsent ? const Value.absent() : Value(cid),
+      config:
+          config == null && nullToAbsent ? const Value.absent() : Value(config),
       frozen:
           frozen == null && nullToAbsent ? const Value.absent() : Value(frozen),
       lastMessageAt: lastMessageAt == null && nullToAbsent
@@ -131,6 +139,7 @@ class _Channel extends DataClass implements Insertable<_Channel> {
           {String id,
           String type,
           String cid,
+          String config,
           bool frozen,
           DateTime lastMessageAt,
           DateTime createdAt,
@@ -143,6 +152,7 @@ class _Channel extends DataClass implements Insertable<_Channel> {
         id: id ?? this.id,
         type: type ?? this.type,
         cid: cid ?? this.cid,
+        config: config ?? this.config,
         frozen: frozen ?? this.frozen,
         lastMessageAt: lastMessageAt ?? this.lastMessageAt,
         createdAt: createdAt ?? this.createdAt,
@@ -158,6 +168,7 @@ class _Channel extends DataClass implements Insertable<_Channel> {
           ..write('id: $id, ')
           ..write('type: $type, ')
           ..write('cid: $cid, ')
+          ..write('config: $config, ')
           ..write('frozen: $frozen, ')
           ..write('lastMessageAt: $lastMessageAt, ')
           ..write('createdAt: $createdAt, ')
@@ -178,19 +189,21 @@ class _Channel extends DataClass implements Insertable<_Channel> {
           $mrjc(
               cid.hashCode,
               $mrjc(
-                  frozen.hashCode,
+                  config.hashCode,
                   $mrjc(
-                      lastMessageAt.hashCode,
+                      frozen.hashCode,
                       $mrjc(
-                          createdAt.hashCode,
+                          lastMessageAt.hashCode,
                           $mrjc(
-                              updatedAt.hashCode,
+                              createdAt.hashCode,
                               $mrjc(
-                                  deletedAt.hashCode,
+                                  updatedAt.hashCode,
                                   $mrjc(
-                                      memberCount.hashCode,
-                                      $mrjc(extraData.hashCode,
-                                          createdBy.hashCode)))))))))));
+                                      deletedAt.hashCode,
+                                      $mrjc(
+                                          memberCount.hashCode,
+                                          $mrjc(extraData.hashCode,
+                                              createdBy.hashCode))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -198,6 +211,7 @@ class _Channel extends DataClass implements Insertable<_Channel> {
           other.id == this.id &&
           other.type == this.type &&
           other.cid == this.cid &&
+          other.config == this.config &&
           other.frozen == this.frozen &&
           other.lastMessageAt == this.lastMessageAt &&
           other.createdAt == this.createdAt &&
@@ -212,6 +226,7 @@ class _ChannelsCompanion extends UpdateCompanion<_Channel> {
   final Value<String> id;
   final Value<String> type;
   final Value<String> cid;
+  final Value<String> config;
   final Value<bool> frozen;
   final Value<DateTime> lastMessageAt;
   final Value<DateTime> createdAt;
@@ -224,6 +239,7 @@ class _ChannelsCompanion extends UpdateCompanion<_Channel> {
     this.id = const Value.absent(),
     this.type = const Value.absent(),
     this.cid = const Value.absent(),
+    this.config = const Value.absent(),
     this.frozen = const Value.absent(),
     this.lastMessageAt = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -237,6 +253,7 @@ class _ChannelsCompanion extends UpdateCompanion<_Channel> {
     @required String id,
     @required String type,
     @required String cid,
+    @required String config,
     this.frozen = const Value.absent(),
     this.lastMessageAt = const Value.absent(),
     @required DateTime createdAt,
@@ -248,12 +265,14 @@ class _ChannelsCompanion extends UpdateCompanion<_Channel> {
   })  : id = Value(id),
         type = Value(type),
         cid = Value(cid),
+        config = Value(config),
         createdAt = Value(createdAt),
         updatedAt = Value(updatedAt);
   _ChannelsCompanion copyWith(
       {Value<String> id,
       Value<String> type,
       Value<String> cid,
+      Value<String> config,
       Value<bool> frozen,
       Value<DateTime> lastMessageAt,
       Value<DateTime> createdAt,
@@ -266,6 +285,7 @@ class _ChannelsCompanion extends UpdateCompanion<_Channel> {
       id: id ?? this.id,
       type: type ?? this.type,
       cid: cid ?? this.cid,
+      config: config ?? this.config,
       frozen: frozen ?? this.frozen,
       lastMessageAt: lastMessageAt ?? this.lastMessageAt,
       createdAt: createdAt ?? this.createdAt,
@@ -314,6 +334,18 @@ class $_ChannelsTable extends _Channels
   GeneratedTextColumn _constructCid() {
     return GeneratedTextColumn(
       'cid',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _configMeta = const VerificationMeta('config');
+  GeneratedTextColumn _config;
+  @override
+  GeneratedTextColumn get config => _config ??= _constructConfig();
+  GeneratedTextColumn _constructConfig() {
+    return GeneratedTextColumn(
+      'config',
       $tableName,
       false,
     );
@@ -421,6 +453,7 @@ class $_ChannelsTable extends _Channels
         id,
         type,
         cid,
+        config,
         frozen,
         lastMessageAt,
         createdAt,
@@ -455,6 +488,12 @@ class $_ChannelsTable extends _Channels
       context.handle(_cidMeta, cid.isAcceptableValue(d.cid.value, _cidMeta));
     } else if (isInserting) {
       context.missing(_cidMeta);
+    }
+    if (d.config.present) {
+      context.handle(
+          _configMeta, config.isAcceptableValue(d.config.value, _configMeta));
+    } else if (isInserting) {
+      context.missing(_configMeta);
     }
     if (d.frozen.present) {
       context.handle(
@@ -513,6 +552,9 @@ class $_ChannelsTable extends _Channels
     }
     if (d.cid.present) {
       map['cid'] = Variable<String, StringType>(d.cid.value);
+    }
+    if (d.config.present) {
+      map['config'] = Variable<String, StringType>(d.config.value);
     }
     if (d.frozen.present) {
       map['frozen'] = Variable<bool, BoolType>(d.frozen.value);
@@ -961,6 +1003,7 @@ class $_UsersTable extends _Users with TableInfo<$_UsersTable, _User> {
 class _Message extends DataClass implements Insertable<_Message> {
   final String id;
   final String messageText;
+  final String attachmentJson;
   final MessageSendingStatus status;
   final String type;
   final Map<String, int> reactionCounts;
@@ -977,6 +1020,7 @@ class _Message extends DataClass implements Insertable<_Message> {
   _Message(
       {@required this.id,
       this.messageText,
+      this.attachmentJson,
       this.status,
       this.type,
       this.reactionCounts,
@@ -1001,6 +1045,8 @@ class _Message extends DataClass implements Insertable<_Message> {
       id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
       messageText: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}message_text']),
+      attachmentJson: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}attachment_json']),
       status: $_MessagesTable.$converter0.mapToDart(
           intType.mapFromDatabaseResponse(data['${effectivePrefix}status'])),
       type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
@@ -1034,6 +1080,7 @@ class _Message extends DataClass implements Insertable<_Message> {
     return _Message(
       id: serializer.fromJson<String>(json['id']),
       messageText: serializer.fromJson<String>(json['messageText']),
+      attachmentJson: serializer.fromJson<String>(json['attachmentJson']),
       status: serializer.fromJson<MessageSendingStatus>(json['status']),
       type: serializer.fromJson<String>(json['type']),
       reactionCounts:
@@ -1057,6 +1104,7 @@ class _Message extends DataClass implements Insertable<_Message> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'messageText': serializer.toJson<String>(messageText),
+      'attachmentJson': serializer.toJson<String>(attachmentJson),
       'status': serializer.toJson<MessageSendingStatus>(status),
       'type': serializer.toJson<String>(type),
       'reactionCounts': serializer.toJson<Map<String, int>>(reactionCounts),
@@ -1080,6 +1128,9 @@ class _Message extends DataClass implements Insertable<_Message> {
       messageText: messageText == null && nullToAbsent
           ? const Value.absent()
           : Value(messageText),
+      attachmentJson: attachmentJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(attachmentJson),
       status:
           status == null && nullToAbsent ? const Value.absent() : Value(status),
       type: type == null && nullToAbsent ? const Value.absent() : Value(type),
@@ -1121,6 +1172,7 @@ class _Message extends DataClass implements Insertable<_Message> {
   _Message copyWith(
           {String id,
           String messageText,
+          String attachmentJson,
           MessageSendingStatus status,
           String type,
           Map<String, int> reactionCounts,
@@ -1137,6 +1189,7 @@ class _Message extends DataClass implements Insertable<_Message> {
       _Message(
         id: id ?? this.id,
         messageText: messageText ?? this.messageText,
+        attachmentJson: attachmentJson ?? this.attachmentJson,
         status: status ?? this.status,
         type: type ?? this.type,
         reactionCounts: reactionCounts ?? this.reactionCounts,
@@ -1156,6 +1209,7 @@ class _Message extends DataClass implements Insertable<_Message> {
     return (StringBuffer('_Message(')
           ..write('id: $id, ')
           ..write('messageText: $messageText, ')
+          ..write('attachmentJson: $attachmentJson, ')
           ..write('status: $status, ')
           ..write('type: $type, ')
           ..write('reactionCounts: $reactionCounts, ')
@@ -1179,37 +1233,41 @@ class _Message extends DataClass implements Insertable<_Message> {
       $mrjc(
           messageText.hashCode,
           $mrjc(
-              status.hashCode,
+              attachmentJson.hashCode,
               $mrjc(
-                  type.hashCode,
+                  status.hashCode,
                   $mrjc(
-                      reactionCounts.hashCode,
+                      type.hashCode,
                       $mrjc(
-                          reactionScores.hashCode,
+                          reactionCounts.hashCode,
                           $mrjc(
-                              parentId.hashCode,
+                              reactionScores.hashCode,
                               $mrjc(
-                                  replyCount.hashCode,
+                                  parentId.hashCode,
                                   $mrjc(
-                                      showInChannel.hashCode,
+                                      replyCount.hashCode,
                                       $mrjc(
-                                          command.hashCode,
+                                          showInChannel.hashCode,
                                           $mrjc(
-                                              createdAt.hashCode,
+                                              command.hashCode,
                                               $mrjc(
-                                                  updatedAt.hashCode,
+                                                  createdAt.hashCode,
                                                   $mrjc(
-                                                      userId.hashCode,
+                                                      updatedAt.hashCode,
                                                       $mrjc(
-                                                          channelCid.hashCode,
-                                                          extraData
-                                                              .hashCode)))))))))))))));
+                                                          userId.hashCode,
+                                                          $mrjc(
+                                                              channelCid
+                                                                  .hashCode,
+                                                              extraData
+                                                                  .hashCode))))))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
       (other is _Message &&
           other.id == this.id &&
           other.messageText == this.messageText &&
+          other.attachmentJson == this.attachmentJson &&
           other.status == this.status &&
           other.type == this.type &&
           other.reactionCounts == this.reactionCounts &&
@@ -1228,6 +1286,7 @@ class _Message extends DataClass implements Insertable<_Message> {
 class _MessagesCompanion extends UpdateCompanion<_Message> {
   final Value<String> id;
   final Value<String> messageText;
+  final Value<String> attachmentJson;
   final Value<MessageSendingStatus> status;
   final Value<String> type;
   final Value<Map<String, int>> reactionCounts;
@@ -1244,6 +1303,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
   const _MessagesCompanion({
     this.id = const Value.absent(),
     this.messageText = const Value.absent(),
+    this.attachmentJson = const Value.absent(),
     this.status = const Value.absent(),
     this.type = const Value.absent(),
     this.reactionCounts = const Value.absent(),
@@ -1261,6 +1321,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
   _MessagesCompanion.insert({
     @required String id,
     this.messageText = const Value.absent(),
+    this.attachmentJson = const Value.absent(),
     this.status = const Value.absent(),
     this.type = const Value.absent(),
     this.reactionCounts = const Value.absent(),
@@ -1279,6 +1340,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
   _MessagesCompanion copyWith(
       {Value<String> id,
       Value<String> messageText,
+      Value<String> attachmentJson,
       Value<MessageSendingStatus> status,
       Value<String> type,
       Value<Map<String, int>> reactionCounts,
@@ -1295,6 +1357,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
     return _MessagesCompanion(
       id: id ?? this.id,
       messageText: messageText ?? this.messageText,
+      attachmentJson: attachmentJson ?? this.attachmentJson,
       status: status ?? this.status,
       type: type ?? this.type,
       reactionCounts: reactionCounts ?? this.reactionCounts,
@@ -1338,6 +1401,20 @@ class $_MessagesTable extends _Messages
   GeneratedTextColumn _constructMessageText() {
     return GeneratedTextColumn(
       'message_text',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _attachmentJsonMeta =
+      const VerificationMeta('attachmentJson');
+  GeneratedTextColumn _attachmentJson;
+  @override
+  GeneratedTextColumn get attachmentJson =>
+      _attachmentJson ??= _constructAttachmentJson();
+  GeneratedTextColumn _constructAttachmentJson() {
+    return GeneratedTextColumn(
+      'attachment_json',
       $tableName,
       true,
     );
@@ -1509,6 +1586,7 @@ class $_MessagesTable extends _Messages
   List<GeneratedColumn> get $columns => [
         id,
         messageText,
+        attachmentJson,
         status,
         type,
         reactionCounts,
@@ -1541,6 +1619,12 @@ class $_MessagesTable extends _Messages
     if (d.messageText.present) {
       context.handle(_messageTextMeta,
           messageText.isAcceptableValue(d.messageText.value, _messageTextMeta));
+    }
+    if (d.attachmentJson.present) {
+      context.handle(
+          _attachmentJsonMeta,
+          attachmentJson.isAcceptableValue(
+              d.attachmentJson.value, _attachmentJsonMeta));
     }
     context.handle(_statusMeta, const VerificationResult.success());
     if (d.type.present) {
@@ -1605,6 +1689,10 @@ class $_MessagesTable extends _Messages
     }
     if (d.messageText.present) {
       map['message_text'] = Variable<String, StringType>(d.messageText.value);
+    }
+    if (d.attachmentJson.present) {
+      map['attachment_json'] =
+          Variable<String, StringType>(d.attachmentJson.value);
     }
     if (d.status.present) {
       final converter = $_MessagesTable.$converter0;
@@ -2356,817 +2444,6 @@ class $_MembersTable extends _Members with TableInfo<$_MembersTable, _Member> {
   }
 }
 
-class _Attachment extends DataClass implements Insertable<_Attachment> {
-  final String messageId;
-  final String type;
-  final String titleLink;
-  final String title;
-  final String thumbUrl;
-  final String attachmentText;
-  final String pretext;
-  final String ogScrapeUrl;
-  final String imageUrl;
-  final String footerIcon;
-  final String footer;
-  final String fallback;
-  final String color;
-  final String authorName;
-  final String authorLink;
-  final String authorIcon;
-  final String assetUrl;
-  final Map<String, dynamic> extraData;
-  _Attachment(
-      {@required this.messageId,
-      @required this.type,
-      @required this.titleLink,
-      this.title,
-      @required this.thumbUrl,
-      this.attachmentText,
-      this.pretext,
-      this.ogScrapeUrl,
-      @required this.imageUrl,
-      this.footerIcon,
-      this.footer,
-      this.fallback,
-      this.color,
-      this.authorName,
-      this.authorLink,
-      this.authorIcon,
-      @required this.assetUrl,
-      this.extraData});
-  factory _Attachment.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String prefix}) {
-    final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    return _Attachment(
-      messageId: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}message_id']),
-      type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
-      titleLink: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}title_link']),
-      title:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}title']),
-      thumbUrl: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}thumb_url']),
-      attachmentText: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}attachment_text']),
-      pretext:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}pretext']),
-      ogScrapeUrl: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}og_scrape_url']),
-      imageUrl: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}image_url']),
-      footerIcon: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}footer_icon']),
-      footer:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}footer']),
-      fallback: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}fallback']),
-      color:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}color']),
-      authorName: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}author_name']),
-      authorLink: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}author_link']),
-      authorIcon: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}author_icon']),
-      assetUrl: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}asset_url']),
-      extraData: $_AttachmentsTable.$converter0.mapToDart(stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
-    );
-  }
-  factory _Attachment.fromJson(Map<String, dynamic> json,
-      {ValueSerializer serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
-    return _Attachment(
-      messageId: serializer.fromJson<String>(json['messageId']),
-      type: serializer.fromJson<String>(json['type']),
-      titleLink: serializer.fromJson<String>(json['titleLink']),
-      title: serializer.fromJson<String>(json['title']),
-      thumbUrl: serializer.fromJson<String>(json['thumbUrl']),
-      attachmentText: serializer.fromJson<String>(json['attachmentText']),
-      pretext: serializer.fromJson<String>(json['pretext']),
-      ogScrapeUrl: serializer.fromJson<String>(json['ogScrapeUrl']),
-      imageUrl: serializer.fromJson<String>(json['imageUrl']),
-      footerIcon: serializer.fromJson<String>(json['footerIcon']),
-      footer: serializer.fromJson<String>(json['footer']),
-      fallback: serializer.fromJson<String>(json['fallback']),
-      color: serializer.fromJson<String>(json['color']),
-      authorName: serializer.fromJson<String>(json['authorName']),
-      authorLink: serializer.fromJson<String>(json['authorLink']),
-      authorIcon: serializer.fromJson<String>(json['authorIcon']),
-      assetUrl: serializer.fromJson<String>(json['assetUrl']),
-      extraData: serializer.fromJson<Map<String, dynamic>>(json['extraData']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'messageId': serializer.toJson<String>(messageId),
-      'type': serializer.toJson<String>(type),
-      'titleLink': serializer.toJson<String>(titleLink),
-      'title': serializer.toJson<String>(title),
-      'thumbUrl': serializer.toJson<String>(thumbUrl),
-      'attachmentText': serializer.toJson<String>(attachmentText),
-      'pretext': serializer.toJson<String>(pretext),
-      'ogScrapeUrl': serializer.toJson<String>(ogScrapeUrl),
-      'imageUrl': serializer.toJson<String>(imageUrl),
-      'footerIcon': serializer.toJson<String>(footerIcon),
-      'footer': serializer.toJson<String>(footer),
-      'fallback': serializer.toJson<String>(fallback),
-      'color': serializer.toJson<String>(color),
-      'authorName': serializer.toJson<String>(authorName),
-      'authorLink': serializer.toJson<String>(authorLink),
-      'authorIcon': serializer.toJson<String>(authorIcon),
-      'assetUrl': serializer.toJson<String>(assetUrl),
-      'extraData': serializer.toJson<Map<String, dynamic>>(extraData),
-    };
-  }
-
-  @override
-  _AttachmentsCompanion createCompanion(bool nullToAbsent) {
-    return _AttachmentsCompanion(
-      messageId: messageId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(messageId),
-      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
-      titleLink: titleLink == null && nullToAbsent
-          ? const Value.absent()
-          : Value(titleLink),
-      title:
-          title == null && nullToAbsent ? const Value.absent() : Value(title),
-      thumbUrl: thumbUrl == null && nullToAbsent
-          ? const Value.absent()
-          : Value(thumbUrl),
-      attachmentText: attachmentText == null && nullToAbsent
-          ? const Value.absent()
-          : Value(attachmentText),
-      pretext: pretext == null && nullToAbsent
-          ? const Value.absent()
-          : Value(pretext),
-      ogScrapeUrl: ogScrapeUrl == null && nullToAbsent
-          ? const Value.absent()
-          : Value(ogScrapeUrl),
-      imageUrl: imageUrl == null && nullToAbsent
-          ? const Value.absent()
-          : Value(imageUrl),
-      footerIcon: footerIcon == null && nullToAbsent
-          ? const Value.absent()
-          : Value(footerIcon),
-      footer:
-          footer == null && nullToAbsent ? const Value.absent() : Value(footer),
-      fallback: fallback == null && nullToAbsent
-          ? const Value.absent()
-          : Value(fallback),
-      color:
-          color == null && nullToAbsent ? const Value.absent() : Value(color),
-      authorName: authorName == null && nullToAbsent
-          ? const Value.absent()
-          : Value(authorName),
-      authorLink: authorLink == null && nullToAbsent
-          ? const Value.absent()
-          : Value(authorLink),
-      authorIcon: authorIcon == null && nullToAbsent
-          ? const Value.absent()
-          : Value(authorIcon),
-      assetUrl: assetUrl == null && nullToAbsent
-          ? const Value.absent()
-          : Value(assetUrl),
-      extraData: extraData == null && nullToAbsent
-          ? const Value.absent()
-          : Value(extraData),
-    );
-  }
-
-  _Attachment copyWith(
-          {String messageId,
-          String type,
-          String titleLink,
-          String title,
-          String thumbUrl,
-          String attachmentText,
-          String pretext,
-          String ogScrapeUrl,
-          String imageUrl,
-          String footerIcon,
-          String footer,
-          String fallback,
-          String color,
-          String authorName,
-          String authorLink,
-          String authorIcon,
-          String assetUrl,
-          Map<String, dynamic> extraData}) =>
-      _Attachment(
-        messageId: messageId ?? this.messageId,
-        type: type ?? this.type,
-        titleLink: titleLink ?? this.titleLink,
-        title: title ?? this.title,
-        thumbUrl: thumbUrl ?? this.thumbUrl,
-        attachmentText: attachmentText ?? this.attachmentText,
-        pretext: pretext ?? this.pretext,
-        ogScrapeUrl: ogScrapeUrl ?? this.ogScrapeUrl,
-        imageUrl: imageUrl ?? this.imageUrl,
-        footerIcon: footerIcon ?? this.footerIcon,
-        footer: footer ?? this.footer,
-        fallback: fallback ?? this.fallback,
-        color: color ?? this.color,
-        authorName: authorName ?? this.authorName,
-        authorLink: authorLink ?? this.authorLink,
-        authorIcon: authorIcon ?? this.authorIcon,
-        assetUrl: assetUrl ?? this.assetUrl,
-        extraData: extraData ?? this.extraData,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('_Attachment(')
-          ..write('messageId: $messageId, ')
-          ..write('type: $type, ')
-          ..write('titleLink: $titleLink, ')
-          ..write('title: $title, ')
-          ..write('thumbUrl: $thumbUrl, ')
-          ..write('attachmentText: $attachmentText, ')
-          ..write('pretext: $pretext, ')
-          ..write('ogScrapeUrl: $ogScrapeUrl, ')
-          ..write('imageUrl: $imageUrl, ')
-          ..write('footerIcon: $footerIcon, ')
-          ..write('footer: $footer, ')
-          ..write('fallback: $fallback, ')
-          ..write('color: $color, ')
-          ..write('authorName: $authorName, ')
-          ..write('authorLink: $authorLink, ')
-          ..write('authorIcon: $authorIcon, ')
-          ..write('assetUrl: $assetUrl, ')
-          ..write('extraData: $extraData')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => $mrjf($mrjc(
-      messageId.hashCode,
-      $mrjc(
-          type.hashCode,
-          $mrjc(
-              titleLink.hashCode,
-              $mrjc(
-                  title.hashCode,
-                  $mrjc(
-                      thumbUrl.hashCode,
-                      $mrjc(
-                          attachmentText.hashCode,
-                          $mrjc(
-                              pretext.hashCode,
-                              $mrjc(
-                                  ogScrapeUrl.hashCode,
-                                  $mrjc(
-                                      imageUrl.hashCode,
-                                      $mrjc(
-                                          footerIcon.hashCode,
-                                          $mrjc(
-                                              footer.hashCode,
-                                              $mrjc(
-                                                  fallback.hashCode,
-                                                  $mrjc(
-                                                      color.hashCode,
-                                                      $mrjc(
-                                                          authorName.hashCode,
-                                                          $mrjc(
-                                                              authorLink
-                                                                  .hashCode,
-                                                              $mrjc(
-                                                                  authorIcon
-                                                                      .hashCode,
-                                                                  $mrjc(
-                                                                      assetUrl
-                                                                          .hashCode,
-                                                                      extraData
-                                                                          .hashCode))))))))))))))))));
-  @override
-  bool operator ==(dynamic other) =>
-      identical(this, other) ||
-      (other is _Attachment &&
-          other.messageId == this.messageId &&
-          other.type == this.type &&
-          other.titleLink == this.titleLink &&
-          other.title == this.title &&
-          other.thumbUrl == this.thumbUrl &&
-          other.attachmentText == this.attachmentText &&
-          other.pretext == this.pretext &&
-          other.ogScrapeUrl == this.ogScrapeUrl &&
-          other.imageUrl == this.imageUrl &&
-          other.footerIcon == this.footerIcon &&
-          other.footer == this.footer &&
-          other.fallback == this.fallback &&
-          other.color == this.color &&
-          other.authorName == this.authorName &&
-          other.authorLink == this.authorLink &&
-          other.authorIcon == this.authorIcon &&
-          other.assetUrl == this.assetUrl &&
-          other.extraData == this.extraData);
-}
-
-class _AttachmentsCompanion extends UpdateCompanion<_Attachment> {
-  final Value<String> messageId;
-  final Value<String> type;
-  final Value<String> titleLink;
-  final Value<String> title;
-  final Value<String> thumbUrl;
-  final Value<String> attachmentText;
-  final Value<String> pretext;
-  final Value<String> ogScrapeUrl;
-  final Value<String> imageUrl;
-  final Value<String> footerIcon;
-  final Value<String> footer;
-  final Value<String> fallback;
-  final Value<String> color;
-  final Value<String> authorName;
-  final Value<String> authorLink;
-  final Value<String> authorIcon;
-  final Value<String> assetUrl;
-  final Value<Map<String, dynamic>> extraData;
-  const _AttachmentsCompanion({
-    this.messageId = const Value.absent(),
-    this.type = const Value.absent(),
-    this.titleLink = const Value.absent(),
-    this.title = const Value.absent(),
-    this.thumbUrl = const Value.absent(),
-    this.attachmentText = const Value.absent(),
-    this.pretext = const Value.absent(),
-    this.ogScrapeUrl = const Value.absent(),
-    this.imageUrl = const Value.absent(),
-    this.footerIcon = const Value.absent(),
-    this.footer = const Value.absent(),
-    this.fallback = const Value.absent(),
-    this.color = const Value.absent(),
-    this.authorName = const Value.absent(),
-    this.authorLink = const Value.absent(),
-    this.authorIcon = const Value.absent(),
-    this.assetUrl = const Value.absent(),
-    this.extraData = const Value.absent(),
-  });
-  _AttachmentsCompanion.insert({
-    @required String messageId,
-    this.type = const Value.absent(),
-    this.titleLink = const Value.absent(),
-    this.title = const Value.absent(),
-    this.thumbUrl = const Value.absent(),
-    this.attachmentText = const Value.absent(),
-    this.pretext = const Value.absent(),
-    this.ogScrapeUrl = const Value.absent(),
-    this.imageUrl = const Value.absent(),
-    this.footerIcon = const Value.absent(),
-    this.footer = const Value.absent(),
-    this.fallback = const Value.absent(),
-    this.color = const Value.absent(),
-    this.authorName = const Value.absent(),
-    this.authorLink = const Value.absent(),
-    this.authorIcon = const Value.absent(),
-    this.assetUrl = const Value.absent(),
-    this.extraData = const Value.absent(),
-  }) : messageId = Value(messageId);
-  _AttachmentsCompanion copyWith(
-      {Value<String> messageId,
-      Value<String> type,
-      Value<String> titleLink,
-      Value<String> title,
-      Value<String> thumbUrl,
-      Value<String> attachmentText,
-      Value<String> pretext,
-      Value<String> ogScrapeUrl,
-      Value<String> imageUrl,
-      Value<String> footerIcon,
-      Value<String> footer,
-      Value<String> fallback,
-      Value<String> color,
-      Value<String> authorName,
-      Value<String> authorLink,
-      Value<String> authorIcon,
-      Value<String> assetUrl,
-      Value<Map<String, dynamic>> extraData}) {
-    return _AttachmentsCompanion(
-      messageId: messageId ?? this.messageId,
-      type: type ?? this.type,
-      titleLink: titleLink ?? this.titleLink,
-      title: title ?? this.title,
-      thumbUrl: thumbUrl ?? this.thumbUrl,
-      attachmentText: attachmentText ?? this.attachmentText,
-      pretext: pretext ?? this.pretext,
-      ogScrapeUrl: ogScrapeUrl ?? this.ogScrapeUrl,
-      imageUrl: imageUrl ?? this.imageUrl,
-      footerIcon: footerIcon ?? this.footerIcon,
-      footer: footer ?? this.footer,
-      fallback: fallback ?? this.fallback,
-      color: color ?? this.color,
-      authorName: authorName ?? this.authorName,
-      authorLink: authorLink ?? this.authorLink,
-      authorIcon: authorIcon ?? this.authorIcon,
-      assetUrl: assetUrl ?? this.assetUrl,
-      extraData: extraData ?? this.extraData,
-    );
-  }
-}
-
-class $_AttachmentsTable extends _Attachments
-    with TableInfo<$_AttachmentsTable, _Attachment> {
-  final GeneratedDatabase _db;
-  final String _alias;
-  $_AttachmentsTable(this._db, [this._alias]);
-  final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
-  GeneratedTextColumn _messageId;
-  @override
-  GeneratedTextColumn get messageId => _messageId ??= _constructMessageId();
-  GeneratedTextColumn _constructMessageId() {
-    return GeneratedTextColumn(
-      'message_id',
-      $tableName,
-      false,
-    );
-  }
-
-  final VerificationMeta _typeMeta = const VerificationMeta('type');
-  GeneratedTextColumn _type;
-  @override
-  GeneratedTextColumn get type => _type ??= _constructType();
-  GeneratedTextColumn _constructType() {
-    return GeneratedTextColumn('type', $tableName, false,
-        defaultValue: Constant(''));
-  }
-
-  final VerificationMeta _titleLinkMeta = const VerificationMeta('titleLink');
-  GeneratedTextColumn _titleLink;
-  @override
-  GeneratedTextColumn get titleLink => _titleLink ??= _constructTitleLink();
-  GeneratedTextColumn _constructTitleLink() {
-    return GeneratedTextColumn('title_link', $tableName, false,
-        defaultValue: Constant(''));
-  }
-
-  final VerificationMeta _titleMeta = const VerificationMeta('title');
-  GeneratedTextColumn _title;
-  @override
-  GeneratedTextColumn get title => _title ??= _constructTitle();
-  GeneratedTextColumn _constructTitle() {
-    return GeneratedTextColumn(
-      'title',
-      $tableName,
-      true,
-    );
-  }
-
-  final VerificationMeta _thumbUrlMeta = const VerificationMeta('thumbUrl');
-  GeneratedTextColumn _thumbUrl;
-  @override
-  GeneratedTextColumn get thumbUrl => _thumbUrl ??= _constructThumbUrl();
-  GeneratedTextColumn _constructThumbUrl() {
-    return GeneratedTextColumn('thumb_url', $tableName, false,
-        defaultValue: Constant(''));
-  }
-
-  final VerificationMeta _attachmentTextMeta =
-      const VerificationMeta('attachmentText');
-  GeneratedTextColumn _attachmentText;
-  @override
-  GeneratedTextColumn get attachmentText =>
-      _attachmentText ??= _constructAttachmentText();
-  GeneratedTextColumn _constructAttachmentText() {
-    return GeneratedTextColumn(
-      'attachment_text',
-      $tableName,
-      true,
-    );
-  }
-
-  final VerificationMeta _pretextMeta = const VerificationMeta('pretext');
-  GeneratedTextColumn _pretext;
-  @override
-  GeneratedTextColumn get pretext => _pretext ??= _constructPretext();
-  GeneratedTextColumn _constructPretext() {
-    return GeneratedTextColumn(
-      'pretext',
-      $tableName,
-      true,
-    );
-  }
-
-  final VerificationMeta _ogScrapeUrlMeta =
-      const VerificationMeta('ogScrapeUrl');
-  GeneratedTextColumn _ogScrapeUrl;
-  @override
-  GeneratedTextColumn get ogScrapeUrl =>
-      _ogScrapeUrl ??= _constructOgScrapeUrl();
-  GeneratedTextColumn _constructOgScrapeUrl() {
-    return GeneratedTextColumn(
-      'og_scrape_url',
-      $tableName,
-      true,
-    );
-  }
-
-  final VerificationMeta _imageUrlMeta = const VerificationMeta('imageUrl');
-  GeneratedTextColumn _imageUrl;
-  @override
-  GeneratedTextColumn get imageUrl => _imageUrl ??= _constructImageUrl();
-  GeneratedTextColumn _constructImageUrl() {
-    return GeneratedTextColumn('image_url', $tableName, false,
-        defaultValue: Constant(''));
-  }
-
-  final VerificationMeta _footerIconMeta = const VerificationMeta('footerIcon');
-  GeneratedTextColumn _footerIcon;
-  @override
-  GeneratedTextColumn get footerIcon => _footerIcon ??= _constructFooterIcon();
-  GeneratedTextColumn _constructFooterIcon() {
-    return GeneratedTextColumn(
-      'footer_icon',
-      $tableName,
-      true,
-    );
-  }
-
-  final VerificationMeta _footerMeta = const VerificationMeta('footer');
-  GeneratedTextColumn _footer;
-  @override
-  GeneratedTextColumn get footer => _footer ??= _constructFooter();
-  GeneratedTextColumn _constructFooter() {
-    return GeneratedTextColumn(
-      'footer',
-      $tableName,
-      true,
-    );
-  }
-
-  final VerificationMeta _fallbackMeta = const VerificationMeta('fallback');
-  GeneratedTextColumn _fallback;
-  @override
-  GeneratedTextColumn get fallback => _fallback ??= _constructFallback();
-  GeneratedTextColumn _constructFallback() {
-    return GeneratedTextColumn(
-      'fallback',
-      $tableName,
-      true,
-    );
-  }
-
-  final VerificationMeta _colorMeta = const VerificationMeta('color');
-  GeneratedTextColumn _color;
-  @override
-  GeneratedTextColumn get color => _color ??= _constructColor();
-  GeneratedTextColumn _constructColor() {
-    return GeneratedTextColumn(
-      'color',
-      $tableName,
-      true,
-    );
-  }
-
-  final VerificationMeta _authorNameMeta = const VerificationMeta('authorName');
-  GeneratedTextColumn _authorName;
-  @override
-  GeneratedTextColumn get authorName => _authorName ??= _constructAuthorName();
-  GeneratedTextColumn _constructAuthorName() {
-    return GeneratedTextColumn(
-      'author_name',
-      $tableName,
-      true,
-    );
-  }
-
-  final VerificationMeta _authorLinkMeta = const VerificationMeta('authorLink');
-  GeneratedTextColumn _authorLink;
-  @override
-  GeneratedTextColumn get authorLink => _authorLink ??= _constructAuthorLink();
-  GeneratedTextColumn _constructAuthorLink() {
-    return GeneratedTextColumn(
-      'author_link',
-      $tableName,
-      true,
-    );
-  }
-
-  final VerificationMeta _authorIconMeta = const VerificationMeta('authorIcon');
-  GeneratedTextColumn _authorIcon;
-  @override
-  GeneratedTextColumn get authorIcon => _authorIcon ??= _constructAuthorIcon();
-  GeneratedTextColumn _constructAuthorIcon() {
-    return GeneratedTextColumn(
-      'author_icon',
-      $tableName,
-      true,
-    );
-  }
-
-  final VerificationMeta _assetUrlMeta = const VerificationMeta('assetUrl');
-  GeneratedTextColumn _assetUrl;
-  @override
-  GeneratedTextColumn get assetUrl => _assetUrl ??= _constructAssetUrl();
-  GeneratedTextColumn _constructAssetUrl() {
-    return GeneratedTextColumn('asset_url', $tableName, false,
-        defaultValue: Constant(''));
-  }
-
-  final VerificationMeta _extraDataMeta = const VerificationMeta('extraData');
-  GeneratedTextColumn _extraData;
-  @override
-  GeneratedTextColumn get extraData => _extraData ??= _constructExtraData();
-  GeneratedTextColumn _constructExtraData() {
-    return GeneratedTextColumn(
-      'extra_data',
-      $tableName,
-      true,
-    );
-  }
-
-  @override
-  List<GeneratedColumn> get $columns => [
-        messageId,
-        type,
-        titleLink,
-        title,
-        thumbUrl,
-        attachmentText,
-        pretext,
-        ogScrapeUrl,
-        imageUrl,
-        footerIcon,
-        footer,
-        fallback,
-        color,
-        authorName,
-        authorLink,
-        authorIcon,
-        assetUrl,
-        extraData
-      ];
-  @override
-  $_AttachmentsTable get asDslTable => this;
-  @override
-  String get $tableName => _alias ?? 'attachments';
-  @override
-  final String actualTableName = 'attachments';
-  @override
-  VerificationContext validateIntegrity(_AttachmentsCompanion d,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    if (d.messageId.present) {
-      context.handle(_messageIdMeta,
-          messageId.isAcceptableValue(d.messageId.value, _messageIdMeta));
-    } else if (isInserting) {
-      context.missing(_messageIdMeta);
-    }
-    if (d.type.present) {
-      context.handle(
-          _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
-    }
-    if (d.titleLink.present) {
-      context.handle(_titleLinkMeta,
-          titleLink.isAcceptableValue(d.titleLink.value, _titleLinkMeta));
-    }
-    if (d.title.present) {
-      context.handle(
-          _titleMeta, title.isAcceptableValue(d.title.value, _titleMeta));
-    }
-    if (d.thumbUrl.present) {
-      context.handle(_thumbUrlMeta,
-          thumbUrl.isAcceptableValue(d.thumbUrl.value, _thumbUrlMeta));
-    }
-    if (d.attachmentText.present) {
-      context.handle(
-          _attachmentTextMeta,
-          attachmentText.isAcceptableValue(
-              d.attachmentText.value, _attachmentTextMeta));
-    }
-    if (d.pretext.present) {
-      context.handle(_pretextMeta,
-          pretext.isAcceptableValue(d.pretext.value, _pretextMeta));
-    }
-    if (d.ogScrapeUrl.present) {
-      context.handle(_ogScrapeUrlMeta,
-          ogScrapeUrl.isAcceptableValue(d.ogScrapeUrl.value, _ogScrapeUrlMeta));
-    }
-    if (d.imageUrl.present) {
-      context.handle(_imageUrlMeta,
-          imageUrl.isAcceptableValue(d.imageUrl.value, _imageUrlMeta));
-    }
-    if (d.footerIcon.present) {
-      context.handle(_footerIconMeta,
-          footerIcon.isAcceptableValue(d.footerIcon.value, _footerIconMeta));
-    }
-    if (d.footer.present) {
-      context.handle(
-          _footerMeta, footer.isAcceptableValue(d.footer.value, _footerMeta));
-    }
-    if (d.fallback.present) {
-      context.handle(_fallbackMeta,
-          fallback.isAcceptableValue(d.fallback.value, _fallbackMeta));
-    }
-    if (d.color.present) {
-      context.handle(
-          _colorMeta, color.isAcceptableValue(d.color.value, _colorMeta));
-    }
-    if (d.authorName.present) {
-      context.handle(_authorNameMeta,
-          authorName.isAcceptableValue(d.authorName.value, _authorNameMeta));
-    }
-    if (d.authorLink.present) {
-      context.handle(_authorLinkMeta,
-          authorLink.isAcceptableValue(d.authorLink.value, _authorLinkMeta));
-    }
-    if (d.authorIcon.present) {
-      context.handle(_authorIconMeta,
-          authorIcon.isAcceptableValue(d.authorIcon.value, _authorIconMeta));
-    }
-    if (d.assetUrl.present) {
-      context.handle(_assetUrlMeta,
-          assetUrl.isAcceptableValue(d.assetUrl.value, _assetUrlMeta));
-    }
-    context.handle(_extraDataMeta, const VerificationResult.success());
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey =>
-      {messageId, imageUrl, assetUrl, type, thumbUrl, titleLink};
-  @override
-  _Attachment map(Map<String, dynamic> data, {String tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return _Attachment.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(_AttachmentsCompanion d) {
-    final map = <String, Variable>{};
-    if (d.messageId.present) {
-      map['message_id'] = Variable<String, StringType>(d.messageId.value);
-    }
-    if (d.type.present) {
-      map['type'] = Variable<String, StringType>(d.type.value);
-    }
-    if (d.titleLink.present) {
-      map['title_link'] = Variable<String, StringType>(d.titleLink.value);
-    }
-    if (d.title.present) {
-      map['title'] = Variable<String, StringType>(d.title.value);
-    }
-    if (d.thumbUrl.present) {
-      map['thumb_url'] = Variable<String, StringType>(d.thumbUrl.value);
-    }
-    if (d.attachmentText.present) {
-      map['attachment_text'] =
-          Variable<String, StringType>(d.attachmentText.value);
-    }
-    if (d.pretext.present) {
-      map['pretext'] = Variable<String, StringType>(d.pretext.value);
-    }
-    if (d.ogScrapeUrl.present) {
-      map['og_scrape_url'] = Variable<String, StringType>(d.ogScrapeUrl.value);
-    }
-    if (d.imageUrl.present) {
-      map['image_url'] = Variable<String, StringType>(d.imageUrl.value);
-    }
-    if (d.footerIcon.present) {
-      map['footer_icon'] = Variable<String, StringType>(d.footerIcon.value);
-    }
-    if (d.footer.present) {
-      map['footer'] = Variable<String, StringType>(d.footer.value);
-    }
-    if (d.fallback.present) {
-      map['fallback'] = Variable<String, StringType>(d.fallback.value);
-    }
-    if (d.color.present) {
-      map['color'] = Variable<String, StringType>(d.color.value);
-    }
-    if (d.authorName.present) {
-      map['author_name'] = Variable<String, StringType>(d.authorName.value);
-    }
-    if (d.authorLink.present) {
-      map['author_link'] = Variable<String, StringType>(d.authorLink.value);
-    }
-    if (d.authorIcon.present) {
-      map['author_icon'] = Variable<String, StringType>(d.authorIcon.value);
-    }
-    if (d.assetUrl.present) {
-      map['asset_url'] = Variable<String, StringType>(d.assetUrl.value);
-    }
-    if (d.extraData.present) {
-      final converter = $_AttachmentsTable.$converter0;
-      map['extra_data'] =
-          Variable<String, StringType>(converter.mapToSql(d.extraData.value));
-    }
-    return map;
-  }
-
-  @override
-  $_AttachmentsTable createAlias(String alias) {
-    return $_AttachmentsTable(_db, alias);
-  }
-
-  static TypeConverter<Map<String, dynamic>, String> $converter0 =
-      _ExtraDataConverter();
-}
-
 class ChannelQuery extends DataClass implements Insertable<ChannelQuery> {
   final String queryHash;
   final String channelCid;
@@ -3337,6 +2614,342 @@ class $_ChannelQueriesTable extends _ChannelQueries
   }
 }
 
+class _Reaction extends DataClass implements Insertable<_Reaction> {
+  final String messageId;
+  final String type;
+  final DateTime createdAt;
+  final int score;
+  final String userId;
+  final Map<String, dynamic> extraData;
+  _Reaction(
+      {@required this.messageId,
+      @required this.type,
+      @required this.createdAt,
+      this.score,
+      @required this.userId,
+      this.extraData});
+  factory _Reaction.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    final intType = db.typeSystem.forDartType<int>();
+    return _Reaction(
+      messageId: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}message_id']),
+      type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type']),
+      createdAt: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
+      score: intType.mapFromDatabaseResponse(data['${effectivePrefix}score']),
+      userId:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
+      extraData: $_ReactionsTable.$converter0.mapToDart(stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
+    );
+  }
+  factory _Reaction.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return _Reaction(
+      messageId: serializer.fromJson<String>(json['messageId']),
+      type: serializer.fromJson<String>(json['type']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      score: serializer.fromJson<int>(json['score']),
+      userId: serializer.fromJson<String>(json['userId']),
+      extraData: serializer.fromJson<Map<String, dynamic>>(json['extraData']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'messageId': serializer.toJson<String>(messageId),
+      'type': serializer.toJson<String>(type),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'score': serializer.toJson<int>(score),
+      'userId': serializer.toJson<String>(userId),
+      'extraData': serializer.toJson<Map<String, dynamic>>(extraData),
+    };
+  }
+
+  @override
+  _ReactionsCompanion createCompanion(bool nullToAbsent) {
+    return _ReactionsCompanion(
+      messageId: messageId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(messageId),
+      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      score:
+          score == null && nullToAbsent ? const Value.absent() : Value(score),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      extraData: extraData == null && nullToAbsent
+          ? const Value.absent()
+          : Value(extraData),
+    );
+  }
+
+  _Reaction copyWith(
+          {String messageId,
+          String type,
+          DateTime createdAt,
+          int score,
+          String userId,
+          Map<String, dynamic> extraData}) =>
+      _Reaction(
+        messageId: messageId ?? this.messageId,
+        type: type ?? this.type,
+        createdAt: createdAt ?? this.createdAt,
+        score: score ?? this.score,
+        userId: userId ?? this.userId,
+        extraData: extraData ?? this.extraData,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('_Reaction(')
+          ..write('messageId: $messageId, ')
+          ..write('type: $type, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('score: $score, ')
+          ..write('userId: $userId, ')
+          ..write('extraData: $extraData')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      messageId.hashCode,
+      $mrjc(
+          type.hashCode,
+          $mrjc(
+              createdAt.hashCode,
+              $mrjc(score.hashCode,
+                  $mrjc(userId.hashCode, extraData.hashCode))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is _Reaction &&
+          other.messageId == this.messageId &&
+          other.type == this.type &&
+          other.createdAt == this.createdAt &&
+          other.score == this.score &&
+          other.userId == this.userId &&
+          other.extraData == this.extraData);
+}
+
+class _ReactionsCompanion extends UpdateCompanion<_Reaction> {
+  final Value<String> messageId;
+  final Value<String> type;
+  final Value<DateTime> createdAt;
+  final Value<int> score;
+  final Value<String> userId;
+  final Value<Map<String, dynamic>> extraData;
+  const _ReactionsCompanion({
+    this.messageId = const Value.absent(),
+    this.type = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.score = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.extraData = const Value.absent(),
+  });
+  _ReactionsCompanion.insert({
+    @required String messageId,
+    @required String type,
+    @required DateTime createdAt,
+    this.score = const Value.absent(),
+    @required String userId,
+    this.extraData = const Value.absent(),
+  })  : messageId = Value(messageId),
+        type = Value(type),
+        createdAt = Value(createdAt),
+        userId = Value(userId);
+  _ReactionsCompanion copyWith(
+      {Value<String> messageId,
+      Value<String> type,
+      Value<DateTime> createdAt,
+      Value<int> score,
+      Value<String> userId,
+      Value<Map<String, dynamic>> extraData}) {
+    return _ReactionsCompanion(
+      messageId: messageId ?? this.messageId,
+      type: type ?? this.type,
+      createdAt: createdAt ?? this.createdAt,
+      score: score ?? this.score,
+      userId: userId ?? this.userId,
+      extraData: extraData ?? this.extraData,
+    );
+  }
+}
+
+class $_ReactionsTable extends _Reactions
+    with TableInfo<$_ReactionsTable, _Reaction> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  $_ReactionsTable(this._db, [this._alias]);
+  final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
+  GeneratedTextColumn _messageId;
+  @override
+  GeneratedTextColumn get messageId => _messageId ??= _constructMessageId();
+  GeneratedTextColumn _constructMessageId() {
+    return GeneratedTextColumn(
+      'message_id',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _typeMeta = const VerificationMeta('type');
+  GeneratedTextColumn _type;
+  @override
+  GeneratedTextColumn get type => _type ??= _constructType();
+  GeneratedTextColumn _constructType() {
+    return GeneratedTextColumn(
+      'type',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  GeneratedDateTimeColumn _createdAt;
+  @override
+  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedDateTimeColumn _constructCreatedAt() {
+    return GeneratedDateTimeColumn(
+      'created_at',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _scoreMeta = const VerificationMeta('score');
+  GeneratedIntColumn _score;
+  @override
+  GeneratedIntColumn get score => _score ??= _constructScore();
+  GeneratedIntColumn _constructScore() {
+    return GeneratedIntColumn(
+      'score',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  GeneratedTextColumn _userId;
+  @override
+  GeneratedTextColumn get userId => _userId ??= _constructUserId();
+  GeneratedTextColumn _constructUserId() {
+    return GeneratedTextColumn(
+      'user_id',
+      $tableName,
+      false,
+    );
+  }
+
+  final VerificationMeta _extraDataMeta = const VerificationMeta('extraData');
+  GeneratedTextColumn _extraData;
+  @override
+  GeneratedTextColumn get extraData => _extraData ??= _constructExtraData();
+  GeneratedTextColumn _constructExtraData() {
+    return GeneratedTextColumn(
+      'extra_data',
+      $tableName,
+      true,
+    );
+  }
+
+  @override
+  List<GeneratedColumn> get $columns =>
+      [messageId, type, createdAt, score, userId, extraData];
+  @override
+  $_ReactionsTable get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'reactions';
+  @override
+  final String actualTableName = 'reactions';
+  @override
+  VerificationContext validateIntegrity(_ReactionsCompanion d,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    if (d.messageId.present) {
+      context.handle(_messageIdMeta,
+          messageId.isAcceptableValue(d.messageId.value, _messageIdMeta));
+    } else if (isInserting) {
+      context.missing(_messageIdMeta);
+    }
+    if (d.type.present) {
+      context.handle(
+          _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (d.createdAt.present) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableValue(d.createdAt.value, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (d.score.present) {
+      context.handle(
+          _scoreMeta, score.isAcceptableValue(d.score.value, _scoreMeta));
+    }
+    if (d.userId.present) {
+      context.handle(
+          _userIdMeta, userId.isAcceptableValue(d.userId.value, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    context.handle(_extraDataMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {messageId, type, userId};
+  @override
+  _Reaction map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return _Reaction.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  Map<String, Variable> entityToSql(_ReactionsCompanion d) {
+    final map = <String, Variable>{};
+    if (d.messageId.present) {
+      map['message_id'] = Variable<String, StringType>(d.messageId.value);
+    }
+    if (d.type.present) {
+      map['type'] = Variable<String, StringType>(d.type.value);
+    }
+    if (d.createdAt.present) {
+      map['created_at'] = Variable<DateTime, DateTimeType>(d.createdAt.value);
+    }
+    if (d.score.present) {
+      map['score'] = Variable<int, IntType>(d.score.value);
+    }
+    if (d.userId.present) {
+      map['user_id'] = Variable<String, StringType>(d.userId.value);
+    }
+    if (d.extraData.present) {
+      final converter = $_ReactionsTable.$converter0;
+      map['extra_data'] =
+          Variable<String, StringType>(converter.mapToSql(d.extraData.value));
+    }
+    return map;
+  }
+
+  @override
+  $_ReactionsTable createAlias(String alias) {
+    return $_ReactionsTable(_db, alias);
+  }
+
+  static TypeConverter<Map<String, dynamic>, String> $converter0 =
+      _ExtraDataConverter();
+}
+
 abstract class _$OfflineDatabase extends GeneratedDatabase {
   _$OfflineDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   _$OfflineDatabase.connect(DatabaseConnection c) : super.connect(c);
@@ -3350,15 +2963,14 @@ abstract class _$OfflineDatabase extends GeneratedDatabase {
   $_ReadsTable get reads => _reads ??= $_ReadsTable(this);
   $_MembersTable _members;
   $_MembersTable get members => _members ??= $_MembersTable(this);
-  $_AttachmentsTable _attachments;
-  $_AttachmentsTable get attachments =>
-      _attachments ??= $_AttachmentsTable(this);
   $_ChannelQueriesTable _channelQueries;
   $_ChannelQueriesTable get channelQueries =>
       _channelQueries ??= $_ChannelQueriesTable(this);
+  $_ReactionsTable _reactions;
+  $_ReactionsTable get reactions => _reactions ??= $_ReactionsTable(this);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [channels, users, messages, reads, members, attachments, channelQueries];
+      [channels, users, messages, reads, members, channelQueries, reactions];
 }

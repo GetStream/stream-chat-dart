@@ -83,7 +83,7 @@ class WebSocket {
   final int reconnectionMonitorTimeout;
 
   /// This notifies of connection status changes
-  ValueNotifier<ConnectionStatus> connectionStatus =
+  final ValueNotifier<ConnectionStatus> connectionStatus =
       ValueNotifier(ConnectionStatus.disconnected);
 
   Uri _uri;
@@ -102,9 +102,6 @@ class WebSocket {
 
   /// Connect the WS using the parameters passed in the constructor
   Future<Event> connect() {
-    if (_manuallyClosed) {
-      connectionStatus = ValueNotifier(ConnectionStatus.disconnected);
-    }
     _manuallyClosed = false;
 
     if (_connecting) {
@@ -148,9 +145,8 @@ class WebSocket {
   void _onData(data) {
     logger.info('new data: $data');
     final event = _decodeEvent(data);
-    if (_lastEventAt != null) {
-      handler(event);
-    } else {
+
+    if (_lastEventAt == null) {
       logger.info('connection estabilished');
       _connecting = false;
       _reconnecting = false;
@@ -162,11 +158,11 @@ class WebSocket {
         _connectionCompleter.complete(event);
       }
 
-      handler(event);
-
       _startReconnectionMonitor();
       _startHealthCheck();
     }
+
+    handler(event);
     _lastEventAt = DateTime.now();
   }
 

@@ -618,7 +618,7 @@ class ChannelClientState {
         _channelState = this._channelState.copyWith(
               messages: this._channelState.messages.map((message) {
                 if (message.id == event.message.id) {
-                  return _removeReactionRemoveMessage(message, event);
+                  return _removeReactionFromMessage(message, event);
                 }
                 return message;
               }).toList(),
@@ -631,7 +631,7 @@ class ChannelClientState {
           newThreads[event.message.parentId] =
               newThreads[event.message.parentId].map((message) {
             if (message.id == event.message.id) {
-              return _removeReactionRemoveMessage(message, event);
+              return _removeReactionFromMessage(message, event);
             }
             return message;
           }).toList();
@@ -835,7 +835,7 @@ class ChannelClientState {
     return newMessage;
   }
 
-  Message _removeReactionRemoveMessage(Message message, Event event) {
+  Message _removeReactionFromMessage(Message message, Event event) {
     final newMessage = message.copyWith(
       latestReactions: message.latestReactions
         ..removeWhere((r) => r.type == event.reaction.type),
