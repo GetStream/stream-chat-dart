@@ -609,6 +609,17 @@ class ChannelClientState {
     _listenReactionDeleted();
 
     _listenReadEvents();
+
+    _retryFailedMessages();
+  }
+
+  void _retryFailedMessages() {
+    messages
+        .where((message) =>
+            message.status == MessageSendingStatus.FAILED && !message.isDeleted)
+        .forEach((message) {
+      _channel.sendMessage(message);
+    });
   }
 
   void _listenReactionDeleted() {
@@ -967,6 +978,8 @@ class ChannelClientState {
       members: newMembers,
       read: updatedState.read,
     );
+
+    _retryFailedMessages();
   }
 
   /// The channel state related to this client
@@ -976,8 +989,8 @@ class ChannelClientState {
   Stream<ChannelState> get channelStateStream => _channelStateController.stream;
   BehaviorSubject<ChannelState> _channelStateController;
   set _channelState(v) {
-    _channel._client.offlineDatabase.updateChannelState(v);
     _channelStateController.add(v);
+    _channel._client.offlineDatabase.updateChannelState(v);
   }
 
   /// The channel threads related to this channel

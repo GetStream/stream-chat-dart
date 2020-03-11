@@ -23,6 +23,7 @@ class Message {
   final String text;
 
   /// The status of a sending message
+  @JsonKey(ignore: true)
   final MessageSendingStatus status;
 
   /// The message type

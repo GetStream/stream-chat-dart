@@ -7,15 +7,17 @@ import 'package:moor/moor.dart';
 import 'package:moor_ffi/moor_ffi.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:stream_chat/src/models/attachment.dart';
-import 'package:stream_chat/src/models/channel_model.dart';
-import 'package:stream_chat/src/models/member.dart';
-import 'package:stream_chat/src/models/message.dart';
-import 'package:stream_chat/src/models/read.dart';
-import 'package:stream_chat/src/models/user.dart';
 
-import '../../stream_chat.dart';
+import '../api/requests.dart';
+import '../models/attachment.dart';
+import '../models/channel_config.dart';
+import '../models/channel_model.dart';
 import '../models/channel_state.dart';
+import '../models/member.dart';
+import '../models/message.dart';
+import '../models/reaction.dart';
+import '../models/read.dart';
+import '../models/user.dart';
 
 part 'models.dart';
 part 'offline_database.g.dart';
@@ -49,6 +51,7 @@ Future connectDatabase(User user) async {
   return OfflineDatabase.connect(
     connection,
     user.id,
+    isolate,
   );
 }
 
@@ -72,9 +75,11 @@ class OfflineDatabase extends _$OfflineDatabase {
   OfflineDatabase.connect(
     DatabaseConnection connection,
     this._userId,
+    this._isolate,
   ) : super.connect(connection);
 
   final String _userId;
+  final MoorIsolate _isolate;
 
   // you should bump this number whenever you change or add a table definition. Migrations
   // are covered later in this readme.
@@ -98,6 +103,17 @@ class OfflineDatabase extends _$OfflineDatabase {
 //          }
 //        },
 //      );
+
+  Future<void> disconnect({bool flush = false}) async {
+    if (flush) {
+      await batch((batch) {
+        allTables.forEach((table) {
+          delete(table);
+        });
+      });
+    }
+    await _isolate.shutdownAll();
+  }
 
   Future<List<ChannelState>> getChannelStates({
     Map<String, dynamic> filter,

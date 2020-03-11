@@ -187,7 +187,7 @@ class Client {
 
         _ws.connectionStatus.removeListener(_connectionStatusListener);
 
-        await disconnect();
+        await _disconnect();
 
         final newToken = await this.tokenProvider(userId);
         await Future.delayed(Duration(seconds: 4));
@@ -243,11 +243,14 @@ class Client {
 
   /// Call this function to dispose the client
   void dispose() async {
-    await this.disconnect();
+    print('CLIENT DISPOSE START');
+    await offlineDatabase?.disconnect();
+    await this._disconnect();
     httpClient.close();
     await _controller.close();
     state.channels.forEach((c) => c.dispose());
     state.dispose();
+    print('CLIENT DISPOSE end');
   }
 
   Map<String, String> get _httpHeaders => {
@@ -286,7 +289,6 @@ class Client {
   /// Method called to add a new event to the [_controller].
   void handleEvent(Event event) {
     if (event.connectionId != null) {
-      // ws was just reconnected
       _connectionId = event.connectionId;
     }
     if (event.me != null) {
@@ -562,6 +564,11 @@ class Client {
 
   /// Closes the websocket connection and resets the client
   Future<void> disconnect() async {
+    await offlineDatabase?.disconnect(flush: true);
+    await _disconnect();
+  }
+
+  Future<void> _disconnect() async {
     logger.info('Client disconnecting');
 
     this._anonymous = false;
