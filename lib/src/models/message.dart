@@ -9,8 +9,10 @@ part 'message.g.dart';
 
 enum MessageSendingStatus {
   SENDING,
-  SENT,
+  UPDATING,
   FAILED,
+  FAILED_UPDATE,
+  SENT,
 }
 
 /// The class that contains the information about a message

@@ -785,9 +785,42 @@ class Client {
   }
 
   /// Update the given message
-  Future<UpdateMessageResponse> updateMessage(Message message) async {
+  Future<UpdateMessageResponse> updateMessage(
+    Message message, [
+    String cid,
+  ]) async {
+    handleEvent(Event(
+      type: EventType.messageNew,
+      message: message.copyWith(
+        status: MessageSendingStatus.UPDATING,
+      ),
+      cid: cid,
+    ));
+
     return post("/messages/${message.id}", data: {'message': message})
-        .then((res) => decode(res.data, UpdateMessageResponse.fromJson));
+        .then((res) {
+      final updateMessageResponse = decode(
+        res.data,
+        UpdateMessageResponse.fromJson,
+      );
+
+      handleEvent(Event(
+        type: EventType.messageUpdated,
+        message: updateMessageResponse.message,
+        cid: cid,
+      ));
+
+      return updateMessageResponse;
+    }).catchError((error) {
+      handleEvent(Event(
+        type: EventType.messageUpdated,
+        message: message.copyWith(
+          status: MessageSendingStatus.FAILED_UPDATE,
+        ),
+        cid: cid,
+      ));
+      throw error;
+    });
   }
 
   /// Deletes the given message

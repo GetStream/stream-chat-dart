@@ -192,6 +192,10 @@ class _MessageSendingStatusConverter
         return MessageSendingStatus.SENT;
       case 2:
         return MessageSendingStatus.FAILED;
+      case 3:
+        return MessageSendingStatus.UPDATING;
+      case 4:
+        return MessageSendingStatus.FAILED_UPDATE;
       default:
         return null;
     }
@@ -206,6 +210,10 @@ class _MessageSendingStatusConverter
         return 1;
       case MessageSendingStatus.FAILED:
         return 2;
+      case MessageSendingStatus.UPDATING:
+        return 3;
+      case MessageSendingStatus.FAILED_UPDATE:
+        return 4;
       default:
         return null;
     }
