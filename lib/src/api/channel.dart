@@ -383,17 +383,25 @@ class Channel {
     try {
       response = await query(options: watchOptions);
     } catch (error, stackTrace) {
-      _initializedCompleter.completeError(error, stackTrace);
+      if (!_initializedCompleter.isCompleted) {
+        _initializedCompleter.completeError(error, stackTrace);
+      }
       rethrow;
     }
 
     if (state == null) {
-      state = ChannelClientState(this, response);
-      _initializedCompleter.complete(true);
-      _startCleaning();
+      _initState(response);
     }
 
     return response;
+  }
+
+  void _initState(ChannelState channelState) {
+    state = ChannelClientState(this, channelState);
+    if (!_initializedCompleter.isCompleted) {
+      _initializedCompleter.complete(true);
+    }
+    _startCleaning();
   }
 
   /// Stop watching the channel
@@ -485,6 +493,13 @@ class Channel {
       payload['watchers'] = watchersPagination.toJson();
     }
 
+    if (cid != null) {
+      final updatedState = await _client.offlineDatabase?.getChannel(cid);
+      if (state == null && updatedState != null) {
+        _initState(updatedState);
+      }
+    }
+
     final response = await _client.post(path, data: payload);
     final updatedState = _client.decode(response.data, ChannelState.fromJson);
 
@@ -494,7 +509,6 @@ class Channel {
     }
 
     state?.updateChannelState(updatedState);
-
     return updatedState;
   }
 

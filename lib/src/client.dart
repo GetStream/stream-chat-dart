@@ -393,8 +393,8 @@ class Client {
       final index =
           newChannels.indexWhere((c) => c.cid == channelState.channel.cid);
       if (index != -1) {
-        final client = newChannels[index];
-        client.state.updateChannelState(channelState);
+        final channel = newChannels[index];
+        channel.state?.updateChannelState(channelState);
       } else {
         newChannels.add(Channel.fromState(this, channelState));
       }

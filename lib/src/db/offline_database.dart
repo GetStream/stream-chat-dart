@@ -96,7 +96,7 @@ class OfflineDatabase extends _$OfflineDatabase {
 //          }
 //        },
 //        onUpgrade: (openingDetails, _, __) async {
-//          final m = Migrator(this, customStatement);
+//          final m = Msigrator(this, customStatement);
 //          for (final table in allTables) {
 //            await m.deleteTable(table.actualTableName);
 //            await m.createTable(table);
@@ -125,6 +125,17 @@ class OfflineDatabase extends _$OfflineDatabase {
           ]))
         .map(_messageFromJoinRow)
         .get());
+  }
+
+  Future<ChannelState> getChannel(String cid) async {
+    return await (select(channels)..where((c) => c.cid.equals(cid))).join([
+      leftOuterJoin(users, channels.createdBy.equalsExp(users.id)),
+    ]).map((row) {
+      return _channelFromRow(
+        row.readTable(channels),
+        row.readTable(users),
+      );
+    }).getSingle();
   }
 
   Future<List<ChannelState>> getChannelStates({
@@ -161,37 +172,44 @@ class OfflineDatabase extends _$OfflineDatabase {
       return query.join([
         leftOuterJoin(users, channels.createdBy.equalsExp(users.id)),
       ]).map((row) async {
-        final channelRow = row.readTable(channels);
         final userRow = row.readTable(users);
+        final channelRow = row.readTable(channels);
 
-        List<Message> rowMessages = await _getChannelMessages(channelRow);
-        List<Read> rowReads = await _getChannelReads(channelRow);
-        List<Member> rowMembers = await _getChannelMembers(channelRow);
-
-        return ChannelState(
-          members: rowMembers,
-          read: rowReads,
-          messages: rowMessages,
-          channel: ChannelModel(
-            id: channelRow.id,
-            type: channelRow.type,
-            frozen: channelRow.frozen,
-            createdAt: channelRow.createdAt,
-            updatedAt: channelRow.updatedAt,
-            memberCount: channelRow.memberCount,
-            cid: channelRow.cid,
-            lastMessageAt: channelRow.lastMessageAt,
-            deletedAt: channelRow.deletedAt,
-            extraData: channelRow.extraData,
-            members: [],
-            config: ChannelConfig.fromJson(jsonDecode(channelRow.config)),
-            createdBy: _userFromUserRow(userRow),
-          ),
-        );
+        return _channelFromRow(channelRow, userRow);
       }).get();
     }));
 
     return cachedChannels;
+  }
+
+  Future<ChannelState> _channelFromRow(
+    _Channel channelRow,
+    _User userRow,
+  ) async {
+    List<Message> rowMessages = await _getChannelMessages(channelRow);
+    List<Read> rowReads = await _getChannelReads(channelRow);
+    List<Member> rowMembers = await _getChannelMembers(channelRow);
+
+    return ChannelState(
+      members: rowMembers,
+      read: rowReads,
+      messages: rowMessages,
+      channel: ChannelModel(
+        id: channelRow.id,
+        type: channelRow.type,
+        frozen: channelRow.frozen,
+        createdAt: channelRow.createdAt,
+        updatedAt: channelRow.updatedAt,
+        memberCount: channelRow.memberCount,
+        cid: channelRow.cid,
+        lastMessageAt: channelRow.lastMessageAt,
+        deletedAt: channelRow.deletedAt,
+        extraData: channelRow.extraData,
+        members: [],
+        config: ChannelConfig.fromJson(jsonDecode(channelRow.config)),
+        createdBy: _userFromUserRow(userRow),
+      ),
+    );
   }
 
   String _computeHash(Map<String, dynamic> filter) {
