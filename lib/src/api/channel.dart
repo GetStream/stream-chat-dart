@@ -883,8 +883,7 @@ class ChannelClientState {
       newThreads[parentId] = [
         ...messages,
         ...newThreads[parentId]
-            .where((newMessage) =>
-                !newThreads[parentId].any((m) => m.id == newMessage.id))
+            .where((newMessage) => !messages.any((m) => m.id == newMessage.id))
             .toList(),
       ];
     } else {
