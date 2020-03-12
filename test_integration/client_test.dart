@@ -18,23 +18,5 @@ void main() {
 
     final setUserEvent = await client.setGuestUser(user);
     print(setUserEvent.toJson());
-
-    final queryChannels = await client.queryChannels();
-    print('queryChannels.channels.length: ${queryChannels.length}');
-
-    final queryUsers = await client.queryUsers(
-        null, [SortOption('created_at', direction: SortOption.DESC)], null);
-    print('queryUsers.users.length: ${queryUsers.users.length}');
-    expect(queryUsers.users.length, greaterThan(1));
-
-    queryUsers.users.forEach((u) => print(u.createdAt));
-
-    final queryCurrentUser = await client.queryUsers({
-      'id': {
-        '\$in': [user.id],
-      }
-    }, null, null);
-    print('queryCurrentUser.users.length: ${queryCurrentUser.users.length}');
-    expect(queryCurrentUser.users.length, 1);
   });
 }

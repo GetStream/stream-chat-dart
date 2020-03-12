@@ -48,7 +48,7 @@ class _ChannelListViewState extends State<ChannelListView> {
         );
       },
       child: StreamBuilder<List<Channel>>(
-          stream: streamChat.channelsStream,
+          stream: streamChat.client.state.channelsStream,
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
               return Center(
@@ -95,7 +95,8 @@ class _ChannelListViewState extends State<ChannelListView> {
     if (i < channelsStates.length) {
       final channelState = channelsStates[i];
 
-      final channelClient = streamChat.client.channels[channelState.id];
+      final channelClient = streamChat.client.state.channels
+          .firstWhere((c) => c.cid == channelState.cid);
 
       ChannelTapCallback onTap;
       if (widget.onChannelTap != null) {

@@ -22,7 +22,6 @@ class StreamChat extends InheritedWidget {
       if (index > 0) {
         final channel = channels.removeAt(index);
         channels.insert(0, channel);
-        _channelsController.add(channels);
       }
     }));
   }
@@ -31,8 +30,6 @@ class StreamChat extends InheritedWidget {
 
   Stream<User> get userStream => client.state.userStream;
 
-  Stream<List<Channel>> get channelsStream => _channelsController.stream;
-  final BehaviorSubject<List<Channel>> _channelsController = BehaviorSubject();
   final List<Channel> channels = [];
 
   final BehaviorSubject<bool> _queryChannelsLoadingController =
@@ -53,17 +50,14 @@ class StreamChat extends InheritedWidget {
     _queryChannelsLoadingController.sink.add(true);
 
     try {
-      final res = await client.queryChannels(
+      client.queryChannels(
         filter: filter,
         sort: sortOptions,
         options: options,
         paginationParams: paginationParams,
       );
-      channels.addAll(res);
-      _channelsController.sink.add(channels);
+    } finally {
       _queryChannelsLoadingController.sink.add(false);
-    } catch (e) {
-      _channelsController.sink.addError(e);
     }
   }
 
@@ -75,7 +69,6 @@ class StreamChat extends InheritedWidget {
     client.dispose();
     _subscriptions.forEach((s) => s.cancel());
     _queryChannelsLoadingController.close();
-    _channelsController.close();
   }
 
   @override
