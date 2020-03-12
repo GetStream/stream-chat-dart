@@ -338,6 +338,10 @@ class OfflineDatabase extends _$OfflineDatabase {
   ]) async {
     await batch((batch) {
       final hash = _computeHash(filter);
+      batch.deleteWhere(
+        channelQueries,
+        (_ChannelQueries query) => query.queryHash.equals(hash),
+      );
       batch.insertAll(
         channelQueries,
         channelStates.map((c) {

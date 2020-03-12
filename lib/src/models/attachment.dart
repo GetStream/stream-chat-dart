@@ -50,6 +50,8 @@ class Attachment {
   /// Actions from a command
   final List<Action> actions;
 
+  final Uri localUri;
+
   /// Map of custom channel extraData
   @JsonKey(includeIfNull: false)
   final Map<String, dynamic> extraData;
@@ -98,6 +100,7 @@ class Attachment {
     this.assetUrl,
     this.actions,
     this.extraData,
+    this.localUri,
   });
 
   /// Create a new instance from a json

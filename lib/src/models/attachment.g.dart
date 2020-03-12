@@ -30,6 +30,9 @@ Attachment _$AttachmentFromJson(Map<String, dynamic> json) {
             e == null ? null : Action.fromJson(e as Map<String, dynamic>))
         ?.toList(),
     extraData: json['extra_data'] as Map<String, dynamic>,
+    localUri: json['local_uri'] == null
+        ? null
+        : Uri.parse(json['local_uri'] as String),
   );
 }
 
@@ -60,6 +63,7 @@ Map<String, dynamic> _$AttachmentToJson(Attachment instance) {
   writeNotNull('author_icon', instance.authorIcon);
   writeNotNull('asset_url', instance.assetUrl);
   writeNotNull('actions', instance.actions?.map((e) => e?.toJson())?.toList());
+  writeNotNull('local_uri', instance.localUri?.toString());
   writeNotNull('extra_data', instance.extraData);
   return val;
 }
