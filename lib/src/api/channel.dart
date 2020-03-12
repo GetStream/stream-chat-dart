@@ -407,6 +407,9 @@ class Channel {
     String parentId,
     PaginationParams options,
   ) async {
+    final cachedReplies = await _client.offlineDatabase?.getReplies(parentId);
+    state?.updateThreadInfo(parentId, cachedReplies);
+
     final response = await _client.get("/messages/$parentId/replies",
         queryParameters: options.toJson());
 
@@ -621,16 +624,26 @@ class ChannelClientState {
 
     _listenReadEvents();
 
-    retryFailedMessages();
+    _channel._client.offlineDatabase
+        .getChannelThreads(_channel.cid)
+        .then((threads) {
+      _threads = threads;
+      retryFailedMessages();
+    });
   }
 
   Future<void> retryFailedMessages() {
     _channel._client.logger.info('_retryFailedMessages');
-    return Future.wait(messages.reversed
+    final failedMessages = <Message>[
+      ...messages,
+      ...threads.values.expand((v) => v.reversed)
+    ]
         .where((message) =>
             message.status != null &&
             message.status != MessageSendingStatus.SENT)
-        .map((message) {
+        .toList()
+        .reversed;
+    return Future.wait(failedMessages.map((message) {
       final List<Future> futures = [];
       if (message.status == MessageSendingStatus.FAILED_UPDATE ||
           message.status == MessageSendingStatus.UPDATING) {
@@ -731,7 +744,7 @@ class ChannelClientState {
       }
 
       if (event.message.parentId != null) {
-        final newThreads = threads;
+        final newThreads = Map<String, List<Message>>.from(threads);
         if (newThreads.containsKey(event.message.parentId)) {
           newThreads[event.message.parentId] =
               newThreads[event.message.parentId].map((message) {
@@ -748,7 +761,7 @@ class ChannelClientState {
   }
 
   void _listenMessageDeleted() {
-    _channel.on('message.deleted').listen((event) {
+    _channel.on(EventType.messageDeleted).listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
         _channelState = this._channelState.copyWith(
@@ -763,7 +776,7 @@ class ChannelClientState {
       }
 
       if (event.message.parentId != null) {
-        final newThreads = threads;
+        final newThreads = Map<String, List<Message>>.from(threads);
         if (newThreads.containsKey(event.message.parentId)) {
           newThreads[event.message.parentId] =
               newThreads[event.message.parentId].map((message) {
@@ -775,16 +788,6 @@ class ChannelClientState {
           }).toList();
           _threads = newThreads;
         }
-
-        _channelState = this._channelState.copyWith(
-              messages: this._channelState.messages.map((message) {
-                if (message.id == event.message.parentId) {
-                  return message;
-                }
-
-                return message;
-              }).toList(),
-            );
       }
     });
   }
@@ -812,27 +815,7 @@ class ChannelClientState {
       }
 
       if (event.message.parentId != null) {
-        final newThreads = threads;
-        if (newThreads.containsKey(event.message.parentId)) {
-          final oldIndex = newThreads[event.message.parentId]
-              .indexWhere((m) => m.id == event.message.id);
-          if (oldIndex != -1) {
-            newThreads[event.message.parentId][oldIndex] = event.message;
-          } else {
-            newThreads[event.message.parentId].add(event.message);
-          }
-          _threads = newThreads;
-        }
-
-        _channelState = this._channelState.copyWith(
-              messages: this._channelState.messages.map((message) {
-                if (message.id == event.message.parentId) {
-                  return message;
-                }
-
-                return message;
-              }).toList(),
-            );
+        updateThreadInfo(event.message.parentId, [event.message]);
       }
     });
   }
@@ -948,16 +931,17 @@ class ChannelClientState {
 
   /// Update threads with updated information about messages
   void updateThreadInfo(String parentId, List<Message> messages) {
-    final newThreads = threads;
+    final newThreads = Map<String, List<Message>>.from(threads);
 
     if (newThreads.containsKey(parentId)) {
       newThreads[parentId] = [
-        ...messages,
         ...newThreads[parentId]
-            .where((newMessage) =>
-                !newThreads[parentId].any((m) => m.id == newMessage.id))
+            .where((newMessage) => !messages.any((m) => m.id == newMessage.id))
             .toList(),
+        ...messages,
       ];
+
+      newThreads[parentId].sort(_sortByCreatedAt);
     } else {
       newThreads[parentId] = messages;
     }
@@ -978,17 +962,7 @@ class ChannelClientState {
           [],
     ];
 
-    newMessages.sort((a, b) {
-      if (a.createdAt == null) {
-        return 1;
-      }
-
-      if (b.createdAt == null) {
-        return -1;
-      }
-
-      return a.createdAt.compareTo(b.createdAt);
-    });
+    newMessages.sort(_sortByCreatedAt);
 
     List<User> newWatchers = [
       ...updatedState?.watchers ?? [],
@@ -1022,6 +996,18 @@ class ChannelClientState {
     );
   }
 
+  int _sortByCreatedAt(a, b) {
+    if (a.createdAt == null) {
+      return 1;
+    }
+
+    if (b.createdAt == null) {
+      return -1;
+    }
+
+    return a.createdAt.compareTo(b.createdAt);
+  }
+
   /// The channel state related to this client
   ChannelState get _channelState => _channelStateController.value;
 
@@ -1043,7 +1029,11 @@ class ChannelClientState {
   BehaviorSubject<Map<String, List<Message>>> _threadsController =
       BehaviorSubject.seeded({});
 
-  set _threads(v) {
+  set _threads(Map<String, List<Message>> v) {
+    _channel._client.offlineDatabase.updateMessages(
+      v.values.expand((v) => v).toList(),
+      _channel.cid,
+    );
     _threadsController.add(v);
   }
 

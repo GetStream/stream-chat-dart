@@ -322,8 +322,8 @@ class Client {
 
       if (value == ConnectionStatus.connected &&
           state.channels?.isNotEmpty == true) {
-        await Future.wait(state.channels
-            .map((channel) => channel.state.retryFailedMessages()));
+        await Future.wait(state.channels.map((channel) =>
+            channel.state?.retryFailedMessages() ?? Future.value()));
         queryChannels(filter: {
           'cid': {
             '\$in': state.channels.map((c) => c.cid).toList(),
@@ -334,7 +334,7 @@ class Client {
             state.channels.map(
               (c) => MapEntry<String, String>(
                 c.cid,
-                c.state.messages?.last?.id,
+                c.state?.messages?.last?.id,
               ),
             ),
           ),
@@ -420,14 +420,18 @@ class Client {
           newChannels.indexWhere((c) => c.cid == channelState.channel.cid);
       if (index != -1) {
         final client = newChannels[index];
-        client.state.updateChannelState(channelState);
+        client.state?.updateChannelState(channelState);
       } else {
         newChannels.add(Channel.fromState(this, channelState));
       }
     });
     state.channels = newChannels;
 
-    offlineDatabase?.updateChannelStates(res.channels, filter);
+    offlineDatabase?.updateChannelQueries(
+      filter,
+      res.channels.map((c) => c.channel.cid).toList(),
+      paginationParams?.offset == null || paginationParams.offset == 0,
+    );
   }
 
   _parseError(DioError error) {
@@ -677,7 +681,7 @@ class Client {
     final channel = Channel(this, type, id, extraData);
 
     state.channels = [
-      ...state.channels,
+      ...state.channels ?? [],
       channel,
     ];
 

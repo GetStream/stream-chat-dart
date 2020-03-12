@@ -115,6 +115,18 @@ class OfflineDatabase extends _$OfflineDatabase {
     await _isolate.shutdownAll();
   }
 
+  Future<List<Message>> getReplies(String parentId) async {
+    return await Future.wait(await (select(messages).join([
+      leftOuterJoin(users, messages.userId.equalsExp(users.id)),
+    ])
+          ..where(messages.parentId.equals(parentId))
+          ..orderBy([
+            OrderingTerm.asc(messages.createdAt),
+          ]))
+        .map(_messageFromJoinRow)
+        .get());
+  }
+
   Future<List<ChannelState>> getChannelStates({
     Map<String, dynamic> filter,
     List<SortOption> sort = const [],
@@ -195,40 +207,69 @@ class OfflineDatabase extends _$OfflineDatabase {
       leftOuterJoin(users, messages.userId.equalsExp(users.id)),
     ])
           ..where(messages.channelCid.equals(channelRow.cid))
+          ..where(
+              isNull(messages.parentId) | messages.showInChannel.equals(true))
           ..orderBy([
             OrderingTerm.asc(messages.createdAt),
           ]))
-        .map((row) async {
-      final messageRow = row.readTable(messages);
-      final userRow = row.readTable(users);
-
-      final latestReactions = await _getLatestReactions(messageRow);
-      final ownReactions = await _getOwnReactions(messageRow);
-
-      return Message(
-        latestReactions: latestReactions,
-        ownReactions: ownReactions,
-        attachments: List<Map<String, dynamic>>.from(
-                jsonDecode(messageRow.attachmentJson))
-            .map((j) => Attachment.fromJson(j))
-            .toList(),
-        createdAt: messageRow.createdAt,
-        extraData: messageRow.extraData,
-        updatedAt: messageRow.updatedAt,
-        id: messageRow.id,
-        type: messageRow.type,
-        status: messageRow.status,
-        command: messageRow.command,
-        parentId: messageRow.parentId,
-        reactionCounts: messageRow.reactionCounts,
-        reactionScores: messageRow.reactionScores,
-        replyCount: messageRow.replyCount,
-        showInChannel: messageRow.showInChannel,
-        text: messageRow.messageText,
-        user: _userFromUserRow(userRow),
-      );
-    }).get());
+        .map(_messageFromJoinRow)
+        .get());
     return rowMessages;
+  }
+
+  Future<Map<String, List<Message>>> getChannelThreads(String cid) async {
+    final rowMessages = await Future.wait(await (select(messages).join([
+      leftOuterJoin(users, messages.userId.equalsExp(users.id)),
+    ])
+          ..where(messages.channelCid.equals(cid))
+          ..where(isNotNull(messages.parentId))
+          ..orderBy([
+            OrderingTerm.asc(messages.createdAt),
+          ]))
+        .map(_messageFromJoinRow)
+        .get());
+
+    final threads = Map<String, List<Message>>();
+    rowMessages.forEach((message) {
+      if (threads.containsKey(message.parentId)) {
+        threads[message.parentId].add(message);
+      } else {
+        threads[message.parentId] = [message];
+      }
+    });
+
+    return threads;
+  }
+
+  Future<Message> _messageFromJoinRow(row) async {
+    final messageRow = row.readTable(messages);
+    final userRow = row.readTable(users);
+
+    final latestReactions = await _getLatestReactions(messageRow);
+    final ownReactions = await _getOwnReactions(messageRow);
+
+    return Message(
+      latestReactions: latestReactions,
+      ownReactions: ownReactions,
+      attachments:
+          List<Map<String, dynamic>>.from(jsonDecode(messageRow.attachmentJson))
+              .map((j) => Attachment.fromJson(j))
+              .toList(),
+      createdAt: messageRow.createdAt,
+      extraData: messageRow.extraData,
+      updatedAt: messageRow.updatedAt,
+      id: messageRow.id,
+      type: messageRow.type,
+      status: messageRow.status,
+      command: messageRow.command,
+      parentId: messageRow.parentId,
+      reactionCounts: messageRow.reactionCounts,
+      reactionScores: messageRow.reactionScores,
+      replyCount: messageRow.replyCount,
+      showInChannel: messageRow.showInChannel,
+      text: messageRow.messageText,
+      user: _userFromUserRow(userRow),
+    );
   }
 
   Future<List<Reaction>> _getLatestReactions(_Message messageRow) async {
@@ -329,164 +370,215 @@ class OfflineDatabase extends _$OfflineDatabase {
   }
 
   Future<void> updateChannelState(ChannelState channelState) async {
-    await updateChannelStates([channelState]);
+    await updateChannelStates([
+      channelState
+    ], {
+      'cid': channelState.channel.cid,
+    });
   }
 
   Future<void> updateChannelStates(
     List<ChannelState> channelStates, [
     Map<String, dynamic> filter,
+    bool clearQueryCache = false,
   ]) async {
-    await batch((batch) {
-      final hash = _computeHash(filter);
-      batch.deleteWhere(
-        channelQueries,
-        (_ChannelQueries query) => query.queryHash.equals(hash),
+    updateChannelQueries(
+      filter,
+      channelStates.map((c) => c.channel.cid).toList(),
+      clearQueryCache,
+    );
+
+    channelStates.forEach((cs) {
+      updateMessages(
+        cs.messages,
+        cs.channel.cid,
       );
+    });
+
+    await batch((batch) {
+      _updateReactions(batch, channelStates);
+
+      _updateUsers(batch, channelStates);
+
+      _updateReads(channelStates, batch);
+
+      _updateMembers(channelStates, batch);
+
+      _updateChannels(batch, channelStates);
+    });
+  }
+
+  void _updateChannels(Batch batch, List<ChannelState> channelStates) {
+    batch.insertAll(
+      channels,
+      channelStates.map((cs) {
+        final channel = cs.channel;
+        return _channelDataFromChannelModel(channel);
+      }).toList(),
+      mode: InsertMode.insertOrReplace,
+    );
+  }
+
+  void _updateMembers(List<ChannelState> channelStates, Batch batch) {
+    final newMembers = channelStates
+        .map((cs) => cs.members.map((m) => _Member(
+              userId: m.user.id,
+              channelCid: cs.channel.cid,
+              createdAt: m.createdAt,
+              isModerator: m.isModerator,
+              inviteRejectedAt: m.inviteRejectedAt,
+              invited: m.invited,
+              inviteAcceptedAt: m.inviteAcceptedAt,
+              role: m.role,
+              updatedAt: m.updatedAt,
+            )))
+        .where((v) => v != null)
+        .expand((v) => v);
+    if (newMembers != null && newMembers.isNotEmpty) {
       batch.insertAll(
-        channelQueries,
-        channelStates.map((c) {
-          return ChannelQuery(
-            queryHash: hash,
-            channelCid: c.channel.cid,
-          );
-        }).toList(),
+        members,
+        newMembers.toList(),
         mode: InsertMode.insertOrReplace,
       );
+    }
+  }
 
+  void _updateReads(List<ChannelState> channelStates, Batch batch) {
+    final newReads = channelStates
+        .map((cs) => cs.read?.map((r) => _Read(
+              lastRead: r.lastRead,
+              userId: r.user.id,
+              channelCid: cs.channel.cid,
+            )))
+        .where((v) => v != null)
+        .expand((v) => v);
+
+    if (newReads != null && newReads.isNotEmpty) {
+      batch.insertAll(
+        reads,
+        newReads.toList(),
+        mode: InsertMode.insertOrReplace,
+      );
+    }
+  }
+
+  void _updateUsers(Batch batch, List<ChannelState> channelStates) {
+    batch.insertAll(
+      users,
+      channelStates
+          .map((cs) => [
+                _userDataFromUser(cs.channel.createdBy),
+                if (cs.messages != null)
+                  ...cs.messages
+                      .map((m) => [
+                            _userDataFromUser(m.user),
+                            if (m.latestReactions != null)
+                              ...m.latestReactions
+                                  .map((r) => _userDataFromUser(r.user)),
+                            if (m.ownReactions != null)
+                              ...m.ownReactions
+                                  .map((r) => _userDataFromUser(r.user)),
+                          ])
+                      .expand((v) => v),
+                if (cs.read != null)
+                  ...cs.read.map((r) => _userDataFromUser(r.user)),
+                if (cs.members != null)
+                  ...cs.members.map((m) => _userDataFromUser(m.user)),
+              ])
+          .expand((v) => v)
+          .toList(),
+      mode: InsertMode.insertOrReplace,
+    );
+  }
+
+  void _updateReactions(Batch batch, List<ChannelState> channelStates) {
+    batch.deleteWhere<_Reactions, _Reaction>(
+      reactions,
+      (r) => r.messageId.isIn(channelStates
+          .map((cs) => cs.messages.map((m) => m.id))
+          .expand((v) => v)),
+    );
+    final newReactions = channelStates
+        .map((cs) => cs.messages.map((m) {
+              final ownReactions = m.ownReactions?.map(
+                    (r) => _reactionDataFromReaction(m, r),
+                  ) ??
+                  [];
+              final latestReactions = m.latestReactions?.map(
+                    (r) => _reactionDataFromReaction(m, r),
+                  ) ??
+                  [];
+              return [
+                ...ownReactions,
+                ...latestReactions,
+              ];
+            }).expand((v) => v))
+        .expand((v) => v);
+
+    if (newReactions.isNotEmpty) {
+      batch.insertAll(
+        reactions,
+        newReactions.toList(),
+        mode: InsertMode.insertOrReplace,
+      );
+    }
+  }
+
+  void updateMessages(
+    List<Message> newMessages,
+    String cid,
+  ) {
+    batch((batch) {
       batch.insertAll(
         messages,
-        channelStates
-            .map((cs) => cs.messages.map(
-                  (m) {
-                    return _Message(
-                      id: m.id,
-                      attachmentJson: jsonEncode(
-                          m.attachments.map((a) => a.toJson()).toList()),
-                      channelCid: cs.channel.cid,
-                      type: m.type,
-                      parentId: m.parentId,
-                      command: m.command,
-                      createdAt: m.createdAt,
-                      showInChannel: m.showInChannel,
-                      replyCount: m.replyCount,
-                      reactionScores: m.reactionScores,
-                      reactionCounts: m.reactionCounts,
-                      status: m.status,
-                      updatedAt: m.updatedAt,
-                      extraData: m.extraData,
-                      userId: m.user.id,
-                      messageText: m.text,
-                    );
-                  },
-                ))
-            .expand((v) => v)
-            .toList(),
+        newMessages.map(
+          (m) {
+            return _Message(
+              id: m.id,
+              attachmentJson:
+                  jsonEncode(m.attachments.map((a) => a.toJson()).toList()),
+              channelCid: cid,
+              type: m.type,
+              parentId: m.parentId,
+              command: m.command,
+              createdAt: m.createdAt,
+              showInChannel: m.showInChannel,
+              replyCount: m.replyCount,
+              reactionScores: m.reactionScores,
+              reactionCounts: m.reactionCounts,
+              status: m.status,
+              updatedAt: m.updatedAt,
+              extraData: m.extraData,
+              userId: m.user.id,
+              messageText: m.text,
+            );
+          },
+        ).toList(),
         mode: InsertMode.insertOrReplace,
       );
+    });
+  }
 
-      batch.deleteWhere<_Reactions, _Reaction>(
-        reactions,
-        (r) => r.messageId.isIn(channelStates
-            .map((cs) => cs.messages.map((m) => m.id))
-            .expand((v) => v)),
+  void updateChannelQueries(
+    Map<String, dynamic> filter,
+    List<String> cids,
+    bool clearQueryCache,
+  ) {
+    final hash = _computeHash(filter);
+    if (clearQueryCache) {
+      delete(channelQueries).where(
+        (_ChannelQueries query) => query.queryHash.equals(hash),
       );
+    }
 
-      final newReactions = channelStates
-          .map((cs) => cs.messages.map((m) {
-                final ownReactions = m.ownReactions?.map(
-                      (r) => _reactionDataFromReaction(m, r),
-                    ) ??
-                    [];
-                final latestReactions = m.latestReactions?.map(
-                      (r) => _reactionDataFromReaction(m, r),
-                    ) ??
-                    [];
-                return [
-                  ...ownReactions,
-                  ...latestReactions,
-                ];
-              }).expand((v) => v))
-          .expand((v) => v);
-
-      if (newReactions.isNotEmpty) {
-        batch.insertAll(
-          reactions,
-          newReactions.toList(),
-          mode: InsertMode.insertOrReplace,
-        );
-      }
-
+    batch((batch) {
       batch.insertAll(
-        users,
-        channelStates
-            .map((cs) => [
-                  _userDataFromUser(cs.channel.createdBy),
-                  if (cs.messages != null)
-                    ...cs.messages
-                        .map((m) => [
-                              _userDataFromUser(m.user),
-                              if (m.latestReactions != null)
-                                ...m.latestReactions
-                                    .map((r) => _userDataFromUser(r.user)),
-                              if (m.ownReactions != null)
-                                ...m.ownReactions
-                                    .map((r) => _userDataFromUser(r.user)),
-                            ])
-                        .expand((v) => v),
-                  if (cs.read != null)
-                    ...cs.read.map((r) => _userDataFromUser(r.user)),
-                  if (cs.members != null)
-                    ...cs.members.map((m) => _userDataFromUser(m.user)),
-                ])
-            .expand((v) => v)
-            .toList(),
-        mode: InsertMode.insertOrReplace,
-      );
-
-      final newReads = channelStates
-          .map((cs) => cs.read?.map((r) => _Read(
-                lastRead: r.lastRead,
-                userId: r.user.id,
-                channelCid: cs.channel.cid,
-              )))
-          .where((v) => v != null)
-          .expand((v) => v);
-
-      if (newReads != null && newReads.isNotEmpty) {
-        batch.insertAll(
-          reads,
-          newReads.toList(),
-          mode: InsertMode.insertOrReplace,
-        );
-      }
-
-      final newMembers = channelStates
-          .map((cs) => cs.members.map((m) => _Member(
-                userId: m.user.id,
-                channelCid: cs.channel.cid,
-                createdAt: m.createdAt,
-                isModerator: m.isModerator,
-                inviteRejectedAt: m.inviteRejectedAt,
-                invited: m.invited,
-                inviteAcceptedAt: m.inviteAcceptedAt,
-                role: m.role,
-                updatedAt: m.updatedAt,
-              )))
-          .where((v) => v != null)
-          .expand((v) => v);
-      if (newMembers != null && newMembers.isNotEmpty) {
-        batch.insertAll(
-          members,
-          newMembers.toList(),
-          mode: InsertMode.insertOrReplace,
-        );
-      }
-
-      batch.insertAll(
-        channels,
-        channelStates.map((cs) {
-          final channel = cs.channel;
-          return _channelDataFromChannelModel(channel);
+        channelQueries,
+        cids.map((cid) {
+          return ChannelQuery(
+            queryHash: hash,
+            channelCid: cid,
+          );
         }).toList(),
         mode: InsertMode.insertOrReplace,
       );
