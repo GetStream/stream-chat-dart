@@ -330,9 +330,10 @@ class Client {
 
       if (value == ConnectionStatus.connected &&
           state.channels?.isNotEmpty == true) {
-        await Future.wait(state.channels.map((channel) =>
-            channel.state?.retryFailedMessages() ?? Future.value()));
-        queryChannels(filter: {
+        await Future.wait(state.channels.map((channel) {
+          return channel.state?.retryFailedMessages() ?? Future.value();
+        }));
+        await queryChannels(filter: {
           'cid': {
             '\$in': state.channels.map((c) => c.cid).toList(),
           },
