@@ -910,7 +910,7 @@ class ClientState {
     });
 
     _client.on(EventType.messageNew).listen((e) {
-      final newChannels = channels;
+      final newChannels = List<Channel>.from(channels ?? []);
       final index = newChannels.indexWhere((c) => c.cid == e.cid);
       if (index > 0) {
         final channel = newChannels.removeAt(index);

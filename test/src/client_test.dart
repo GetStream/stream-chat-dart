@@ -100,6 +100,7 @@ void main() {
         final client = Client(
           'api-key',
           httpClient: mockDio,
+          persistenceEnabled: false,
         );
 
         final queryParams = {
@@ -116,7 +117,7 @@ void main() {
         when(mockDio.get<String>('/channels', queryParameters: queryParams))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
-        client.queryChannels();
+        await client.queryChannels();
 
         verify(mockDio.get<String>('/channels', queryParameters: queryParams))
             .called(1);
@@ -131,6 +132,7 @@ void main() {
         final client = Client(
           'api-key',
           httpClient: mockDio,
+          persistenceEnabled: false,
         );
 
         final Map<String, dynamic> queryFilter = {
@@ -160,7 +162,7 @@ void main() {
           return Response(data: '{}', statusCode: 200);
         });
 
-        client.queryChannels(
+        await client.queryChannels(
           filter: queryFilter,
           sort: sortOptions,
           options: options,
