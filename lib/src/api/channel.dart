@@ -982,8 +982,10 @@ class ChannelClientState {
     if (newThreads.containsKey(parentId)) {
       newThreads[parentId] = [
         ...newThreads[parentId]
-            .where((newMessage) => !messages.any((m) => m.id == newMessage.id))
-            .toList(),
+                ?.where(
+                    (newMessage) => !messages.any((m) => m.id == newMessage.id))
+                ?.toList() ??
+            [],
         ...messages,
       ];
 
