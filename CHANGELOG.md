@@ -1,3 +1,7 @@
+## 0.1.19
+
+- Fix loading message replies
+
 ## 0.1.18
 
 - Export dio error
