@@ -437,7 +437,7 @@ class Channel {
     String parentId,
     PaginationParams options,
   ) async {
-    final cachedReplies = await _client.offlineDatabase?.getReplies(parentId);
+    final cachedReplies = await _client.offlineStorage?.getReplies(parentId);
     state?.updateThreadInfo(parentId, cachedReplies);
 
     final response = await _client.get("/messages/$parentId/replies",
@@ -516,7 +516,7 @@ class Channel {
     }
 
     if (cid != null) {
-      final updatedState = await _client.offlineDatabase?.getChannel(cid);
+      final updatedState = await _client.offlineStorage?.getChannel(cid);
       if (state == null && updatedState != null) {
         _initState(updatedState);
       }
@@ -660,9 +660,9 @@ class ChannelClientState {
 
     _listenReadEvents();
 
-    _channel._client.offlineDatabase
-        .getChannelThreads(_channel.cid)
-        .then((threads) {
+    _channel._client.offlineStorage
+        ?.getChannelThreads(_channel.cid)
+        ?.then((threads) {
       _threads = threads;
       retryFailedMessages();
     });
@@ -1063,7 +1063,7 @@ class ChannelClientState {
 
   set _channelState(v) {
     _channelStateController.add(v);
-    _channel._client.offlineDatabase.updateChannelState(v);
+    _channel._client.offlineStorage?.updateChannelState(v);
   }
 
   /// The channel threads related to this channel
@@ -1076,7 +1076,7 @@ class ChannelClientState {
       BehaviorSubject.seeded({});
 
   set _threads(Map<String, List<Message>> v) {
-    _channel._client.offlineDatabase.updateMessages(
+    _channel._client.offlineStorage?.updateMessages(
       v.values.expand((v) => v).toList(),
       _channel.cid,
     );

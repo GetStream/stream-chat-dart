@@ -16,7 +16,6 @@ void main() {
     );
     final user = User(id: "wild-breeze-7");
 
-    final setUserEvent = await client.setGuestUser(user);
-    print(setUserEvent.toJson());
+    await client.setGuestUser(user);
   });
 }

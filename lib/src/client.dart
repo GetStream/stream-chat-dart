@@ -45,6 +45,7 @@ class Client {
     this.baseURL = _defaultBaseURL,
     this.logLevel = Level.WARNING,
     this.logHandlerFunction,
+    this.persistenceEnabled = true,
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
     Dio httpClient,
@@ -57,10 +58,13 @@ class Client {
     logger.info('instantiating new client');
   }
 
-  OfflineDatabase _offlineDatabase;
+  OfflineDatabase _offlineStorage;
+
+  /// If true chat data will persist on disk
+  final bool persistenceEnabled;
 
   /// Client offline database
-  OfflineDatabase get offlineDatabase => _offlineDatabase;
+  OfflineDatabase get offlineStorage => _offlineStorage;
 
   /// This client state
   ClientState state;
@@ -123,7 +127,7 @@ class Client {
   /// This notifies the connection status of the websocket connection.
   /// Listen to this to get notified when the websocket tries to reconnect.
   final ValueNotifier<ConnectionStatus> wsConnectionStatus =
-      ValueNotifier(null);
+      ValueNotifier(ConnectionStatus.disconnected);
 
   String _token;
   bool _anonymous = false;
@@ -246,14 +250,12 @@ class Client {
 
   /// Call this function to dispose the client
   void dispose() async {
-    print('CLIENT DISPOSE START');
-    await offlineDatabase?.disconnect();
+    await _offlineStorage?.disconnect();
     await this._disconnect();
     httpClient.close();
     await _controller.close();
     state.channels.forEach((c) => c.dispose());
     state.dispose();
-    print('CLIENT DISPOSE end');
   }
 
   Map<String, String> get _httpHeaders => {
@@ -302,7 +304,9 @@ class Client {
   }
 
   Future<void> _connect() async {
-    _offlineDatabase = await connectDatabase(state.user);
+    if (persistenceEnabled) {
+      _offlineStorage = await connectDatabase(state.user);
+    }
 
     _ws = WebSocket(
       baseUrl: baseURL,
@@ -353,7 +357,7 @@ class Client {
   }
 
   /// Requests channels with a given query.
-  void queryChannels({
+  Future<void> queryChannels({
     Map<String, dynamic> filter,
     List<SortOption> sort,
     Map<String, dynamic> options,
@@ -386,7 +390,7 @@ class Client {
       payload.addAll(paginationParams.toJson());
     }
 
-    final offlineChannels = await offlineDatabase?.getChannelStates(
+    final offlineChannels = await _offlineStorage?.getChannelStates(
           filter: filter,
           sort: sort,
           paginationParams: paginationParams,
@@ -431,7 +435,7 @@ class Client {
     });
     state.channels = newChannels;
 
-    offlineDatabase?.updateChannelQueries(
+    _offlineStorage?.updateChannelQueries(
       filter,
       res.channels.map((c) => c.channel.cid).toList(),
       paginationParams?.offset == null || paginationParams.offset == 0,
@@ -574,7 +578,7 @@ class Client {
 
   /// Closes the websocket connection and resets the client
   Future<void> disconnect() async {
-    await offlineDatabase?.disconnect(flush: true);
+    await _offlineStorage?.disconnect(flush: true);
     await _disconnect();
   }
 
