@@ -75,7 +75,7 @@ class _IsolateStartRequest {
   _ChannelQueries,
   _Reactions,
 ])
-class OfflineStorage extends _$OfflineDatabase {
+class OfflineStorage extends _$OfflineStorage {
   /// Creates a new database instance
   OfflineStorage.connect(
     DatabaseConnection connection,
