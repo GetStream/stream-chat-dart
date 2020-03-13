@@ -55,6 +55,7 @@ class Member {
     );
   }
 
+  /// Creates a copy of [Member] with specified attributes overridden.
   Member copyWith({
     user,
     inviteAcceptedAt,

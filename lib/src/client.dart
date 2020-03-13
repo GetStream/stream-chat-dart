@@ -57,7 +57,10 @@ class Client {
     logger.info('instantiating new client');
   }
 
-  OfflineDatabase offlineDatabase;
+  OfflineDatabase _offlineDatabase;
+
+  /// Client offline database
+  OfflineDatabase get offlineDatabase => _offlineDatabase;
 
   /// This client state
   ClientState state;
@@ -298,7 +301,7 @@ class Client {
   }
 
   Future<Event> _connect() async {
-    offlineDatabase = await connectDatabase(state.user);
+    _offlineDatabase = await connectDatabase(state.user);
 
     _ws = WebSocket(
       baseUrl: baseURL,
@@ -385,7 +388,6 @@ class Client {
           filter: filter,
           sort: sort,
           paginationParams: paginationParams,
-          messageLimit: messageLimit,
         ) ??
         [];
     var newChannels = List<Channel>.from(state.channels ?? []);
@@ -937,7 +939,10 @@ class ClientState {
   /// The current total unread messages count as a stream
   Stream<int> get totalUnreadCountStream => _totalUnreadCountController.stream;
 
+  /// The current list of channels in memory as a stream
   Stream<List<Channel>> get channelsStream => _channelsController.stream;
+
+  /// The current list of channels in memory
   List<Channel> get channels => _channelsController.value;
 
   set channels(List<Channel> v) {

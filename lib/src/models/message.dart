@@ -7,13 +7,27 @@ import 'user.dart';
 
 part 'message.g.dart';
 
+/// Enum defining the status of a sending message
 enum MessageSendingStatus {
+  /// Message is being sent
   SENDING,
+
+  /// Message is being updated
   UPDATING,
+
+  /// Message is being deleted
   DELETING,
+
+  /// Message failed to send
   FAILED,
+
+  /// Message failed to updated
   FAILED_UPDATE,
+
+  /// Message failed to delete
   FAILED_DELETE,
+
+  /// Message correctly sent
   SENT,
 }
 

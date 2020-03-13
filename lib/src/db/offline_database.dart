@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:flutter/material.dart' show WidgetsFlutterBinding;
 import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
 import 'package:moor_ffi/moor_ffi.dart';
@@ -23,6 +24,7 @@ part 'models.dart';
 part 'offline_database.g.dart';
 
 Future<MoorIsolate> _createMoorIsolate(String userId) async {
+  WidgetsFlutterBinding.ensureInitialized();
   final dir = await getApplicationDocumentsDirectory();
   final path = p.join(dir.path, 'db_$userId.sqlite');
   final receivePort = ReceivePort();
@@ -45,7 +47,8 @@ void _startBackground(_IsolateStartRequest request) {
   request.sendMoorIsolate.send(moorIsolate);
 }
 
-Future connectDatabase(User user) async {
+/// Gets a new instance of the database running on a background isolate
+Future<OfflineDatabase> connectDatabase(User user) async {
   final isolate = await _createMoorIsolate(user.id);
   final connection = await isolate.connect();
   return OfflineDatabase.connect(
@@ -62,6 +65,7 @@ class _IsolateStartRequest {
   _IsolateStartRequest(this.sendMoorIsolate, this.targetPath);
 }
 
+/// Offline database used for caching channel queries and state
 @UseMoor(tables: [
   _Channels,
   _Users,
@@ -72,6 +76,7 @@ class _IsolateStartRequest {
   _Reactions,
 ])
 class OfflineDatabase extends _$OfflineDatabase {
+  /// Creates a new database instance
   OfflineDatabase.connect(
     DatabaseConnection connection,
     this._userId,
@@ -104,6 +109,8 @@ class OfflineDatabase extends _$OfflineDatabase {
 //        },
 //      );
 
+  /// Closes the database instance
+  /// If [flush] is true, the database data will be deleted
   Future<void> disconnect({bool flush = false}) async {
     if (flush) {
       await batch((batch) {
@@ -115,6 +122,7 @@ class OfflineDatabase extends _$OfflineDatabase {
     await _isolate.shutdownAll();
   }
 
+  /// Get stored replies by messageId
   Future<List<Message>> getReplies(String parentId) async {
     return await Future.wait(await (select(messages).join([
       leftOuterJoin(users, messages.userId.equalsExp(users.id)),
@@ -127,6 +135,7 @@ class OfflineDatabase extends _$OfflineDatabase {
         .get());
   }
 
+  /// Get channel data by cid
   Future<ChannelState> getChannel(String cid) async {
     return await (select(channels)..where((c) => c.cid.equals(cid))).join([
       leftOuterJoin(users, channels.createdBy.equalsExp(users.id)),
@@ -138,11 +147,11 @@ class OfflineDatabase extends _$OfflineDatabase {
     }).getSingle();
   }
 
+  /// Get list of channels by filter, sort and paginationParams
   Future<List<ChannelState>> getChannelStates({
     Map<String, dynamic> filter,
     List<SortOption> sort = const [],
     PaginationParams paginationParams,
-    int messageLimit,
   }) async {
     String hash = _computeHash(filter);
     final cachedChannels = await Future.wait(await (select(channelQueries)
@@ -180,6 +189,123 @@ class OfflineDatabase extends _$OfflineDatabase {
     }));
 
     return cachedChannels;
+  }
+
+  /// Update list of channel queries
+  /// If [clearQueryCache] is true before the insert
+  /// the list of matching rows will be deleted
+  void updateChannelQueries(
+    Map<String, dynamic> filter,
+    List<String> cids,
+    bool clearQueryCache,
+  ) {
+    final hash = _computeHash(filter);
+    if (clearQueryCache) {
+      delete(channelQueries).where(
+        (_ChannelQueries query) => query.queryHash.equals(hash),
+      );
+    }
+
+    batch((batch) {
+      batch.insertAll(
+        channelQueries,
+        cids.map((cid) {
+          return ChannelQuery(
+            queryHash: hash,
+            channelCid: cid,
+          );
+        }).toList(),
+        mode: InsertMode.insertOrReplace,
+      );
+    });
+  }
+
+  /// Update messages data from a list
+  void updateMessages(
+    List<Message> newMessages,
+    String cid,
+  ) {
+    batch((batch) {
+      batch.insertAll(
+        messages,
+        newMessages.map(
+          (m) {
+            return _Message(
+              id: m.id,
+              attachmentJson:
+                  jsonEncode(m.attachments.map((a) => a.toJson()).toList()),
+              channelCid: cid,
+              type: m.type,
+              parentId: m.parentId,
+              command: m.command,
+              createdAt: m.createdAt,
+              showInChannel: m.showInChannel,
+              replyCount: m.replyCount,
+              reactionScores: m.reactionScores,
+              reactionCounts: m.reactionCounts,
+              status: m.status,
+              updatedAt: m.updatedAt,
+              extraData: m.extraData,
+              userId: m.user.id,
+              messageText: m.text,
+            );
+          },
+        ).toList(),
+        mode: InsertMode.insertOrReplace,
+      );
+    });
+  }
+
+  /// Update single channel state
+  Future<void> updateChannelState(ChannelState channelState) async {
+    await updateChannelStates([channelState]);
+  }
+
+  /// Update list of channel states
+  Future<void> updateChannelStates(List<ChannelState> channelStates) async {
+    channelStates.forEach((cs) {
+      updateMessages(
+        cs.messages,
+        cs.channel.cid,
+      );
+    });
+
+    await batch((batch) {
+      _updateReactions(batch, channelStates);
+
+      _updateUsers(batch, channelStates);
+
+      _updateReads(channelStates, batch);
+
+      _updateMembers(channelStates, batch);
+
+      _updateChannels(batch, channelStates);
+    });
+  }
+
+  /// Get the info about channel threads
+  Future<Map<String, List<Message>>> getChannelThreads(String cid) async {
+    final rowMessages = await Future.wait(await (select(messages).join([
+      leftOuterJoin(users, messages.userId.equalsExp(users.id)),
+    ])
+          ..where(messages.channelCid.equals(cid))
+          ..where(isNotNull(messages.parentId))
+          ..orderBy([
+            OrderingTerm.asc(messages.createdAt),
+          ]))
+        .map(_messageFromJoinRow)
+        .get());
+
+    final threads = Map<String, List<Message>>();
+    rowMessages.forEach((message) {
+      if (threads.containsKey(message.parentId)) {
+        threads[message.parentId].add(message);
+      } else {
+        threads[message.parentId] = [message];
+      }
+    });
+
+    return threads;
   }
 
   Future<ChannelState> _channelFromRow(
@@ -233,30 +359,6 @@ class OfflineDatabase extends _$OfflineDatabase {
         .map(_messageFromJoinRow)
         .get());
     return rowMessages;
-  }
-
-  Future<Map<String, List<Message>>> getChannelThreads(String cid) async {
-    final rowMessages = await Future.wait(await (select(messages).join([
-      leftOuterJoin(users, messages.userId.equalsExp(users.id)),
-    ])
-          ..where(messages.channelCid.equals(cid))
-          ..where(isNotNull(messages.parentId))
-          ..orderBy([
-            OrderingTerm.asc(messages.createdAt),
-          ]))
-        .map(_messageFromJoinRow)
-        .get());
-
-    final threads = Map<String, List<Message>>();
-    rowMessages.forEach((message) {
-      if (threads.containsKey(message.parentId)) {
-        threads[message.parentId].add(message);
-      } else {
-        threads[message.parentId] = [message];
-      }
-    });
-
-    return threads;
   }
 
   Future<Message> _messageFromJoinRow(row) async {
@@ -387,45 +489,6 @@ class OfflineDatabase extends _$OfflineDatabase {
     );
   }
 
-  Future<void> updateChannelState(ChannelState channelState) async {
-    await updateChannelStates([
-      channelState
-    ], {
-      'cid': channelState.channel.cid,
-    });
-  }
-
-  Future<void> updateChannelStates(
-    List<ChannelState> channelStates, [
-    Map<String, dynamic> filter,
-    bool clearQueryCache = false,
-  ]) async {
-    updateChannelQueries(
-      filter,
-      channelStates.map((c) => c.channel.cid).toList(),
-      clearQueryCache,
-    );
-
-    channelStates.forEach((cs) {
-      updateMessages(
-        cs.messages,
-        cs.channel.cid,
-      );
-    });
-
-    await batch((batch) {
-      _updateReactions(batch, channelStates);
-
-      _updateUsers(batch, channelStates);
-
-      _updateReads(channelStates, batch);
-
-      _updateMembers(channelStates, batch);
-
-      _updateChannels(batch, channelStates);
-    });
-  }
-
   void _updateChannels(Batch batch, List<ChannelState> channelStates) {
     batch.insertAll(
       channels,
@@ -540,67 +603,6 @@ class OfflineDatabase extends _$OfflineDatabase {
         mode: InsertMode.insertOrReplace,
       );
     }
-  }
-
-  void updateMessages(
-    List<Message> newMessages,
-    String cid,
-  ) {
-    batch((batch) {
-      batch.insertAll(
-        messages,
-        newMessages.map(
-          (m) {
-            return _Message(
-              id: m.id,
-              attachmentJson:
-                  jsonEncode(m.attachments.map((a) => a.toJson()).toList()),
-              channelCid: cid,
-              type: m.type,
-              parentId: m.parentId,
-              command: m.command,
-              createdAt: m.createdAt,
-              showInChannel: m.showInChannel,
-              replyCount: m.replyCount,
-              reactionScores: m.reactionScores,
-              reactionCounts: m.reactionCounts,
-              status: m.status,
-              updatedAt: m.updatedAt,
-              extraData: m.extraData,
-              userId: m.user.id,
-              messageText: m.text,
-            );
-          },
-        ).toList(),
-        mode: InsertMode.insertOrReplace,
-      );
-    });
-  }
-
-  void updateChannelQueries(
-    Map<String, dynamic> filter,
-    List<String> cids,
-    bool clearQueryCache,
-  ) {
-    final hash = _computeHash(filter);
-    if (clearQueryCache) {
-      delete(channelQueries).where(
-        (_ChannelQueries query) => query.queryHash.equals(hash),
-      );
-    }
-
-    batch((batch) {
-      batch.insertAll(
-        channelQueries,
-        cids.map((cid) {
-          return ChannelQuery(
-            queryHash: hash,
-            channelCid: cid,
-          );
-        }).toList(),
-        mode: InsertMode.insertOrReplace,
-      );
-    });
   }
 
   _Reaction _reactionDataFromReaction(Message m, Reaction r) {

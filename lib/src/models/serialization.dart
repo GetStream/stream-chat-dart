@@ -8,6 +8,7 @@ class Serialization {
   /// Used to avoid to serialize properties to json
   static const Function readOnly = readonly;
 
+  /// List of users to list of userIds
   static List<String> userIds(List<User> users) {
     return users?.map((u) => u.id)?.toList();
   }

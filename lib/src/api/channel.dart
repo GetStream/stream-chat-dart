@@ -50,59 +50,81 @@ class Channel {
   String _cid;
   Map<String, dynamic> _extraData;
 
+  /// Channel configuration
   ChannelConfig get config => state?._channelState?.channel?.config;
 
+  /// Channel configuration as a stream
   Stream<ChannelConfig> get configStream =>
       state?.channelStateStream?.map((cs) => cs.channel?.config);
 
+  /// Channel user creator
   User get createdBy => state?._channelState?.channel?.createdBy;
 
+  /// Channel user creator as a stream
   Stream<User> get createdByStream =>
       state?.channelStateStream?.map((cs) => cs.channel?.createdBy);
 
+  /// Channel frozen status
   bool get frozen => state?._channelState?.channel?.frozen;
 
+  /// Channel frozen status as a stream
   Stream<bool> get frozenStream =>
       state?.channelStateStream?.map((cs) => cs.channel?.frozen);
 
+  /// Channel creation date
   DateTime get createdAt => state?._channelState?.channel?.createdAt;
 
+  /// Channel creation date as a stream
   Stream<DateTime> get createdAtStream =>
       state?.channelStateStream?.map((cs) => cs.channel?.createdAt);
 
+  /// Channel last message date
   DateTime get lastMessageAt => state?._channelState?.channel?.lastMessageAt;
 
+  /// Channel last message date as a stream
   Stream<DateTime> get lastMessageAtStream =>
       state?.channelStateStream?.map((cs) => cs.channel?.lastMessageAt);
 
+  /// Channel updated date
   DateTime get updatedAt => state?._channelState?.channel?.updatedAt;
 
+  /// Channel updated date as a stream
   Stream<DateTime> get updatedAtStream =>
       state?.channelStateStream?.map((cs) => cs.channel?.updatedAt);
 
+  /// Channel deletion date
   DateTime get deletedAt => state?._channelState?.channel?.deletedAt;
 
+  /// Channel deletion date as a stream
   Stream<DateTime> get deletedAtStream =>
       state?.channelStateStream?.map((cs) => cs.channel?.deletedAt);
 
+  /// Channel member count
   int get memberCount => state?._channelState?.channel?.memberCount;
 
+  /// Channel member count as a stream
   Stream<int> get memberCountStream =>
       state?.channelStateStream?.map((cs) => cs.channel?.memberCount);
 
+  /// Channel id
   String get id => state?._channelState?.channel?.id ?? _id;
 
+  /// Channel id as a stream
   Stream<String> get idStream =>
       state?.channelStateStream?.map((cs) => cs.channel?.id ?? _id);
 
+  /// Channel cid
   String get cid => state?._channelState?.channel?.cid ?? _cid;
 
+  /// Channel cid as a stream
   Stream<String> get cidStream =>
       state?.channelStateStream?.map((cs) => cs.channel?.cid ?? _cid);
 
+  /// Channel extra data
   Map<String, dynamic> get extraData =>
       state?._channelState?.channel?.extraData;
 
+  /// Channel extra data as a stream
   Stream<Map<String, dynamic>> get extraDataStream =>
       state?.channelStateStream?.map((cs) => cs.channel?.extraData);
 
@@ -646,8 +668,8 @@ class ChannelClientState {
     });
   }
 
+  /// Retry failed message
   Future<void> retryFailedMessages() {
-    _channel._client.logger.info('_retryFailedMessages');
     final failedMessages = <Message>[
       ...messages,
       ...threads.values.expand((v) => v.reversed)
@@ -899,28 +921,38 @@ class ChannelClientState {
     return newMessage;
   }
 
+  /// Channel message list
   List<Message> get messages => _channelState.messages;
 
+  /// Channel message list as a stream
   Stream<List<Message>> get messagesStream =>
       channelStateStream.map((cs) => cs.messages);
 
+  /// Channel members list
   List<Member> get members => _channelState.members;
 
+  /// Channel members list as a stream
   Stream<List<Member>> get membersStream =>
       channelStateStream.map((cs) => cs.members);
 
+  /// Channel watcher count
   int get watcherCount => _channelState.watcherCount;
 
+  /// Channel watcher count as a stream
   Stream<int> get watcherCountStream =>
       channelStateStream.map((cs) => cs.watcherCount);
 
+  /// Channel watchers list
   List<User> get watchers => _channelState.watchers;
 
+  /// Channel watchers list as a stream
   Stream<List<User>> get watchersStream =>
       channelStateStream.map((cs) => cs.watchers);
 
+  /// Channel read list
   List<Read> get read => _channelState.read;
 
+  /// Channel read list as a stream
   Stream<List<Read>> get readStream => channelStateStream.map((cs) => cs.read);
 
   /// Unread count getter
