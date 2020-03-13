@@ -20,7 +20,7 @@ import '../models/reaction.dart';
 import '../models/read.dart';
 import '../models/user.dart';
 
-part 'models.dart';
+part 'models.part.dart';
 part 'offline_database.g.dart';
 
 Future<MoorIsolate> _createMoorIsolate(String userId) async {
