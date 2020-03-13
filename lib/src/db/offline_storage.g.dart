@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'offline_database.dart';
+part of 'offline_storage.dart';
 
 // **************************************************************************
 // MoorGenerator
@@ -2947,9 +2947,9 @@ class $_ReactionsTable extends _Reactions
       _ExtraDataConverter();
 }
 
-abstract class _$OfflineDatabase extends GeneratedDatabase {
-  _$OfflineDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
-  _$OfflineDatabase.connect(DatabaseConnection c) : super.connect(c);
+abstract class _$OfflineStorage extends GeneratedDatabase {
+  _$OfflineStorage(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
+  _$OfflineStorage.connect(DatabaseConnection c) : super.connect(c);
   $_ChannelsTable _channels;
   $_ChannelsTable get channels => _channels ??= $_ChannelsTable(this);
   $_UsersTable _users;

@@ -1,4 +1,4 @@
-part of './offline_database.dart';
+part of './offline_storage.dart';
 
 @DataClassName("ChannelQuery")
 class _ChannelQueries extends Table {

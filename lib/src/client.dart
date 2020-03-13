@@ -15,7 +15,7 @@ import 'api/connection_status.dart';
 import 'api/requests.dart';
 import 'api/responses.dart';
 import 'api/websocket.dart';
-import 'db/offline_database.dart';
+import 'db/offline_storage.dart';
 import 'exceptions.dart';
 import 'models/event.dart';
 import 'models/message.dart';
@@ -58,13 +58,13 @@ class Client {
     logger.info('instantiating new client');
   }
 
-  OfflineDatabase _offlineStorage;
+  OfflineStorage _offlineStorage;
 
   /// If true chat data will persist on disk
   final bool persistenceEnabled;
 
   /// Client offline database
-  OfflineDatabase get offlineStorage => _offlineStorage;
+  OfflineStorage get offlineStorage => _offlineStorage;
 
   /// This client state
   ClientState state;

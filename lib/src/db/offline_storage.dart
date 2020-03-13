@@ -21,7 +21,7 @@ import '../models/read.dart';
 import '../models/user.dart';
 
 part 'models.part.dart';
-part 'offline_database.g.dart';
+part 'offline_storage.g.dart';
 
 Future<MoorIsolate> _createMoorIsolate(String userId) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,10 +48,10 @@ void _startBackground(_IsolateStartRequest request) {
 }
 
 /// Gets a new instance of the database running on a background isolate
-Future<OfflineDatabase> connectDatabase(User user) async {
+Future<OfflineStorage> connectDatabase(User user) async {
   final isolate = await _createMoorIsolate(user.id);
   final connection = await isolate.connect();
-  return OfflineDatabase.connect(
+  return OfflineStorage.connect(
     connection,
     user.id,
     isolate,
@@ -75,9 +75,9 @@ class _IsolateStartRequest {
   _ChannelQueries,
   _Reactions,
 ])
-class OfflineDatabase extends _$OfflineDatabase {
+class OfflineStorage extends _$OfflineDatabase {
   /// Creates a new database instance
-  OfflineDatabase.connect(
+  OfflineStorage.connect(
     DatabaseConnection connection,
     this._userId,
     this._isolate,
