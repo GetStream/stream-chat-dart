@@ -264,7 +264,8 @@ class Client {
 
   /// Set the current user, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<Event> setUser(User user, String token) async {
+  Future<void> setUser(User user, String token) async {
+    logger.info('set user');
     state.user = user;
     _token = token;
     _anonymous = false;
@@ -273,7 +274,7 @@ class Client {
 
   /// Set the current user using the [tokenProvider] to fetch the token.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<Event> setUserWithProvider(User user) async {
+  Future<void> setUserWithProvider(User user) async {
     if (tokenProvider == null) {
       throw Exception('''
       TokenProvider must be provided in the constructor in order to use `setUserWithProvider` method.
@@ -300,7 +301,7 @@ class Client {
     _controller.add(event);
   }
 
-  Future<Event> _connect() async {
+  Future<void> _connect() async {
     _offlineDatabase = await connectDatabase(state.user);
 
     _ws = WebSocket(
@@ -316,7 +317,7 @@ class Client {
         "server_determines_connection_id": true,
       },
       handler: handleEvent,
-      logger: Logger('WS'),
+      logger: Logger('🔌'),
     );
 
     _connectionStatusListener = () async {
@@ -346,8 +347,9 @@ class Client {
     };
 
     _ws.connectionStatus.addListener(_connectionStatusListener);
-
-    return _ws.connect();
+    await _ws.connect().catchError((err, stacktrace) {
+      logger.severe('error connecting ws', err, stacktrace);
+    });
   }
 
   /// Requests channels with a given query.
@@ -549,7 +551,7 @@ class Client {
 
   /// Set the current user with an anonymous id, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<Event> setAnonymousUser() async {
+  Future<void> setAnonymousUser() async {
     this._anonymous = true;
     final uuid = Uuid();
     state.user = User(id: uuid.v4());
@@ -558,7 +560,7 @@ class Client {
 
   /// Set the current user as guest, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<Event> setGuestUser(User user) async {
+  Future<void> setGuestUser(User user) async {
     _anonymous = true;
     final response = await post("/guest", data: {"user": user.toJson()})
         .then((res) => decode<SetGuestUserResponse>(
