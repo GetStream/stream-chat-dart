@@ -150,6 +150,17 @@ class Channel {
       status: MessageSendingStatus.SENDING,
     );
 
+    if (message.parentId != null) {
+      final parentMessage =
+          state.messages.firstWhere((m) => m.id == message.parentId);
+      _client.handleEvent(Event(
+        type: EventType.messageUpdated,
+        message: parentMessage.copyWith(
+          replyCount: parentMessage.replyCount + 1,
+        ),
+        cid: cid,
+      ));
+    }
     _client.handleEvent(Event(
       type: EventType.messageNew,
       message: newMessage,
