@@ -8,6 +8,7 @@ import 'package:moor/moor.dart';
 import 'package:moor_ffi/moor_ffi.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api/requests.dart';
 import '../models/attachment.dart';
@@ -23,12 +24,17 @@ import '../models/user.dart';
 part 'models.part.dart';
 part 'offline_storage.g.dart';
 
+const String _KEY_DB_PATH = '_KEY_DB_PATH';
+
 Future<MoorIsolate> _createMoorIsolate(String userId) async {
   WidgetsFlutterBinding.ensureInitialized();
   final dir = await getApplicationDocumentsDirectory();
   final path = p.join(dir.path, 'db_$userId.sqlite');
-  final receivePort = ReceivePort();
 
+  final sharePreferences = await SharedPreferences.getInstance();
+  await sharePreferences.setString(_KEY_DB_PATH, path);
+
+  final receivePort = ReceivePort();
   await Isolate.spawn(
     _startBackground,
     _IsolateStartRequest(receivePort.sendPort, path),
@@ -65,6 +71,17 @@ class _IsolateStartRequest {
   _IsolateStartRequest(this.sendMoorIsolate, this.targetPath);
 }
 
+LazyDatabase _openConnection() {
+  return LazyDatabase(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    final sharePreferences = await SharedPreferences.getInstance();
+    final path = sharePreferences.getString(_KEY_DB_PATH);
+
+    final file = File(path);
+    return VmDatabase(file);
+  });
+}
+
 /// Offline database used for caching channel queries and state
 @UseMoor(tables: [
   _Channels,
@@ -82,6 +99,20 @@ class OfflineStorage extends _$OfflineStorage {
     this._userId,
     this._isolate,
   ) : super.connect(connection);
+
+  static OfflineStorage _connection;
+
+  factory OfflineStorage(String userId) {
+    if (_connection == null) {
+      _connection = OfflineStorage._internal(userId);
+    }
+
+    return _connection;
+  }
+
+  OfflineStorage._internal(this._userId)
+      : _isolate = null,
+        super(_openConnection());
 
   final String _userId;
   final MoorIsolate _isolate;
@@ -119,7 +150,12 @@ class OfflineStorage extends _$OfflineStorage {
         });
       });
     }
-    await _isolate.shutdownAll();
+
+    if (_isolate != null) {
+      await _isolate.shutdownAll();
+    }
+    _connection = null;
+    await close();
   }
 
   /// Get stored replies by messageId

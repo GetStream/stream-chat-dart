@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
@@ -25,6 +26,9 @@ import 'notifications.dart' as notifications;
 typedef LogHandlerFunction = void Function(LogRecord record);
 typedef DecoderFunction<T> = T Function(Map<String, dynamic>);
 typedef TokenProvider = Future<String> Function(String userId);
+
+const String KEY_USER_ID = 'KEY_USER_ID';
+const String KEY_TOKEN = 'KEY_TOKEN';
 
 /// The official Dart client for Stream Chat,
 /// a service for building chat applications.
@@ -57,8 +61,6 @@ class Client {
     _setupDio(httpClient, receiveTimeout, connectTimeout);
 
     logger.info('instantiating new client');
-
-    notifications.init(this);
   }
 
   OfflineStorage _offlineStorage;
@@ -132,7 +134,7 @@ class Client {
   final ValueNotifier<ConnectionStatus> wsConnectionStatus =
       ValueNotifier(ConnectionStatus.disconnected);
 
-  String _token;
+  String token;
   bool _anonymous = false;
   String _connectionId;
   WebSocket _ws;
@@ -201,7 +203,7 @@ class Client {
 
         final newToken = await this.tokenProvider(userId);
         await Future.delayed(Duration(seconds: 4));
-        this._token = newToken;
+        this.token = newToken;
 
         await setUser(User(id: userId), newToken);
 
@@ -262,7 +264,7 @@ class Client {
   }
 
   Map<String, String> get _httpHeaders => {
-        "Authorization": _token,
+        "Authorization": token,
         "stream-auth-type": _authType,
         "x-stream-client": _userAgent,
       };
@@ -272,9 +274,16 @@ class Client {
   Future<void> setUser(User user, String token) async {
     logger.info('set user');
     state.user = user;
-    _token = token;
+    this.token = token;
     _anonymous = false;
-    return _connect();
+
+    WidgetsFlutterBinding.ensureInitialized();
+    final sharePreferences = await SharedPreferences.getInstance();
+    await sharePreferences.setString(KEY_USER_ID, user.id);
+    await sharePreferences.setString(KEY_TOKEN, token);
+
+    notifications.init(this);
+    return connect();
   }
 
   /// Set the current user using the [tokenProvider] to fetch the token.
@@ -306,7 +315,7 @@ class Client {
     _controller.add(event);
   }
 
-  Future<void> _connect() async {
+  Future<void> connect() async {
     if (persistenceEnabled) {
       _offlineStorage = await connectDatabase(state.user);
     }
@@ -316,7 +325,7 @@ class Client {
       user: state.user,
       connectParams: {
         "api_key": apiKey,
-        "authorization": _token,
+        "authorization": token,
         "stream-auth-type": _authType,
       },
       connectPayload: {
@@ -563,7 +572,7 @@ class Client {
     this._anonymous = true;
     final uuid = Uuid();
     state.user = User(id: uuid.v4());
-    return _connect();
+    return connect();
   }
 
   /// Set the current user as guest, this triggers a connection to the API.
@@ -590,11 +599,7 @@ class Client {
   Future<void> _disconnect() async {
     logger.info('Client disconnecting');
 
-    this._anonymous = false;
-    this._connectionId = null;
     await this._ws.disconnect();
-    this._token = null;
-    state.user = null;
   }
 
   /// Requests users with a given query.
