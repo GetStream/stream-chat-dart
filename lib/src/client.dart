@@ -20,6 +20,7 @@ import 'exceptions.dart';
 import 'models/event.dart';
 import 'models/message.dart';
 import 'models/user.dart';
+import 'notifications.dart' as notifications;
 
 typedef LogHandlerFunction = void Function(LogRecord record);
 typedef DecoderFunction<T> = T Function(Map<String, dynamic>);
@@ -56,6 +57,8 @@ class Client {
     _setupDio(httpClient, receiveTimeout, connectTimeout);
 
     logger.info('instantiating new client');
+
+    notifications.init(this);
   }
 
   OfflineStorage _offlineStorage;
@@ -578,8 +581,9 @@ class Client {
   }
 
   /// Closes the websocket connection and resets the client
-  Future<void> disconnect() async {
-    await _offlineStorage?.disconnect(flush: true);
+  Future<void> disconnect({bool flushOfflineStorage = false}) async {
+    logger.info('Disconnecting');
+    await _offlineStorage?.disconnect(flush: flushOfflineStorage);
     await _disconnect();
   }
 
