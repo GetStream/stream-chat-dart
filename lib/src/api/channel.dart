@@ -538,6 +538,7 @@ class Channel {
     final updatedState = _client.decode(response.data, ChannelState.fromJson);
 
     if (_id == null) {
+      print('set oid $id');
       _id = updatedState.channel.id;
       _cid = updatedState.channel.cid;
     }
@@ -1046,13 +1047,38 @@ class ChannelClientState {
           [],
     ];
 
+    List<Read> newReads = [
+      ...updatedState?.read ?? [],
+      ..._channelState?.read
+              ?.where((r) =>
+                  updatedState.read
+                      ?.any((newRead) => newRead.user.id == r.user.id) ==
+                  false)
+              ?.toList() ??
+          [],
+    ];
+
     _channelState = _channelState.copyWith(
       messages: newMessages,
-      channel: updatedState.channel,
+      channel: _channelState.channel?.copyWith(
+        lastMessageAt: updatedState.channel?.lastMessageAt,
+        members: updatedState.channel?.members,
+        createdAt: updatedState.channel?.createdAt,
+        type: updatedState.channel?.type,
+        extraData: updatedState.channel?.extraData,
+        updatedAt: updatedState.channel?.updatedAt,
+        id: updatedState.channel?.id,
+        createdBy: updatedState.channel?.createdBy,
+        config: updatedState.channel?.config,
+        deletedAt: updatedState.channel?.deletedAt,
+        cid: updatedState.channel?.cid,
+        frozen: updatedState.channel?.frozen,
+        memberCount: updatedState.channel?.memberCount,
+      ),
       watchers: newWatchers,
       watcherCount: updatedState.watcherCount,
       members: newMembers,
-      read: updatedState.read,
+      read: newReads,
     );
   }
 
@@ -1073,6 +1099,9 @@ class ChannelClientState {
 
   /// The channel state related to this client as a stream
   Stream<ChannelState> get channelStateStream => _channelStateController.stream;
+
+  /// The channel state related to this client
+  ChannelState get channelState => _channelStateController.value;
   BehaviorSubject<ChannelState> _channelStateController;
 
   set _channelState(v) {

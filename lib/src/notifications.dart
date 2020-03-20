@@ -1,71 +1,97 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_apns/apns.dart';
+import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stream_chat/src/api/connection_status.dart';
 import 'package:stream_chat/src/db/offline_storage.dart';
+import 'package:stream_chat/src/models/channel_model.dart';
+import 'package:stream_chat/src/models/channel_state.dart';
+import 'package:stream_chat/src/models/message.dart';
 
 import 'client.dart';
-import 'models/user.dart';
 
-void _handleNotification(Map<String, dynamic> data) async {
-  final messageId = data['messageId'];
-  final channelCid = data['channelCid'];
+Future<void> _handleNotification(
+  Map<String, dynamic> notification,
+  Client client,
+) async {
+  print('New notification $notification');
+  if (notification.containsKey('data')) {
+    final data = Map<String, dynamic>.from(notification['data']);
+    final message = Message.fromJson(
+      Map<String, dynamic>.from(jsonDecode(data['message'].toString())),
+    ).copyWith(
+      createdAt: DateTime.now(),
+    );
+    final channelModel = ChannelModel.fromJson(
+      Map<String, dynamic>.from(jsonDecode(data['channel'].toString())),
+    );
 
-  if (messageId != null) {
-    final sharedPreferences = await SharedPreferences.getInstance();
-    final userId = sharedPreferences.getString(KEY_USER_ID);
-    final token = sharedPreferences.getString(KEY_TOKEN);
+    if (message != null) {
+      if (client == null) {
+        final sharedPreferences = await SharedPreferences.getInstance();
+        final userId = sharedPreferences.getString(KEY_USER_ID);
 
-    final client = Client('s2dxdhpxd94g');
-    client.state.user = User(id: userId);
-    client.token = token;
-
-    final offlineStorage = OfflineStorage(client.state.user.id);
-
-    final res = await client.getMessage(messageId);
-    final message = res.message;
-
-    offlineStorage.updateMessages([message], channelCid);
-    await offlineStorage.disconnect();
+        final offlineStorage = OfflineStorage(userId, Logger('💽'));
+        await offlineStorage.updateChannelState(
+          ChannelState(
+            channel: channelModel,
+            messages: [message],
+          ),
+        );
+      } else {
+        if (client.wsConnectionStatus.value == ConnectionStatus.disconnected) {
+          await client.connect();
+        }
+        final channel = client.state.channels.firstWhere(
+          (c) => c.cid == channelModel.cid,
+        );
+        channel.state.updateChannelState(
+          ChannelState(
+            channel: channelModel,
+            messages: [message],
+          ),
+        );
+      }
+    }
   }
 }
 
 void init(Client client) async {
   WidgetsFlutterBinding.ensureInitialized();
+
   final pushConnector = createPushConnector();
   pushConnector.requestNotificationPermissions();
+
+  // workaround for https://github.com/FirebaseExtended/flutterfire/issues/1669
+  var lastMessage;
   pushConnector.configure(
-    onMessage: (Map<String, dynamic> message) async {
-      print("onMessage: $message");
+    onMessage: (message) async {
+      if (message == lastMessage) {
+        return;
+      }
+      lastMessage = message;
+      await _handleNotification(message, client);
     },
-    onBackgroundMessage: backgroundMessageHandler,
-    onLaunch: (Map<String, dynamic> message) async {
-      print("onLaunch: $message");
+    onLaunch: (message) async {
+      if (message == lastMessage) {
+        return;
+      }
+      lastMessage = message;
+      await _handleNotification(message, client);
     },
-    onResume: (Map<String, dynamic> message) async {
-      print("onResume: $message");
+    onResume: (message) async {
+      if (lastMessage != null &&
+          message['data'].toString() == lastMessage['data'].toString()) {
+        return;
+      }
+      lastMessage = message;
+      await _handleNotification(message, client);
     },
   );
   pushConnector.token.addListener(() {
     final token = pushConnector.token.value;
-    print('TOKEN REFRESHED $token');
     client.addDevice(token, 'firebase');
   });
-  print('NOTIFICATION CONFIGURED');
-}
-
-Future<dynamic> backgroundMessageHandler(Map<String, dynamic> message) {
-  if (message.containsKey('data')) {
-    // Handle data message
-    final dynamic data = Map<String, dynamic>.from(message['data']);
-    print('NOTIFICATION DATA $data');
-    _handleNotification(data);
-  }
-
-  if (message.containsKey('notification')) {
-    // Handle notification message
-    final dynamic notification = message['notification'];
-    print('NOTIFICATION MESSAGE $notification');
-  }
-
-  // Or do other work.
 }

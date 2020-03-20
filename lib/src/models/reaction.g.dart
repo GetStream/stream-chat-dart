@@ -6,7 +6,7 @@ part of 'reaction.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Reaction _$ReactionFromJson(Map<String, dynamic> json) {
+Reaction _$ReactionFromJson(Map json) {
   return Reaction(
     messageId: json['message_id'] as String,
     createdAt: json['created_at'] == null
@@ -15,10 +15,14 @@ Reaction _$ReactionFromJson(Map<String, dynamic> json) {
     type: json['type'] as String,
     user: json['user'] == null
         ? null
-        : User.fromJson(json['user'] as Map<String, dynamic>),
+        : User.fromJson((json['user'] as Map)?.map(
+            (k, e) => MapEntry(k as String, e),
+          )),
     userId: json['user_id'] as String,
     score: json['score'] as int,
-    extraData: json['extra_data'] as Map<String, dynamic>,
+    extraData: (json['extra_data'] as Map)?.map(
+      (k, e) => MapEntry(k as String, e),
+    ),
   );
 }
 

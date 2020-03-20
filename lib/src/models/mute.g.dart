@@ -6,14 +6,18 @@ part of 'mute.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Mute _$MuteFromJson(Map<String, dynamic> json) {
+Mute _$MuteFromJson(Map json) {
   return Mute(
     user: json['user'] == null
         ? null
-        : User.fromJson(json['user'] as Map<String, dynamic>),
+        : User.fromJson((json['user'] as Map)?.map(
+            (k, e) => MapEntry(k as String, e),
+          )),
     target: json['target'] == null
         ? null
-        : User.fromJson(json['target'] as Map<String, dynamic>),
+        : User.fromJson((json['target'] as Map)?.map(
+            (k, e) => MapEntry(k as String, e),
+          )),
     createdAt: json['created_at'] == null
         ? null
         : DateTime.parse(json['created_at'] as String),

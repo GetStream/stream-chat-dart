@@ -6,7 +6,7 @@ part of 'attachment.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Attachment _$AttachmentFromJson(Map<String, dynamic> json) {
+Attachment _$AttachmentFromJson(Map json) {
   return Attachment(
     type: json['type'] as String,
     titleLink: json['title_link'] as String,
@@ -26,10 +26,15 @@ Attachment _$AttachmentFromJson(Map<String, dynamic> json) {
     authorIcon: json['author_icon'] as String,
     assetUrl: json['asset_url'] as String,
     actions: (json['actions'] as List)
-        ?.map((e) =>
-            e == null ? null : Action.fromJson(e as Map<String, dynamic>))
+        ?.map((e) => e == null
+            ? null
+            : Action.fromJson((e as Map)?.map(
+                (k, e) => MapEntry(k as String, e),
+              )))
         ?.toList(),
-    extraData: json['extra_data'] as Map<String, dynamic>,
+    extraData: (json['extra_data'] as Map)?.map(
+      (k, e) => MapEntry(k as String, e),
+    ),
     localUri: json['local_uri'] == null
         ? null
         : Uri.parse(json['local_uri'] as String),

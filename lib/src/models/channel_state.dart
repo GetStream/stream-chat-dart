@@ -32,11 +32,11 @@ class ChannelState {
   /// Constructor used for json serialization
   ChannelState({
     this.channel,
-    this.messages,
-    this.members,
+    this.messages = const [],
+    this.members = const [],
     this.watcherCount,
-    this.watchers,
-    this.read,
+    this.watchers = const [],
+    this.read = const [],
   });
 
   /// Create a new instance from a json

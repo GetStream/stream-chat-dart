@@ -8,6 +8,7 @@ import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_chat/src/event_type.dart';
+import 'package:stream_chat/src/models/own_user.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
 
@@ -28,7 +29,6 @@ typedef DecoderFunction<T> = T Function(Map<String, dynamic>);
 typedef TokenProvider = Future<String> Function(String userId);
 
 const String KEY_USER_ID = 'KEY_USER_ID';
-const String KEY_TOKEN = 'KEY_TOKEN';
 
 /// The official Dart client for Stream Chat,
 /// a service for building chat applications.
@@ -280,7 +280,6 @@ class Client {
     WidgetsFlutterBinding.ensureInitialized();
     final sharePreferences = await SharedPreferences.getInstance();
     await sharePreferences.setString(KEY_USER_ID, user.id);
-    await sharePreferences.setString(KEY_TOKEN, token);
 
     notifications.init(this);
     return connect();
@@ -316,8 +315,15 @@ class Client {
   }
 
   Future<void> connect() async {
-    if (persistenceEnabled) {
-      _offlineStorage = await connectDatabase(state.user);
+    if (this.wsConnectionStatus.value == ConnectionStatus.connecting) {
+      logger.warning('Already connecting');
+      return;
+    }
+
+    this.wsConnectionStatus.value = ConnectionStatus.connecting;
+
+    if (persistenceEnabled && _offlineStorage == null) {
+      _offlineStorage = await connectDatabase(state.user, Logger('💽'));
     }
 
     _ws = WebSocket(
@@ -377,6 +383,7 @@ class Client {
     PaginationParams paginationParams,
     int messageLimit,
   }) async {
+    logger.info('Query channel start');
     final Map<String, dynamic> defaultOptions = {
       "state": true,
       "watch": true,
@@ -410,6 +417,7 @@ class Client {
         ) ??
         [];
     var newChannels = List<Channel>.from(state.channels ?? []);
+    logger.info('Got ${newChannels.length} channels from storage');
     offlineChannels?.forEach((channelState) {
       final index =
           newChannels.indexWhere((c) => c.cid == channelState.channel.cid);
@@ -434,6 +442,8 @@ class Client {
       response.data,
       QueryChannelsResponse.fromJson,
     );
+
+    logger.info('Got ${res.channels.length} channels from api');
 
     newChannels = List<Channel>.from(state.channels ?? []);
     res?.channels?.forEach((channelState) {
@@ -571,7 +581,7 @@ class Client {
   Future<void> setAnonymousUser() async {
     this._anonymous = true;
     final uuid = Uuid();
-    state.user = User(id: uuid.v4());
+    state.user = OwnUser(id: uuid.v4());
     return connect();
   }
 
@@ -592,7 +602,11 @@ class Client {
   /// Closes the websocket connection and resets the client
   Future<void> disconnect({bool flushOfflineStorage = false}) async {
     logger.info('Disconnecting');
-    await _offlineStorage?.disconnect(flush: flushOfflineStorage);
+
+    if (flushOfflineStorage) {
+      await _offlineStorage?.disconnect(flush: true);
+    }
+
     await _disconnect();
   }
 
@@ -933,15 +947,15 @@ class ClientState {
   final Client _client;
 
   /// Update user information
-  set user(User user) {
+  set user(OwnUser user) {
     _userController.add(user);
   }
 
   /// The current user
-  User get user => _userController.value;
+  OwnUser get user => _userController.value;
 
   /// The current user as a stream
-  Stream<User> get userStream => _userController.stream;
+  Stream<OwnUser> get userStream => _userController.stream;
 
   /// The current unread channels count
   int get unreadChannels => _unreadChannelsController.value;
@@ -966,7 +980,7 @@ class ClientState {
   }
 
   BehaviorSubject<List<Channel>> _channelsController = BehaviorSubject();
-  BehaviorSubject<User> _userController = BehaviorSubject();
+  BehaviorSubject<OwnUser> _userController = BehaviorSubject();
   BehaviorSubject<int> _unreadChannelsController = BehaviorSubject();
   BehaviorSubject<int> _totalUnreadCountController = BehaviorSubject();
 

@@ -6,7 +6,7 @@ part of 'event.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Event _$EventFromJson(Map<String, dynamic> json) {
+Event _$EventFromJson(Map json) {
   return Event(
     type: json['type'] as String,
     cid: json['cid'] as String,
@@ -16,18 +16,26 @@ Event _$EventFromJson(Map<String, dynamic> json) {
         : DateTime.parse(json['created_at'] as String),
     me: json['me'] == null
         ? null
-        : OwnUser.fromJson(json['me'] as Map<String, dynamic>),
+        : OwnUser.fromJson((json['me'] as Map)?.map(
+            (k, e) => MapEntry(k as String, e),
+          )),
     user: json['user'] == null
         ? null
-        : User.fromJson(json['user'] as Map<String, dynamic>),
+        : User.fromJson((json['user'] as Map)?.map(
+            (k, e) => MapEntry(k as String, e),
+          )),
     message: json['message'] == null
         ? null
-        : Message.fromJson(json['message'] as Map<String, dynamic>),
+        : Message.fromJson((json['message'] as Map)?.map(
+            (k, e) => MapEntry(k as String, e),
+          )),
     totalUnreadCount: json['total_unread_count'] as int,
     unreadChannels: json['unread_channels'] as int,
     reaction: json['reaction'] == null
         ? null
-        : Reaction.fromJson(json['reaction'] as Map<String, dynamic>),
+        : Reaction.fromJson((json['reaction'] as Map)?.map(
+            (k, e) => MapEntry(k as String, e),
+          )),
   );
 }
 

@@ -27,8 +27,8 @@ class _Channel extends DataClass implements Insertable<_Channel> {
       @required this.config,
       @required this.frozen,
       this.lastMessageAt,
-      @required this.createdAt,
-      @required this.updatedAt,
+      this.createdAt,
+      this.updatedAt,
       this.deletedAt,
       this.memberCount,
       this.extraData,
@@ -256,8 +256,8 @@ class _ChannelsCompanion extends UpdateCompanion<_Channel> {
     @required String config,
     this.frozen = const Value.absent(),
     this.lastMessageAt = const Value.absent(),
-    @required DateTime createdAt,
-    @required DateTime updatedAt,
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
     this.memberCount = const Value.absent(),
     this.extraData = const Value.absent(),
@@ -265,9 +265,7 @@ class _ChannelsCompanion extends UpdateCompanion<_Channel> {
   })  : id = Value(id),
         type = Value(type),
         cid = Value(cid),
-        config = Value(config),
-        createdAt = Value(createdAt),
-        updatedAt = Value(updatedAt);
+        config = Value(config);
   _ChannelsCompanion copyWith(
       {Value<String> id,
       Value<String> type,
@@ -382,7 +380,7 @@ class $_ChannelsTable extends _Channels
     return GeneratedDateTimeColumn(
       'created_at',
       $tableName,
-      false,
+      true,
     );
   }
 
@@ -394,7 +392,7 @@ class $_ChannelsTable extends _Channels
     return GeneratedDateTimeColumn(
       'updated_at',
       $tableName,
-      false,
+      true,
     );
   }
 
@@ -508,14 +506,10 @@ class $_ChannelsTable extends _Channels
     if (d.createdAt.present) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableValue(d.createdAt.value, _createdAtMeta));
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
     }
     if (d.updatedAt.present) {
       context.handle(_updatedAtMeta,
           updatedAt.isAcceptableValue(d.updatedAt.value, _updatedAtMeta));
-    } else if (isInserting) {
-      context.missing(_updatedAtMeta);
     }
     if (d.deletedAt.present) {
       context.handle(_deletedAtMeta,

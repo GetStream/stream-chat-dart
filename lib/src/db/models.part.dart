@@ -26,9 +26,9 @@ class _Channels extends Table {
 
   DateTimeColumn get lastMessageAt => dateTime().nullable()();
 
-  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get createdAt => dateTime().nullable()();
 
-  DateTimeColumn get updatedAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
 
   DateTimeColumn get deletedAt => dateTime().nullable()();
 

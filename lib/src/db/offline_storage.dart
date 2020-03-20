@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:flutter/material.dart' show WidgetsFlutterBinding;
+import 'package:logging/logging.dart';
 import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
 import 'package:moor_ffi/moor_ffi.dart';
@@ -54,13 +55,15 @@ void _startBackground(_IsolateStartRequest request) {
 }
 
 /// Gets a new instance of the database running on a background isolate
-Future<OfflineStorage> connectDatabase(User user) async {
+Future<OfflineStorage> connectDatabase(User user, Logger logger) async {
+  logger.info('Connecting on background isolate');
   final isolate = await _createMoorIsolate(user.id);
   final connection = await isolate.connect();
   return OfflineStorage.connect(
     connection,
     user.id,
     isolate,
+    logger,
   );
 }
 
@@ -98,24 +101,21 @@ class OfflineStorage extends _$OfflineStorage {
     DatabaseConnection connection,
     this._userId,
     this._isolate,
+    this._logger,
   ) : super.connect(connection);
 
-  static OfflineStorage _connection;
-
-  factory OfflineStorage(String userId) {
-    if (_connection == null) {
-      _connection = OfflineStorage._internal(userId);
-    }
-
-    return _connection;
+  OfflineStorage(
+    this._userId,
+    this._logger,
+  )   : _isolate = null,
+        super(_openConnection()) {
+    moorRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+    _logger.info('Connecting on standard isolate');
   }
-
-  OfflineStorage._internal(this._userId)
-      : _isolate = null,
-        super(_openConnection());
 
   final String _userId;
   final MoorIsolate _isolate;
+  final Logger _logger;
 
   // you should bump this number whenever you change or add a table definition. Migrations
   // are covered later in this readme.
@@ -143,7 +143,9 @@ class OfflineStorage extends _$OfflineStorage {
   /// Closes the database instance
   /// If [flush] is true, the database data will be deleted
   Future<void> disconnect({bool flush = false}) async {
+    _logger.info('Disconnecting');
     if (flush) {
+      _logger.info('Flushing');
       await batch((batch) {
         allTables.forEach((table) {
           delete(table);
@@ -151,10 +153,8 @@ class OfflineStorage extends _$OfflineStorage {
       });
     }
 
-    if (_isolate != null) {
-      await _isolate.shutdownAll();
-    }
-    _connection = null;
+    await _isolate?.shutdownAll();
+
     await close();
   }
 
@@ -189,6 +189,7 @@ class OfflineStorage extends _$OfflineStorage {
     List<SortOption> sort = const [],
     PaginationParams paginationParams,
   }) async {
+    _logger.info('Get channel states');
     String hash = _computeHash(filter);
     final cachedChannels = await Future.wait(await (select(channelQueries)
           ..where((c) => c.queryHash.equals(hash)))
@@ -223,6 +224,8 @@ class OfflineStorage extends _$OfflineStorage {
         return _channelFromRow(channelRow, userRow);
       }).get();
     }));
+
+    _logger.info('Got ${cachedChannels.length} channels');
 
     return cachedChannels;
   }
@@ -268,8 +271,9 @@ class OfflineStorage extends _$OfflineStorage {
           (m) {
             return _Message(
               id: m.id,
-              attachmentJson:
-                  jsonEncode(m.attachments.map((a) => a.toJson()).toList()),
+              attachmentJson: m.attachments != null
+                  ? jsonEncode(m.attachments.map((a) => a.toJson()).toList())
+                  : null,
               channelCid: cid,
               type: m.type,
               parentId: m.parentId,
@@ -369,7 +373,7 @@ class OfflineStorage extends _$OfflineStorage {
         extraData: channelRow.extraData,
         members: [],
         config: ChannelConfig.fromJson(jsonDecode(channelRow.config)),
-        createdBy: _userFromUserRow(userRow),
+        createdBy: userRow != null ? _userFromUserRow(userRow) : null,
       ),
     );
   }
@@ -407,10 +411,12 @@ class OfflineStorage extends _$OfflineStorage {
     return Message(
       latestReactions: latestReactions,
       ownReactions: ownReactions,
-      attachments:
-          List<Map<String, dynamic>>.from(jsonDecode(messageRow.attachmentJson))
+      attachments: messageRow.attachmentJson != null
+          ? List<Map<String, dynamic>>.from(
+                  jsonDecode(messageRow.attachmentJson))
               .map((j) => Attachment.fromJson(j))
-              .toList(),
+              .toList()
+          : null,
       createdAt: messageRow.createdAt,
       extraData: messageRow.extraData,
       updatedAt: messageRow.updatedAt,
@@ -584,7 +590,8 @@ class OfflineStorage extends _$OfflineStorage {
       users,
       channelStates
           .map((cs) => [
-                _userDataFromUser(cs.channel.createdBy),
+                if (cs.channel.createdBy != null)
+                  _userDataFromUser(cs.channel.createdBy),
                 if (cs.messages != null)
                   ...cs.messages
                       .map((m) => [
@@ -668,7 +675,7 @@ class OfflineStorage extends _$OfflineStorage {
   _Channel _channelDataFromChannelModel(ChannelModel channel) {
     return _Channel(
       id: channel.id,
-      config: jsonEncode(channel.config.toJson()),
+      config: jsonEncode(channel.config?.toJson() ?? {}),
       type: channel.type,
       frozen: channel.frozen,
       createdAt: channel.createdAt,
@@ -678,7 +685,7 @@ class OfflineStorage extends _$OfflineStorage {
       lastMessageAt: channel.lastMessageAt,
       deletedAt: channel.deletedAt,
       extraData: channel.extraData,
-      createdBy: channel.createdBy.id,
+      createdBy: channel.createdBy?.id,
     );
   }
 }
