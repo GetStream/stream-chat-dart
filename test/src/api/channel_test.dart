@@ -529,7 +529,7 @@ void main() {
             'presence': true,
           };
 
-          when(mockDio.post<String>('/channels/messaging', data: options))
+          when(mockDio.post<String>('/channels/messaging/query', data: options))
               .thenAnswer((_) async {
             return Response(data: r'''
             {
@@ -822,7 +822,8 @@ void main() {
 
           final response = await channelClient.query(options: options);
 
-          verify(mockDio.post<String>('/channels/messaging', data: options))
+          verify(mockDio.post<String>('/channels/messaging/query',
+                  data: options))
               .called(1);
           expect(channelClient.id, response.channel.id);
           expect(channelClient.cid, response.channel.cid);
@@ -1160,7 +1161,7 @@ void main() {
           'presence': false,
         };
 
-        when(mockDio.post<String>('/channels/messaging', data: options))
+        when(mockDio.post<String>('/channels/messaging/query', data: options))
             .thenAnswer((_) async => Response(data: r'''
             {
             "channel": {
@@ -1451,7 +1452,7 @@ void main() {
 
         final response = await channelClient.create();
 
-        verify(mockDio.post<String>('/channels/messaging', data: options))
+        verify(mockDio.post<String>('/channels/messaging/query', data: options))
             .called(1);
         expect(channelClient.id, response.channel.id);
         expect(channelClient.cid, response.channel.cid);
@@ -1475,7 +1476,7 @@ void main() {
           'presence': true,
         };
 
-        when(mockDio.post<String>('/channels/messaging', data: options))
+        when(mockDio.post<String>('/channels/messaging/query', data: options))
             .thenAnswer((_) async => Response(data: r'''
             {
             "channel": {
@@ -1766,7 +1767,7 @@ void main() {
 
         final response = await channelClient.watch({'presence': true});
 
-        verify(mockDio.post<String>('/channels/messaging', data: options))
+        verify(mockDio.post<String>('/channels/messaging/query', data: options))
             .called(1);
         expect(channelClient.id, response.channel.id);
         expect(channelClient.cid, response.channel.cid);
