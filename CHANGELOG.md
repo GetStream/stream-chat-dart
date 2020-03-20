@@ -1,3 +1,7 @@
+## 0.1.20
+
+- Fix channel query path without id
+
 ## 0.1.19
 
 - Fix loading message replies

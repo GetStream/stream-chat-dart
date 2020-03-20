@@ -451,8 +451,9 @@ class Channel {
   }) async {
     var path = "/channels/$type";
     if (id != null) {
-      path = "$path/$id/query";
+      path = "$path/$id";
     }
+    path = '$path/query';
 
     final payload = Map<String, dynamic>.from({
       "state": true,
