@@ -10,6 +10,8 @@ import 'package:moor_ffi/moor_ffi.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stream_chat/src/models/event.dart';
+import 'package:stream_chat/src/models/own_user.dart';
 
 import '../api/requests.dart';
 import '../models/attachment.dart';
@@ -87,6 +89,7 @@ LazyDatabase _openConnection() {
 
 /// Offline database used for caching channel queries and state
 @UseMoor(tables: [
+  _ConnectionEvent,
   _Channels,
   _Users,
   _Messages,
@@ -132,7 +135,7 @@ class OfflineStorage extends _$OfflineStorage {
 //          }
 //        },
 //        onUpgrade: (openingDetails, _, __) async {
-//          final m = Msigrator(this, customStatement);
+//          final m = Migrator(this, customStatement);
 //          for (final table in allTables) {
 //            await m.deleteTable(table.actualTableName);
 //            await m.createTable(table);
@@ -169,6 +172,30 @@ class OfflineStorage extends _$OfflineStorage {
           ]))
         .map(_messageFromJoinRow)
         .get());
+  }
+
+  /// Get stored connection event
+  Future<Event> getConnectionInfo() async {
+    return select(connectionEvent)
+        .map((row) => Event(
+              me: OwnUser.fromJson(row.ownUser),
+              totalUnreadCount: row.totalUnreadCount,
+              unreadChannels: row.unreadChannels,
+            ))
+        .getSingle();
+  }
+
+  /// Update stored connection event
+  Future<void> updateConnectionInfo(Event event) async {
+    return into(connectionEvent).insert(
+      _ConnectionEventData(
+        id: 1,
+        unreadChannels: event.unreadChannels,
+        totalUnreadCount: event.totalUnreadCount,
+        ownUser: event.me?.toJson(),
+      ),
+      mode: InsertMode.insertOrReplace,
+    );
   }
 
   /// Get channel data by cid

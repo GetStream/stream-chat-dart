@@ -271,9 +271,9 @@ class Client {
 
   /// Set the current user, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<void> setUser(User user, String token) async {
+  Future<Event> setUser(User user, String token) async {
     logger.info('set user');
-    state.user = user;
+    state.user = OwnUser.fromJson(user.toJson());
     this.token = token;
     _anonymous = false;
 
@@ -309,15 +309,21 @@ class Client {
       _connectionId = event.connectionId;
     }
     if (event.me != null) {
+      _offlineStorage.updateConnectionInfo(event);
       state.user = event.me;
     }
     _controller.add(event);
   }
 
-  Future<void> connect() async {
+  Future<Event> connect() async {
     if (this.wsConnectionStatus.value == ConnectionStatus.connecting) {
       logger.warning('Already connecting');
-      return;
+      throw Exception('Already connecting');
+    }
+
+    if (this.wsConnectionStatus.value == ConnectionStatus.connected) {
+      logger.warning('Already connected');
+      throw Exception('Already connected');
     }
 
     this.wsConnectionStatus.value = ConnectionStatus.connecting;
@@ -370,9 +376,19 @@ class Client {
     };
 
     _ws.connectionStatus.addListener(_connectionStatusListener);
-    await _ws.connect().catchError((err, stacktrace) {
+
+    var event = await _offlineStorage.getConnectionInfo();
+
+    await _ws.connect().then((e) {
+      if (e.me != null) {
+        _offlineStorage.updateConnectionInfo(e);
+      }
+      return event = e;
+    }).catchError((err, stacktrace) {
       logger.severe('error connecting ws', err, stacktrace);
     });
+
+    return event;
   }
 
   /// Requests channels with a given query.
@@ -578,7 +594,7 @@ class Client {
 
   /// Set the current user with an anonymous id, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<void> setAnonymousUser() async {
+  Future<Event> setAnonymousUser() async {
     this._anonymous = true;
     final uuid = Uuid();
     state.user = OwnUser(id: uuid.v4());

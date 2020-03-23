@@ -7,6 +7,262 @@ part of 'offline_storage.dart';
 // **************************************************************************
 
 // ignore_for_file: unnecessary_brace_in_string_interps, unnecessary_this
+class _ConnectionEventData extends DataClass
+    implements Insertable<_ConnectionEventData> {
+  final int id;
+  final Map<String, dynamic> ownUser;
+  final int totalUnreadCount;
+  final int unreadChannels;
+  _ConnectionEventData(
+      {@required this.id,
+      this.ownUser,
+      this.totalUnreadCount,
+      this.unreadChannels});
+  factory _ConnectionEventData.fromData(
+      Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final intType = db.typeSystem.forDartType<int>();
+    final stringType = db.typeSystem.forDartType<String>();
+    return _ConnectionEventData(
+      id: intType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
+      ownUser: $_ConnectionEventTable.$converter0.mapToDart(stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}own_user'])),
+      totalUnreadCount: intType.mapFromDatabaseResponse(
+          data['${effectivePrefix}total_unread_count']),
+      unreadChannels: intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}unread_channels']),
+    );
+  }
+  factory _ConnectionEventData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return _ConnectionEventData(
+      id: serializer.fromJson<int>(json['id']),
+      ownUser: serializer.fromJson<Map<String, dynamic>>(json['ownUser']),
+      totalUnreadCount: serializer.fromJson<int>(json['totalUnreadCount']),
+      unreadChannels: serializer.fromJson<int>(json['unreadChannels']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'ownUser': serializer.toJson<Map<String, dynamic>>(ownUser),
+      'totalUnreadCount': serializer.toJson<int>(totalUnreadCount),
+      'unreadChannels': serializer.toJson<int>(unreadChannels),
+    };
+  }
+
+  @override
+  _ConnectionEventCompanion createCompanion(bool nullToAbsent) {
+    return _ConnectionEventCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      ownUser: ownUser == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ownUser),
+      totalUnreadCount: totalUnreadCount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(totalUnreadCount),
+      unreadChannels: unreadChannels == null && nullToAbsent
+          ? const Value.absent()
+          : Value(unreadChannels),
+    );
+  }
+
+  _ConnectionEventData copyWith(
+          {int id,
+          Map<String, dynamic> ownUser,
+          int totalUnreadCount,
+          int unreadChannels}) =>
+      _ConnectionEventData(
+        id: id ?? this.id,
+        ownUser: ownUser ?? this.ownUser,
+        totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
+        unreadChannels: unreadChannels ?? this.unreadChannels,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('_ConnectionEventData(')
+          ..write('id: $id, ')
+          ..write('ownUser: $ownUser, ')
+          ..write('totalUnreadCount: $totalUnreadCount, ')
+          ..write('unreadChannels: $unreadChannels')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      id.hashCode,
+      $mrjc(ownUser.hashCode,
+          $mrjc(totalUnreadCount.hashCode, unreadChannels.hashCode))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is _ConnectionEventData &&
+          other.id == this.id &&
+          other.ownUser == this.ownUser &&
+          other.totalUnreadCount == this.totalUnreadCount &&
+          other.unreadChannels == this.unreadChannels);
+}
+
+class _ConnectionEventCompanion extends UpdateCompanion<_ConnectionEventData> {
+  final Value<int> id;
+  final Value<Map<String, dynamic>> ownUser;
+  final Value<int> totalUnreadCount;
+  final Value<int> unreadChannels;
+  const _ConnectionEventCompanion({
+    this.id = const Value.absent(),
+    this.ownUser = const Value.absent(),
+    this.totalUnreadCount = const Value.absent(),
+    this.unreadChannels = const Value.absent(),
+  });
+  _ConnectionEventCompanion.insert({
+    this.id = const Value.absent(),
+    this.ownUser = const Value.absent(),
+    this.totalUnreadCount = const Value.absent(),
+    this.unreadChannels = const Value.absent(),
+  });
+  _ConnectionEventCompanion copyWith(
+      {Value<int> id,
+      Value<Map<String, dynamic>> ownUser,
+      Value<int> totalUnreadCount,
+      Value<int> unreadChannels}) {
+    return _ConnectionEventCompanion(
+      id: id ?? this.id,
+      ownUser: ownUser ?? this.ownUser,
+      totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
+      unreadChannels: unreadChannels ?? this.unreadChannels,
+    );
+  }
+}
+
+class $_ConnectionEventTable extends _ConnectionEvent
+    with TableInfo<$_ConnectionEventTable, _ConnectionEventData> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  $_ConnectionEventTable(this._db, [this._alias]);
+  final VerificationMeta _idMeta = const VerificationMeta('id');
+  GeneratedIntColumn _id;
+  @override
+  GeneratedIntColumn get id => _id ??= _constructId();
+  GeneratedIntColumn _constructId() {
+    return GeneratedIntColumn('id', $tableName, false,
+        hasAutoIncrement: true, declaredAsPrimaryKey: true);
+  }
+
+  final VerificationMeta _ownUserMeta = const VerificationMeta('ownUser');
+  GeneratedTextColumn _ownUser;
+  @override
+  GeneratedTextColumn get ownUser => _ownUser ??= _constructOwnUser();
+  GeneratedTextColumn _constructOwnUser() {
+    return GeneratedTextColumn(
+      'own_user',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _totalUnreadCountMeta =
+      const VerificationMeta('totalUnreadCount');
+  GeneratedIntColumn _totalUnreadCount;
+  @override
+  GeneratedIntColumn get totalUnreadCount =>
+      _totalUnreadCount ??= _constructTotalUnreadCount();
+  GeneratedIntColumn _constructTotalUnreadCount() {
+    return GeneratedIntColumn(
+      'total_unread_count',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _unreadChannelsMeta =
+      const VerificationMeta('unreadChannels');
+  GeneratedIntColumn _unreadChannels;
+  @override
+  GeneratedIntColumn get unreadChannels =>
+      _unreadChannels ??= _constructUnreadChannels();
+  GeneratedIntColumn _constructUnreadChannels() {
+    return GeneratedIntColumn(
+      'unread_channels',
+      $tableName,
+      true,
+    );
+  }
+
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, ownUser, totalUnreadCount, unreadChannels];
+  @override
+  $_ConnectionEventTable get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'connection_event';
+  @override
+  final String actualTableName = 'connection_event';
+  @override
+  VerificationContext validateIntegrity(_ConnectionEventCompanion d,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    if (d.id.present) {
+      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    }
+    context.handle(_ownUserMeta, const VerificationResult.success());
+    if (d.totalUnreadCount.present) {
+      context.handle(
+          _totalUnreadCountMeta,
+          totalUnreadCount.isAcceptableValue(
+              d.totalUnreadCount.value, _totalUnreadCountMeta));
+    }
+    if (d.unreadChannels.present) {
+      context.handle(
+          _unreadChannelsMeta,
+          unreadChannels.isAcceptableValue(
+              d.unreadChannels.value, _unreadChannelsMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  _ConnectionEventData map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return _ConnectionEventData.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  Map<String, Variable> entityToSql(_ConnectionEventCompanion d) {
+    final map = <String, Variable>{};
+    if (d.id.present) {
+      map['id'] = Variable<int, IntType>(d.id.value);
+    }
+    if (d.ownUser.present) {
+      final converter = $_ConnectionEventTable.$converter0;
+      map['own_user'] =
+          Variable<String, StringType>(converter.mapToSql(d.ownUser.value));
+    }
+    if (d.totalUnreadCount.present) {
+      map['total_unread_count'] =
+          Variable<int, IntType>(d.totalUnreadCount.value);
+    }
+    if (d.unreadChannels.present) {
+      map['unread_channels'] = Variable<int, IntType>(d.unreadChannels.value);
+    }
+    return map;
+  }
+
+  @override
+  $_ConnectionEventTable createAlias(String alias) {
+    return $_ConnectionEventTable(_db, alias);
+  }
+
+  static TypeConverter<Map<String, dynamic>, String> $converter0 =
+      _ExtraDataConverter();
+}
+
 class _Channel extends DataClass implements Insertable<_Channel> {
   final String id;
   final String type;
@@ -2944,6 +3200,9 @@ class $_ReactionsTable extends _Reactions
 abstract class _$OfflineStorage extends GeneratedDatabase {
   _$OfflineStorage(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   _$OfflineStorage.connect(DatabaseConnection c) : super.connect(c);
+  $_ConnectionEventTable _connectionEvent;
+  $_ConnectionEventTable get connectionEvent =>
+      _connectionEvent ??= $_ConnectionEventTable(this);
   $_ChannelsTable _channels;
   $_ChannelsTable get channels => _channels ??= $_ChannelsTable(this);
   $_UsersTable _users;
@@ -2962,6 +3221,14 @@ abstract class _$OfflineStorage extends GeneratedDatabase {
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [channels, users, messages, reads, members, channelQueries, reactions];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+        connectionEvent,
+        channels,
+        users,
+        messages,
+        reads,
+        members,
+        channelQueries,
+        reactions
+      ];
 }

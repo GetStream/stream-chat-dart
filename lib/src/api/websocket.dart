@@ -90,7 +90,7 @@ class WebSocket {
   String _path;
 
   WebSocketChannel _channel;
-  Timer _healthCheck, _reconnectionMonitor;
+  Timer _healthCheck, _reconnectionMonitor, _reconnectionTimer;
   DateTime _lastEventAt;
   bool _manuallyClosed = false, _connecting = false, _reconnecting = false;
 
@@ -222,9 +222,10 @@ class WebSocket {
       connect();
     };
 
-    final timer = Timer.periodic(Duration(seconds: 5), reconnectionTimer);
+    _reconnectionTimer =
+        Timer.periodic(Duration(seconds: 5), reconnectionTimer);
 
-    reconnectionTimer(timer);
+    reconnectionTimer(_reconnectionTimer);
   }
 
   void _cancelTimers() {
@@ -257,6 +258,9 @@ class WebSocket {
   Future<void> disconnect() {
     logger.info('disconnecting');
     _connectionCompleter = Completer();
+    if (_reconnectionTimer != null) {
+      _reconnectionTimer.cancel();
+    }
     _cancelTimers();
     _manuallyClosed = true;
     connectionStatus.value = ConnectionStatus.disconnected;

@@ -21,7 +21,7 @@ class Event {
   /// The connection id in which the event has been sent
   final String connectionId;
 
-  /// The date of creation of the channel
+  /// The date of creation of the event
   final DateTime createdAt;
 
   /// User object of the health check user

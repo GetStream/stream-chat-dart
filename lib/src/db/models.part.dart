@@ -42,6 +42,16 @@ class _Channels extends Table {
   Set<Column> get primaryKey => {cid};
 }
 
+class _ConnectionEvent extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  TextColumn get ownUser => text().nullable().map(_ExtraDataConverter())();
+
+  IntColumn get totalUnreadCount => integer().nullable()();
+
+  IntColumn get unreadChannels => integer().nullable()();
+}
+
 class _Users extends Table {
   TextColumn get id => text()();
 
