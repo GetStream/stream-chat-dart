@@ -78,7 +78,6 @@ class _IsolateStartRequest {
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
-    WidgetsFlutterBinding.ensureInitialized();
     final sharePreferences = await SharedPreferences.getInstance();
     final path = sharePreferences.getString(_KEY_DB_PATH);
 
@@ -287,11 +286,11 @@ class OfflineStorage extends _$OfflineStorage {
   }
 
   /// Update messages data from a list
-  void updateMessages(
+  Future<void> updateMessages(
     List<Message> newMessages,
     String cid,
   ) {
-    batch((batch) {
+    return batch((batch) {
       batch.insertAll(
         messages,
         newMessages.map(

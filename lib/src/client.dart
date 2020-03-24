@@ -29,6 +29,8 @@ typedef DecoderFunction<T> = T Function(Map<String, dynamic>);
 typedef TokenProvider = Future<String> Function(String userId);
 
 const String KEY_USER_ID = 'KEY_USER_ID';
+const String KEY_TOKEN = 'KEY_TOKEN';
+const String KEY_API_KEY = 'KEY_API_KEY';
 
 /// The official Dart client for Stream Chat,
 /// a service for building chat applications.
@@ -55,10 +57,16 @@ class Client {
     Duration receiveTimeout = const Duration(seconds: 6),
     Dio httpClient,
   }) {
+    WidgetsFlutterBinding.ensureInitialized();
+
     state = ClientState(this);
 
     _setupLogger();
     _setupDio(httpClient, receiveTimeout, connectTimeout);
+
+    SharedPreferences.getInstance().then((sharedPreferences) {
+      sharedPreferences.setString(KEY_API_KEY, apiKey);
+    });
 
     logger.info('instantiating new client');
   }
@@ -277,11 +285,12 @@ class Client {
     this.token = token;
     _anonymous = false;
 
-    WidgetsFlutterBinding.ensureInitialized();
-    final sharePreferences = await SharedPreferences.getInstance();
-    await sharePreferences.setString(KEY_USER_ID, user.id);
+    final sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences.setString(KEY_USER_ID, user.id);
+    await sharedPreferences.setString(KEY_TOKEN, token);
 
     notifications.init(this);
+
     return connect();
   }
 
@@ -309,7 +318,7 @@ class Client {
       _connectionId = event.connectionId;
     }
     if (event.me != null) {
-      _offlineStorage.updateConnectionInfo(event);
+      _offlineStorage?.updateConnectionInfo(event);
       state.user = event.me;
     }
     _controller.add(event);
@@ -377,11 +386,11 @@ class Client {
 
     _ws.connectionStatus.addListener(_connectionStatusListener);
 
-    var event = await _offlineStorage.getConnectionInfo();
+    var event = await _offlineStorage?.getConnectionInfo();
 
     await _ws.connect().then((e) {
       if (e.me != null) {
-        _offlineStorage.updateConnectionInfo(e);
+        _offlineStorage?.updateConnectionInfo(e);
       }
       return event = e;
     }).catchError((err, stacktrace) {

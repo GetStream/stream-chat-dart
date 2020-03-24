@@ -5,7 +5,6 @@ import 'channel_list_page.dart';
 import 'stream_chat.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
   final client = Client(
     "qk4nn7rpcn75",
     logLevel: Level.INFO,
