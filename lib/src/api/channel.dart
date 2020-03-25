@@ -487,6 +487,23 @@ class Channel {
     return updatedState;
   }
 
+  /// Mutes the channel
+  Future<EmptyResponse> mute({Duration expiration}) async {
+    final response = await _client.post('/moderation/mute/channel', data: {
+      'channel_cid': cid,
+      if (expiration != null) 'expiration': expiration.inMilliseconds,
+    });
+    return _client.decode(response.data, EmptyResponse.fromJson);
+  }
+
+  /// Unmutes the channel
+  Future<EmptyResponse> unmute() async {
+    final response = await _client.post('/moderation/unmute/channel', data: {
+      'channel_cid': cid,
+    });
+    return _client.decode(response.data, EmptyResponse.fromJson);
+  }
+
   /// Bans a user from the channel
   Future<EmptyResponse> banUser(
     String userID,
