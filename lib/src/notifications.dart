@@ -183,8 +183,8 @@ class NotificationService {
         loc.FlutterLocalNotificationsPlugin();
     final initializationSettingsAndroid =
         loc.AndroidInitializationSettings('launch_background');
-    final initializationSettings =
-        loc.InitializationSettings(initializationSettingsAndroid, null);
+    final initializationSettings = loc.InitializationSettings(
+        initializationSettingsAndroid, loc.IOSInitializationSettings());
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
     // workaround for https://github.com/FirebaseExtended/flutterfire/issues/1669
