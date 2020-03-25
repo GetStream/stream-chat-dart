@@ -22,7 +22,7 @@ import 'exceptions.dart';
 import 'models/event.dart';
 import 'models/message.dart';
 import 'models/user.dart';
-import 'notifications.dart' as notifications;
+import 'notifications.dart';
 
 typedef LogHandlerFunction = void Function(LogRecord record);
 typedef DecoderFunction<T> = T Function(Map<String, dynamic>);
@@ -56,6 +56,7 @@ class Client {
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
     Dio httpClient,
+    this.notificationHandler,
   }) {
     WidgetsFlutterBinding.ensureInitialized();
 
@@ -70,6 +71,8 @@ class Client {
 
     logger.info('instantiating new client');
   }
+
+  NotificationHandler notificationHandler;
 
   OfflineStorage _offlineStorage;
 
@@ -289,7 +292,7 @@ class Client {
     await sharedPreferences.setString(KEY_USER_ID, user.id);
     await sharedPreferences.setString(KEY_TOKEN, token);
 
-    notifications.init(this);
+    NotificationService.init(this, notificationHandler);
 
     return connect();
   }
