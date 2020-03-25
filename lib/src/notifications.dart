@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_apns/apns.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart'
@@ -98,7 +99,8 @@ class NotificationService {
   }
 
   static Future<void> sendNotification(
-      AndroidNotificationOptions androidNotificationOptions) async {
+    AndroidNotificationOptions androidNotificationOptions,
+  ) async {
     final platformChannelSpecifics = loc.NotificationDetails(
       androidNotificationOptions.androidNotificationDetails,
       null,
@@ -216,7 +218,7 @@ class NotificationService {
     );
     pushConnector.token.addListener(() {
       final token = pushConnector.token.value;
-      client.addDevice(token, 'firebase');
+      client.addDevice(token, Platform.isAndroid ? 'firebase' : 'apn');
     });
   }
 }

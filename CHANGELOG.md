@@ -1,3 +1,7 @@
+## 0.1.21
+
+- Add mute/unmute channel
+
 ## 0.1.20
 
 - Fix channel query path without id
