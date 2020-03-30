@@ -88,7 +88,7 @@ class NotificationService {
   static Future<void> _handleBackgroundNotification(
     Map<String, dynamic> notification,
   ) async {
-    _NotificationData messageChannel = await storeMessage(notification);
+    _NotificationData messageChannel = await getAndStoreMessage(notification);
 
     final androidNotificationOptions = getAndroidNotificationOptions(
       messageChannel.message,
@@ -116,7 +116,7 @@ class NotificationService {
     );
   }
 
-  static Future<_NotificationData> storeMessage(
+  static Future<_NotificationData> getAndStoreMessage(
     Map<String, dynamic> notification,
   ) async {
     final sharedPreferences = await SharedPreferences.getInstance();
