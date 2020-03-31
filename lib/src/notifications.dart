@@ -189,6 +189,13 @@ class NotificationService {
         initializationSettingsAndroid, loc.IOSInitializationSettings());
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
+    print('Listening for new token');
+    pushConnector.token.addListener(() {
+      final token = pushConnector.token.value;
+      print('New token $token');
+      client.addDevice(token, Platform.isAndroid ? 'firebase' : 'apn');
+    });
+
     // workaround for https://github.com/FirebaseExtended/flutterfire/issues/1669
     var lastMessage;
     pushConnector.configure(
@@ -216,9 +223,5 @@ class NotificationService {
         await _handleNotification(message, client);
       },
     );
-    pushConnector.token.addListener(() {
-      final token = pushConnector.token.value;
-      client.addDevice(token, Platform.isAndroid ? 'firebase' : 'apn');
-    });
   }
 }
