@@ -404,14 +404,14 @@ class Client {
   }
 
   /// Requests channels with a given query.
-  Future<void> queryChannels({
+  Stream<List<Channel>> queryChannels({
     Map<String, dynamic> filter,
     List<SortOption> sort,
     Map<String, dynamic> options,
     PaginationParams paginationParams,
     int messageLimit,
     bool onlyOffline = false,
-  }) async {
+  }) async* {
     logger.info('Query channel start');
     final Map<String, dynamic> defaultOptions = {
       "state": true,
@@ -446,17 +446,22 @@ class Client {
         ) ??
         [];
     var newChannels = List<Channel>.from(state.channels ?? []);
-    logger.info('Got ${newChannels.length} channels from storage');
-    offlineChannels?.forEach((channelState) {
+    logger.info('Got ${offlineChannels.length} channels from storage');
+    var channels = offlineChannels.map((channelState) {
       final index =
           newChannels.indexWhere((c) => c.cid == channelState.channel.cid);
       if (index != -1) {
         final channel = newChannels[index];
         channel.state?.updateChannelState(channelState);
+        return channel;
       } else {
-        newChannels.add(Channel.fromState(this, channelState));
+        final channel = Channel.fromState(this, channelState);
+        newChannels.add(channel);
+        return channel;
       }
-    });
+    }).toList();
+
+    yield channels;
 
     state.channels = newChannels;
 
@@ -479,16 +484,22 @@ class Client {
     logger.info('Got ${res.channels.length} channels from api');
 
     newChannels = List<Channel>.from(state.channels ?? []);
-    res?.channels?.forEach((channelState) {
+    channels = res?.channels?.map((channelState) {
       final index =
           newChannels.indexWhere((c) => c.cid == channelState.channel.cid);
       if (index != -1) {
-        final client = newChannels[index];
-        client.state?.updateChannelState(channelState);
+        final channel = newChannels[index];
+        channel.state?.updateChannelState(channelState);
+        return channel;
       } else {
-        newChannels.add(Channel.fromState(this, channelState));
+        final channel = Channel.fromState(this, channelState);
+        newChannels.add(channel);
+        return channel;
       }
-    });
+    }).toList();
+
+    yield channels;
+
     state.channels = newChannels;
 
     _offlineStorage?.updateChannelQueries(
