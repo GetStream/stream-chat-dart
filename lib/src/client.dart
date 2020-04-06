@@ -410,6 +410,7 @@ class Client {
     Map<String, dynamic> options,
     PaginationParams paginationParams,
     int messageLimit,
+    bool onlyOffline = false,
   }) async {
     logger.info('Query channel start');
     final Map<String, dynamic> defaultOptions = {
@@ -458,6 +459,10 @@ class Client {
     });
 
     state.channels = newChannels;
+
+    if (onlyOffline) {
+      return;
+    }
 
     final response = await get(
       "/channels",

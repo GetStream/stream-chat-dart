@@ -47,8 +47,6 @@ class NotificationService {
       final data = Map<String, dynamic>.from(notification['data']);
       final message = Message.fromJson(
         Map<String, dynamic>.from(data['message']),
-      ).copyWith(
-        createdAt: DateTime.now(),
       );
       final channelModel = ChannelModel.fromJson(
         Map<String, dynamic>.from(data['channel']),
@@ -89,7 +87,7 @@ class NotificationService {
   static Future<void> _handleBackgroundNotification(
     Map<String, dynamic> notification,
   ) async {
-    _NotificationData messageChannel = await getAndStoreMessage(notification);
+    final messageChannel = await getAndStoreMessage(notification);
 
     final androidNotificationOptions = getAndroidNotificationOptions(
       messageChannel.message,
@@ -190,13 +188,9 @@ class NotificationService {
         initializationSettingsAndroid, loc.IOSInitializationSettings());
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
-    print('Listening for new token');
     pushConnector.token.addListener(() {
       final token = pushConnector.token.value;
-      print('New token $token');
-      client
-          .addDevice(token, Platform.isAndroid ? 'firebase' : 'apn')
-          .catchError((e) {});
+      client.addDevice(token, Platform.isIOS ? 'apn' : 'firebase');
     });
 
     await handleIosMessageQueue(client);
