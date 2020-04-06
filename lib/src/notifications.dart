@@ -70,9 +70,7 @@ class NotificationService {
               ConnectionStatus.disconnected) {
             await client.connect();
           }
-          final channel = client.state.channels.firstWhere(
-            (c) => c.cid == channelModel.cid,
-          );
+          final channel = client.state.channels[channelModel.cid];
           channel.state.updateChannelState(
             ChannelState(
               channel: channelModel,

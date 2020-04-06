@@ -270,7 +270,7 @@ class Client {
     await this._disconnect();
     httpClient.close();
     await _controller.close();
-    state.channels.forEach((c) => c.dispose());
+    state.channels.values.forEach((c) => c.dispose());
     state.dispose();
   }
 
@@ -366,21 +366,19 @@ class Client {
 
       if (value == ConnectionStatus.connected &&
           state.channels?.isNotEmpty == true) {
-        await Future.wait(state.channels.map((channel) {
+        await Future.wait(state.channels.values.map((channel) {
           return channel.state?.retryFailedMessages() ?? Future.value();
         }));
-        await queryChannels(filter: {
+        queryChannels(filter: {
           'cid': {
-            '\$in': state.channels.map((c) => c.cid).toList(),
+            '\$in': state.channels.keys,
           },
         }, options: {
           'recovery': true,
-          'last_message_ids': Map<String, String>.fromEntries(
-            state.channels.map(
-              (c) => MapEntry<String, String>(
-                c.cid,
-                c.state?.messages?.last?.id,
-              ),
+          'last_message_ids': state.channels.map<String, String>(
+            (cid, c) => MapEntry<String, String>(
+              cid,
+              c.state?.messages?.last?.id,
             ),
           ),
         });
@@ -445,19 +443,17 @@ class Client {
           paginationParams: paginationParams,
         ) ??
         [];
-    var newChannels = List<Channel>.from(state.channels ?? []);
+    var newChannels = Map<String, Channel>.from(state.channels ?? {});
     logger.info('Got ${offlineChannels.length} channels from storage');
     var channels = offlineChannels.map((channelState) {
-      final index =
-          newChannels.indexWhere((c) => c.cid == channelState.channel.cid);
-      if (index != -1) {
-        final channel = newChannels[index];
+      final channel = newChannels[channelState.channel.cid];
+      if (channel != null) {
         channel.state?.updateChannelState(channelState);
         return channel;
       } else {
-        final channel = Channel.fromState(this, channelState);
-        newChannels.add(channel);
-        return channel;
+        final newChannel = Channel.fromState(this, channelState);
+        newChannels[newChannel.cid] = newChannel;
+        return newChannel;
       }
     }).toList();
 
@@ -483,18 +479,16 @@ class Client {
 
     logger.info('Got ${res.channels.length} channels from api');
 
-    newChannels = List<Channel>.from(state.channels ?? []);
-    channels = res?.channels?.map((channelState) {
-      final index =
-          newChannels.indexWhere((c) => c.cid == channelState.channel.cid);
-      if (index != -1) {
-        final channel = newChannels[index];
+    newChannels = Map<String, Channel>.from(state.channels ?? {});
+    channels = res.channels.map((channelState) {
+      final channel = newChannels[channelState.channel.cid];
+      if (channel != null) {
         channel.state?.updateChannelState(channelState);
         return channel;
       } else {
-        final channel = Channel.fromState(this, channelState);
-        newChannels.add(channel);
-        return channel;
+        final newChannel = Channel.fromState(this, channelState);
+        newChannels[newChannel.cid] = newChannel;
+        return newChannel;
       }
     }).toList();
 
@@ -756,10 +750,10 @@ class Client {
   }) {
     final channel = Channel(this, type, id, extraData);
 
-    state.channels = [
-      ...state.channels ?? [],
-      channel,
-    ];
+    state.channels = {
+      ...state.channels ?? {},
+      channel.cid: channel,
+    };
 
     return channel;
   }
@@ -976,16 +970,6 @@ class ClientState {
         .listen((totalUnreadCount) {
       _totalUnreadCountController.add(totalUnreadCount);
     });
-
-    _client.on(EventType.messageNew).listen((e) {
-      final newChannels = List<Channel>.from(channels ?? []);
-      final index = newChannels.indexWhere((c) => c.cid == e.cid);
-      if (index > 0) {
-        final channel = newChannels.removeAt(index);
-        newChannels.insert(0, channel);
-        channels = newChannels;
-      }
-    });
   }
 
   final Client _client;
@@ -1014,16 +998,16 @@ class ClientState {
   Stream<int> get totalUnreadCountStream => _totalUnreadCountController.stream;
 
   /// The current list of channels in memory as a stream
-  Stream<List<Channel>> get channelsStream => _channelsController.stream;
+  Stream<Map<String, Channel>> get channelsStream => _channelsController.stream;
 
   /// The current list of channels in memory
-  List<Channel> get channels => _channelsController.value;
+  Map<String, Channel> get channels => _channelsController.value;
 
-  set channels(List<Channel> v) {
+  set channels(Map<String, Channel> v) {
     _channelsController.add(v);
   }
 
-  BehaviorSubject<List<Channel>> _channelsController = BehaviorSubject();
+  BehaviorSubject<Map<String, Channel>> _channelsController = BehaviorSubject();
   BehaviorSubject<OwnUser> _userController = BehaviorSubject();
   BehaviorSubject<int> _unreadChannelsController = BehaviorSubject();
   BehaviorSubject<int> _totalUnreadCountController = BehaviorSubject();
