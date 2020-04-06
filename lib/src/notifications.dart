@@ -46,16 +46,16 @@ class NotificationService {
     if (notification.containsKey('data')) {
       final data = Map<String, dynamic>.from(notification['data']);
       final message = Message.fromJson(
-        Map<String, dynamic>.from(jsonDecode(data['message'].toString())),
+        Map<String, dynamic>.from(data['message']),
       ).copyWith(
         createdAt: DateTime.now(),
       );
       final channelModel = ChannelModel.fromJson(
-        Map<String, dynamic>.from(jsonDecode(data['channel'].toString())),
+        Map<String, dynamic>.from(data['channel']),
       );
 
       if (message != null) {
-        if (client == null) {
+        if (client?.state?.channels == null) {
           final sharedPreferences = await SharedPreferences.getInstance();
           final userId = sharedPreferences.getString(KEY_USER_ID);
 
@@ -66,6 +66,7 @@ class NotificationService {
               messages: [message],
             ),
           );
+          await offlineStorage.disconnect();
         } else {
           if (client.wsConnectionStatus.value ==
               ConnectionStatus.disconnected) {
@@ -193,8 +194,12 @@ class NotificationService {
     pushConnector.token.addListener(() {
       final token = pushConnector.token.value;
       print('New token $token');
-      client.addDevice(token, Platform.isAndroid ? 'firebase' : 'apn');
+      client
+          .addDevice(token, Platform.isAndroid ? 'firebase' : 'apn')
+          .catchError((e) {});
     });
+
+    await handleIosMessageQueue(client);
 
     // workaround for https://github.com/FirebaseExtended/flutterfire/issues/1669
     var lastMessage;
@@ -223,5 +228,26 @@ class NotificationService {
         await _handleNotification(message, client);
       },
     );
+  }
+
+  static Future<void> handleIosMessageQueue(Client client) async {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences.reload();
+    final messageQueue = sharedPreferences.getStringList('messageQueue');
+    if (messageQueue != null) {
+      messageQueue.forEach((message) {
+        final jsonMessage = jsonDecode(message);
+        _handleNotification(
+          {
+            'data': {
+              'message': jsonMessage,
+              'channel': jsonMessage['channel'],
+            },
+          },
+          client,
+        );
+      });
+      await sharedPreferences.remove('messageQueue');
+    }
   }
 }

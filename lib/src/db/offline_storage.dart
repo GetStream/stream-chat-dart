@@ -9,7 +9,6 @@ import 'package:moor/moor.dart';
 import 'package:moor_ffi/moor_ffi.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_chat/src/models/event.dart';
 import 'package:stream_chat/src/models/own_user.dart';
 
@@ -27,15 +26,10 @@ import '../models/user.dart';
 part 'models.part.dart';
 part 'offline_storage.g.dart';
 
-const String _KEY_DB_PATH = '_KEY_DB_PATH';
-
 Future<MoorIsolate> _createMoorIsolate(String userId) async {
   WidgetsFlutterBinding.ensureInitialized();
   final dir = await getApplicationDocumentsDirectory();
   final path = p.join(dir.path, 'db_$userId.sqlite');
-
-  final sharePreferences = await SharedPreferences.getInstance();
-  await sharePreferences.setString(_KEY_DB_PATH, path);
 
   final receivePort = ReceivePort();
   await Isolate.spawn(
@@ -76,11 +70,10 @@ class _IsolateStartRequest {
   _IsolateStartRequest(this.sendMoorIsolate, this.targetPath);
 }
 
-LazyDatabase _openConnection() {
+LazyDatabase _openConnection(String userId) {
   return LazyDatabase(() async {
-    final sharePreferences = await SharedPreferences.getInstance();
-    final path = sharePreferences.getString(_KEY_DB_PATH);
-
+    final dir = await getApplicationDocumentsDirectory();
+    final path = p.join(dir.path, 'db_$userId.sqlite');
     final file = File(path);
     return VmDatabase(file);
   });
@@ -110,7 +103,7 @@ class OfflineStorage extends _$OfflineStorage {
     this._userId,
     this._logger,
   )   : _isolate = null,
-        super(_openConnection()) {
+        super(_openConnection(_userId)) {
     moorRuntimeOptions.dontWarnAboutMultipleDatabases = true;
     _logger.info('Connecting on standard isolate');
   }
