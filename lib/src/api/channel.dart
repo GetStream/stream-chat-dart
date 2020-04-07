@@ -538,7 +538,6 @@ class Channel {
     final updatedState = _client.decode(response.data, ChannelState.fromJson);
 
     if (_id == null) {
-      print('set oid $id');
       _id = updatedState.channel.id;
       _cid = updatedState.channel.cid;
     }

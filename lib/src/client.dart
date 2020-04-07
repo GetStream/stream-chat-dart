@@ -371,7 +371,7 @@ class Client {
         }));
         queryChannels(filter: {
           'cid': {
-            '\$in': state.channels.keys,
+            '\$in': state.channels.keys.toList(),
           },
         }, options: {
           'recovery': true,
