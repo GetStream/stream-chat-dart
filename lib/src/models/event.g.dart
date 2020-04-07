@@ -36,6 +36,7 @@ Event _$EventFromJson(Map json) {
         : Reaction.fromJson((json['reaction'] as Map)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
+    online: json['online'] as bool,
   );
 }
 
@@ -50,4 +51,5 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'reaction': instance.reaction?.toJson(),
       'total_unread_count': instance.totalUnreadCount,
       'unread_channels': instance.unreadChannels,
+      'online': instance.online,
     };

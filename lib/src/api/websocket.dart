@@ -143,7 +143,6 @@ class WebSocket {
   }
 
   void _onData(data) {
-    logger.info('new data: $data');
     final event = _decodeEvent(data);
 
     if (_lastEventAt == null) {

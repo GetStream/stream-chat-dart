@@ -42,6 +42,9 @@ class Event {
   /// User total unread channels
   final int unreadChannels;
 
+  /// Online status
+  final bool online;
+
   /// Constructor used for json serialization
   Event({
     this.type,
@@ -54,6 +57,7 @@ class Event {
     this.totalUnreadCount,
     this.unreadChannels,
     this.reaction,
+    this.online,
   });
 
   /// Create a new instance from a json

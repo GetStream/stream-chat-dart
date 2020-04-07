@@ -26,4 +26,10 @@ class EventType {
 
   /// Event sent when reading a message
   static const String messageRead = "message.read";
+
+  /// Event sent when the connection status changes
+  static const String connectionChanged = "connection.changed";
+
+  /// Event sent when the connection is recovered
+  static const String connectionRecovered = "connection.recovered";
 }

@@ -317,6 +317,7 @@ class Client {
 
   /// Method called to add a new event to the [_controller].
   void handleEvent(Event event) {
+    logger.info('handle new event: ${event.toJson()}');
     if (event.connectionId != null) {
       _connectionId = event.connectionId;
     }
@@ -363,9 +364,17 @@ class Client {
     _connectionStatusListener = () async {
       final value = _ws.connectionStatus.value;
       this.wsConnectionStatus.value = value;
+      handleEvent(Event(
+        type: EventType.connectionChanged,
+        online: value == ConnectionStatus.connected,
+      ));
 
       if (value == ConnectionStatus.connected &&
           state.channels?.isNotEmpty == true) {
+        handleEvent(Event(
+          type: EventType.connectionRecovered,
+          online: true,
+        ));
         await Future.wait(state.channels.values.map((channel) {
           return channel.state?.retryFailedMessages() ?? Future.value();
         }));
@@ -381,7 +390,7 @@ class Client {
               c.state?.messages?.last?.id,
             ),
           ),
-        });
+        }).listen((_) {});
       }
     };
 
