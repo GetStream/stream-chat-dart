@@ -56,7 +56,8 @@ class Client {
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
     Dio httpClient,
-    this.notificationHandler,
+    this.androidNotificationHandler =
+        NotificationService.handleAndroidNotifications,
   }) {
     WidgetsFlutterBinding.ensureInitialized();
 
@@ -72,7 +73,7 @@ class Client {
     logger.info('instantiating new client');
   }
 
-  NotificationHandler notificationHandler;
+  NotificationHandler androidNotificationHandler;
 
   OfflineStorage _offlineStorage;
 
@@ -292,7 +293,7 @@ class Client {
     await sharedPreferences.setString(KEY_USER_ID, user.id);
     await sharedPreferences.setString(KEY_TOKEN, token);
 
-    NotificationService.init(this, notificationHandler);
+    NotificationService.init(this, androidNotificationHandler);
 
     return connect();
   }

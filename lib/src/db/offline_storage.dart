@@ -71,6 +71,7 @@ class _IsolateStartRequest {
 }
 
 LazyDatabase _openConnection(String userId) {
+  moorRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   return LazyDatabase(() async {
     final dir = await getApplicationDocumentsDirectory();
     final path = p.join(dir.path, 'db_$userId.sqlite');
@@ -104,7 +105,6 @@ class OfflineStorage extends _$OfflineStorage {
     this._logger,
   )   : _isolate = null,
         super(_openConnection(_userId)) {
-    moorRuntimeOptions.dontWarnAboutMultipleDatabases = true;
     _logger.info('Connecting on standard isolate');
   }
 

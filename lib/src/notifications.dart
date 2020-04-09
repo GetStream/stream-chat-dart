@@ -82,7 +82,7 @@ class NotificationService {
     }
   }
 
-  static Future<void> _handleBackgroundNotification(
+  static Future<void> handleAndroidNotifications(
     Map<String, dynamic> notification,
   ) async {
     final messageChannel = await getAndStoreMessage(notification);
@@ -203,7 +203,7 @@ class NotificationService {
         lastMessage = message;
         await _handleNotification(message, client);
       },
-      onBackgroundMessage: notificationHandler ?? _handleBackgroundNotification,
+      onBackgroundMessage: notificationHandler ?? handleAndroidNotifications,
       onLaunch: (message) async {
         if (message == lastMessage) {
           return;
