@@ -28,8 +28,13 @@ typedef LogHandlerFunction = void Function(LogRecord record);
 typedef DecoderFunction<T> = T Function(Map<String, dynamic>);
 typedef TokenProvider = Future<String> Function(String userId);
 
+/// The key used to save the userId to sharedPreferences
 const String KEY_USER_ID = 'KEY_USER_ID';
+
+/// The key used to save the token to sharedPreferences
 const String KEY_TOKEN = 'KEY_TOKEN';
+
+/// The key used to save the apiKey to sharedPreferences
 const String KEY_API_KEY = 'KEY_API_KEY';
 
 /// The official Dart client for Stream Chat,
@@ -66,13 +71,10 @@ class Client {
     _setupLogger();
     _setupDio(httpClient, receiveTimeout, connectTimeout);
 
-    SharedPreferences.getInstance().then((sharedPreferences) {
-      sharedPreferences.setString(KEY_API_KEY, apiKey);
-    });
-
     logger.info('instantiating new client');
   }
 
+  /// Android notification handler
   NotificationHandler androidNotificationHandler;
 
   OfflineStorage _offlineStorage;
@@ -146,6 +148,7 @@ class Client {
   final ValueNotifier<ConnectionStatus> wsConnectionStatus =
       ValueNotifier(ConnectionStatus.disconnected);
 
+  /// The current user token
   String token;
   bool _anonymous = false;
   String _connectionId;
@@ -292,7 +295,7 @@ class Client {
     final sharedPreferences = await SharedPreferences.getInstance();
     await sharedPreferences.setString(KEY_USER_ID, user.id);
     await sharedPreferences.setString(KEY_TOKEN, token);
-
+    await sharedPreferences.setString(KEY_API_KEY, apiKey);
     NotificationService.init(this, androidNotificationHandler);
 
     return connect();
@@ -329,6 +332,7 @@ class Client {
     _controller.add(event);
   }
 
+  /// Connect the client websocket
   Future<Event> connect() async {
     if (this.wsConnectionStatus.value == ConnectionStatus.connecting) {
       logger.warning('Already connecting');
@@ -487,10 +491,10 @@ class Client {
       QueryChannelsResponse.fromJson,
     );
 
-    logger.info('Got ${res.channels.length} channels from api');
+    logger.info('Got ${res.channels?.length} channels from api');
 
     newChannels = Map<String, Channel>.from(state.channels ?? {});
-    channels = res.channels.map((channelState) {
+    channels = res.channels?.map((channelState) {
       final channel = newChannels[channelState.channel.cid];
       if (channel != null) {
         channel.state?.updateChannelState(channelState);
@@ -500,7 +504,7 @@ class Client {
         newChannels[newChannel.cid] = newChannel;
         return newChannel;
       }
-    }).toList();
+    })?.toList();
 
     yield channels;
 

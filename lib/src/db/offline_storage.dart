@@ -100,6 +100,7 @@ class OfflineStorage extends _$OfflineStorage {
     this._logger,
   ) : super.connect(connection);
 
+  /// Instantiate a new OfflineStorage
   OfflineStorage(
     this._userId,
     this._logger,

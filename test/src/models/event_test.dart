@@ -58,6 +58,7 @@ void main() {
         me: OwnUser(id: 'id2'),
         totalUnreadCount: 1,
         unreadChannels: 1,
+        online: true,
       );
 
       expect(
@@ -73,6 +74,7 @@ void main() {
           'message': null,
           'total_unread_count': 1,
           'unread_channels': 1,
+          'online': true
         },
       );
     });
