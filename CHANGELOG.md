@@ -1,3 +1,11 @@
+## 0.2.0-alpha
+
+- Offline storage
+
+- Push notifications
+
+- Minor bug fixes
+
 ## 0.1.21
 
 - Add mute/unmute channel
