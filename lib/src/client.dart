@@ -63,6 +63,7 @@ class Client {
     Dio httpClient,
     this.androidNotificationHandler =
         NotificationService.handleAndroidNotifications,
+    this.pushNotificationsEnabled = false,
   }) {
     WidgetsFlutterBinding.ensureInitialized();
 
@@ -81,6 +82,9 @@ class Client {
 
   /// If true chat data will persist on disk
   final bool persistenceEnabled;
+
+  /// If true push notification feature will be initialized
+  final bool pushNotificationsEnabled;
 
   /// Client offline database
   OfflineStorage get offlineStorage => _offlineStorage;
@@ -296,7 +300,10 @@ class Client {
     await sharedPreferences.setString(KEY_USER_ID, user.id);
     await sharedPreferences.setString(KEY_TOKEN, token);
     await sharedPreferences.setString(KEY_API_KEY, apiKey);
-    NotificationService.init(this, androidNotificationHandler);
+
+    if (pushNotificationsEnabled) {
+      NotificationService.init(this, androidNotificationHandler);
+    }
 
     return connect();
   }
