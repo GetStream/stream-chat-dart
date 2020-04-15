@@ -1,7 +1,7 @@
 name: stream_chat
 homepage: https://github.com/GetStream/stream-chat-dart
 description: The official Dart client for Stream Chat, a service for building chat applications.
-version: 0.2.0-alpha+1
+version: 0.2.0-alpha+2
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -17,11 +17,11 @@ dependencies:
   uuid: ^2.0.4
   async: ^2.4.0
   stream_channel: ^2.0.0
-  rxdart: ^0.24.0
+  rxdart: ^0.23.0
   moor: ^2.4.2
   moor_ffi: ^0.4.0
   path_provider: ^1.6.5
-  path: ^1.7.0
+  path: ^1.6.0
   flutter_apns: ^1.1.0
   flutter_local_notifications: ^1.4.1
   http_parser: ^3.1.4
