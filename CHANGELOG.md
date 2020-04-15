@@ -1,3 +1,7 @@
+## 0.1.23
+
+- Fix unread count
+
 ## 0.1.22
 
 - Add mute/unmute channel
