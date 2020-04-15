@@ -773,6 +773,13 @@ class ClientState {
         .map((e) => e.me)
         .listen((user) {
       _userController.add(user);
+      if (user.totalUnreadCount != null) {
+        _totalUnreadCountController.add(user.totalUnreadCount);
+      }
+
+      if (user.unreadChannels != null) {
+        _unreadChannelsController.add(user.unreadChannels);
+      }
     });
 
     _client
