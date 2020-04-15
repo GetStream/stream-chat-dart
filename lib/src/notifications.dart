@@ -213,27 +213,29 @@ class NotificationService {
     var lastMessage;
     pushConnector.configure(
       onMessage: (message) async {
-        if (message == lastMessage) {
+        if (lastMessage != null &&
+            message['data']?.toString() == lastMessage['data']?.toString()) {
           return;
         }
         lastMessage = message;
-        await _handleNotification(message, client);
+        notificationHandler(message);
       },
-      onBackgroundMessage: notificationHandler ?? handleAndroidNotifications,
+      onBackgroundMessage: notificationHandler,
       onLaunch: (message) async {
-        if (message == lastMessage) {
+        if (lastMessage != null &&
+            message['data']?.toString() == lastMessage['data']?.toString()) {
           return;
         }
         lastMessage = message;
-        await _handleNotification(message, client);
+        notificationHandler(message);
       },
       onResume: (message) async {
         if (lastMessage != null &&
-            message['data'].toString() == lastMessage['data'].toString()) {
+            message['data']?.toString() == lastMessage['data']?.toString()) {
           return;
         }
         lastMessage = message;
-        await _handleNotification(message, client);
+        notificationHandler(message);
       },
     );
   }

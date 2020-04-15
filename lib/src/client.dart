@@ -414,7 +414,7 @@ class Client {
       if (e.me != null) {
         _offlineStorage?.updateConnectionInfo(e);
       }
-      return event = e;
+      event = e;
     }).catchError((err, stacktrace) {
       logger.severe('error connecting ws', err, stacktrace);
     });
@@ -974,6 +974,13 @@ class ClientState {
         .map((e) => e.me)
         .listen((user) {
       _userController.add(user);
+      if (user.totalUnreadCount != null) {
+        _totalUnreadCountController.add(user.totalUnreadCount);
+      }
+
+      if (user.unreadChannels != null) {
+        _unreadChannelsController.add(user.unreadChannels);
+      }
     });
 
     _client
