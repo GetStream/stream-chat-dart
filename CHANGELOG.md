@@ -1,4 +1,4 @@
-## 0.1.23
+## 0.1.24
 
 - Fix unread count
 
