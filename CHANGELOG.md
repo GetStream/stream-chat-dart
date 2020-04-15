@@ -1,3 +1,7 @@
+## 0.2.0-alpha+1
+
+- Fix unread count
+
 ## 0.2.0-alpha
 
 - Offline storage
