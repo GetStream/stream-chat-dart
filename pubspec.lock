@@ -215,7 +215,7 @@ packages:
     source: hosted
     version: "2.1.0"
   http_parser:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: http_parser
       url: "https://pub.dartlang.org"
@@ -374,7 +374,7 @@ packages:
       name: rxdart
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.24.0"
+    version: "0.23.1"
   shelf:
     dependency: transitive
     description:
