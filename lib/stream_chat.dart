@@ -2,9 +2,6 @@ library stream_chat;
 
 export 'package:dio/src/dio_error.dart';
 export 'package:dio/src/multipart_file.dart';
-export 'package:flutter_local_notifications/flutter_local_notifications.dart'
-    hide Message;
-export 'package:http_parser/src/media_type.dart';
 export 'package:logging/src/level.dart';
 
 export './src/api/channel.dart';

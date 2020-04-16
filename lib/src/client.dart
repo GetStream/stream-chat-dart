@@ -8,6 +8,7 @@ import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_chat/src/event_type.dart';
+import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:stream_chat/src/models/own_user.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
@@ -22,7 +23,6 @@ import 'exceptions.dart';
 import 'models/event.dart';
 import 'models/message.dart';
 import 'models/user.dart';
-import 'notifications.dart';
 
 typedef LogHandlerFunction = void Function(LogRecord record);
 typedef DecoderFunction<T> = T Function(Map<String, dynamic>);
@@ -61,9 +61,8 @@ class Client {
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
     Dio httpClient,
-    this.androidNotificationHandler =
-        NotificationService.handleAndroidNotifications,
-    this.pushNotificationsEnabled = false,
+    this.showFakeNotification,
+    this.backgroundKeepAlive = const Duration(minutes: 1),
   }) {
     WidgetsFlutterBinding.ensureInitialized();
 
@@ -75,16 +74,18 @@ class Client {
     logger.info('instantiating new client');
   }
 
-  /// Android notification handler
-  NotificationHandler androidNotificationHandler;
-
   OfflineStorage _offlineStorage;
 
   /// If true chat data will persist on disk
   final bool persistenceEnabled;
 
-  /// If true push notification feature will be initialized
-  final bool pushNotificationsEnabled;
+  /// Method used to show a "fake" notification while the app is in background
+  /// Switching to another application will not disconnect the client immediately
+  /// So, use this method to show the notification when receiving a new message via events
+  final void Function(Message, ChannelModel) showFakeNotification;
+
+  /// The amount of time that will pass before disconnecting the client in the background
+  final Duration backgroundKeepAlive;
 
   /// Client offline database
   OfflineStorage get offlineStorage => _offlineStorage;
@@ -300,10 +301,6 @@ class Client {
     await sharedPreferences.setString(KEY_USER_ID, user.id);
     await sharedPreferences.setString(KEY_TOKEN, token);
     await sharedPreferences.setString(KEY_API_KEY, apiKey);
-
-    if (pushNotificationsEnabled) {
-      NotificationService.init(this, androidNotificationHandler);
-    }
 
     return connect();
   }
