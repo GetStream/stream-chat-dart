@@ -160,9 +160,16 @@ class GetMessageResponse extends _BaseResponse {
   /// Message returned by the api call
   Message message;
 
+  /// Channel of the message
+  ChannelModel channel;
+
   /// Create a new instance from a json
-  static GetMessageResponse fromJson(Map<String, dynamic> json) =>
-      _$GetMessageResponseFromJson(json);
+  static GetMessageResponse fromJson(Map<String, dynamic> json) {
+    final res = _$GetMessageResponseFromJson(json);
+    res.channel =
+        ChannelModel.fromJson(res.message.extraData.remove('channel'));
+    return res;
+  }
 }
 
 /// Model response for [Client.search] api call

@@ -141,6 +141,11 @@ GetMessageResponse _$GetMessageResponseFromJson(Map json) {
         ? null
         : Message.fromJson((json['message'] as Map)?.map(
             (k, e) => MapEntry(k as String, e),
+          ))
+    ..channel = json['channel'] == null
+        ? null
+        : ChannelModel.fromJson((json['channel'] as Map)?.map(
+            (k, e) => MapEntry(k as String, e),
           ));
 }
 
