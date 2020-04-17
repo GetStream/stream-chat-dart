@@ -1,3 +1,7 @@
+## 0.2.0-alpha+4
+
+- Rename client parameters
+
 ## 0.2.0-alpha+3
 
 - Remove dependencies on notification service
