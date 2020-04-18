@@ -33,14 +33,18 @@ void main() {
           id: 'test',
         );
 
-        when(mockDio.post<String>('/channels/messaging/testid/message',
-                data: {'message': message.toJson()}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(mockDio.post<String>('/channels/messaging/testid/message', data: {
+          'message': message.toJson(),
+          'connection_id': null,
+        })).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await channelClient.sendMessage(message);
 
-        verify(mockDio.post<String>('/channels/messaging/testid/message',
-            data: {'message': message.toJson()})).called(1);
+        verify(
+            mockDio.post<String>('/channels/messaging/testid/message', data: {
+          'message': message.toJson(),
+          'connection_id': null,
+        })).called(1);
       });
 
       test('markRead', () async {

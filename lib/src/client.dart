@@ -121,6 +121,9 @@ class Client {
   final ValueNotifier<ConnectionStatus> wsConnectionStatus =
       ValueNotifier(null);
 
+  /// The id of the current websocket connection
+  String get connectionId => _connectionId;
+
   String _token;
   bool _anonymous = false;
   String _connectionId;
