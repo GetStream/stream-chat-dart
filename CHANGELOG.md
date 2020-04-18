@@ -1,3 +1,7 @@
+## 0.1.26
+
+- Remove wrong `members` property from `ChannelModel`
+
 ## 0.1.25
 
 - Fix online status
