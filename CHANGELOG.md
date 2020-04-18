@@ -1,3 +1,7 @@
+## 0.1.25
+
+- Fix online status
+
 ## 0.1.24
 
 - Fix unread count

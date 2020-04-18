@@ -126,7 +126,6 @@ class Channel {
     final response = await _client.post(
       "$_channelURL/message",
       data: {
-        "connection_id": _client.connectionId,
         "message": message
             .copyWith(
               id: messageId,
