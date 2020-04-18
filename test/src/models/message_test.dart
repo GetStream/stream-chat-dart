@@ -12,6 +12,7 @@ void main() {
       "id": "4637f7e4-a06b-42db-ba5a-8d8270dd926f",
       "text": "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
       "type": "regular",
+      "status": "SENT",
       "user": {
           "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
           "role": "user",
@@ -120,6 +121,7 @@ void main() {
         {
             "id": "4637f7e4-a06b-42db-ba5a-8d8270dd926f",
             "text": "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
+            "status": "SENT",
             "attachments": [
               {
                 "type": "video",

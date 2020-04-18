@@ -47,6 +47,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) {
         ? null
         : User.fromJson(json['user'] as Map<String, dynamic>),
     extraData: json['extra_data'] as Map<String, dynamic>,
+    status: _$enumDecodeNullable(_$MessageSendingStatusEnumMap, json['status']),
   );
 }
 
@@ -54,6 +55,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   final val = <String, dynamic>{
     'id': instance.id,
     'text': instance.text,
+    'status': _$MessageSendingStatusEnumMap[instance.status],
   };
 
   void writeNotNull(String key, dynamic value) {
@@ -80,3 +82,41 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   writeNotNull('extra_data', instance.extraData);
   return val;
 }
+
+T _$enumDecode<T>(
+  Map<T, dynamic> enumValues,
+  dynamic source, {
+  T unknownValue,
+}) {
+  if (source == null) {
+    throw ArgumentError('A value must be provided. Supported values: '
+        '${enumValues.values.join(', ')}');
+  }
+
+  final value = enumValues.entries
+      .singleWhere((e) => e.value == source, orElse: () => null)
+      ?.key;
+
+  if (value == null && unknownValue == null) {
+    throw ArgumentError('`$source` is not one of the supported values: '
+        '${enumValues.values.join(', ')}');
+  }
+  return value ?? unknownValue;
+}
+
+T _$enumDecodeNullable<T>(
+  Map<T, dynamic> enumValues,
+  dynamic source, {
+  T unknownValue,
+}) {
+  if (source == null) {
+    return null;
+  }
+  return _$enumDecode<T>(enumValues, source, unknownValue: unknownValue);
+}
+
+const _$MessageSendingStatusEnumMap = {
+  MessageSendingStatus.SENDING: 'SENDING',
+  MessageSendingStatus.SENT: 'SENT',
+  MessageSendingStatus.FAILED: 'FAILED',
+};
