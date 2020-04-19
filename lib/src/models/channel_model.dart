@@ -1,7 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import 'channel_config.dart';
-import 'member.dart';
 import 'serialization.dart';
 import 'user.dart';
 

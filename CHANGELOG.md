@@ -1,3 +1,7 @@
+## 0.1.27
+
+- Update dependencies
+
 ## 0.1.26
 
 - Remove wrong `members` property from `ChannelModel`
