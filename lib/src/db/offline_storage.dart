@@ -279,6 +279,11 @@ class OfflineStorage extends _$OfflineStorage {
     });
   }
 
+  /// Remove a message by message id
+  Future<void> removeMessage(String messageId) {
+    return (delete(messages)..where((m) => m.id.equals(messageId))).go();
+  }
+
   /// Update messages data from a list
   Future<void> updateMessages(
     List<Message> newMessages,

@@ -37,7 +37,7 @@ Event _$EventFromJson(Map json) {
             (k, e) => MapEntry(k as String, e),
           )),
     online: json['online'] as bool,
-  );
+  )..isOffline = json['is_offline'] as bool;
 }
 
 Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
@@ -52,4 +52,5 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'total_unread_count': instance.totalUnreadCount,
       'unread_channels': instance.unreadChannels,
       'online': instance.online,
+      'is_offline': instance.isOffline,
     };

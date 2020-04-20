@@ -255,28 +255,83 @@ class Channel {
 
   /// Send a reaction to this channel
   Future<SendReactionResponse> sendReaction(
-    String messageID,
+    Message message,
     String type, {
     Map<String, dynamic> extraData = const {},
   }) async {
+    final messageId = message.id;
     final data = Map<String, dynamic>.from(extraData)
       ..addAll({
         "type": type,
       });
 
-    final res = await _client.post(
-      "/messages/$messageID/reaction",
-      data: {"reaction": data},
+    final currentScore = message.ownReactions
+            .firstWhere((r) => r.type == type, orElse: () => null)
+            ?.score ??
+        0;
+
+    final newReaction = Reaction(
+      type: type,
+      extraData: extraData,
+      createdAt: DateTime.now(),
+      user: _client.state.user,
+      messageId: messageId,
+      userId: _client.state.user.id,
+      score: currentScore + 1,
     );
-    return _client.decode(res.data, SendReactionResponse.fromJson);
+
+    _client.handleEvent(Event(
+      type: EventType.reactionNew,
+      cid: cid,
+      user: _client.state.user,
+      message: message,
+      reaction: newReaction,
+    ));
+
+    try {
+      final res = await _client.post(
+        "/messages/$messageId/reaction",
+        data: {"reaction": data},
+      );
+      return _client.decode(res.data, SendReactionResponse.fromJson);
+    } catch (_) {
+      _client.handleEvent(Event(
+        type: EventType.reactionDeleted,
+        cid: cid,
+        message: message,
+        user: _client.state.user,
+        reaction: newReaction,
+      ));
+      rethrow;
+    }
   }
 
   /// Delete a reaction from this channel
-  Future<EmptyResponse> deleteReaction(String messageID, String reactionType) {
+  Future<EmptyResponse> deleteReaction(Message message, Reaction reaction) {
     _checkInitialized();
+
+    _client.handleEvent(Event(
+      type: EventType.reactionDeleted,
+      cid: cid,
+      message: message,
+      user: _client.state.user,
+      reaction: reaction,
+    ));
+
     return client
-        .delete("/messages/$messageID/reaction/$reactionType")
-        .then((res) => _client.decode(res.data, EmptyResponse.fromJson));
+        .delete("/messages/${message.id}/reaction/${reaction.type}")
+        .then((res) => _client.decode(res.data, EmptyResponse.fromJson))
+        .catchError((e) {
+      _client.handleEvent(Event(
+        type: EventType.reactionNew,
+        cid: cid,
+        message: message,
+        user: _client.state.user,
+        reaction: reaction,
+      ));
+
+      throw e;
+    });
   }
 
   /// Edit the channel custom data
@@ -353,10 +408,12 @@ class Channel {
 
   /// Send action for a specific message of this channel
   Future<SendActionResponse> sendAction(
-    String messageId,
+    Message message,
     Map<String, dynamic> formData,
   ) async {
     _checkInitialized();
+
+    String messageId = message.id;
     final response = await _client.post("/messages/$messageId/action", data: {
       'id': id,
       'type': type,
@@ -369,7 +426,7 @@ class Channel {
     if (res.message != null) {
       _client.handleEvent(Event(
         message: res.message,
-        type: EventType.messageNew,
+        type: EventType.messageUpdated,
         cid: cid,
       ));
     } else {
@@ -390,6 +447,8 @@ class Channel {
               state.threads[oldMessage.parentId]..remove(oldMessage));
         }
       }
+
+      await _client.offlineStorage?.removeMessage(messageId);
     }
 
     return res;
@@ -764,7 +823,11 @@ class ChannelClientState {
   }
 
   void _listenReactionNew() {
-    _channel.on(EventType.reactionNew).listen((event) {
+    _channel
+        .on(EventType.reactionNew)
+        .where(
+            (e) => _channel._client.state.user.id != e.user.id || e.isOffline)
+        .listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
         _channelState = this._channelState.copyWith(
@@ -934,11 +997,11 @@ class ChannelClientState {
       reactionCounts: message.reactionCounts
         ..addAll({
           event.reaction.type:
-              (message.reactionCounts[event.reaction.type]) - 1,
+              (message.reactionCounts[event.reaction.type] ?? 0) - 1,
         }),
     );
 
-    newMessage.reactionCounts.removeWhere((_, v) => v == 0);
+    newMessage.reactionCounts.removeWhere((_, v) => v <= 0);
 
     if (event.user.id == this._channel.client.state.user.id) {
       return newMessage.copyWith(
