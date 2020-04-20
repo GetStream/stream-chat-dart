@@ -391,7 +391,6 @@ class OfflineStorage extends _$OfflineStorage {
         lastMessageAt: channelRow.lastMessageAt,
         deletedAt: channelRow.deletedAt,
         extraData: channelRow.extraData,
-        members: [],
         config: ChannelConfig.fromJson(jsonDecode(channelRow.config)),
         createdBy: userRow != null ? _userFromUserRow(userRow) : null,
       ),

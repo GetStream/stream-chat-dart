@@ -1078,7 +1078,6 @@ class ChannelClientState {
       messages: newMessages,
       channel: _channelState.channel?.copyWith(
         lastMessageAt: updatedState.channel?.lastMessageAt,
-        members: updatedState.channel?.members,
         createdAt: updatedState.channel?.createdAt,
         type: updatedState.channel?.type,
         extraData: updatedState.channel?.extraData,
