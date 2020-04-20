@@ -20,7 +20,23 @@
 
 - Minor bug fixes
 
-## 0.1.21
+## 0.1.27
+
+- Update dependencies
+
+## 0.1.26
+
+- Remove wrong `members` property from `ChannelModel`
+
+## 0.1.25
+
+- Fix online status
+
+## 0.1.24
+
+- Fix unread count
+
+## 0.1.22
 
 - Add mute/unmute channel
 

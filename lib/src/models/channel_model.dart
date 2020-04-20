@@ -1,7 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import 'channel_config.dart';
-import 'member.dart';
 import 'serialization.dart';
 import 'user.dart';
 
@@ -52,10 +51,6 @@ class ChannelModel {
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final int memberCount;
 
-  /// The list of this channel members
-  @JsonKey(includeIfNull: false)
-  final List<Member> members;
-
   /// Map of custom channel extraData
   @JsonKey(includeIfNull: false)
   final Map<String, dynamic> extraData;
@@ -74,7 +69,6 @@ class ChannelModel {
     'updated_at',
     'deleted_at',
     'member_count',
-    'members',
   ];
 
   /// Constructor used for json serialization
@@ -90,7 +84,6 @@ class ChannelModel {
     this.updatedAt,
     this.deletedAt,
     this.memberCount,
-    this.members,
     this.extraData,
   });
 
@@ -125,7 +118,6 @@ class ChannelModel {
     DateTime updatedAt,
     DateTime deletedAt,
     int memberCount,
-    List<Member> members,
     Map<String, dynamic> extraData,
   }) =>
       ChannelModel(
@@ -140,7 +132,6 @@ class ChannelModel {
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt ?? this.deletedAt,
         memberCount: memberCount ?? this.memberCount,
-        members: members ?? this.members,
         extraData: extraData ?? this.extraData,
       );
 }

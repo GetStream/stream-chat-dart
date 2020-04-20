@@ -35,13 +35,6 @@ ChannelModel _$ChannelModelFromJson(Map json) {
         ? null
         : DateTime.parse(json['deleted_at'] as String),
     memberCount: json['member_count'] as int,
-    members: (json['members'] as List)
-        ?.map((e) => e == null
-            ? null
-            : Member.fromJson((e as Map)?.map(
-                (k, e) => MapEntry(k as String, e),
-              )))
-        ?.toList(),
     extraData: (json['extra_data'] as Map)?.map(
       (k, e) => MapEntry(k as String, e),
     ),
@@ -69,7 +62,6 @@ Map<String, dynamic> _$ChannelModelToJson(ChannelModel instance) {
   writeNotNull('updated_at', readonly(instance.updatedAt));
   writeNotNull('deleted_at', readonly(instance.deletedAt));
   writeNotNull('member_count', readonly(instance.memberCount));
-  writeNotNull('members', instance.members?.map((e) => e?.toJson())?.toList());
   writeNotNull('extra_data', instance.extraData);
   return val;
 }

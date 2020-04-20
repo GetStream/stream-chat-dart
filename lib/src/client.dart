@@ -155,6 +155,10 @@ class Client {
 
   /// The current user token
   String token;
+
+  /// The id of the current websocket connection
+  String get connectionId => _connectionId;
+
   bool _anonymous = false;
   String _connectionId;
   WebSocket _ws;
@@ -181,6 +185,13 @@ class Client {
 
             options.queryParameters.addAll(_commonQueryParams);
             options.headers.addAll(_httpHeaders);
+
+            if (_connectionId != null && options.data is Map) {
+              options.data = {
+                'connection_id': _connectionId,
+                ...options.data,
+              };
+            }
 
             String stringData = options.data.toString();
 
