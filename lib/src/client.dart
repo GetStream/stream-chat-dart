@@ -486,9 +486,11 @@ class Client {
       }
     }).toList();
 
-    yield channels;
+    if (channels.isNotEmpty) {
+      yield channels;
 
-    state.channels = newChannels;
+      state.channels = newChannels;
+    }
 
     if (onlyOffline) {
       return;
