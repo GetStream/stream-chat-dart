@@ -92,8 +92,8 @@ class Channel {
 
   Map<String, dynamic> get extraData =>
       state?._channelState?.channel?.extraData;
-  Stream<Map<String, dynamic>> get extraDataStream =>
-      state?.channelStateStream?.map((cs) => cs.channel?.extraData);
+  Stream<Map<String, dynamic>> get extraDataStream => state?.channelStateStream
+      ?.map((cs) => cs.channel?.extraData ?? extraData);
 
   /// The main Stream chat client
   Client get client => _client;
@@ -918,8 +918,8 @@ class ChannelClientState {
       ..._channelState?.messages
               ?.where((m) =>
                   updatedState.messages
-                      ?.any((newMessage) => newMessage.id == m.id) ==
-                  false)
+                      ?.any((newMessage) => newMessage.id == m.id) !=
+                  true)
               ?.toList() ??
           [],
     ];
@@ -941,8 +941,8 @@ class ChannelClientState {
       ..._channelState?.watchers
               ?.where((w) =>
                   updatedState.watchers
-                      ?.any((newWatcher) => newWatcher.id == w.id) ==
-                  false)
+                      ?.any((newWatcher) => newWatcher.id == w.id) !=
+                  true)
               ?.toList() ??
           [],
     ];
@@ -952,8 +952,8 @@ class ChannelClientState {
       ..._channelState?.members
               ?.where((m) =>
                   updatedState.members
-                      ?.any((newMember) => newMember.userId == m.userId) ==
-                  false)
+                      ?.any((newMember) => newMember.userId == m.userId) !=
+                  true)
               ?.toList() ??
           [],
     ];
