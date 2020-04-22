@@ -1,3 +1,7 @@
+## 0.1.28
+
+- Fix bug clearing members when receiving a message
+
 ## 0.1.27
 
 - Update dependencies
