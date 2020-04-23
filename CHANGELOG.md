@@ -1,3 +1,7 @@
+## 0.2.0-alpha+6
+
+- Align with stable release
+
 ## 0.2.0-alpha+5
 
 - Rename client parameters
