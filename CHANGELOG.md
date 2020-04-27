@@ -1,3 +1,7 @@
+## 0.1.29
+
+- Fix read event handling
+
 ## 0.1.28
 
 - Fix bug clearing members when receiving a message
