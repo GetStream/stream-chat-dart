@@ -953,13 +953,9 @@ class ChannelClientState {
       return;
     }
 
-    _channel
-        .on(EventType.messageRead)
-        .where((e) => e.user.id == _channel.client.state.user.id)
-        .listen((event) {
+    _channel.on(EventType.messageRead).listen((event) {
       final read = this._channelState.read;
-      final userReadIndex =
-          read?.indexWhere((r) => r.user.id == _channel.client.state.user.id);
+      final userReadIndex = read?.indexWhere((r) => r.user.id == event.user.id);
 
       if (userReadIndex != null && userReadIndex != -1) {
         final userRead = read.removeAt(userReadIndex);
