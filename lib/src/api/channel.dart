@@ -748,6 +748,18 @@ class ChannelClientState {
 
     _listenReadEvents();
 
+    _channel.on(EventType.channelTruncated).listen((event) async {
+      final channel = event.channel;
+      await _channel._client.offlineStorage
+          ?.deleteChannelsMessages([channel.cid]);
+      truncate();
+    });
+
+    _channel.on(EventType.channelUpdated).listen((e) {
+      final channel = e.channel;
+      updateChannelState(channelState.copyWith(channel: channel));
+    });
+
     _channel._client.offlineStorage
         ?.getChannelThreads(_channel.cid)
         ?.then((threads) {

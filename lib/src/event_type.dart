@@ -33,6 +33,9 @@ class EventType {
   /// Event sent when a channel is truncated
   static const String channelTruncated = "channel.truncated";
 
+  /// Event sent when a channel is updated
+  static const String channelUpdated = "channel.updated";
+
   /// Event sent when the connection status changes
   static const String connectionChanged = "connection.changed";
 
