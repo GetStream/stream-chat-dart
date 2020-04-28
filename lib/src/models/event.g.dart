@@ -39,10 +39,8 @@ Event _$EventFromJson(Map json) {
     online: json['online'] as bool,
     channel: json['channel'] == null
         ? null
-        : ChannelModel.fromJson((json['channel'] as Map)?.map(
-            (k, e) => MapEntry(k as String, e),
-          )),
-  )..isOffline = json['is_offline'] as bool;
+        : EventChannel.fromJson(json['channel'] as Map),
+  )..isLocal = json['is_local'] as bool;
 }
 
 Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
@@ -58,5 +56,22 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'total_unread_count': instance.totalUnreadCount,
       'unread_channels': instance.unreadChannels,
       'online': instance.online,
-      'is_offline': instance.isOffline,
+      'is_local': instance.isLocal,
+    };
+
+EventChannel _$EventChannelFromJson(Map json) {
+  return EventChannel(
+    members: (json['members'] as List)
+        ?.map((e) => e == null
+            ? null
+            : Member.fromJson((e as Map)?.map(
+                (k, e) => MapEntry(k as String, e),
+              )))
+        ?.toList(),
+  );
+}
+
+Map<String, dynamic> _$EventChannelToJson(EventChannel instance) =>
+    <String, dynamic>{
+      'members': instance.members?.map((e) => e?.toJson())?.toList(),
     };

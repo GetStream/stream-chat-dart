@@ -144,6 +144,7 @@ class WebSocket {
 
   void _onData(data) {
     final event = _decodeEvent(data);
+    logger.info('received new event: $data');
 
     if (_lastEventAt == null) {
       logger.info('connection estabilished');

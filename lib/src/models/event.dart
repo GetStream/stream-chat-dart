@@ -3,6 +3,7 @@ import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:stream_chat/src/models/message.dart';
 
 import '../event_type.dart';
+import 'member.dart';
 import 'own_user.dart';
 import 'reaction.dart';
 import 'user.dart';
@@ -35,7 +36,7 @@ class Event {
   final Message message;
 
   /// The channel sent with the event
-  final ChannelModel channel;
+  final EventChannel channel;
 
   /// The reaction sent with the event
   final Reaction reaction;
@@ -51,7 +52,7 @@ class Event {
 
   /// True if the event is created by the library.
   /// Used only for internal state management
-  bool isOffline;
+  bool isLocal;
 
   /// Constructor used for json serialization
   Event({
@@ -67,12 +68,32 @@ class Event {
     this.reaction,
     this.online,
     this.channel,
-  }) : this.isOffline = true;
+  }) : this.isLocal = true;
 
   /// Create a new instance from a json
   factory Event.fromJson(Map<String, dynamic> json) =>
-      _$EventFromJson(json)..isOffline = false;
+      _$EventFromJson(json)..isLocal = false;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$EventToJson(this);
+}
+
+@JsonSerializable()
+class EventChannel extends ChannelModel {
+  /// A paginated list of channel members
+  final List<Member> members;
+
+  /// Known top level fields.
+  /// Useful for [Serialization] methods.
+  static final topLevelFields = [
+    'members',
+    ...ChannelModel.topLevelFields,
+  ];
+
+  /// Constructor used for json serialization
+  EventChannel({this.members});
+
+  /// Create a new instance from a json
+  static EventChannel fromJson(Map<String, dynamic> json) =>
+      _$EventChannelFromJson(json);
 }

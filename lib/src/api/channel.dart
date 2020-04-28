@@ -755,9 +755,12 @@ class ChannelClientState {
       truncate();
     });
 
-    _channel.on(EventType.channelUpdated).listen((e) {
+    _channel.on(EventType.channelUpdated).listen((Event e) {
       final channel = e.channel;
-      updateChannelState(channelState.copyWith(channel: channel));
+      updateChannelState(channelState.copyWith(
+        channel: channel,
+        members: channel.members,
+      ));
     });
 
     _channel._client.offlineStorage
@@ -837,8 +840,7 @@ class ChannelClientState {
   void _listenReactionNew() {
     _channel
         .on(EventType.reactionNew)
-        .where(
-            (e) => _channel._client.state.user.id != e.user.id || e.isOffline)
+        .where((e) => _channel._client.state.user.id != e.user.id || e.isLocal)
         .listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
