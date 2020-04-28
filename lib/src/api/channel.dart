@@ -758,7 +758,7 @@ class ChannelClientState {
     _channel.on(EventType.channelUpdated).listen((Event e) {
       final channel = e.channel;
       updateChannelState(channelState.copyWith(
-        channel: channel,
+        channel: channel.copyWith(lastMessageAt: null),
         members: channel.members,
       ));
     });
