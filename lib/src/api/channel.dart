@@ -1085,6 +1085,13 @@ class ChannelClientState {
     _threads = newThreads;
   }
 
+  /// Delete all channel messages
+  void truncate() {
+    _channelState = _channelState.copyWith(
+      messages: [],
+    );
+  }
+
   /// Update channelState with updated information
   void updateChannelState(ChannelState updatedState) {
     List<Message> newMessages = [

@@ -1015,10 +1015,10 @@ class ClientState {
       channels = channels..removeWhere((cid, ch) => cid == channel.cid);
     });
 
-    _client.on(EventType.channelTruncated).listen((event) {
+    _client.on(EventType.channelTruncated).listen((event) async {
       final channel = event.channel;
-      _client._offlineStorage?.deleteChannels([channel.cid]);
-      channels = channels..removeWhere((cid, ch) => cid == channel.cid);
+      await _client._offlineStorage?.deleteChannelsMessages([channel.cid]);
+      channels[channel.cid].state.truncate();
     });
   }
 
