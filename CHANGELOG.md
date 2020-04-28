@@ -1,3 +1,7 @@
+## 0.2.0-alpha+7
+
+- Add channel deleted/updated event handling
+
 ## 0.2.0-alpha+6
 
 - Align with stable release
