@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:stream_chat/src/models/message.dart';
 
 import '../event_type.dart';
@@ -33,6 +34,9 @@ class Event {
   /// The message sent with the event
   final Message message;
 
+  /// The channel sent with the event
+  final ChannelModel channel;
+
   /// The reaction sent with the event
   final Reaction reaction;
 
@@ -62,6 +66,7 @@ class Event {
     this.unreadChannels,
     this.reaction,
     this.online,
+    this.channel,
   }) : this.isOffline = true;
 
   /// Create a new instance from a json

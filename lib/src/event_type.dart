@@ -27,6 +27,12 @@ class EventType {
   /// Event sent when reading a message
   static const String messageRead = "message.read";
 
+  /// Event sent when a channel is deleted
+  static const String channelDeleted = "channel.deleted";
+
+  /// Event sent when a channel is truncated
+  static const String channelTruncated = "channel.truncated";
+
   /// Event sent when the connection status changes
   static const String connectionChanged = "connection.changed";
 

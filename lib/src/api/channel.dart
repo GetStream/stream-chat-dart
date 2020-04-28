@@ -448,7 +448,7 @@ class Channel {
         }
       }
 
-      await _client.offlineStorage?.removeMessage(messageId);
+      await _client.offlineStorage?.deleteMessages([messageId]);
     }
 
     return res;

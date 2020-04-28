@@ -37,6 +37,11 @@ Event _$EventFromJson(Map json) {
             (k, e) => MapEntry(k as String, e),
           )),
     online: json['online'] as bool,
+    channel: json['channel'] == null
+        ? null
+        : ChannelModel.fromJson((json['channel'] as Map)?.map(
+            (k, e) => MapEntry(k as String, e),
+          )),
   )..isOffline = json['is_offline'] as bool;
 }
 
@@ -48,6 +53,7 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'me': instance.me?.toJson(),
       'user': instance.user?.toJson(),
       'message': instance.message?.toJson(),
+      'channel': instance.channel?.toJson(),
       'reaction': instance.reaction?.toJson(),
       'total_unread_count': instance.totalUnreadCount,
       'unread_channels': instance.unreadChannels,

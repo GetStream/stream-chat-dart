@@ -1008,6 +1008,18 @@ class ClientState {
         .listen((totalUnreadCount) {
       _totalUnreadCountController.add(totalUnreadCount);
     });
+
+    _client.on(EventType.channelDeleted).listen((event) {
+      final channel = event.channel;
+      _client._offlineStorage?.deleteChannels([channel.cid]);
+      channels = channels..removeWhere((cid, ch) => cid == channel.cid);
+    });
+
+    _client.on(EventType.channelTruncated).listen((event) {
+      final channel = event.channel;
+      _client._offlineStorage?.deleteChannels([channel.cid]);
+      channels = channels..removeWhere((cid, ch) => cid == channel.cid);
+    });
   }
 
   final Client _client;

@@ -280,8 +280,54 @@ class OfflineStorage extends _$OfflineStorage {
   }
 
   /// Remove a message by message id
-  Future<void> removeMessage(String messageId) {
-    return (delete(messages)..where((m) => m.id.equals(messageId))).go();
+  Future<void> deleteMessages(List<String> messageIds) {
+    return batch((batch) {
+      batch.deleteWhere<_Reactions, _Reaction>(
+        reactions,
+        (r) => r.messageId.isIn(messageIds),
+      );
+      batch.deleteWhere<_Messages, _Message>(
+        messages,
+        (m) => m.id.isIn(messageIds),
+      );
+    });
+  }
+
+  /// Remove a message by message id
+  Future<void> deleteChannelsMessages(List<String> cids) async {
+    final List<String> messageIds = await (select(messages)
+          ..where((m) => m.channelCid.isIn(cids)))
+        .map((m) => m.id)
+        .get();
+    return batch((batch) {
+      batch.deleteWhere<_Reactions, _Reaction>(
+        reactions,
+        (r) => r.messageId.isIn(messageIds),
+      );
+      batch.deleteWhere<_Messages, _Message>(
+        messages,
+        (m) => m.id.isIn(messageIds),
+      );
+    });
+  }
+
+  /// Remove a channel by cid
+  Future<void> deleteChannels(List<String> cids) async {
+    await deleteChannelsMessages(cids);
+    return batch((batch) {
+      batch.deleteWhere<_Members, _Member>(
+        members,
+        (m) => m.channelCid.isIn(cids),
+      );
+      batch.deleteWhere<_Reads, _Read>(
+        reads,
+        (r) => r.channelCid.isIn(cids),
+      );
+      batch.deleteWhere<_Channels, _Channel>(
+        channels,
+        (c) => c.cid.isIn(cids),
+      );
+    });
   }
 
   /// Update messages data from a list
