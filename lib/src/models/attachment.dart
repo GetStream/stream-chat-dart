@@ -113,6 +113,51 @@ class Attachment {
   Map<String, dynamic> toJson() => Serialization.moveKeysToMapInPlace(
       _$AttachmentToJson(this), topLevelFields);
 
+  Attachment copyWith({
+    String type,
+    String titleLink,
+    String title,
+    String thumbUrl,
+    String text,
+    String pretext,
+    String ogScrapeUrl,
+    String imageUrl,
+    String footerIcon,
+    String footer,
+    dynamic fields,
+    String fallback,
+    String color,
+    String authorName,
+    String authorLink,
+    String authorIcon,
+    String assetUrl,
+    List<Action> actions,
+    Uri localUri,
+    Map<String, dynamic> extraData,
+  }) =>
+      Attachment(
+        type: type ?? this.type,
+        titleLink: titleLink ?? this.titleLink,
+        title: title ?? this.title,
+        thumbUrl: thumbUrl ?? this.thumbUrl,
+        text: text ?? this.text,
+        pretext: pretext ?? this.pretext,
+        ogScrapeUrl: ogScrapeUrl ?? this.ogScrapeUrl,
+        imageUrl: imageUrl ?? this.imageUrl,
+        footerIcon: footerIcon ?? this.footerIcon,
+        footer: footer ?? this.footer,
+        fields: fields ?? this.fields,
+        fallback: fallback ?? this.fallback,
+        color: color ?? this.color,
+        authorName: authorName ?? this.authorName,
+        authorLink: authorLink ?? this.authorLink,
+        authorIcon: authorIcon ?? this.authorIcon,
+        assetUrl: assetUrl ?? this.assetUrl,
+        actions: actions ?? this.actions,
+        localUri: localUri ?? this.localUri,
+        extraData: extraData ?? this.extraData,
+      );
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
