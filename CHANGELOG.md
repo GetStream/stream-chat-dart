@@ -1,3 +1,7 @@
+## 0.2.0-alpha+8
+
+- Add copyWith to Attachment
+
 ## 0.2.0-alpha+7
 
 - Add channel deleted/updated event handling
