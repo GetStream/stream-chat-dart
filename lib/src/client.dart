@@ -164,7 +164,6 @@ class Client {
   WebSocket _ws;
 
   bool get _hasConnectionId => _connectionId != null;
-  Completer _tokenExpiredCompleter;
 
   void _setupDio(
     Dio httpClient,
@@ -179,10 +178,6 @@ class Client {
     this.httpClient.options.connectTimeout = connectTimeout.inMilliseconds;
     this.httpClient.interceptors.add(InterceptorsWrapper(
           onRequest: (options) async {
-            if (_tokenExpiredCompleter != null) {
-              await _tokenExpiredCompleter.future;
-            }
-
             options.queryParameters.addAll(_commonQueryParams);
             options.headers.addAll(_httpHeaders);
 
@@ -225,7 +220,7 @@ class Client {
       logger.info('token expired');
 
       if (this.tokenProvider != null) {
-        _tokenExpiredCompleter = Completer();
+        httpClient.lock();
         final userId = state.user.id;
 
         _ws.connectionStatus.removeListener(_connectionStatusListener);
@@ -236,9 +231,9 @@ class Client {
         await Future.delayed(Duration(seconds: 4));
         this.token = newToken;
 
-        await setUser(User(id: userId), newToken);
+        httpClient.unlock();
 
-        _tokenExpiredCompleter.complete();
+        await setUser(User(id: userId), newToken);
 
         try {
           return await this.httpClient.request(
@@ -637,7 +632,7 @@ class Client {
   String get _authType => _anonymous ? 'anonymous' : 'jwt';
 
   // TODO: get the right version of the lib from the build toolchain
-  String get _userAgent => "stream_chat_dart-client-$PACKAGE_VERSION";
+  String get _userAgent => "stream-chat-dart-client-$PACKAGE_VERSION";
 
   Map<String, String> get _commonQueryParams => {
         "user_id": state.user?.id,
