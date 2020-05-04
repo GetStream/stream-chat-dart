@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stream_chat/src/api/retry_policy.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:stream_chat/src/models/own_user.dart';
@@ -63,8 +64,15 @@ class Client {
     Dio httpClient,
     this.showLocalNotification,
     this.backgroundKeepAlive = const Duration(minutes: 1),
+    RetryPolicy retryPolicy,
   }) {
     WidgetsFlutterBinding.ensureInitialized();
+
+    this._retryPolicy ??= RetryPolicy(
+      retryTimeout: (Client client, int attempt, ApiError error) =>
+          Duration(seconds: 1 * attempt),
+      shouldRetry: (Client client, int attempt, ApiError error) => attempt < 5,
+    );
 
     state = ClientState(this);
 
@@ -78,6 +86,10 @@ class Client {
 
   /// If true chat data will persist on disk
   final bool persistenceEnabled;
+
+  RetryPolicy _retryPolicy;
+
+  RetryPolicy get retryPolicy => _retryPolicy;
 
   /// Method used to show a local notification while the app is in background
   /// Switching to another application will not disconnect the client immediately
@@ -176,26 +188,28 @@ class Client {
     this.httpClient.options.baseUrl = Uri.https(baseURL, '').toString();
     this.httpClient.options.receiveTimeout = receiveTimeout.inMilliseconds;
     this.httpClient.options.connectTimeout = connectTimeout.inMilliseconds;
-    this.httpClient.interceptors.add(InterceptorsWrapper(
-          onRequest: (options) async {
-            options.queryParameters.addAll(_commonQueryParams);
-            options.headers.addAll(_httpHeaders);
+    this.httpClient.interceptors.add(
+          InterceptorsWrapper(
+            onRequest: (options) async {
+              options.queryParameters.addAll(_commonQueryParams);
+              options.headers.addAll(_httpHeaders);
 
-            if (_connectionId != null && options.data is Map) {
-              options.data = {
-                'connection_id': _connectionId,
-                ...options.data,
-              };
-            }
+              if (_connectionId != null && options.data is Map) {
+                options.data = {
+                  'connection_id': _connectionId,
+                  ...options.data,
+                };
+              }
 
-            String stringData = options.data.toString();
+              String stringData = options.data.toString();
 
-            if (options.data is FormData) {
-              final multiPart = (options.data as FormData).files[0]?.value;
-              stringData = '${multiPart?.filename} - ${multiPart?.contentType}';
-            }
+              if (options.data is FormData) {
+                final multiPart = (options.data as FormData).files[0]?.value;
+                stringData =
+                    '${multiPart?.filename} - ${multiPart?.contentType}';
+              }
 
-            logger.info('''
+              logger.info('''
     
           method: ${options.method}
           url: ${options.uri} 
@@ -204,10 +218,11 @@ class Client {
     
         ''');
 
-            return options;
-          },
-          onError: _tokenExpiredInterceptor,
-        ));
+              return options;
+            },
+            onError: _tokenExpiredInterceptor,
+          ),
+        );
   }
 
   _tokenExpiredInterceptor(DioError err) async {
@@ -390,9 +405,6 @@ class Client {
           type: EventType.connectionRecovered,
           online: true,
         ));
-        await Future.wait(state.channels.values.map((channel) {
-          return channel.state?.retryFailedMessages() ?? Future.value();
-        }));
         queryChannels(filter: {
           'cid': {
             '\$in': state.channels.keys.toList(),
@@ -400,10 +412,15 @@ class Client {
         }, options: {
           'recovery': true,
           'last_message_ids': state.channels.map<String, String>(
-            (cid, c) => MapEntry<String, String>(
-              cid,
-              c.state?.messages?.last?.id,
-            ),
+            (cid, c) {
+              final lastId = c.state?.messages?.isEmpty == true
+                  ? null
+                  : c.state.messages.last.id;
+              return MapEntry<String, String>(
+                cid,
+                lastId,
+              );
+            },
           ),
         }).listen((_) {});
       }
@@ -891,11 +908,14 @@ class Client {
     Message message, [
     String cid,
   ]) async {
+    message = message.copyWith(
+      status: MessageSendingStatus.UPDATING,
+      updatedAt: message.updatedAt ?? DateTime.now(),
+    );
+
     handleEvent(Event(
-      type: EventType.messageNew,
-      message: message.copyWith(
-        status: MessageSendingStatus.UPDATING,
-      ),
+      type: EventType.messageUpdated,
+      message: message,
       cid: cid,
     ));
 
@@ -929,7 +949,10 @@ class Client {
   Future<EmptyResponse> deleteMessage(Message message, [String cid]) async {
     if (message.status == MessageSendingStatus.FAILED) {
       handleEvent(Event(
-        message: message.copyWith(type: 'deleted'),
+        message: message.copyWith(
+          type: 'deleted',
+          status: MessageSendingStatus.SENT,
+        ),
         type: EventType.messageDeleted,
         cid: cid,
       ));
@@ -937,21 +960,27 @@ class Client {
     }
 
     try {
+      message = message.copyWith(
+        type: 'deleted',
+        status: MessageSendingStatus.DELETING,
+        deletedAt: message.deletedAt ?? DateTime.now(),
+      );
       handleEvent(Event(
-        message: message.copyWith(
-          type: 'deleted',
-          status: MessageSendingStatus.DELETING,
-        ),
+        message: message,
         type: EventType.messageDeleted,
         cid: cid,
       ));
 
       final response = await delete("/messages/${message.id}");
+      handleEvent(Event(
+        message: message.copyWith(status: MessageSendingStatus.SENT),
+        type: EventType.messageDeleted,
+        cid: cid,
+      ));
       return decode(response.data, EmptyResponse.fromJson);
     } catch (error) {
       handleEvent(Event(
         message: message.copyWith(
-          type: 'deleted',
           status: MessageSendingStatus.FAILED_DELETE,
         ),
         type: EventType.messageUpdated,

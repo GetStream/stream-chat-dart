@@ -140,6 +140,8 @@ class _Messages extends Table {
 
   DateTimeColumn get updatedAt => dateTime().nullable()();
 
+  DateTimeColumn get deletedAt => dateTime().nullable()();
+
   TextColumn get userId => text().nullable()();
 
   TextColumn get channelCid => text().nullable()();

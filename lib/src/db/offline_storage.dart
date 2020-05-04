@@ -358,6 +358,7 @@ class OfflineStorage extends _$OfflineStorage {
               updatedAt: m.updatedAt,
               extraData: m.extraData,
               userId: m.user.id,
+              deletedAt: m.deletedAt,
               messageText: m.text,
             );
           },
@@ -501,6 +502,7 @@ class OfflineStorage extends _$OfflineStorage {
       showInChannel: messageRow.showInChannel,
       text: messageRow.messageText,
       user: _userFromUserRow(userRow),
+      deletedAt: messageRow.deletedAt,
     );
   }
 

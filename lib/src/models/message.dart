@@ -108,6 +108,9 @@ class Message {
   /// True is the message is ephemeral
   bool get isEphemeral => type == 'ephemeral';
 
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  final DateTime deletedAt;
+
   /// Known top level fields.
   /// Useful for [Serialization] methods.
   static const topLevelFields = [
@@ -126,6 +129,7 @@ class Message {
     'command',
     'created_at',
     'updated_at',
+    'deleted_at',
     'user',
   ];
 
@@ -148,6 +152,7 @@ class Message {
     this.updatedAt,
     this.user,
     this.extraData,
+    this.deletedAt,
     this.status = MessageSendingStatus.SENT,
   });
 
@@ -176,6 +181,7 @@ class Message {
     String command,
     DateTime createdAt,
     DateTime updatedAt,
+    DateTime deletedAt,
     User user,
     Map<String, dynamic> extraData,
     MessageSendingStatus status,
@@ -198,6 +204,7 @@ class Message {
         extraData: extraData ?? this.extraData,
         user: user ?? this.user,
         updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt ?? this.deletedAt,
         status: status ?? this.status,
       );
 }

@@ -63,6 +63,9 @@ Message _$MessageFromJson(Map json) {
     extraData: (json['extra_data'] as Map)?.map(
       (k, e) => MapEntry(k as String, e),
     ),
+    deletedAt: json['deleted_at'] == null
+        ? null
+        : DateTime.parse(json['deleted_at'] as String),
   );
 }
 
@@ -94,5 +97,6 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   writeNotNull('updated_at', readonly(instance.updatedAt));
   writeNotNull('user', readonly(instance.user));
   writeNotNull('extra_data', instance.extraData);
+  writeNotNull('deleted_at', readonly(instance.deletedAt));
   return val;
 }

@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_chat/src/api/retry_queue.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/models/channel_state.dart';
 import 'package:stream_chat/src/models/user.dart';
@@ -144,7 +146,7 @@ class Channel {
   Future<SendMessageResponse> sendMessage(Message message) async {
     final messageId = message.id ?? Uuid().v4();
     final newMessage = message.copyWith(
-      createdAt: DateTime.now(),
+      createdAt: message.createdAt ?? DateTime.now(),
       user: _client.state.user,
       id: messageId,
       status: MessageSendingStatus.SENDING,
@@ -179,23 +181,13 @@ class Channel {
         },
       );
 
-      _client.handleEvent(Event(
-        type: EventType.messageNew,
-        message: newMessage.copyWith(
-          status: MessageSendingStatus.SENT,
-        ),
-        cid: cid,
-      ));
-
       final res = _client.decode(response.data, SendMessageResponse.fromJson);
 
-      if (res.message?.type == 'ephemeral') {
-        _client.handleEvent(Event(
-          type: EventType.messageUpdated,
-          message: res.message,
-          cid: cid,
-        ));
-      }
+      _client.handleEvent(Event(
+        type: EventType.messageUpdated,
+        message: res.message,
+        cid: cid,
+      ));
 
       return res;
     } catch (error) {
@@ -340,7 +332,7 @@ class Channel {
     Message updateMessage,
   ) async {
     final response = await _client.post(_channelURL, data: {
-      'message': updateMessage.toJson(),
+      'message': updateMessage.copyWith(updatedAt: DateTime.now()).toJson(),
       'data': channelData,
     });
     return _client.decode(response.data, UpdateChannelResponse.fromJson);
@@ -733,7 +725,13 @@ class Channel {
 class ChannelClientState {
   /// Creates a new instance listening to events and updating the state
   ChannelClientState(this._channel, ChannelState channelState) {
+    _retryQueue = RetryQueue(
+      channel: _channel,
+      logger: Logger('RETRY QUEUE ${_channel.cid}'),
+    );
+
     _channelStateController = BehaviorSubject.seeded(channelState);
+
     _listenTypingEvents();
 
     _listenMessageNew();
@@ -771,40 +769,20 @@ class ChannelClientState {
     });
   }
 
+  RetryQueue _retryQueue;
+
   /// Retry failed message
-  Future<void> retryFailedMessages() {
+  Future<void> retryFailedMessages() async {
     final failedMessages = <Message>[
       ...messages,
-      ...threads.values.expand((v) => v.reversed)
+      ...threads.values.expand((v) => v)
     ]
         .where((message) =>
             message.status != null &&
             message.status != MessageSendingStatus.SENT)
-        .toList()
-        .reversed;
-    return Future.wait(failedMessages.map((message) {
-      final List<Future> futures = [];
-      if (message.status == MessageSendingStatus.FAILED_UPDATE ||
-          message.status == MessageSendingStatus.UPDATING) {
-        futures.add(_channel._client.updateMessage(
-          message,
-          _channel.cid,
-        ));
-      } else if (message.status == MessageSendingStatus.FAILED ||
-          message.status == MessageSendingStatus.SENDING) {
-        futures.add(_channel.sendMessage(
-          message,
-        ));
-      } else if (message.status == MessageSendingStatus.FAILED_DELETE ||
-          message.status == MessageSendingStatus.DELETING) {
-        futures.add(_channel._client.deleteMessage(
-          message,
-          _channel.cid,
-        ));
-      }
+        .toList();
 
-      return futures;
-    }).expand((v) => v));
+    _retryQueue.add(failedMessages);
   }
 
   void _listenReactionDeleted() {

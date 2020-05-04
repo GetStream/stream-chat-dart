@@ -1261,6 +1261,7 @@ class _Message extends DataClass implements Insertable<_Message> {
   final String command;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final DateTime deletedAt;
   final String userId;
   final String channelCid;
   final Map<String, dynamic> extraData;
@@ -1278,6 +1279,7 @@ class _Message extends DataClass implements Insertable<_Message> {
       this.command,
       @required this.createdAt,
       this.updatedAt,
+      this.deletedAt,
       this.userId,
       this.channelCid,
       this.extraData});
@@ -1313,6 +1315,8 @@ class _Message extends DataClass implements Insertable<_Message> {
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
       updatedAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}updated_at']),
+      deletedAt: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}deleted_at']),
       userId:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
       channelCid: stringType
@@ -1340,6 +1344,7 @@ class _Message extends DataClass implements Insertable<_Message> {
       command: serializer.fromJson<String>(json['command']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime>(json['deletedAt']),
       userId: serializer.fromJson<String>(json['userId']),
       channelCid: serializer.fromJson<String>(json['channelCid']),
       extraData: serializer.fromJson<Map<String, dynamic>>(json['extraData']),
@@ -1362,6 +1367,7 @@ class _Message extends DataClass implements Insertable<_Message> {
       'command': serializer.toJson<String>(command),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime>(deletedAt),
       'userId': serializer.toJson<String>(userId),
       'channelCid': serializer.toJson<String>(channelCid),
       'extraData': serializer.toJson<Map<String, dynamic>>(extraData),
@@ -1405,6 +1411,9 @@ class _Message extends DataClass implements Insertable<_Message> {
       updatedAt: updatedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
       userId:
           userId == null && nullToAbsent ? const Value.absent() : Value(userId),
       channelCid: channelCid == null && nullToAbsent
@@ -1430,6 +1439,7 @@ class _Message extends DataClass implements Insertable<_Message> {
           String command,
           DateTime createdAt,
           DateTime updatedAt,
+          DateTime deletedAt,
           String userId,
           String channelCid,
           Map<String, dynamic> extraData}) =>
@@ -1447,6 +1457,7 @@ class _Message extends DataClass implements Insertable<_Message> {
         command: command ?? this.command,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt ?? this.deletedAt,
         userId: userId ?? this.userId,
         channelCid: channelCid ?? this.channelCid,
         extraData: extraData ?? this.extraData,
@@ -1467,6 +1478,7 @@ class _Message extends DataClass implements Insertable<_Message> {
           ..write('command: $command, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('userId: $userId, ')
           ..write('channelCid: $channelCid, ')
           ..write('extraData: $extraData')
@@ -1502,12 +1514,14 @@ class _Message extends DataClass implements Insertable<_Message> {
                                                   $mrjc(
                                                       updatedAt.hashCode,
                                                       $mrjc(
-                                                          userId.hashCode,
+                                                          deletedAt.hashCode,
                                                           $mrjc(
-                                                              channelCid
-                                                                  .hashCode,
-                                                              extraData
-                                                                  .hashCode))))))))))))))));
+                                                              userId.hashCode,
+                                                              $mrjc(
+                                                                  channelCid
+                                                                      .hashCode,
+                                                                  extraData
+                                                                      .hashCode)))))))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -1525,6 +1539,7 @@ class _Message extends DataClass implements Insertable<_Message> {
           other.command == this.command &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
           other.userId == this.userId &&
           other.channelCid == this.channelCid &&
           other.extraData == this.extraData);
@@ -1544,6 +1559,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
   final Value<String> command;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
+  final Value<DateTime> deletedAt;
   final Value<String> userId;
   final Value<String> channelCid;
   final Value<Map<String, dynamic>> extraData;
@@ -1561,6 +1577,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
     this.command = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.userId = const Value.absent(),
     this.channelCid = const Value.absent(),
     this.extraData = const Value.absent(),
@@ -1579,6 +1596,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
     this.command = const Value.absent(),
     @required DateTime createdAt,
     this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.userId = const Value.absent(),
     this.channelCid = const Value.absent(),
     this.extraData = const Value.absent(),
@@ -1598,6 +1616,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
       Value<String> command,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
+      Value<DateTime> deletedAt,
       Value<String> userId,
       Value<String> channelCid,
       Value<Map<String, dynamic>> extraData}) {
@@ -1615,6 +1634,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
       command: command ?? this.command,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
       userId: userId ?? this.userId,
       channelCid: channelCid ?? this.channelCid,
       extraData: extraData ?? this.extraData,
@@ -1793,6 +1813,18 @@ class $_MessagesTable extends _Messages
     );
   }
 
+  final VerificationMeta _deletedAtMeta = const VerificationMeta('deletedAt');
+  GeneratedDateTimeColumn _deletedAt;
+  @override
+  GeneratedDateTimeColumn get deletedAt => _deletedAt ??= _constructDeletedAt();
+  GeneratedDateTimeColumn _constructDeletedAt() {
+    return GeneratedDateTimeColumn(
+      'deleted_at',
+      $tableName,
+      true,
+    );
+  }
+
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
   GeneratedTextColumn _userId;
   @override
@@ -1844,6 +1876,7 @@ class $_MessagesTable extends _Messages
         command,
         createdAt,
         updatedAt,
+        deletedAt,
         userId,
         channelCid,
         extraData
@@ -1907,6 +1940,10 @@ class $_MessagesTable extends _Messages
     if (d.updatedAt.present) {
       context.handle(_updatedAtMeta,
           updatedAt.isAcceptableValue(d.updatedAt.value, _updatedAtMeta));
+    }
+    if (d.deletedAt.present) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableValue(d.deletedAt.value, _deletedAtMeta));
     }
     if (d.userId.present) {
       context.handle(
@@ -1976,6 +2013,9 @@ class $_MessagesTable extends _Messages
     }
     if (d.updatedAt.present) {
       map['updated_at'] = Variable<DateTime, DateTimeType>(d.updatedAt.value);
+    }
+    if (d.deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime, DateTimeType>(d.deletedAt.value);
     }
     if (d.userId.present) {
       map['user_id'] = Variable<String, StringType>(d.userId.value);
