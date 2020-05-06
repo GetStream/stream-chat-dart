@@ -50,6 +50,8 @@ class _ConnectionEvent extends Table {
   IntColumn get totalUnreadCount => integer().nullable()();
 
   IntColumn get unreadChannels => integer().nullable()();
+
+  DateTimeColumn get createdAt => dateTime().nullable()();
 }
 
 class _Users extends Table {

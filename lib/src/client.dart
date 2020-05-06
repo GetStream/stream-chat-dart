@@ -350,8 +350,10 @@ class Client {
     if (event.connectionId != null) {
       _connectionId = event.connectionId;
     }
+
+    _offlineStorage?.updateConnectionInfo(event);
+
     if (event.me != null) {
-      _offlineStorage?.updateConnectionInfo(event);
       state.user = event.me;
     }
     _controller.add(event);
@@ -431,9 +433,7 @@ class Client {
     var event = await _offlineStorage?.getConnectionInfo();
 
     await _ws.connect().then((e) {
-      if (e.me != null) {
-        _offlineStorage?.updateConnectionInfo(e);
-      }
+      _offlineStorage?.updateConnectionInfo(e);
       event = e;
     }).catchError((err, stacktrace) {
       logger.severe('error connecting ws', err, stacktrace);

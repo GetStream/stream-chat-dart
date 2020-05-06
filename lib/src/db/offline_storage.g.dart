@@ -13,17 +13,20 @@ class _ConnectionEventData extends DataClass
   final Map<String, dynamic> ownUser;
   final int totalUnreadCount;
   final int unreadChannels;
+  final DateTime createdAt;
   _ConnectionEventData(
       {@required this.id,
       this.ownUser,
       this.totalUnreadCount,
-      this.unreadChannels});
+      this.unreadChannels,
+      this.createdAt});
   factory _ConnectionEventData.fromData(
       Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final intType = db.typeSystem.forDartType<int>();
     final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return _ConnectionEventData(
       id: intType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
       ownUser: $_ConnectionEventTable.$converter0.mapToDart(stringType
@@ -32,6 +35,8 @@ class _ConnectionEventData extends DataClass
           data['${effectivePrefix}total_unread_count']),
       unreadChannels: intType
           .mapFromDatabaseResponse(data['${effectivePrefix}unread_channels']),
+      createdAt: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
     );
   }
   factory _ConnectionEventData.fromJson(Map<String, dynamic> json,
@@ -42,6 +47,7 @@ class _ConnectionEventData extends DataClass
       ownUser: serializer.fromJson<Map<String, dynamic>>(json['ownUser']),
       totalUnreadCount: serializer.fromJson<int>(json['totalUnreadCount']),
       unreadChannels: serializer.fromJson<int>(json['unreadChannels']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
   @override
@@ -52,6 +58,7 @@ class _ConnectionEventData extends DataClass
       'ownUser': serializer.toJson<Map<String, dynamic>>(ownUser),
       'totalUnreadCount': serializer.toJson<int>(totalUnreadCount),
       'unreadChannels': serializer.toJson<int>(unreadChannels),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
 
@@ -68,6 +75,9 @@ class _ConnectionEventData extends DataClass
       unreadChannels: unreadChannels == null && nullToAbsent
           ? const Value.absent()
           : Value(unreadChannels),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
     );
   }
 
@@ -75,12 +85,14 @@ class _ConnectionEventData extends DataClass
           {int id,
           Map<String, dynamic> ownUser,
           int totalUnreadCount,
-          int unreadChannels}) =>
+          int unreadChannels,
+          DateTime createdAt}) =>
       _ConnectionEventData(
         id: id ?? this.id,
         ownUser: ownUser ?? this.ownUser,
         totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
         unreadChannels: unreadChannels ?? this.unreadChannels,
+        createdAt: createdAt ?? this.createdAt,
       );
   @override
   String toString() {
@@ -88,7 +100,8 @@ class _ConnectionEventData extends DataClass
           ..write('id: $id, ')
           ..write('ownUser: $ownUser, ')
           ..write('totalUnreadCount: $totalUnreadCount, ')
-          ..write('unreadChannels: $unreadChannels')
+          ..write('unreadChannels: $unreadChannels, ')
+          ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
@@ -96,8 +109,10 @@ class _ConnectionEventData extends DataClass
   @override
   int get hashCode => $mrjf($mrjc(
       id.hashCode,
-      $mrjc(ownUser.hashCode,
-          $mrjc(totalUnreadCount.hashCode, unreadChannels.hashCode))));
+      $mrjc(
+          ownUser.hashCode,
+          $mrjc(totalUnreadCount.hashCode,
+              $mrjc(unreadChannels.hashCode, createdAt.hashCode)))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -105,7 +120,8 @@ class _ConnectionEventData extends DataClass
           other.id == this.id &&
           other.ownUser == this.ownUser &&
           other.totalUnreadCount == this.totalUnreadCount &&
-          other.unreadChannels == this.unreadChannels);
+          other.unreadChannels == this.unreadChannels &&
+          other.createdAt == this.createdAt);
 }
 
 class _ConnectionEventCompanion extends UpdateCompanion<_ConnectionEventData> {
@@ -113,28 +129,33 @@ class _ConnectionEventCompanion extends UpdateCompanion<_ConnectionEventData> {
   final Value<Map<String, dynamic>> ownUser;
   final Value<int> totalUnreadCount;
   final Value<int> unreadChannels;
+  final Value<DateTime> createdAt;
   const _ConnectionEventCompanion({
     this.id = const Value.absent(),
     this.ownUser = const Value.absent(),
     this.totalUnreadCount = const Value.absent(),
     this.unreadChannels = const Value.absent(),
+    this.createdAt = const Value.absent(),
   });
   _ConnectionEventCompanion.insert({
     this.id = const Value.absent(),
     this.ownUser = const Value.absent(),
     this.totalUnreadCount = const Value.absent(),
     this.unreadChannels = const Value.absent(),
+    this.createdAt = const Value.absent(),
   });
   _ConnectionEventCompanion copyWith(
       {Value<int> id,
       Value<Map<String, dynamic>> ownUser,
       Value<int> totalUnreadCount,
-      Value<int> unreadChannels}) {
+      Value<int> unreadChannels,
+      Value<DateTime> createdAt}) {
     return _ConnectionEventCompanion(
       id: id ?? this.id,
       ownUser: ownUser ?? this.ownUser,
       totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
       unreadChannels: unreadChannels ?? this.unreadChannels,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }
@@ -193,9 +214,21 @@ class $_ConnectionEventTable extends _ConnectionEvent
     );
   }
 
+  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  GeneratedDateTimeColumn _createdAt;
+  @override
+  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedDateTimeColumn _constructCreatedAt() {
+    return GeneratedDateTimeColumn(
+      'created_at',
+      $tableName,
+      true,
+    );
+  }
+
   @override
   List<GeneratedColumn> get $columns =>
-      [id, ownUser, totalUnreadCount, unreadChannels];
+      [id, ownUser, totalUnreadCount, unreadChannels, createdAt];
   @override
   $_ConnectionEventTable get asDslTable => this;
   @override
@@ -221,6 +254,10 @@ class $_ConnectionEventTable extends _ConnectionEvent
           _unreadChannelsMeta,
           unreadChannels.isAcceptableValue(
               d.unreadChannels.value, _unreadChannelsMeta));
+    }
+    if (d.createdAt.present) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableValue(d.createdAt.value, _createdAtMeta));
     }
     return context;
   }
@@ -250,6 +287,9 @@ class $_ConnectionEventTable extends _ConnectionEvent
     }
     if (d.unreadChannels.present) {
       map['unread_channels'] = Variable<int, IntType>(d.unreadChannels.value);
+    }
+    if (d.createdAt.present) {
+      map['created_at'] = Variable<DateTime, DateTimeType>(d.createdAt.value);
     }
     return map;
   }

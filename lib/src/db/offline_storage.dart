@@ -180,15 +180,15 @@ class OfflineStorage extends _$OfflineStorage {
 
   /// Update stored connection event
   Future<void> updateConnectionInfo(Event event) async {
-    return into(connectionEvent).insert(
-      _ConnectionEventData(
-        id: 1,
-        unreadChannels: event.unreadChannels,
-        totalUnreadCount: event.totalUnreadCount,
-        ownUser: event.me?.toJson(),
-      ),
-      mode: InsertMode.insertOrReplace,
-    );
+    return update(connectionEvent).write(_ConnectionEventCompanion(
+      ownUser: event.me != null ? Value(event.me.toJson()) : Value.absent(),
+      totalUnreadCount: event.totalUnreadCount != null
+          ? Value(event.totalUnreadCount)
+          : Value.absent(),
+      unreadChannels: event.unreadChannels != null
+          ? Value(event.unreadChannels)
+          : Value.absent(),
+    ));
   }
 
   /// Get channel data by cid
