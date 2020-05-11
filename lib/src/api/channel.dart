@@ -191,13 +191,7 @@ class Channel {
 
       return res;
     } catch (error) {
-      _client.handleEvent(Event(
-        type: EventType.messageUpdated,
-        message: newMessage.copyWith(
-          status: MessageSendingStatus.FAILED,
-        ),
-        cid: cid,
-      ));
+      state.retryQueue.add([newMessage]);
       rethrow;
     }
   }
@@ -725,7 +719,7 @@ class Channel {
 class ChannelClientState {
   /// Creates a new instance listening to events and updating the state
   ChannelClientState(this._channel, ChannelState channelState) {
-    _retryQueue = RetryQueue(
+    retryQueue = RetryQueue(
       channel: _channel,
       logger: Logger('RETRY QUEUE ${_channel.cid}'),
     );
@@ -769,7 +763,7 @@ class ChannelClientState {
     });
   }
 
-  RetryQueue _retryQueue;
+  RetryQueue retryQueue;
 
   /// Retry failed message
   Future<void> retryFailedMessages() async {
@@ -782,7 +776,7 @@ class ChannelClientState {
             message.status != MessageSendingStatus.SENT)
         .toList();
 
-    _retryQueue.add(failedMessages);
+    retryQueue.add(failedMessages);
   }
 
   void _listenReactionDeleted() {
@@ -951,7 +945,10 @@ class ChannelClientState {
 
       if (userReadIndex != null && userReadIndex != -1) {
         final userRead = read.removeAt(userReadIndex);
-        read.add(Read(user: userRead.user, lastRead: event.createdAt));
+        read.add(Read(
+          user: userRead.user,
+          lastRead: event.createdAt,
+        ));
         _channelState = this._channelState.copyWith(read: read);
       }
     });
@@ -1126,8 +1123,8 @@ class ChannelClientState {
       ..._channelState?.read
               ?.where((r) =>
                   updatedState.read
-                      ?.any((newRead) => newRead.user.id == r.user.id) ==
-                  false)
+                      ?.any((newRead) => newRead.user.id == r.user.id) !=
+                  true)
               ?.toList() ??
           [],
     ];

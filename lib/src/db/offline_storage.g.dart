@@ -13,13 +13,15 @@ class _ConnectionEventData extends DataClass
   final Map<String, dynamic> ownUser;
   final int totalUnreadCount;
   final int unreadChannels;
-  final DateTime createdAt;
+  final DateTime lastEventAt;
+  final DateTime lastSyncAt;
   _ConnectionEventData(
       {@required this.id,
       this.ownUser,
       this.totalUnreadCount,
       this.unreadChannels,
-      this.createdAt});
+      this.lastEventAt,
+      this.lastSyncAt});
   factory _ConnectionEventData.fromData(
       Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
@@ -35,10 +37,37 @@ class _ConnectionEventData extends DataClass
           data['${effectivePrefix}total_unread_count']),
       unreadChannels: intType
           .mapFromDatabaseResponse(data['${effectivePrefix}unread_channels']),
-      createdAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
+      lastEventAt: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}last_event_at']),
+      lastSyncAt: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}last_sync_at']),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || id != null) {
+      map['id'] = Variable<int>(id);
+    }
+    if (!nullToAbsent || ownUser != null) {
+      final converter = $_ConnectionEventTable.$converter0;
+      map['own_user'] = Variable<String>(converter.mapToSql(ownUser));
+    }
+    if (!nullToAbsent || totalUnreadCount != null) {
+      map['total_unread_count'] = Variable<int>(totalUnreadCount);
+    }
+    if (!nullToAbsent || unreadChannels != null) {
+      map['unread_channels'] = Variable<int>(unreadChannels);
+    }
+    if (!nullToAbsent || lastEventAt != null) {
+      map['last_event_at'] = Variable<DateTime>(lastEventAt);
+    }
+    if (!nullToAbsent || lastSyncAt != null) {
+      map['last_sync_at'] = Variable<DateTime>(lastSyncAt);
+    }
+    return map;
+  }
+
   factory _ConnectionEventData.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -47,7 +76,8 @@ class _ConnectionEventData extends DataClass
       ownUser: serializer.fromJson<Map<String, dynamic>>(json['ownUser']),
       totalUnreadCount: serializer.fromJson<int>(json['totalUnreadCount']),
       unreadChannels: serializer.fromJson<int>(json['unreadChannels']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      lastEventAt: serializer.fromJson<DateTime>(json['lastEventAt']),
+      lastSyncAt: serializer.fromJson<DateTime>(json['lastSyncAt']),
     );
   }
   @override
@@ -58,27 +88,9 @@ class _ConnectionEventData extends DataClass
       'ownUser': serializer.toJson<Map<String, dynamic>>(ownUser),
       'totalUnreadCount': serializer.toJson<int>(totalUnreadCount),
       'unreadChannels': serializer.toJson<int>(unreadChannels),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'lastEventAt': serializer.toJson<DateTime>(lastEventAt),
+      'lastSyncAt': serializer.toJson<DateTime>(lastSyncAt),
     };
-  }
-
-  @override
-  _ConnectionEventCompanion createCompanion(bool nullToAbsent) {
-    return _ConnectionEventCompanion(
-      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
-      ownUser: ownUser == null && nullToAbsent
-          ? const Value.absent()
-          : Value(ownUser),
-      totalUnreadCount: totalUnreadCount == null && nullToAbsent
-          ? const Value.absent()
-          : Value(totalUnreadCount),
-      unreadChannels: unreadChannels == null && nullToAbsent
-          ? const Value.absent()
-          : Value(unreadChannels),
-      createdAt: createdAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdAt),
-    );
   }
 
   _ConnectionEventData copyWith(
@@ -86,13 +98,15 @@ class _ConnectionEventData extends DataClass
           Map<String, dynamic> ownUser,
           int totalUnreadCount,
           int unreadChannels,
-          DateTime createdAt}) =>
+          DateTime lastEventAt,
+          DateTime lastSyncAt}) =>
       _ConnectionEventData(
         id: id ?? this.id,
         ownUser: ownUser ?? this.ownUser,
         totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
         unreadChannels: unreadChannels ?? this.unreadChannels,
-        createdAt: createdAt ?? this.createdAt,
+        lastEventAt: lastEventAt ?? this.lastEventAt,
+        lastSyncAt: lastSyncAt ?? this.lastSyncAt,
       );
   @override
   String toString() {
@@ -101,7 +115,8 @@ class _ConnectionEventData extends DataClass
           ..write('ownUser: $ownUser, ')
           ..write('totalUnreadCount: $totalUnreadCount, ')
           ..write('unreadChannels: $unreadChannels, ')
-          ..write('createdAt: $createdAt')
+          ..write('lastEventAt: $lastEventAt, ')
+          ..write('lastSyncAt: $lastSyncAt')
           ..write(')'))
         .toString();
   }
@@ -111,8 +126,10 @@ class _ConnectionEventData extends DataClass
       id.hashCode,
       $mrjc(
           ownUser.hashCode,
-          $mrjc(totalUnreadCount.hashCode,
-              $mrjc(unreadChannels.hashCode, createdAt.hashCode)))));
+          $mrjc(
+              totalUnreadCount.hashCode,
+              $mrjc(unreadChannels.hashCode,
+                  $mrjc(lastEventAt.hashCode, lastSyncAt.hashCode))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -121,7 +138,8 @@ class _ConnectionEventData extends DataClass
           other.ownUser == this.ownUser &&
           other.totalUnreadCount == this.totalUnreadCount &&
           other.unreadChannels == this.unreadChannels &&
-          other.createdAt == this.createdAt);
+          other.lastEventAt == this.lastEventAt &&
+          other.lastSyncAt == this.lastSyncAt);
 }
 
 class _ConnectionEventCompanion extends UpdateCompanion<_ConnectionEventData> {
@@ -129,34 +147,82 @@ class _ConnectionEventCompanion extends UpdateCompanion<_ConnectionEventData> {
   final Value<Map<String, dynamic>> ownUser;
   final Value<int> totalUnreadCount;
   final Value<int> unreadChannels;
-  final Value<DateTime> createdAt;
+  final Value<DateTime> lastEventAt;
+  final Value<DateTime> lastSyncAt;
   const _ConnectionEventCompanion({
     this.id = const Value.absent(),
     this.ownUser = const Value.absent(),
     this.totalUnreadCount = const Value.absent(),
     this.unreadChannels = const Value.absent(),
-    this.createdAt = const Value.absent(),
+    this.lastEventAt = const Value.absent(),
+    this.lastSyncAt = const Value.absent(),
   });
   _ConnectionEventCompanion.insert({
     this.id = const Value.absent(),
     this.ownUser = const Value.absent(),
     this.totalUnreadCount = const Value.absent(),
     this.unreadChannels = const Value.absent(),
-    this.createdAt = const Value.absent(),
+    this.lastEventAt = const Value.absent(),
+    this.lastSyncAt = const Value.absent(),
   });
+  static Insertable<_ConnectionEventData> custom({
+    Expression<int> id,
+    Expression<String> ownUser,
+    Expression<int> totalUnreadCount,
+    Expression<int> unreadChannels,
+    Expression<DateTime> lastEventAt,
+    Expression<DateTime> lastSyncAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ownUser != null) 'own_user': ownUser,
+      if (totalUnreadCount != null) 'total_unread_count': totalUnreadCount,
+      if (unreadChannels != null) 'unread_channels': unreadChannels,
+      if (lastEventAt != null) 'last_event_at': lastEventAt,
+      if (lastSyncAt != null) 'last_sync_at': lastSyncAt,
+    });
+  }
+
   _ConnectionEventCompanion copyWith(
       {Value<int> id,
       Value<Map<String, dynamic>> ownUser,
       Value<int> totalUnreadCount,
       Value<int> unreadChannels,
-      Value<DateTime> createdAt}) {
+      Value<DateTime> lastEventAt,
+      Value<DateTime> lastSyncAt}) {
     return _ConnectionEventCompanion(
       id: id ?? this.id,
       ownUser: ownUser ?? this.ownUser,
       totalUnreadCount: totalUnreadCount ?? this.totalUnreadCount,
       unreadChannels: unreadChannels ?? this.unreadChannels,
-      createdAt: createdAt ?? this.createdAt,
+      lastEventAt: lastEventAt ?? this.lastEventAt,
+      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (ownUser.present) {
+      final converter = $_ConnectionEventTable.$converter0;
+      map['own_user'] = Variable<String>(converter.mapToSql(ownUser.value));
+    }
+    if (totalUnreadCount.present) {
+      map['total_unread_count'] = Variable<int>(totalUnreadCount.value);
+    }
+    if (unreadChannels.present) {
+      map['unread_channels'] = Variable<int>(unreadChannels.value);
+    }
+    if (lastEventAt.present) {
+      map['last_event_at'] = Variable<DateTime>(lastEventAt.value);
+    }
+    if (lastSyncAt.present) {
+      map['last_sync_at'] = Variable<DateTime>(lastSyncAt.value);
+    }
+    return map;
   }
 }
 
@@ -170,8 +236,11 @@ class $_ConnectionEventTable extends _ConnectionEvent
   @override
   GeneratedIntColumn get id => _id ??= _constructId();
   GeneratedIntColumn _constructId() {
-    return GeneratedIntColumn('id', $tableName, false,
-        hasAutoIncrement: true, declaredAsPrimaryKey: true);
+    return GeneratedIntColumn(
+      'id',
+      $tableName,
+      false,
+    );
   }
 
   final VerificationMeta _ownUserMeta = const VerificationMeta('ownUser');
@@ -214,13 +283,28 @@ class $_ConnectionEventTable extends _ConnectionEvent
     );
   }
 
-  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedDateTimeColumn _createdAt;
+  final VerificationMeta _lastEventAtMeta =
+      const VerificationMeta('lastEventAt');
+  GeneratedDateTimeColumn _lastEventAt;
   @override
-  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
+  GeneratedDateTimeColumn get lastEventAt =>
+      _lastEventAt ??= _constructLastEventAt();
+  GeneratedDateTimeColumn _constructLastEventAt() {
     return GeneratedDateTimeColumn(
-      'created_at',
+      'last_event_at',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _lastSyncAtMeta = const VerificationMeta('lastSyncAt');
+  GeneratedDateTimeColumn _lastSyncAt;
+  @override
+  GeneratedDateTimeColumn get lastSyncAt =>
+      _lastSyncAt ??= _constructLastSyncAt();
+  GeneratedDateTimeColumn _constructLastSyncAt() {
+    return GeneratedDateTimeColumn(
+      'last_sync_at',
       $tableName,
       true,
     );
@@ -228,7 +312,7 @@ class $_ConnectionEventTable extends _ConnectionEvent
 
   @override
   List<GeneratedColumn> get $columns =>
-      [id, ownUser, totalUnreadCount, unreadChannels, createdAt];
+      [id, ownUser, totalUnreadCount, unreadChannels, lastEventAt, lastSyncAt];
   @override
   $_ConnectionEventTable get asDslTable => this;
   @override
@@ -236,28 +320,38 @@ class $_ConnectionEventTable extends _ConnectionEvent
   @override
   final String actualTableName = 'connection_event';
   @override
-  VerificationContext validateIntegrity(_ConnectionEventCompanion d,
+  VerificationContext validateIntegrity(
+      Insertable<_ConnectionEventData> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.id.present) {
-      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id'], _idMeta));
     }
     context.handle(_ownUserMeta, const VerificationResult.success());
-    if (d.totalUnreadCount.present) {
+    if (data.containsKey('total_unread_count')) {
       context.handle(
           _totalUnreadCountMeta,
-          totalUnreadCount.isAcceptableValue(
-              d.totalUnreadCount.value, _totalUnreadCountMeta));
+          totalUnreadCount.isAcceptableOrUnknown(
+              data['total_unread_count'], _totalUnreadCountMeta));
     }
-    if (d.unreadChannels.present) {
+    if (data.containsKey('unread_channels')) {
       context.handle(
           _unreadChannelsMeta,
-          unreadChannels.isAcceptableValue(
-              d.unreadChannels.value, _unreadChannelsMeta));
+          unreadChannels.isAcceptableOrUnknown(
+              data['unread_channels'], _unreadChannelsMeta));
     }
-    if (d.createdAt.present) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableValue(d.createdAt.value, _createdAtMeta));
+    if (data.containsKey('last_event_at')) {
+      context.handle(
+          _lastEventAtMeta,
+          lastEventAt.isAcceptableOrUnknown(
+              data['last_event_at'], _lastEventAtMeta));
+    }
+    if (data.containsKey('last_sync_at')) {
+      context.handle(
+          _lastSyncAtMeta,
+          lastSyncAt.isAcceptableOrUnknown(
+              data['last_sync_at'], _lastSyncAtMeta));
     }
     return context;
   }
@@ -268,30 +362,6 @@ class $_ConnectionEventTable extends _ConnectionEvent
   _ConnectionEventData map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return _ConnectionEventData.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(_ConnectionEventCompanion d) {
-    final map = <String, Variable>{};
-    if (d.id.present) {
-      map['id'] = Variable<int, IntType>(d.id.value);
-    }
-    if (d.ownUser.present) {
-      final converter = $_ConnectionEventTable.$converter0;
-      map['own_user'] =
-          Variable<String, StringType>(converter.mapToSql(d.ownUser.value));
-    }
-    if (d.totalUnreadCount.present) {
-      map['total_unread_count'] =
-          Variable<int, IntType>(d.totalUnreadCount.value);
-    }
-    if (d.unreadChannels.present) {
-      map['unread_channels'] = Variable<int, IntType>(d.unreadChannels.value);
-    }
-    if (d.createdAt.present) {
-      map['created_at'] = Variable<DateTime, DateTimeType>(d.createdAt.value);
-    }
-    return map;
   }
 
   @override
@@ -360,6 +430,49 @@ class _Channel extends DataClass implements Insertable<_Channel> {
           .mapFromDatabaseResponse(data['${effectivePrefix}created_by']),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || id != null) {
+      map['id'] = Variable<String>(id);
+    }
+    if (!nullToAbsent || type != null) {
+      map['type'] = Variable<String>(type);
+    }
+    if (!nullToAbsent || cid != null) {
+      map['cid'] = Variable<String>(cid);
+    }
+    if (!nullToAbsent || config != null) {
+      map['config'] = Variable<String>(config);
+    }
+    if (!nullToAbsent || frozen != null) {
+      map['frozen'] = Variable<bool>(frozen);
+    }
+    if (!nullToAbsent || lastMessageAt != null) {
+      map['last_message_at'] = Variable<DateTime>(lastMessageAt);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<DateTime>(createdAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    if (!nullToAbsent || memberCount != null) {
+      map['member_count'] = Variable<int>(memberCount);
+    }
+    if (!nullToAbsent || extraData != null) {
+      final converter = $_ChannelsTable.$converter0;
+      map['extra_data'] = Variable<String>(converter.mapToSql(extraData));
+    }
+    if (!nullToAbsent || createdBy != null) {
+      map['created_by'] = Variable<String>(createdBy);
+    }
+    return map;
+  }
+
   factory _Channel.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -395,40 +508,6 @@ class _Channel extends DataClass implements Insertable<_Channel> {
       'extraData': serializer.toJson<Map<String, dynamic>>(extraData),
       'createdBy': serializer.toJson<String>(createdBy),
     };
-  }
-
-  @override
-  _ChannelsCompanion createCompanion(bool nullToAbsent) {
-    return _ChannelsCompanion(
-      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
-      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
-      cid: cid == null && nullToAbsent ? const Value.absent() : Value(cid),
-      config:
-          config == null && nullToAbsent ? const Value.absent() : Value(config),
-      frozen:
-          frozen == null && nullToAbsent ? const Value.absent() : Value(frozen),
-      lastMessageAt: lastMessageAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastMessageAt),
-      createdAt: createdAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdAt),
-      updatedAt: updatedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(updatedAt),
-      deletedAt: deletedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(deletedAt),
-      memberCount: memberCount == null && nullToAbsent
-          ? const Value.absent()
-          : Value(memberCount),
-      extraData: extraData == null && nullToAbsent
-          ? const Value.absent()
-          : Value(extraData),
-      createdBy: createdBy == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdBy),
-    );
   }
 
   _Channel copyWith(
@@ -562,6 +641,36 @@ class _ChannelsCompanion extends UpdateCompanion<_Channel> {
         type = Value(type),
         cid = Value(cid),
         config = Value(config);
+  static Insertable<_Channel> custom({
+    Expression<String> id,
+    Expression<String> type,
+    Expression<String> cid,
+    Expression<String> config,
+    Expression<bool> frozen,
+    Expression<DateTime> lastMessageAt,
+    Expression<DateTime> createdAt,
+    Expression<DateTime> updatedAt,
+    Expression<DateTime> deletedAt,
+    Expression<int> memberCount,
+    Expression<String> extraData,
+    Expression<String> createdBy,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (type != null) 'type': type,
+      if (cid != null) 'cid': cid,
+      if (config != null) 'config': config,
+      if (frozen != null) 'frozen': frozen,
+      if (lastMessageAt != null) 'last_message_at': lastMessageAt,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (memberCount != null) 'member_count': memberCount,
+      if (extraData != null) 'extra_data': extraData,
+      if (createdBy != null) 'created_by': createdBy,
+    });
+  }
+
   _ChannelsCompanion copyWith(
       {Value<String> id,
       Value<String> type,
@@ -589,6 +698,49 @@ class _ChannelsCompanion extends UpdateCompanion<_Channel> {
       extraData: extraData ?? this.extraData,
       createdBy: createdBy ?? this.createdBy,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (cid.present) {
+      map['cid'] = Variable<String>(cid.value);
+    }
+    if (config.present) {
+      map['config'] = Variable<String>(config.value);
+    }
+    if (frozen.present) {
+      map['frozen'] = Variable<bool>(frozen.value);
+    }
+    if (lastMessageAt.present) {
+      map['last_message_at'] = Variable<DateTime>(lastMessageAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (memberCount.present) {
+      map['member_count'] = Variable<int>(memberCount.value);
+    }
+    if (extraData.present) {
+      final converter = $_ChannelsTable.$converter0;
+      map['extra_data'] = Variable<String>(converter.mapToSql(extraData.value));
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    return map;
   }
 }
 
@@ -764,61 +916,65 @@ class $_ChannelsTable extends _Channels
   @override
   final String actualTableName = 'channels';
   @override
-  VerificationContext validateIntegrity(_ChannelsCompanion d,
+  VerificationContext validateIntegrity(Insertable<_Channel> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.id.present) {
-      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id'], _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (d.type.present) {
+    if (data.containsKey('type')) {
       context.handle(
-          _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
+          _typeMeta, type.isAcceptableOrUnknown(data['type'], _typeMeta));
     } else if (isInserting) {
       context.missing(_typeMeta);
     }
-    if (d.cid.present) {
-      context.handle(_cidMeta, cid.isAcceptableValue(d.cid.value, _cidMeta));
+    if (data.containsKey('cid')) {
+      context.handle(
+          _cidMeta, cid.isAcceptableOrUnknown(data['cid'], _cidMeta));
     } else if (isInserting) {
       context.missing(_cidMeta);
     }
-    if (d.config.present) {
-      context.handle(
-          _configMeta, config.isAcceptableValue(d.config.value, _configMeta));
+    if (data.containsKey('config')) {
+      context.handle(_configMeta,
+          config.isAcceptableOrUnknown(data['config'], _configMeta));
     } else if (isInserting) {
       context.missing(_configMeta);
     }
-    if (d.frozen.present) {
-      context.handle(
-          _frozenMeta, frozen.isAcceptableValue(d.frozen.value, _frozenMeta));
+    if (data.containsKey('frozen')) {
+      context.handle(_frozenMeta,
+          frozen.isAcceptableOrUnknown(data['frozen'], _frozenMeta));
     }
-    if (d.lastMessageAt.present) {
+    if (data.containsKey('last_message_at')) {
       context.handle(
           _lastMessageAtMeta,
-          lastMessageAt.isAcceptableValue(
-              d.lastMessageAt.value, _lastMessageAtMeta));
+          lastMessageAt.isAcceptableOrUnknown(
+              data['last_message_at'], _lastMessageAtMeta));
     }
-    if (d.createdAt.present) {
+    if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
-          createdAt.isAcceptableValue(d.createdAt.value, _createdAtMeta));
+          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
     }
-    if (d.updatedAt.present) {
+    if (data.containsKey('updated_at')) {
       context.handle(_updatedAtMeta,
-          updatedAt.isAcceptableValue(d.updatedAt.value, _updatedAtMeta));
+          updatedAt.isAcceptableOrUnknown(data['updated_at'], _updatedAtMeta));
     }
-    if (d.deletedAt.present) {
+    if (data.containsKey('deleted_at')) {
       context.handle(_deletedAtMeta,
-          deletedAt.isAcceptableValue(d.deletedAt.value, _deletedAtMeta));
+          deletedAt.isAcceptableOrUnknown(data['deleted_at'], _deletedAtMeta));
     }
-    if (d.memberCount.present) {
-      context.handle(_memberCountMeta,
-          memberCount.isAcceptableValue(d.memberCount.value, _memberCountMeta));
+    if (data.containsKey('member_count')) {
+      context.handle(
+          _memberCountMeta,
+          memberCount.isAcceptableOrUnknown(
+              data['member_count'], _memberCountMeta));
     }
     context.handle(_extraDataMeta, const VerificationResult.success());
-    if (d.createdBy.present) {
+    if (data.containsKey('created_by')) {
       context.handle(_createdByMeta,
-          createdBy.isAcceptableValue(d.createdBy.value, _createdByMeta));
+          createdBy.isAcceptableOrUnknown(data['created_by'], _createdByMeta));
     }
     return context;
   }
@@ -829,51 +985,6 @@ class $_ChannelsTable extends _Channels
   _Channel map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return _Channel.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(_ChannelsCompanion d) {
-    final map = <String, Variable>{};
-    if (d.id.present) {
-      map['id'] = Variable<String, StringType>(d.id.value);
-    }
-    if (d.type.present) {
-      map['type'] = Variable<String, StringType>(d.type.value);
-    }
-    if (d.cid.present) {
-      map['cid'] = Variable<String, StringType>(d.cid.value);
-    }
-    if (d.config.present) {
-      map['config'] = Variable<String, StringType>(d.config.value);
-    }
-    if (d.frozen.present) {
-      map['frozen'] = Variable<bool, BoolType>(d.frozen.value);
-    }
-    if (d.lastMessageAt.present) {
-      map['last_message_at'] =
-          Variable<DateTime, DateTimeType>(d.lastMessageAt.value);
-    }
-    if (d.createdAt.present) {
-      map['created_at'] = Variable<DateTime, DateTimeType>(d.createdAt.value);
-    }
-    if (d.updatedAt.present) {
-      map['updated_at'] = Variable<DateTime, DateTimeType>(d.updatedAt.value);
-    }
-    if (d.deletedAt.present) {
-      map['deleted_at'] = Variable<DateTime, DateTimeType>(d.deletedAt.value);
-    }
-    if (d.memberCount.present) {
-      map['member_count'] = Variable<int, IntType>(d.memberCount.value);
-    }
-    if (d.extraData.present) {
-      final converter = $_ChannelsTable.$converter0;
-      map['extra_data'] =
-          Variable<String, StringType>(converter.mapToSql(d.extraData.value));
-    }
-    if (d.createdBy.present) {
-      map['created_by'] = Variable<String, StringType>(d.createdBy.value);
-    }
-    return map;
   }
 
   @override
@@ -926,6 +1037,37 @@ class _User extends DataClass implements Insertable<_User> {
           .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || id != null) {
+      map['id'] = Variable<String>(id);
+    }
+    if (!nullToAbsent || role != null) {
+      map['role'] = Variable<String>(role);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<DateTime>(createdAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    if (!nullToAbsent || lastActive != null) {
+      map['last_active'] = Variable<DateTime>(lastActive);
+    }
+    if (!nullToAbsent || online != null) {
+      map['online'] = Variable<bool>(online);
+    }
+    if (!nullToAbsent || banned != null) {
+      map['banned'] = Variable<bool>(banned);
+    }
+    if (!nullToAbsent || extraData != null) {
+      final converter = $_UsersTable.$converter0;
+      map['extra_data'] = Variable<String>(converter.mapToSql(extraData));
+    }
+    return map;
+  }
+
   factory _User.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -953,30 +1095,6 @@ class _User extends DataClass implements Insertable<_User> {
       'banned': serializer.toJson<bool>(banned),
       'extraData': serializer.toJson<Map<String, dynamic>>(extraData),
     };
-  }
-
-  @override
-  _UsersCompanion createCompanion(bool nullToAbsent) {
-    return _UsersCompanion(
-      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
-      role: role == null && nullToAbsent ? const Value.absent() : Value(role),
-      createdAt: createdAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdAt),
-      updatedAt: updatedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(updatedAt),
-      lastActive: lastActive == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastActive),
-      online:
-          online == null && nullToAbsent ? const Value.absent() : Value(online),
-      banned:
-          banned == null && nullToAbsent ? const Value.absent() : Value(banned),
-      extraData: extraData == null && nullToAbsent
-          ? const Value.absent()
-          : Value(extraData),
-    );
   }
 
   _User copyWith(
@@ -1069,6 +1187,28 @@ class _UsersCompanion extends UpdateCompanion<_User> {
     this.banned = const Value.absent(),
     this.extraData = const Value.absent(),
   }) : id = Value(id);
+  static Insertable<_User> custom({
+    Expression<String> id,
+    Expression<String> role,
+    Expression<DateTime> createdAt,
+    Expression<DateTime> updatedAt,
+    Expression<DateTime> lastActive,
+    Expression<bool> online,
+    Expression<bool> banned,
+    Expression<String> extraData,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (role != null) 'role': role,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (lastActive != null) 'last_active': lastActive,
+      if (online != null) 'online': online,
+      if (banned != null) 'banned': banned,
+      if (extraData != null) 'extra_data': extraData,
+    });
+  }
+
   _UsersCompanion copyWith(
       {Value<String> id,
       Value<String> role,
@@ -1088,6 +1228,37 @@ class _UsersCompanion extends UpdateCompanion<_User> {
       banned: banned ?? this.banned,
       extraData: extraData ?? this.extraData,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (role.present) {
+      map['role'] = Variable<String>(role.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (lastActive.present) {
+      map['last_active'] = Variable<DateTime>(lastActive.value);
+    }
+    if (online.present) {
+      map['online'] = Variable<bool>(online.value);
+    }
+    if (banned.present) {
+      map['banned'] = Variable<bool>(banned.value);
+    }
+    if (extraData.present) {
+      final converter = $_UsersTable.$converter0;
+      map['extra_data'] = Variable<String>(converter.mapToSql(extraData.value));
+    }
+    return map;
   }
 }
 
@@ -1202,37 +1373,40 @@ class $_UsersTable extends _Users with TableInfo<$_UsersTable, _User> {
   @override
   final String actualTableName = 'users';
   @override
-  VerificationContext validateIntegrity(_UsersCompanion d,
+  VerificationContext validateIntegrity(Insertable<_User> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.id.present) {
-      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id'], _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (d.role.present) {
+    if (data.containsKey('role')) {
       context.handle(
-          _roleMeta, role.isAcceptableValue(d.role.value, _roleMeta));
+          _roleMeta, role.isAcceptableOrUnknown(data['role'], _roleMeta));
     }
-    if (d.createdAt.present) {
+    if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
-          createdAt.isAcceptableValue(d.createdAt.value, _createdAtMeta));
+          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
     }
-    if (d.updatedAt.present) {
+    if (data.containsKey('updated_at')) {
       context.handle(_updatedAtMeta,
-          updatedAt.isAcceptableValue(d.updatedAt.value, _updatedAtMeta));
+          updatedAt.isAcceptableOrUnknown(data['updated_at'], _updatedAtMeta));
     }
-    if (d.lastActive.present) {
-      context.handle(_lastActiveMeta,
-          lastActive.isAcceptableValue(d.lastActive.value, _lastActiveMeta));
-    }
-    if (d.online.present) {
+    if (data.containsKey('last_active')) {
       context.handle(
-          _onlineMeta, online.isAcceptableValue(d.online.value, _onlineMeta));
+          _lastActiveMeta,
+          lastActive.isAcceptableOrUnknown(
+              data['last_active'], _lastActiveMeta));
     }
-    if (d.banned.present) {
-      context.handle(
-          _bannedMeta, banned.isAcceptableValue(d.banned.value, _bannedMeta));
+    if (data.containsKey('online')) {
+      context.handle(_onlineMeta,
+          online.isAcceptableOrUnknown(data['online'], _onlineMeta));
+    }
+    if (data.containsKey('banned')) {
+      context.handle(_bannedMeta,
+          banned.isAcceptableOrUnknown(data['banned'], _bannedMeta));
     }
     context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
@@ -1244,38 +1418,6 @@ class $_UsersTable extends _Users with TableInfo<$_UsersTable, _User> {
   _User map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return _User.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(_UsersCompanion d) {
-    final map = <String, Variable>{};
-    if (d.id.present) {
-      map['id'] = Variable<String, StringType>(d.id.value);
-    }
-    if (d.role.present) {
-      map['role'] = Variable<String, StringType>(d.role.value);
-    }
-    if (d.createdAt.present) {
-      map['created_at'] = Variable<DateTime, DateTimeType>(d.createdAt.value);
-    }
-    if (d.updatedAt.present) {
-      map['updated_at'] = Variable<DateTime, DateTimeType>(d.updatedAt.value);
-    }
-    if (d.lastActive.present) {
-      map['last_active'] = Variable<DateTime, DateTimeType>(d.lastActive.value);
-    }
-    if (d.online.present) {
-      map['online'] = Variable<bool, BoolType>(d.online.value);
-    }
-    if (d.banned.present) {
-      map['banned'] = Variable<bool, BoolType>(d.banned.value);
-    }
-    if (d.extraData.present) {
-      final converter = $_UsersTable.$converter0;
-      map['extra_data'] =
-          Variable<String, StringType>(converter.mapToSql(d.extraData.value));
-    }
-    return map;
   }
 
   @override
@@ -1365,6 +1507,69 @@ class _Message extends DataClass implements Insertable<_Message> {
           .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || id != null) {
+      map['id'] = Variable<String>(id);
+    }
+    if (!nullToAbsent || messageText != null) {
+      map['message_text'] = Variable<String>(messageText);
+    }
+    if (!nullToAbsent || attachmentJson != null) {
+      map['attachment_json'] = Variable<String>(attachmentJson);
+    }
+    if (!nullToAbsent || status != null) {
+      final converter = $_MessagesTable.$converter0;
+      map['status'] = Variable<int>(converter.mapToSql(status));
+    }
+    if (!nullToAbsent || type != null) {
+      map['type'] = Variable<String>(type);
+    }
+    if (!nullToAbsent || reactionCounts != null) {
+      final converter = $_MessagesTable.$converter1;
+      map['reaction_counts'] =
+          Variable<String>(converter.mapToSql(reactionCounts));
+    }
+    if (!nullToAbsent || reactionScores != null) {
+      final converter = $_MessagesTable.$converter2;
+      map['reaction_scores'] =
+          Variable<String>(converter.mapToSql(reactionScores));
+    }
+    if (!nullToAbsent || parentId != null) {
+      map['parent_id'] = Variable<String>(parentId);
+    }
+    if (!nullToAbsent || replyCount != null) {
+      map['reply_count'] = Variable<int>(replyCount);
+    }
+    if (!nullToAbsent || showInChannel != null) {
+      map['show_in_channel'] = Variable<bool>(showInChannel);
+    }
+    if (!nullToAbsent || command != null) {
+      map['command'] = Variable<String>(command);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<DateTime>(createdAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    if (!nullToAbsent || channelCid != null) {
+      map['channel_cid'] = Variable<String>(channelCid);
+    }
+    if (!nullToAbsent || extraData != null) {
+      final converter = $_MessagesTable.$converter3;
+      map['extra_data'] = Variable<String>(converter.mapToSql(extraData));
+    }
+    return map;
+  }
+
   factory _Message.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -1412,57 +1617,6 @@ class _Message extends DataClass implements Insertable<_Message> {
       'channelCid': serializer.toJson<String>(channelCid),
       'extraData': serializer.toJson<Map<String, dynamic>>(extraData),
     };
-  }
-
-  @override
-  _MessagesCompanion createCompanion(bool nullToAbsent) {
-    return _MessagesCompanion(
-      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
-      messageText: messageText == null && nullToAbsent
-          ? const Value.absent()
-          : Value(messageText),
-      attachmentJson: attachmentJson == null && nullToAbsent
-          ? const Value.absent()
-          : Value(attachmentJson),
-      status:
-          status == null && nullToAbsent ? const Value.absent() : Value(status),
-      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
-      reactionCounts: reactionCounts == null && nullToAbsent
-          ? const Value.absent()
-          : Value(reactionCounts),
-      reactionScores: reactionScores == null && nullToAbsent
-          ? const Value.absent()
-          : Value(reactionScores),
-      parentId: parentId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(parentId),
-      replyCount: replyCount == null && nullToAbsent
-          ? const Value.absent()
-          : Value(replyCount),
-      showInChannel: showInChannel == null && nullToAbsent
-          ? const Value.absent()
-          : Value(showInChannel),
-      command: command == null && nullToAbsent
-          ? const Value.absent()
-          : Value(command),
-      createdAt: createdAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdAt),
-      updatedAt: updatedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(updatedAt),
-      deletedAt: deletedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(deletedAt),
-      userId:
-          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
-      channelCid: channelCid == null && nullToAbsent
-          ? const Value.absent()
-          : Value(channelCid),
-      extraData: extraData == null && nullToAbsent
-          ? const Value.absent()
-          : Value(extraData),
-    );
   }
 
   _Message copyWith(
@@ -1642,6 +1796,46 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
     this.extraData = const Value.absent(),
   })  : id = Value(id),
         createdAt = Value(createdAt);
+  static Insertable<_Message> custom({
+    Expression<String> id,
+    Expression<String> messageText,
+    Expression<String> attachmentJson,
+    Expression<int> status,
+    Expression<String> type,
+    Expression<String> reactionCounts,
+    Expression<String> reactionScores,
+    Expression<String> parentId,
+    Expression<int> replyCount,
+    Expression<bool> showInChannel,
+    Expression<String> command,
+    Expression<DateTime> createdAt,
+    Expression<DateTime> updatedAt,
+    Expression<DateTime> deletedAt,
+    Expression<String> userId,
+    Expression<String> channelCid,
+    Expression<String> extraData,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (messageText != null) 'message_text': messageText,
+      if (attachmentJson != null) 'attachment_json': attachmentJson,
+      if (status != null) 'status': status,
+      if (type != null) 'type': type,
+      if (reactionCounts != null) 'reaction_counts': reactionCounts,
+      if (reactionScores != null) 'reaction_scores': reactionScores,
+      if (parentId != null) 'parent_id': parentId,
+      if (replyCount != null) 'reply_count': replyCount,
+      if (showInChannel != null) 'show_in_channel': showInChannel,
+      if (command != null) 'command': command,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (userId != null) 'user_id': userId,
+      if (channelCid != null) 'channel_cid': channelCid,
+      if (extraData != null) 'extra_data': extraData,
+    });
+  }
+
   _MessagesCompanion copyWith(
       {Value<String> id,
       Value<String> messageText,
@@ -1679,6 +1873,69 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
       channelCid: channelCid ?? this.channelCid,
       extraData: extraData ?? this.extraData,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (messageText.present) {
+      map['message_text'] = Variable<String>(messageText.value);
+    }
+    if (attachmentJson.present) {
+      map['attachment_json'] = Variable<String>(attachmentJson.value);
+    }
+    if (status.present) {
+      final converter = $_MessagesTable.$converter0;
+      map['status'] = Variable<int>(converter.mapToSql(status.value));
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (reactionCounts.present) {
+      final converter = $_MessagesTable.$converter1;
+      map['reaction_counts'] =
+          Variable<String>(converter.mapToSql(reactionCounts.value));
+    }
+    if (reactionScores.present) {
+      final converter = $_MessagesTable.$converter2;
+      map['reaction_scores'] =
+          Variable<String>(converter.mapToSql(reactionScores.value));
+    }
+    if (parentId.present) {
+      map['parent_id'] = Variable<String>(parentId.value);
+    }
+    if (replyCount.present) {
+      map['reply_count'] = Variable<int>(replyCount.value);
+    }
+    if (showInChannel.present) {
+      map['show_in_channel'] = Variable<bool>(showInChannel.value);
+    }
+    if (command.present) {
+      map['command'] = Variable<String>(command.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (channelCid.present) {
+      map['channel_cid'] = Variable<String>(channelCid.value);
+    }
+    if (extraData.present) {
+      final converter = $_MessagesTable.$converter3;
+      map['extra_data'] = Variable<String>(converter.mapToSql(extraData.value));
+    }
+    return map;
   }
 }
 
@@ -1928,70 +2185,77 @@ class $_MessagesTable extends _Messages
   @override
   final String actualTableName = 'messages';
   @override
-  VerificationContext validateIntegrity(_MessagesCompanion d,
+  VerificationContext validateIntegrity(Insertable<_Message> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.id.present) {
-      context.handle(_idMeta, id.isAcceptableValue(d.id.value, _idMeta));
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id'], _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (d.messageText.present) {
-      context.handle(_messageTextMeta,
-          messageText.isAcceptableValue(d.messageText.value, _messageTextMeta));
+    if (data.containsKey('message_text')) {
+      context.handle(
+          _messageTextMeta,
+          messageText.isAcceptableOrUnknown(
+              data['message_text'], _messageTextMeta));
     }
-    if (d.attachmentJson.present) {
+    if (data.containsKey('attachment_json')) {
       context.handle(
           _attachmentJsonMeta,
-          attachmentJson.isAcceptableValue(
-              d.attachmentJson.value, _attachmentJsonMeta));
+          attachmentJson.isAcceptableOrUnknown(
+              data['attachment_json'], _attachmentJsonMeta));
     }
     context.handle(_statusMeta, const VerificationResult.success());
-    if (d.type.present) {
+    if (data.containsKey('type')) {
       context.handle(
-          _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
+          _typeMeta, type.isAcceptableOrUnknown(data['type'], _typeMeta));
     }
     context.handle(_reactionCountsMeta, const VerificationResult.success());
     context.handle(_reactionScoresMeta, const VerificationResult.success());
-    if (d.parentId.present) {
+    if (data.containsKey('parent_id')) {
       context.handle(_parentIdMeta,
-          parentId.isAcceptableValue(d.parentId.value, _parentIdMeta));
+          parentId.isAcceptableOrUnknown(data['parent_id'], _parentIdMeta));
     }
-    if (d.replyCount.present) {
-      context.handle(_replyCountMeta,
-          replyCount.isAcceptableValue(d.replyCount.value, _replyCountMeta));
+    if (data.containsKey('reply_count')) {
+      context.handle(
+          _replyCountMeta,
+          replyCount.isAcceptableOrUnknown(
+              data['reply_count'], _replyCountMeta));
     }
-    if (d.showInChannel.present) {
+    if (data.containsKey('show_in_channel')) {
       context.handle(
           _showInChannelMeta,
-          showInChannel.isAcceptableValue(
-              d.showInChannel.value, _showInChannelMeta));
+          showInChannel.isAcceptableOrUnknown(
+              data['show_in_channel'], _showInChannelMeta));
     }
-    if (d.command.present) {
+    if (data.containsKey('command')) {
       context.handle(_commandMeta,
-          command.isAcceptableValue(d.command.value, _commandMeta));
+          command.isAcceptableOrUnknown(data['command'], _commandMeta));
     }
-    if (d.createdAt.present) {
+    if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
-          createdAt.isAcceptableValue(d.createdAt.value, _createdAtMeta));
+          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
-    if (d.updatedAt.present) {
+    if (data.containsKey('updated_at')) {
       context.handle(_updatedAtMeta,
-          updatedAt.isAcceptableValue(d.updatedAt.value, _updatedAtMeta));
+          updatedAt.isAcceptableOrUnknown(data['updated_at'], _updatedAtMeta));
     }
-    if (d.deletedAt.present) {
+    if (data.containsKey('deleted_at')) {
       context.handle(_deletedAtMeta,
-          deletedAt.isAcceptableValue(d.deletedAt.value, _deletedAtMeta));
+          deletedAt.isAcceptableOrUnknown(data['deleted_at'], _deletedAtMeta));
     }
-    if (d.userId.present) {
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id'], _userIdMeta));
+    }
+    if (data.containsKey('channel_cid')) {
       context.handle(
-          _userIdMeta, userId.isAcceptableValue(d.userId.value, _userIdMeta));
-    }
-    if (d.channelCid.present) {
-      context.handle(_channelCidMeta,
-          channelCid.isAcceptableValue(d.channelCid.value, _channelCidMeta));
+          _channelCidMeta,
+          channelCid.isAcceptableOrUnknown(
+              data['channel_cid'], _channelCidMeta));
     }
     context.handle(_extraDataMeta, const VerificationResult.success());
     return context;
@@ -2003,72 +2267,6 @@ class $_MessagesTable extends _Messages
   _Message map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return _Message.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(_MessagesCompanion d) {
-    final map = <String, Variable>{};
-    if (d.id.present) {
-      map['id'] = Variable<String, StringType>(d.id.value);
-    }
-    if (d.messageText.present) {
-      map['message_text'] = Variable<String, StringType>(d.messageText.value);
-    }
-    if (d.attachmentJson.present) {
-      map['attachment_json'] =
-          Variable<String, StringType>(d.attachmentJson.value);
-    }
-    if (d.status.present) {
-      final converter = $_MessagesTable.$converter0;
-      map['status'] =
-          Variable<int, IntType>(converter.mapToSql(d.status.value));
-    }
-    if (d.type.present) {
-      map['type'] = Variable<String, StringType>(d.type.value);
-    }
-    if (d.reactionCounts.present) {
-      final converter = $_MessagesTable.$converter1;
-      map['reaction_counts'] = Variable<String, StringType>(
-          converter.mapToSql(d.reactionCounts.value));
-    }
-    if (d.reactionScores.present) {
-      final converter = $_MessagesTable.$converter2;
-      map['reaction_scores'] = Variable<String, StringType>(
-          converter.mapToSql(d.reactionScores.value));
-    }
-    if (d.parentId.present) {
-      map['parent_id'] = Variable<String, StringType>(d.parentId.value);
-    }
-    if (d.replyCount.present) {
-      map['reply_count'] = Variable<int, IntType>(d.replyCount.value);
-    }
-    if (d.showInChannel.present) {
-      map['show_in_channel'] = Variable<bool, BoolType>(d.showInChannel.value);
-    }
-    if (d.command.present) {
-      map['command'] = Variable<String, StringType>(d.command.value);
-    }
-    if (d.createdAt.present) {
-      map['created_at'] = Variable<DateTime, DateTimeType>(d.createdAt.value);
-    }
-    if (d.updatedAt.present) {
-      map['updated_at'] = Variable<DateTime, DateTimeType>(d.updatedAt.value);
-    }
-    if (d.deletedAt.present) {
-      map['deleted_at'] = Variable<DateTime, DateTimeType>(d.deletedAt.value);
-    }
-    if (d.userId.present) {
-      map['user_id'] = Variable<String, StringType>(d.userId.value);
-    }
-    if (d.channelCid.present) {
-      map['channel_cid'] = Variable<String, StringType>(d.channelCid.value);
-    }
-    if (d.extraData.present) {
-      final converter = $_MessagesTable.$converter3;
-      map['extra_data'] =
-          Variable<String, StringType>(converter.mapToSql(d.extraData.value));
-    }
-    return map;
   }
 
   @override
@@ -2108,6 +2306,21 @@ class _Read extends DataClass implements Insertable<_Read> {
           .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid']),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || lastRead != null) {
+      map['last_read'] = Variable<DateTime>(lastRead);
+    }
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    if (!nullToAbsent || channelCid != null) {
+      map['channel_cid'] = Variable<String>(channelCid);
+    }
+    return map;
+  }
+
   factory _Read.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -2125,20 +2338,6 @@ class _Read extends DataClass implements Insertable<_Read> {
       'userId': serializer.toJson<String>(userId),
       'channelCid': serializer.toJson<String>(channelCid),
     };
-  }
-
-  @override
-  _ReadsCompanion createCompanion(bool nullToAbsent) {
-    return _ReadsCompanion(
-      lastRead: lastRead == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastRead),
-      userId:
-          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
-      channelCid: channelCid == null && nullToAbsent
-          ? const Value.absent()
-          : Value(channelCid),
-    );
   }
 
   _Read copyWith({DateTime lastRead, String userId, String channelCid}) =>
@@ -2185,6 +2384,18 @@ class _ReadsCompanion extends UpdateCompanion<_Read> {
   })  : lastRead = Value(lastRead),
         userId = Value(userId),
         channelCid = Value(channelCid);
+  static Insertable<_Read> custom({
+    Expression<DateTime> lastRead,
+    Expression<String> userId,
+    Expression<String> channelCid,
+  }) {
+    return RawValuesInsertable({
+      if (lastRead != null) 'last_read': lastRead,
+      if (userId != null) 'user_id': userId,
+      if (channelCid != null) 'channel_cid': channelCid,
+    });
+  }
+
   _ReadsCompanion copyWith(
       {Value<DateTime> lastRead,
       Value<String> userId,
@@ -2194,6 +2405,21 @@ class _ReadsCompanion extends UpdateCompanion<_Read> {
       userId: userId ?? this.userId,
       channelCid: channelCid ?? this.channelCid,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (lastRead.present) {
+      map['last_read'] = Variable<DateTime>(lastRead.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (channelCid.present) {
+      map['channel_cid'] = Variable<String>(channelCid.value);
+    }
+    return map;
   }
 }
 
@@ -2246,24 +2472,27 @@ class $_ReadsTable extends _Reads with TableInfo<$_ReadsTable, _Read> {
   @override
   final String actualTableName = 'reads';
   @override
-  VerificationContext validateIntegrity(_ReadsCompanion d,
+  VerificationContext validateIntegrity(Insertable<_Read> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.lastRead.present) {
+    final data = instance.toColumns(true);
+    if (data.containsKey('last_read')) {
       context.handle(_lastReadMeta,
-          lastRead.isAcceptableValue(d.lastRead.value, _lastReadMeta));
+          lastRead.isAcceptableOrUnknown(data['last_read'], _lastReadMeta));
     } else if (isInserting) {
       context.missing(_lastReadMeta);
     }
-    if (d.userId.present) {
-      context.handle(
-          _userIdMeta, userId.isAcceptableValue(d.userId.value, _userIdMeta));
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id'], _userIdMeta));
     } else if (isInserting) {
       context.missing(_userIdMeta);
     }
-    if (d.channelCid.present) {
-      context.handle(_channelCidMeta,
-          channelCid.isAcceptableValue(d.channelCid.value, _channelCidMeta));
+    if (data.containsKey('channel_cid')) {
+      context.handle(
+          _channelCidMeta,
+          channelCid.isAcceptableOrUnknown(
+              data['channel_cid'], _channelCidMeta));
     } else if (isInserting) {
       context.missing(_channelCidMeta);
     }
@@ -2276,21 +2505,6 @@ class $_ReadsTable extends _Reads with TableInfo<$_ReadsTable, _Read> {
   _Read map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return _Read.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(_ReadsCompanion d) {
-    final map = <String, Variable>{};
-    if (d.lastRead.present) {
-      map['last_read'] = Variable<DateTime, DateTimeType>(d.lastRead.value);
-    }
-    if (d.userId.present) {
-      map['user_id'] = Variable<String, StringType>(d.userId.value);
-    }
-    if (d.channelCid.present) {
-      map['channel_cid'] = Variable<String, StringType>(d.channelCid.value);
-    }
-    return map;
   }
 
   @override
@@ -2345,6 +2559,39 @@ class _Member extends DataClass implements Insertable<_Member> {
           .mapFromDatabaseResponse(data['${effectivePrefix}updated_at']),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    if (!nullToAbsent || channelCid != null) {
+      map['channel_cid'] = Variable<String>(channelCid);
+    }
+    if (!nullToAbsent || role != null) {
+      map['role'] = Variable<String>(role);
+    }
+    if (!nullToAbsent || inviteAcceptedAt != null) {
+      map['invite_accepted_at'] = Variable<DateTime>(inviteAcceptedAt);
+    }
+    if (!nullToAbsent || inviteRejectedAt != null) {
+      map['invite_rejected_at'] = Variable<DateTime>(inviteRejectedAt);
+    }
+    if (!nullToAbsent || invited != null) {
+      map['invited'] = Variable<bool>(invited);
+    }
+    if (!nullToAbsent || isModerator != null) {
+      map['is_moderator'] = Variable<bool>(isModerator);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<DateTime>(createdAt);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    return map;
+  }
+
   factory _Member.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -2374,36 +2621,6 @@ class _Member extends DataClass implements Insertable<_Member> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
-  }
-
-  @override
-  _MembersCompanion createCompanion(bool nullToAbsent) {
-    return _MembersCompanion(
-      userId:
-          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
-      channelCid: channelCid == null && nullToAbsent
-          ? const Value.absent()
-          : Value(channelCid),
-      role: role == null && nullToAbsent ? const Value.absent() : Value(role),
-      inviteAcceptedAt: inviteAcceptedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(inviteAcceptedAt),
-      inviteRejectedAt: inviteRejectedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(inviteRejectedAt),
-      invited: invited == null && nullToAbsent
-          ? const Value.absent()
-          : Value(invited),
-      isModerator: isModerator == null && nullToAbsent
-          ? const Value.absent()
-          : Value(isModerator),
-      createdAt: createdAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdAt),
-      updatedAt: updatedAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(updatedAt),
-    );
   }
 
   _Member copyWith(
@@ -2509,6 +2726,30 @@ class _MembersCompanion extends UpdateCompanion<_Member> {
   })  : userId = Value(userId),
         channelCid = Value(channelCid),
         createdAt = Value(createdAt);
+  static Insertable<_Member> custom({
+    Expression<String> userId,
+    Expression<String> channelCid,
+    Expression<String> role,
+    Expression<DateTime> inviteAcceptedAt,
+    Expression<DateTime> inviteRejectedAt,
+    Expression<bool> invited,
+    Expression<bool> isModerator,
+    Expression<DateTime> createdAt,
+    Expression<DateTime> updatedAt,
+  }) {
+    return RawValuesInsertable({
+      if (userId != null) 'user_id': userId,
+      if (channelCid != null) 'channel_cid': channelCid,
+      if (role != null) 'role': role,
+      if (inviteAcceptedAt != null) 'invite_accepted_at': inviteAcceptedAt,
+      if (inviteRejectedAt != null) 'invite_rejected_at': inviteRejectedAt,
+      if (invited != null) 'invited': invited,
+      if (isModerator != null) 'is_moderator': isModerator,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+    });
+  }
+
   _MembersCompanion copyWith(
       {Value<String> userId,
       Value<String> channelCid,
@@ -2530,6 +2771,39 @@ class _MembersCompanion extends UpdateCompanion<_Member> {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (channelCid.present) {
+      map['channel_cid'] = Variable<String>(channelCid.value);
+    }
+    if (role.present) {
+      map['role'] = Variable<String>(role.value);
+    }
+    if (inviteAcceptedAt.present) {
+      map['invite_accepted_at'] = Variable<DateTime>(inviteAcceptedAt.value);
+    }
+    if (inviteRejectedAt.present) {
+      map['invite_rejected_at'] = Variable<DateTime>(inviteRejectedAt.value);
+    }
+    if (invited.present) {
+      map['invited'] = Variable<bool>(invited.value);
+    }
+    if (isModerator.present) {
+      map['is_moderator'] = Variable<bool>(isModerator.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    return map;
   }
 }
 
@@ -2670,54 +2944,59 @@ class $_MembersTable extends _Members with TableInfo<$_MembersTable, _Member> {
   @override
   final String actualTableName = 'members';
   @override
-  VerificationContext validateIntegrity(_MembersCompanion d,
+  VerificationContext validateIntegrity(Insertable<_Member> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.userId.present) {
-      context.handle(
-          _userIdMeta, userId.isAcceptableValue(d.userId.value, _userIdMeta));
+    final data = instance.toColumns(true);
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id'], _userIdMeta));
     } else if (isInserting) {
       context.missing(_userIdMeta);
     }
-    if (d.channelCid.present) {
-      context.handle(_channelCidMeta,
-          channelCid.isAcceptableValue(d.channelCid.value, _channelCidMeta));
+    if (data.containsKey('channel_cid')) {
+      context.handle(
+          _channelCidMeta,
+          channelCid.isAcceptableOrUnknown(
+              data['channel_cid'], _channelCidMeta));
     } else if (isInserting) {
       context.missing(_channelCidMeta);
     }
-    if (d.role.present) {
+    if (data.containsKey('role')) {
       context.handle(
-          _roleMeta, role.isAcceptableValue(d.role.value, _roleMeta));
+          _roleMeta, role.isAcceptableOrUnknown(data['role'], _roleMeta));
     }
-    if (d.inviteAcceptedAt.present) {
+    if (data.containsKey('invite_accepted_at')) {
       context.handle(
           _inviteAcceptedAtMeta,
-          inviteAcceptedAt.isAcceptableValue(
-              d.inviteAcceptedAt.value, _inviteAcceptedAtMeta));
+          inviteAcceptedAt.isAcceptableOrUnknown(
+              data['invite_accepted_at'], _inviteAcceptedAtMeta));
     }
-    if (d.inviteRejectedAt.present) {
+    if (data.containsKey('invite_rejected_at')) {
       context.handle(
           _inviteRejectedAtMeta,
-          inviteRejectedAt.isAcceptableValue(
-              d.inviteRejectedAt.value, _inviteRejectedAtMeta));
+          inviteRejectedAt.isAcceptableOrUnknown(
+              data['invite_rejected_at'], _inviteRejectedAtMeta));
     }
-    if (d.invited.present) {
+    if (data.containsKey('invited')) {
       context.handle(_invitedMeta,
-          invited.isAcceptableValue(d.invited.value, _invitedMeta));
+          invited.isAcceptableOrUnknown(data['invited'], _invitedMeta));
     }
-    if (d.isModerator.present) {
-      context.handle(_isModeratorMeta,
-          isModerator.isAcceptableValue(d.isModerator.value, _isModeratorMeta));
+    if (data.containsKey('is_moderator')) {
+      context.handle(
+          _isModeratorMeta,
+          isModerator.isAcceptableOrUnknown(
+              data['is_moderator'], _isModeratorMeta));
     }
-    if (d.createdAt.present) {
+    if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
-          createdAt.isAcceptableValue(d.createdAt.value, _createdAtMeta));
+          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
-    if (d.updatedAt.present) {
+    if (data.containsKey('updated_at')) {
       context.handle(_updatedAtMeta,
-          updatedAt.isAcceptableValue(d.updatedAt.value, _updatedAtMeta));
+          updatedAt.isAcceptableOrUnknown(data['updated_at'], _updatedAtMeta));
     }
     return context;
   }
@@ -2728,41 +3007,6 @@ class $_MembersTable extends _Members with TableInfo<$_MembersTable, _Member> {
   _Member map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return _Member.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(_MembersCompanion d) {
-    final map = <String, Variable>{};
-    if (d.userId.present) {
-      map['user_id'] = Variable<String, StringType>(d.userId.value);
-    }
-    if (d.channelCid.present) {
-      map['channel_cid'] = Variable<String, StringType>(d.channelCid.value);
-    }
-    if (d.role.present) {
-      map['role'] = Variable<String, StringType>(d.role.value);
-    }
-    if (d.inviteAcceptedAt.present) {
-      map['invite_accepted_at'] =
-          Variable<DateTime, DateTimeType>(d.inviteAcceptedAt.value);
-    }
-    if (d.inviteRejectedAt.present) {
-      map['invite_rejected_at'] =
-          Variable<DateTime, DateTimeType>(d.inviteRejectedAt.value);
-    }
-    if (d.invited.present) {
-      map['invited'] = Variable<bool, BoolType>(d.invited.value);
-    }
-    if (d.isModerator.present) {
-      map['is_moderator'] = Variable<bool, BoolType>(d.isModerator.value);
-    }
-    if (d.createdAt.present) {
-      map['created_at'] = Variable<DateTime, DateTimeType>(d.createdAt.value);
-    }
-    if (d.updatedAt.present) {
-      map['updated_at'] = Variable<DateTime, DateTimeType>(d.updatedAt.value);
-    }
-    return map;
   }
 
   @override
@@ -2786,6 +3030,18 @@ class ChannelQuery extends DataClass implements Insertable<ChannelQuery> {
           .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid']),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || queryHash != null) {
+      map['query_hash'] = Variable<String>(queryHash);
+    }
+    if (!nullToAbsent || channelCid != null) {
+      map['channel_cid'] = Variable<String>(channelCid);
+    }
+    return map;
+  }
+
   factory ChannelQuery.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -2801,18 +3057,6 @@ class ChannelQuery extends DataClass implements Insertable<ChannelQuery> {
       'queryHash': serializer.toJson<String>(queryHash),
       'channelCid': serializer.toJson<String>(channelCid),
     };
-  }
-
-  @override
-  _ChannelQueriesCompanion createCompanion(bool nullToAbsent) {
-    return _ChannelQueriesCompanion(
-      queryHash: queryHash == null && nullToAbsent
-          ? const Value.absent()
-          : Value(queryHash),
-      channelCid: channelCid == null && nullToAbsent
-          ? const Value.absent()
-          : Value(channelCid),
-    );
   }
 
   ChannelQuery copyWith({String queryHash, String channelCid}) => ChannelQuery(
@@ -2850,12 +3094,34 @@ class _ChannelQueriesCompanion extends UpdateCompanion<ChannelQuery> {
     @required String channelCid,
   })  : queryHash = Value(queryHash),
         channelCid = Value(channelCid);
+  static Insertable<ChannelQuery> custom({
+    Expression<String> queryHash,
+    Expression<String> channelCid,
+  }) {
+    return RawValuesInsertable({
+      if (queryHash != null) 'query_hash': queryHash,
+      if (channelCid != null) 'channel_cid': channelCid,
+    });
+  }
+
   _ChannelQueriesCompanion copyWith(
       {Value<String> queryHash, Value<String> channelCid}) {
     return _ChannelQueriesCompanion(
       queryHash: queryHash ?? this.queryHash,
       channelCid: channelCid ?? this.channelCid,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (queryHash.present) {
+      map['query_hash'] = Variable<String>(queryHash.value);
+    }
+    if (channelCid.present) {
+      map['channel_cid'] = Variable<String>(channelCid.value);
+    }
+    return map;
   }
 }
 
@@ -2897,18 +3163,21 @@ class $_ChannelQueriesTable extends _ChannelQueries
   @override
   final String actualTableName = 'channel_queries';
   @override
-  VerificationContext validateIntegrity(_ChannelQueriesCompanion d,
+  VerificationContext validateIntegrity(Insertable<ChannelQuery> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.queryHash.present) {
+    final data = instance.toColumns(true);
+    if (data.containsKey('query_hash')) {
       context.handle(_queryHashMeta,
-          queryHash.isAcceptableValue(d.queryHash.value, _queryHashMeta));
+          queryHash.isAcceptableOrUnknown(data['query_hash'], _queryHashMeta));
     } else if (isInserting) {
       context.missing(_queryHashMeta);
     }
-    if (d.channelCid.present) {
-      context.handle(_channelCidMeta,
-          channelCid.isAcceptableValue(d.channelCid.value, _channelCidMeta));
+    if (data.containsKey('channel_cid')) {
+      context.handle(
+          _channelCidMeta,
+          channelCid.isAcceptableOrUnknown(
+              data['channel_cid'], _channelCidMeta));
     } else if (isInserting) {
       context.missing(_channelCidMeta);
     }
@@ -2921,18 +3190,6 @@ class $_ChannelQueriesTable extends _ChannelQueries
   ChannelQuery map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return ChannelQuery.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(_ChannelQueriesCompanion d) {
-    final map = <String, Variable>{};
-    if (d.queryHash.present) {
-      map['query_hash'] = Variable<String, StringType>(d.queryHash.value);
-    }
-    if (d.channelCid.present) {
-      map['channel_cid'] = Variable<String, StringType>(d.channelCid.value);
-    }
-    return map;
   }
 
   @override
@@ -2974,6 +3231,31 @@ class _Reaction extends DataClass implements Insertable<_Reaction> {
           .mapFromDatabaseResponse(data['${effectivePrefix}extra_data'])),
     );
   }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || messageId != null) {
+      map['message_id'] = Variable<String>(messageId);
+    }
+    if (!nullToAbsent || type != null) {
+      map['type'] = Variable<String>(type);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<DateTime>(createdAt);
+    }
+    if (!nullToAbsent || score != null) {
+      map['score'] = Variable<int>(score);
+    }
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    if (!nullToAbsent || extraData != null) {
+      final converter = $_ReactionsTable.$converter0;
+      map['extra_data'] = Variable<String>(converter.mapToSql(extraData));
+    }
+    return map;
+  }
+
   factory _Reaction.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -2997,26 +3279,6 @@ class _Reaction extends DataClass implements Insertable<_Reaction> {
       'userId': serializer.toJson<String>(userId),
       'extraData': serializer.toJson<Map<String, dynamic>>(extraData),
     };
-  }
-
-  @override
-  _ReactionsCompanion createCompanion(bool nullToAbsent) {
-    return _ReactionsCompanion(
-      messageId: messageId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(messageId),
-      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
-      createdAt: createdAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdAt),
-      score:
-          score == null && nullToAbsent ? const Value.absent() : Value(score),
-      userId:
-          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
-      extraData: extraData == null && nullToAbsent
-          ? const Value.absent()
-          : Value(extraData),
-    );
   }
 
   _Reaction copyWith(
@@ -3094,6 +3356,24 @@ class _ReactionsCompanion extends UpdateCompanion<_Reaction> {
         type = Value(type),
         createdAt = Value(createdAt),
         userId = Value(userId);
+  static Insertable<_Reaction> custom({
+    Expression<String> messageId,
+    Expression<String> type,
+    Expression<DateTime> createdAt,
+    Expression<int> score,
+    Expression<String> userId,
+    Expression<String> extraData,
+  }) {
+    return RawValuesInsertable({
+      if (messageId != null) 'message_id': messageId,
+      if (type != null) 'type': type,
+      if (createdAt != null) 'created_at': createdAt,
+      if (score != null) 'score': score,
+      if (userId != null) 'user_id': userId,
+      if (extraData != null) 'extra_data': extraData,
+    });
+  }
+
   _ReactionsCompanion copyWith(
       {Value<String> messageId,
       Value<String> type,
@@ -3109,6 +3389,31 @@ class _ReactionsCompanion extends UpdateCompanion<_Reaction> {
       userId: userId ?? this.userId,
       extraData: extraData ?? this.extraData,
     );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (messageId.present) {
+      map['message_id'] = Variable<String>(messageId.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (score.present) {
+      map['score'] = Variable<int>(score.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (extraData.present) {
+      final converter = $_ReactionsTable.$converter0;
+      map['extra_data'] = Variable<String>(converter.mapToSql(extraData.value));
+    }
+    return map;
   }
 }
 
@@ -3199,34 +3504,35 @@ class $_ReactionsTable extends _Reactions
   @override
   final String actualTableName = 'reactions';
   @override
-  VerificationContext validateIntegrity(_ReactionsCompanion d,
+  VerificationContext validateIntegrity(Insertable<_Reaction> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
-    if (d.messageId.present) {
+    final data = instance.toColumns(true);
+    if (data.containsKey('message_id')) {
       context.handle(_messageIdMeta,
-          messageId.isAcceptableValue(d.messageId.value, _messageIdMeta));
+          messageId.isAcceptableOrUnknown(data['message_id'], _messageIdMeta));
     } else if (isInserting) {
       context.missing(_messageIdMeta);
     }
-    if (d.type.present) {
+    if (data.containsKey('type')) {
       context.handle(
-          _typeMeta, type.isAcceptableValue(d.type.value, _typeMeta));
+          _typeMeta, type.isAcceptableOrUnknown(data['type'], _typeMeta));
     } else if (isInserting) {
       context.missing(_typeMeta);
     }
-    if (d.createdAt.present) {
+    if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
-          createdAt.isAcceptableValue(d.createdAt.value, _createdAtMeta));
+          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
-    if (d.score.present) {
+    if (data.containsKey('score')) {
       context.handle(
-          _scoreMeta, score.isAcceptableValue(d.score.value, _scoreMeta));
+          _scoreMeta, score.isAcceptableOrUnknown(data['score'], _scoreMeta));
     }
-    if (d.userId.present) {
-      context.handle(
-          _userIdMeta, userId.isAcceptableValue(d.userId.value, _userIdMeta));
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id'], _userIdMeta));
     } else if (isInserting) {
       context.missing(_userIdMeta);
     }
@@ -3240,32 +3546,6 @@ class $_ReactionsTable extends _Reactions
   _Reaction map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return _Reaction.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  Map<String, Variable> entityToSql(_ReactionsCompanion d) {
-    final map = <String, Variable>{};
-    if (d.messageId.present) {
-      map['message_id'] = Variable<String, StringType>(d.messageId.value);
-    }
-    if (d.type.present) {
-      map['type'] = Variable<String, StringType>(d.type.value);
-    }
-    if (d.createdAt.present) {
-      map['created_at'] = Variable<DateTime, DateTimeType>(d.createdAt.value);
-    }
-    if (d.score.present) {
-      map['score'] = Variable<int, IntType>(d.score.value);
-    }
-    if (d.userId.present) {
-      map['user_id'] = Variable<String, StringType>(d.userId.value);
-    }
-    if (d.extraData.present) {
-      final converter = $_ReactionsTable.$converter0;
-      map['extra_data'] =
-          Variable<String, StringType>(converter.mapToSql(d.extraData.value));
-    }
-    return map;
   }
 
   @override

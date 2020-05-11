@@ -36,6 +36,9 @@ class EventType {
   /// Event sent when a channel is updated
   static const String channelUpdated = "channel.updated";
 
+  /// Event sent when a channel is updated
+  static const String channelHidden = "channel.hidden";
+
   /// Event sent when the connection status changes
   static const String connectionChanged = "connection.changed";
 

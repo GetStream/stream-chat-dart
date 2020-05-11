@@ -43,7 +43,7 @@ class _Channels extends Table {
 }
 
 class _ConnectionEvent extends Table {
-  IntColumn get id => integer().autoIncrement()();
+  IntColumn get id => integer()();
 
   TextColumn get ownUser => text().nullable().map(_ExtraDataConverter())();
 
@@ -51,7 +51,12 @@ class _ConnectionEvent extends Table {
 
   IntColumn get unreadChannels => integer().nullable()();
 
-  DateTimeColumn get createdAt => dateTime().nullable()();
+  DateTimeColumn get lastEventAt => dateTime().nullable()();
+
+  DateTimeColumn get lastSyncAt => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
 }
 
 class _Users extends Table {

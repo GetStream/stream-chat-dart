@@ -6,6 +6,18 @@ part of 'responses.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+SyncResponse _$SyncResponseFromJson(Map json) {
+  return SyncResponse()
+    ..duration = json['duration'] as String
+    ..events = (json['events'] as List)
+        ?.map((e) => e == null
+            ? null
+            : Event.fromJson((e as Map)?.map(
+                (k, e) => MapEntry(k as String, e),
+              )))
+        ?.toList();
+}
+
 QueryChannelsResponse _$QueryChannelsResponseFromJson(Map json) {
   return QueryChannelsResponse()
     ..duration = json['duration'] as String

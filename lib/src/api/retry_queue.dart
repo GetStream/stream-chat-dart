@@ -37,11 +37,10 @@ class RetryQueue {
 
   void add(List<Message> messages) {
     logger.info('add ${messages.length} messages');
-    final queueWasEmpty = _messageQueue.isEmpty;
+    _messageQueue
+        .addAll(messages.where((element) => !_messageQueue.contains(element)));
 
-    _messageQueue.addAll(messages);
-
-    if (queueWasEmpty && !_isRetrying) {
+    if (_messageQueue.isNotEmpty && !_isRetrying) {
       _startRetrying();
     }
   }
@@ -56,8 +55,8 @@ class RetryQueue {
     final retryPolicy = _retryPolicy.copyWith(attempt: 0);
 
     while (_messageQueue.isNotEmpty) {
+      final message = _messageQueue.first;
       try {
-        final message = _messageQueue.first;
         logger.info('retry attempt ${retryPolicy.attempt}');
         await _sendMessage(message);
         _messageQueue.removeFirst();
@@ -78,6 +77,7 @@ class RetryQueue {
           retryPolicy.attempt,
           apiError,
         )) {
+          _sendFailedEvent(message);
           _isRetrying = false;
           return;
         }
@@ -92,6 +92,21 @@ class RetryQueue {
       }
     }
     _isRetrying = false;
+  }
+
+  void _sendFailedEvent(Message message) {
+    final newStatus = message.status == MessageSendingStatus.SENDING
+        ? MessageSendingStatus.FAILED
+        : (message.status == MessageSendingStatus.UPDATING
+            ? MessageSendingStatus.FAILED_UPDATE
+            : MessageSendingStatus.FAILED_DELETE);
+    channel.client.handleEvent(Event(
+      type: EventType.messageUpdated,
+      message: message.copyWith(
+        status: newStatus,
+      ),
+      cid: channel.cid,
+    ));
   }
 
   Future<void> _sendMessage(Message message) async {

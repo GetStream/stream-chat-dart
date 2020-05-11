@@ -169,26 +169,50 @@ class OfflineStorage extends _$OfflineStorage {
 
   /// Get stored connection event
   Future<Event> getConnectionInfo() async {
-    return select(connectionEvent)
-        .map((row) => Event(
-              me: OwnUser.fromJson(row.ownUser),
-              totalUnreadCount: row.totalUnreadCount,
-              unreadChannels: row.unreadChannels,
-            ))
-        .getSingle();
+    return select(connectionEvent).map((row) {
+      return Event(
+        me: OwnUser.fromJson(row.ownUser),
+        totalUnreadCount: row.totalUnreadCount,
+        unreadChannels: row.unreadChannels,
+      );
+    }).getSingle();
+  }
+
+  /// Get stored lastSyncAt
+  Future<DateTime> getLastSyncAt() async {
+    return select(connectionEvent).getSingle().then((r) => r?.lastSyncAt);
   }
 
   /// Update stored connection event
   Future<void> updateConnectionInfo(Event event) async {
-    return update(connectionEvent).write(_ConnectionEventCompanion(
-      ownUser: event.me != null ? Value(event.me.toJson()) : Value.absent(),
-      totalUnreadCount: event.totalUnreadCount != null
-          ? Value(event.totalUnreadCount)
-          : Value.absent(),
-      unreadChannels: event.unreadChannels != null
-          ? Value(event.unreadChannels)
-          : Value.absent(),
-    ));
+    final connectionInfo = await select(connectionEvent).getSingle();
+
+    return into(connectionEvent).insert(
+      _ConnectionEventData(
+        id: 1,
+        lastSyncAt: connectionInfo?.lastSyncAt,
+        lastEventAt: event.createdAt ?? connectionInfo?.lastEventAt,
+        totalUnreadCount:
+            event.totalUnreadCount ?? connectionInfo?.totalUnreadCount,
+        ownUser: event.me?.toJson() ?? connectionInfo?.ownUser,
+        unreadChannels: event.unreadChannels ?? connectionInfo?.unreadChannels,
+      ),
+      mode: InsertMode.insertOrReplace,
+    );
+  }
+
+  /// Update stored lastSyncAt
+  Future<void> updateLastSyncAt(DateTime lastSyncAt) async {
+    return await (update(connectionEvent)..where((r) => r.id.equals(1))).write(
+      _ConnectionEventCompanion(
+        id: Value(1),
+        lastSyncAt: Value(lastSyncAt),
+      ),
+    );
+  }
+
+  Future<List<String>> getChannelCids() async {
+    return select(channels).map((c) => c.cid).get();
   }
 
   /// Get channel data by cid

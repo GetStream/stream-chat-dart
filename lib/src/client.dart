@@ -89,6 +89,8 @@ class Client {
 
   RetryPolicy _retryPolicy;
 
+  bool _synced = false;
+
   RetryPolicy get retryPolicy => _retryPolicy;
 
   /// Method used to show a local notification while the app is in background
@@ -345,13 +347,18 @@ class Client {
       stream.where((event) => eventType == null || event.type == eventType);
 
   /// Method called to add a new event to the [_controller].
-  void handleEvent(Event event) {
+  void handleEvent(Event event) async {
     logger.info('handle new event: ${event.toJson()}');
     if (event.connectionId != null) {
       _connectionId = event.connectionId;
     }
 
-    _offlineStorage?.updateConnectionInfo(event);
+    if (!event.isLocal) {
+      await _offlineStorage?.updateConnectionInfo(event);
+      if (_synced) {
+        await _offlineStorage?.updateLastSyncAt(event.createdAt);
+      }
+    }
 
     if (event.me != null) {
       state.user = event.me;
@@ -407,24 +414,9 @@ class Client {
           type: EventType.connectionRecovered,
           online: true,
         ));
-        queryChannels(filter: {
-          'cid': {
-            '\$in': state.channels.keys.toList(),
-          },
-        }, options: {
-          'recovery': true,
-          'last_message_ids': state.channels.map<String, String>(
-            (cid, c) {
-              final lastId = c.state?.messages?.isEmpty == true
-                  ? null
-                  : c.state.messages.last.id;
-              return MapEntry<String, String>(
-                cid,
-                lastId,
-              );
-            },
-          ),
-        }).listen((_) {});
+        await resync();
+      } else if (value == ConnectionStatus.disconnected) {
+        _synced = false;
       }
     };
 
@@ -432,14 +424,44 @@ class Client {
 
     var event = await _offlineStorage?.getConnectionInfo();
 
-    await _ws.connect().then((e) {
-      _offlineStorage?.updateConnectionInfo(e);
+    await _ws.connect().then((e) async {
+      await _offlineStorage?.updateConnectionInfo(e);
       event = e;
+      await resync();
     }).catchError((err, stacktrace) {
       logger.severe('error connecting ws', err, stacktrace);
     });
 
     return event;
+  }
+
+  Future<void> resync() async {
+    final lastSyncAt = await offlineStorage?.getLastSyncAt();
+
+    if (lastSyncAt == null) {
+      _synced = true;
+      return;
+    }
+
+    final cids = await offlineStorage?.getChannelCids();
+
+    try {
+      final rawRes = await post('/sync', data: {
+        'channel_cids': cids,
+        'last_sync_at': lastSyncAt.toUtc().toIso8601String(),
+      });
+
+      final res = decode<SyncResponse>(
+        rawRes.data,
+        SyncResponse.fromJson,
+      );
+
+      res.events.forEach(handleEvent);
+
+      _synced = true;
+    } on DioError catch (error) {
+      logger.severe('Error during resync $error');
+    }
   }
 
   /// Requests channels with a given query.
@@ -934,13 +956,7 @@ class Client {
 
       return updateMessageResponse;
     }).catchError((error) {
-      handleEvent(Event(
-        type: EventType.messageUpdated,
-        message: message.copyWith(
-          status: MessageSendingStatus.FAILED_UPDATE,
-        ),
-        cid: cid,
-      ));
+      state.channels[cid].state.retryQueue.add([message]);
       throw error;
     });
   }
@@ -979,14 +995,7 @@ class Client {
       ));
       return decode(response.data, EmptyResponse.fromJson);
     } catch (error) {
-      handleEvent(Event(
-        message: message.copyWith(
-          status: MessageSendingStatus.FAILED_DELETE,
-        ),
-        type: EventType.messageUpdated,
-        cid: cid,
-      ));
-
+      state.channels[cid].state.retryQueue.add([message]);
       rethrow;
     }
   }
@@ -1034,6 +1043,12 @@ class ClientState {
     });
 
     _client.on(EventType.channelDeleted).listen((event) {
+      final channel = event.channel;
+      _client._offlineStorage?.deleteChannels([channel.cid]);
+      channels = channels..removeWhere((cid, ch) => cid == channel.cid);
+    });
+
+    _client.on(EventType.channelHidden).listen((event) {
       final channel = event.channel;
       _client._offlineStorage?.deleteChannels([channel.cid]);
       channels = channels..removeWhere((cid, ch) => cid == channel.cid);

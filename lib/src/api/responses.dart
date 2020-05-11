@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/client.dart';
 import 'package:stream_chat/src/models/device.dart';
+import 'package:stream_chat/src/models/event.dart';
 
 import '../models/channel_model.dart';
 import '../models/channel_state.dart';
@@ -14,6 +15,16 @@ part 'responses.g.dart';
 
 class _BaseResponse {
   String duration;
+}
+
+/// Model response for [Client.resync] api call
+@JsonSerializable(createToJson: false)
+class SyncResponse extends _BaseResponse {
+  List<Event> events;
+
+  /// Create a new instance from a json
+  static SyncResponse fromJson(Map<String, dynamic> json) =>
+      _$SyncResponseFromJson(json);
 }
 
 /// Model response for [Client.queryChannels] api call

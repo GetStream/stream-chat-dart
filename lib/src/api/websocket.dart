@@ -42,7 +42,7 @@ class WebSocket {
     data["user_details"] = user.toJson();
     qs["json"] = json.encode(data);
 
-    _uri = Uri.https(baseUrl, "connect", qs);
+    final _uri = Uri.https(baseUrl, "connect", qs);
     _path = _uri.toString().replaceFirst("https", "wss");
   }
 
@@ -86,9 +86,7 @@ class WebSocket {
   final ValueNotifier<ConnectionStatus> connectionStatus =
       ValueNotifier(ConnectionStatus.disconnected);
 
-  Uri _uri;
   String _path;
-
   WebSocketChannel _channel;
   Timer _healthCheck, _reconnectionMonitor, _reconnectionTimer;
   DateTime _lastEventAt;
