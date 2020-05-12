@@ -19,6 +19,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) {
         ?.map(
             (e) => e == null ? null : User.fromJson(e as Map<String, dynamic>))
         ?.toList(),
+    silent: json['silent'] as bool,
     reactionCounts: (json['reaction_counts'] as Map<String, dynamic>)?.map(
       (k, e) => MapEntry(k, e as int),
     ),
@@ -75,6 +76,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   val['parent_id'] = instance.parentId;
   writeNotNull('reply_count', readonly(instance.replyCount));
   val['show_in_channel'] = instance.showInChannel;
+  val['silent'] = instance.silent;
   writeNotNull('command', readonly(instance.command));
   writeNotNull('created_at', readonly(instance.createdAt));
   writeNotNull('updated_at', readonly(instance.updatedAt));
