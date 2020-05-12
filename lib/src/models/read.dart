@@ -13,10 +13,14 @@ class Read {
   /// User who sent the event
   final User user;
 
+  /// Number of unread messages
+  final int unreadMessages;
+
   /// Constructor used for json serialization
   Read({
     this.lastRead,
     this.user,
+    this.unreadMessages,
   });
 
   /// Create a new instance from a json

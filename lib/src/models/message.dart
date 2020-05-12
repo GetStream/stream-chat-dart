@@ -82,6 +82,9 @@ class Message {
   /// Check if this message needs to show in the channel.
   final bool showInChannel;
 
+  /// Check if this message needs to show in the channel.
+  final bool silent;
+
   /// A used command name.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final String command;
@@ -117,6 +120,7 @@ class Message {
     'id',
     'text',
     'type',
+    'silent',
     'attachments',
     'latest_reactions',
     'own_reactions',
@@ -153,6 +157,7 @@ class Message {
     this.user,
     this.extraData,
     this.deletedAt,
+    this.silent,
     this.status = MessageSendingStatus.SENT,
   });
 
@@ -179,6 +184,7 @@ class Message {
     int replyCount,
     bool showInChannel,
     String command,
+    bool silent,
     DateTime createdAt,
     DateTime updatedAt,
     DateTime deletedAt,
@@ -204,6 +210,7 @@ class Message {
         extraData: extraData ?? this.extraData,
         user: user ?? this.user,
         updatedAt: updatedAt ?? this.updatedAt,
+        silent: silent ?? this.silent,
         deletedAt: deletedAt ?? this.deletedAt,
         status: status ?? this.status,
       );

@@ -910,7 +910,7 @@ class ChannelClientState {
     _channel.on(EventType.messageNew).listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
-        final newMessages = List<Message>.from(this._channelState.messages);
+        final newMessages = List<Message>.from(_channelState.messages);
 
         final oldIndex =
             newMessages.indexWhere((m) => m.id == event.message.id);
@@ -920,12 +920,12 @@ class ChannelClientState {
           newMessages.add(event.message);
         }
 
-        _channelState = this._channelState.copyWith(
-              messages: newMessages,
-              channel: this._channelState.channel.copyWith(
-                    lastMessageAt: event.message.createdAt,
-                  ),
-            );
+        _channelState = _channelState.copyWith(
+          messages: newMessages,
+          channel: _channelState.channel.copyWith(
+            lastMessageAt: event.message.createdAt,
+          ),
+        );
       }
 
       if (event.message.parentId != null) {
@@ -940,7 +940,7 @@ class ChannelClientState {
     }
 
     _channel.on(EventType.messageRead).listen((event) {
-      final read = this._channelState.read;
+      final read = _channelState.read;
       final userReadIndex = read?.indexWhere((r) => r.user.id == event.user.id);
 
       if (userReadIndex != null && userReadIndex != -1) {
@@ -949,7 +949,7 @@ class ChannelClientState {
           user: userRead.user,
           lastRead: event.createdAt,
         ));
-        _channelState = this._channelState.copyWith(read: read);
+        _channelState = _channelState.copyWith(read: read);
       }
     });
   }
@@ -1044,7 +1044,8 @@ class ChannelClientState {
     } else {
       return _channelState.messages.fold<int>(0, (count, message) {
         if (message.user.id != userId &&
-            message.createdAt.isAfter(userRead.lastRead)) {
+            message.createdAt.isAfter(userRead.lastRead) &&
+            message.silent != true) {
           return count + 1;
         }
         return count;

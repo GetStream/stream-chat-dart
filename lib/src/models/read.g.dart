@@ -16,10 +16,12 @@ Read _$ReadFromJson(Map json) {
         : User.fromJson((json['user'] as Map)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
+    unreadMessages: json['unread_messages'] as int,
   );
 }
 
 Map<String, dynamic> _$ReadToJson(Read instance) => <String, dynamic>{
       'last_read': instance.lastRead?.toIso8601String(),
       'user': instance.user?.toJson(),
+      'unread_messages': instance.unreadMessages,
     };

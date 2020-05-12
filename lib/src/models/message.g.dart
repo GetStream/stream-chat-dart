@@ -66,6 +66,7 @@ Message _$MessageFromJson(Map json) {
     deletedAt: json['deleted_at'] == null
         ? null
         : DateTime.parse(json['deleted_at'] as String),
+    silent: json['silent'] as bool,
   );
 }
 
@@ -92,6 +93,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   val['parent_id'] = instance.parentId;
   writeNotNull('reply_count', readonly(instance.replyCount));
   val['show_in_channel'] = instance.showInChannel;
+  val['silent'] = instance.silent;
   writeNotNull('command', readonly(instance.command));
   writeNotNull('created_at', readonly(instance.createdAt));
   writeNotNull('updated_at', readonly(instance.updatedAt));
