@@ -881,7 +881,8 @@ class ChannelClientState {
     } else {
       return _channelState.messages.fold<int>(0, (count, message) {
         if (message.user.id != userId &&
-            message.createdAt.isAfter(userRead.lastRead)) {
+            message.createdAt.isAfter(userRead.lastRead) &&
+            message.silent != true) {
           return count + 1;
         }
         return count;

@@ -1,3 +1,7 @@
+## 0.1.30
+
+- Add silent property to message
+
 ## 0.1.29
 
 - Fix read event handling
