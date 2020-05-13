@@ -116,25 +116,20 @@ class OfflineStorage extends _$OfflineStorage {
   // you should bump this number whenever you change or add a table definition. Migrations
   // are covered later in this readme.
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
-//  @override
-//  MigrationStrategy get migration => MigrationStrategy(
-//        beforeOpen: (openingDetails) async {
-//          final m = Migrator(this, customStatement);
-//          for (final table in allTables) {
-//            await m.deleteTable(table.actualTableName);
-//            await m.createTable(table);
-//          }
-//        },
-//        onUpgrade: (openingDetails, _, __) async {
-//          final m = Migrator(this, customStatement);
-//          for (final table in allTables) {
-//            await m.deleteTable(table.actualTableName);
-//            await m.createTable(table);
-//          }
-//        },
-//      );
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onUpgrade: (openingDetails, before, after) async {
+          if (before != after) {
+            final m = createMigrator();
+            for (final table in allTables) {
+              await m.deleteTable(table.actualTableName);
+              await m.createTable(table);
+            }
+          }
+        },
+      );
 
   /// Closes the database instance
   /// If [flush] is true, the database data will be deleted
@@ -234,7 +229,7 @@ class OfflineStorage extends _$OfflineStorage {
     PaginationParams paginationParams,
   }) async {
     _logger.info('Get channel states');
-    String hash = _computeHash(filter);
+    final hash = _computeHash(filter);
     final cachedChannels = await Future.wait(await (select(channelQueries)
           ..where((c) => c.queryHash.equals(hash)))
         .get()
