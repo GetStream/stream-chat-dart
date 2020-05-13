@@ -436,6 +436,7 @@ class Client {
   }
 
   Future<void> resync() async {
+    return;
     final lastSyncAt = await offlineStorage?.getLastSyncAt();
 
     if (lastSyncAt == null) {
