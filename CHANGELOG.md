@@ -1,3 +1,7 @@
+## 0.2.0-alpha+9
+
+- Add retry mechanism and retry queue
+
 ## 0.2.0-alpha+8
 
 - Add copyWith to Attachment
