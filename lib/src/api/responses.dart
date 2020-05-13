@@ -177,8 +177,10 @@ class GetMessageResponse extends _BaseResponse {
   /// Create a new instance from a json
   static GetMessageResponse fromJson(Map<String, dynamic> json) {
     final res = _$GetMessageResponseFromJson(json);
-    res.channel =
-        ChannelModel.fromJson(res.message.extraData.remove('channel'));
+    final jsonChannel = res.message?.extraData?.remove('channel');
+    if (jsonChannel != null) {
+      res.channel = ChannelModel.fromJson(jsonChannel);
+    }
     return res;
   }
 }

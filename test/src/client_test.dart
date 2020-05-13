@@ -669,16 +669,20 @@ void main() {
           httpClient: mockDio,
         );
 
-        final message = Message(id: 'test');
+        final message = Message(
+          id: 'test',
+          updatedAt: DateTime.now(),
+        );
 
-        when(mockDio.post<String>('/messages/${message.id}',
-                data: {'message': message}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(mockDio.post<String>(
+          '/messages/${message.id}',
+          data: {'message': message},
+        )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await client.updateMessage(message);
 
         verify(mockDio.post<String>('/messages/${message.id}',
-            data: {'message': message})).called(1);
+            data: {'message': anything})).called(1);
       });
 
       test('deleteMessage', () async {

@@ -474,16 +474,16 @@ class Client {
     bool onlyOffline = false,
   }) async* {
     logger.info('Query channel start');
-    final Map<String, dynamic> defaultOptions = {
-      "state": true,
-      "watch": true,
-      "presence": false,
+    final defaultOptions = {
+      'state': true,
+      'watch': true,
+      'presence': false,
     };
 
-    Map<String, dynamic> payload = {
-      "filter_conditions": filter,
-      "sort": sort,
-      "user_details": state.user,
+    var payload = <String, dynamic>{
+      'filter_conditions': filter,
+      'sort': sort,
+      'user_details': state.user,
     };
 
     if (messageLimit != null) {
@@ -661,6 +661,9 @@ class Client {
   /// Used to log errors and stacktrace in case of bad json deserialization
   T decode<T>(String j, DecoderFunction<T> decoderFunction) {
     try {
+      if (j == null) {
+        return null;
+      }
       return decoderFunction(json.decode(j));
     } catch (error, stacktrace) {
       logger.severe('Error decoding response', error, stacktrace);
@@ -944,19 +947,21 @@ class Client {
     return post("/messages/${message.id}", data: {'message': message})
         .then((res) {
       final updateMessageResponse = decode(
-        res.data,
+        res?.data,
         UpdateMessageResponse.fromJson,
       );
 
       handleEvent(Event(
         type: EventType.messageUpdated,
-        message: updateMessageResponse.message,
+        message: updateMessageResponse?.message,
         cid: cid,
       ));
 
       return updateMessageResponse;
     }).catchError((error) {
-      state.channels[cid].state.retryQueue.add([message]);
+      if (state?.channels != null) {
+        state.channels[cid].state.retryQueue.add([message]);
+      }
       throw error;
     });
   }

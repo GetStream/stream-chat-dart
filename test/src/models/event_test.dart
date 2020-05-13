@@ -72,9 +72,11 @@ void main() {
           'user': {'id': 'id'},
           'reaction': null,
           'message': null,
+          'channel': null,
           'total_unread_count': 1,
           'unread_channels': 1,
-          'online': true
+          'online': true,
+          'is_local': true
         },
       );
     });

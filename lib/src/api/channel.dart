@@ -25,7 +25,7 @@ class Channel {
     this.type,
     this._id,
     this._extraData,
-  ) : _cid = _id != null ? "$type:$_id" : null {
+  ) : _cid = _id != null ? '$type:$_id' : null {
     _client.logger.info('New Channel instance not initialized created');
   }
 
@@ -252,7 +252,7 @@ class Channel {
       });
 
     final currentScore = message.ownReactions
-            .firstWhere((r) => r.type == type, orElse: () => null)
+            ?.firstWhere((r) => r.type == type, orElse: () => null)
             ?.score ??
         0;
 
@@ -262,7 +262,7 @@ class Channel {
       createdAt: DateTime.now(),
       user: _client.state.user,
       messageId: messageId,
-      userId: _client.state.user.id,
+      userId: _client.state.user?.id,
       score: currentScore + 1,
     );
 
@@ -783,14 +783,14 @@ class ChannelClientState {
     _channel.on(EventType.reactionDeleted).listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
-        _channelState = this._channelState.copyWith(
-              messages: this._channelState.messages.map((message) {
-                if (message.id == event.message.id) {
-                  return _removeReactionFromMessage(message, event);
-                }
-                return message;
-              }).toList(),
-            );
+        _channelState = _channelState.copyWith(
+          messages: _channelState?.messages?.map((message) {
+            if (message.id == event.message.id) {
+              return _removeReactionFromMessage(message, event);
+            }
+            return message;
+          })?.toList(),
+        );
       }
 
       if (event.message.parentId != null) {
