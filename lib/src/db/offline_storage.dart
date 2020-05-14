@@ -152,7 +152,7 @@ class OfflineStorage extends _$OfflineStorage {
   /// Get stored replies by messageId
   Future<List<Message>> getReplies(String parentId) async {
     return await Future.wait(await (select(messages).join([
-      leftOuterJoin(users, messages.userId.equalsExp(users.id)),
+      innerJoin(users, messages.userId.equalsExp(users.id)),
     ])
           ..where(messages.parentId.equals(parentId))
           ..orderBy([

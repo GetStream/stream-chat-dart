@@ -152,7 +152,7 @@ class Channel {
       status: MessageSendingStatus.SENDING,
     );
 
-    if (message.parentId != null) {
+    if (message.parentId != null && message.id == null) {
       final parentMessage =
           state.messages.firstWhere((m) => m.id == message.parentId);
       _client.handleEvent(Event(
@@ -494,13 +494,17 @@ class Channel {
     PaginationParams options,
   ) async {
     final cachedReplies = await _client.offlineStorage?.getReplies(parentId);
-    state?.updateThreadInfo(parentId, cachedReplies);
+    if (cachedReplies != null && cachedReplies.isNotEmpty) {
+      state?.updateThreadInfo(parentId, cachedReplies);
+    }
 
     final response = await _client.get("/messages/$parentId/replies",
         queryParameters: options.toJson());
 
     final repliesResponse = _client.decode<QueryRepliesResponse>(
-        response.data, QueryRepliesResponse.fromJson);
+      response.data,
+      QueryRepliesResponse.fromJson,
+    );
 
     state?.updateThreadInfo(parentId, repliesResponse.messages);
 
@@ -1186,7 +1190,7 @@ class ChannelClientState {
   /// The channel threads related to this channel as a stream
   Stream<Map<String, List<Message>>> get threadsStream =>
       _threadsController.stream;
-  BehaviorSubject<Map<String, List<Message>>> _threadsController =
+  final BehaviorSubject<Map<String, List<Message>>> _threadsController =
       BehaviorSubject.seeded({});
 
   set _threads(Map<String, List<Message>> v) {
@@ -1202,7 +1206,7 @@ class ChannelClientState {
 
   /// Channel related typing users stream
   Stream<List<User>> get typingEventsStream => _typingEventsController.stream;
-  BehaviorSubject<List<User>> _typingEventsController =
+  final BehaviorSubject<List<User>> _typingEventsController =
       BehaviorSubject.seeded([]);
 
   final Channel _channel;
