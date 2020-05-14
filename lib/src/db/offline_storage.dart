@@ -139,7 +139,7 @@ class OfflineStorage extends _$OfflineStorage {
       _logger.info('Flushing');
       await batch((batch) {
         allTables.forEach((table) {
-          delete(table);
+          delete(table).go();
         });
       });
     }
@@ -279,9 +279,11 @@ class OfflineStorage extends _$OfflineStorage {
   ) async {
     final hash = _computeHash(filter);
     if (clearQueryCache) {
-      await delete(channelQueries).where(
-        (_ChannelQueries query) => query.queryHash.equals(hash),
-      );
+      await (delete(channelQueries)
+            ..where(
+              (_ChannelQueries query) => query.queryHash.equals(hash),
+            ))
+          .go();
     }
 
     await batch((batch) {
