@@ -276,15 +276,15 @@ class OfflineStorage extends _$OfflineStorage {
     Map<String, dynamic> filter,
     List<String> cids,
     bool clearQueryCache,
-  ) {
+  ) async {
     final hash = _computeHash(filter);
     if (clearQueryCache) {
-      delete(channelQueries).where(
+      await delete(channelQueries).where(
         (_ChannelQueries query) => query.queryHash.equals(hash),
       );
     }
 
-    batch((batch) {
+    await batch((batch) {
       batch.insertAll(
         channelQueries,
         cids.map((cid) {

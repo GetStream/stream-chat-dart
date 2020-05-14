@@ -1,4 +1,4 @@
-## 0.2.0-alpha+10
+## 0.2.0-alpha+11
 
 - Fix retry mechanism in threads
 
