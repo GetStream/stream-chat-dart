@@ -1,3 +1,7 @@
+## 0.2.0-alpha+13
+
+- Fix offline on app first start up
+
 ## 0.2.0-alpha+12
 
 - Fix retry mechanism in threads

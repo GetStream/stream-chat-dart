@@ -42,7 +42,7 @@ Future<MoorIsolate> _createMoorIsolate(String userId) async {
 
 void _startBackground(_IsolateStartRequest request) {
   final executor = LazyDatabase(() async {
-    return VmDatabase(File(request.targetPath));
+    return VmDatabase(File(request.targetPath), logStatements: true);
   });
   final moorIsolate = MoorIsolate.inCurrent(
     () => DatabaseConnection.fromExecutor(executor),
@@ -76,7 +76,7 @@ LazyDatabase _openConnection(String userId) {
     final dir = await getApplicationDocumentsDirectory();
     final path = p.join(dir.path, 'db_$userId.sqlite');
     final file = File(path);
-    return VmDatabase(file);
+    return VmDatabase(file, logStatements: true);
   });
 }
 

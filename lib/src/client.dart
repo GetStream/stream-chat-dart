@@ -516,6 +516,7 @@ class Client {
         return channel;
       } else {
         final newChannel = Channel.fromState(this, channelState);
+        _offlineStorage?.updateChannelState(newChannel.state.channelState);
         newChannels[newChannel.cid] = newChannel;
         return newChannel;
       }
@@ -553,6 +554,8 @@ class Client {
         return channel;
       } else {
         final newChannel = Channel.fromState(this, channelState);
+        _offlineStorage?.updateChannelState(newChannel.state.channelState);
+        newChannel.state?.updateChannelState(channelState);
         newChannels[newChannel.cid] = newChannel;
         return newChannel;
       }
