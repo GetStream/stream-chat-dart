@@ -1,6 +1,7 @@
-## 0.2.0-alpha+11
+## 0.2.0-alpha+12
 
 - Fix retry mechanism in threads
+- Fix delete channel query
 
 ## 0.2.0-alpha+9
 
