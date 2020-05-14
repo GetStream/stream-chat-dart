@@ -1,3 +1,7 @@
+## 0.2.0-alpha+10
+
+- Fix retry mechanism in threads
+
 ## 0.2.0-alpha+9
 
 - Add retry mechanism and retry queue
