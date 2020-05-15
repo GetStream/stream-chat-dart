@@ -39,11 +39,11 @@ class WebSocket {
 
     final data = Map<String, dynamic>.from(connectPayload);
 
-    data["user_details"] = user.toJson();
-    qs["json"] = json.encode(data);
+    data['user_details'] = user.toJson();
+    qs['json'] = json.encode(data);
 
-    final _uri = Uri.https(baseUrl, "connect", qs);
-    _path = _uri.toString().replaceFirst("https", "wss");
+    final _uri = Uri.https(baseUrl, 'connect', qs);
+    _path = _uri.toString().replaceFirst('https', 'wss');
   }
 
   /// WS base url

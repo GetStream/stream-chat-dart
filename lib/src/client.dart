@@ -68,7 +68,7 @@ class Client {
   }) {
     WidgetsFlutterBinding.ensureInitialized();
 
-    this._retryPolicy ??= RetryPolicy(
+    _retryPolicy ??= RetryPolicy(
       retryTimeout: (Client client, int attempt, ApiError error) =>
           Duration(seconds: 1 * attempt),
       shouldRetry: (Client client, int attempt, ApiError error) => attempt < 5,
@@ -152,7 +152,7 @@ class Client {
   @visibleForTesting
   Dio httpClient = Dio();
 
-  static const _defaultBaseURL = "chat-us-east-1.stream-io-api.com";
+  static const _defaultBaseURL = 'chat-us-east-1.stream-io-api.com';
   static const _tokenExpiredErrorCode = 40;
   VoidCallback _connectionStatusListener;
 
@@ -203,7 +203,7 @@ class Client {
                 };
               }
 
-              String stringData = options.data.toString();
+              var stringData = options.data.toString();
 
               if (options.data is FormData) {
                 final multiPart = (options.data as FormData).files[0]?.value;
@@ -227,7 +227,7 @@ class Client {
         );
   }
 
-  _tokenExpiredInterceptor(DioError err) async {
+  Future<void> _tokenExpiredInterceptor(DioError err) async {
     final apiError = ApiError(
       err.response?.data,
       err.response?.statusCode,
@@ -236,7 +236,7 @@ class Client {
     if (apiError.code == _tokenExpiredErrorCode) {
       logger.info('token expired');
 
-      if (this.tokenProvider != null) {
+      if (tokenProvider != null) {
         httpClient.lock();
         final userId = state.user.id;
 
@@ -244,24 +244,24 @@ class Client {
 
         await _disconnect();
 
-        final newToken = await this.tokenProvider(userId);
+        final newToken = await tokenProvider(userId);
         await Future.delayed(Duration(seconds: 4));
-        this.token = newToken;
+        token = newToken;
 
         httpClient.unlock();
 
         await setUser(User(id: userId), newToken);
 
         try {
-          return await this.httpClient.request(
-                err.request.path,
-                cancelToken: err.request.cancelToken,
-                data: err.request.data,
-                onReceiveProgress: err.request.onReceiveProgress,
-                onSendProgress: err.request.onSendProgress,
-                queryParameters: err.request.queryParameters,
-                options: err.request,
-              );
+          return await httpClient.request(
+            err.request.path,
+            cancelToken: err.request.cancelToken,
+            data: err.request.data,
+            onReceiveProgress: err.request.onReceiveProgress,
+            onSendProgress: err.request.onSendProgress,
+            queryParameters: err.request.queryParameters,
+            options: err.request,
+          );
         } catch (err) {
           return err;
         }
@@ -299,7 +299,7 @@ class Client {
   /// Call this function to dispose the client
   void dispose() async {
     await _offlineStorage?.disconnect();
-    await this._disconnect();
+    await _disconnect();
     httpClient.close();
     await _controller.close();
     state.channels.values.forEach((c) => c.dispose());
@@ -307,9 +307,9 @@ class Client {
   }
 
   Map<String, String> get _httpHeaders => {
-        "Authorization": token,
-        "stream-auth-type": _authType,
-        "x-stream-client": _userAgent,
+        'Authorization': token,
+        'stream-auth-type': _authType,
+        'x-stream-client': _userAgent,
       };
 
   /// Set the current user, this triggers a connection to the API.
@@ -368,17 +368,17 @@ class Client {
 
   /// Connect the client websocket
   Future<Event> connect() async {
-    if (this.wsConnectionStatus.value == ConnectionStatus.connecting) {
+    if (wsConnectionStatus.value == ConnectionStatus.connecting) {
       logger.warning('Already connecting');
       throw Exception('Already connecting');
     }
 
-    if (this.wsConnectionStatus.value == ConnectionStatus.connected) {
+    if (wsConnectionStatus.value == ConnectionStatus.connected) {
       logger.warning('Already connected');
       throw Exception('Already connected');
     }
 
-    this.wsConnectionStatus.value = ConnectionStatus.connecting;
+    wsConnectionStatus.value = ConnectionStatus.connecting;
 
     if (persistenceEnabled && _offlineStorage == null) {
       _offlineStorage = await connectDatabase(state.user, Logger('💽'));
@@ -388,13 +388,13 @@ class Client {
       baseUrl: baseURL,
       user: state.user,
       connectParams: {
-        "api_key": apiKey,
-        "authorization": token,
-        "stream-auth-type": _authType,
+        'api_key': apiKey,
+        'authorization': token,
+        'stream-auth-type': _authType,
       },
       connectPayload: {
-        "user_id": state.user.id,
-        "server_determines_connection_id": true,
+        'user_id': state.user.id,
+        'server_determines_connection_id': true,
       },
       handler: handleEvent,
       logger: Logger('🔌'),
@@ -402,7 +402,7 @@ class Client {
 
     _connectionStatusListener = () async {
       final value = _ws.connectionStatus.value;
-      this.wsConnectionStatus.value = value;
+      wsConnectionStatus.value = value;
       handleEvent(Event(
         type: EventType.connectionChanged,
         online: value == ConnectionStatus.connected,
@@ -533,9 +533,9 @@ class Client {
     }
 
     final response = await get(
-      "/channels",
+      '/channels',
       queryParameters: {
-        "payload": jsonEncode(payload),
+        'payload': jsonEncode(payload),
       },
     );
 
@@ -678,18 +678,18 @@ class Client {
   String get _authType => _anonymous ? 'anonymous' : 'jwt';
 
   // TODO: get the right version of the lib from the build toolchain
-  String get _userAgent => "stream-chat-dart-client-$PACKAGE_VERSION";
+  String get _userAgent => 'stream-chat-dart-client-$PACKAGE_VERSION';
 
   Map<String, String> get _commonQueryParams => {
-        "user_id": state.user?.id,
-        "api_key": apiKey,
-        "connection_id": _connectionId,
+        'user_id': state.user?.id,
+        'api_key': apiKey,
+        'connection_id': _connectionId,
       };
 
   /// Set the current user with an anonymous id, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
   Future<Event> setAnonymousUser() async {
-    this._anonymous = true;
+    _anonymous = true;
     final uuid = Uuid();
     state.user = OwnUser(id: uuid.v4());
     return connect();
@@ -699,7 +699,7 @@ class Client {
   /// It returns a [Future] that resolves when the connection is setup.
   Future<void> setGuestUser(User user) async {
     _anonymous = true;
-    final response = await post("/guest", data: {"user": user.toJson()})
+    final response = await post('/guest', data: {'user': user.toJson()})
         .then((res) => decode<SetGuestUserResponse>(
             res.data, SetGuestUserResponse.fromJson))
         .whenComplete(() => _anonymous = false);
@@ -723,7 +723,7 @@ class Client {
   Future<void> _disconnect() async {
     logger.info('Client disconnecting');
 
-    await this._ws.disconnect();
+    await _ws.disconnect();
   }
 
   /// Requests users with a given query.
@@ -732,13 +732,13 @@ class Client {
     List<SortOption> sort,
     Map<String, dynamic> options,
   ) async {
-    final Map<String, dynamic> defaultOptions = {
-      "presence": this._hasConnectionId,
+    final defaultOptions = {
+      'presence': _hasConnectionId,
     };
 
-    Map<String, dynamic> payload = {
-      "filter_conditions": filter ?? {},
-      "sort": sort,
+    final payload = <String, dynamic>{
+      'filter_conditions': filter ?? {},
+      'sort': sort,
     };
 
     payload.addAll(defaultOptions);
@@ -748,9 +748,9 @@ class Client {
     }
 
     final response = await get(
-      "/users",
+      '/users',
       queryParameters: {
-        "payload": jsonEncode(payload),
+        'payload': jsonEncode(payload),
       },
     );
     return decode<QueryUsersResponse>(
@@ -776,7 +776,7 @@ class Client {
       payload.addAll(paginationParams.toJson());
     }
 
-    final response = await get("/search",
+    final response = await get('/search',
         queryParameters: {'payload': json.encode(payload)});
     return decode<SearchMessagesResponse>(
         response.data, SearchMessagesResponse.fromJson);
@@ -784,34 +784,34 @@ class Client {
 
   /// Add a device for Push Notifications.
   Future<EmptyResponse> addDevice(String id, String pushProvider) async {
-    final response = await post("/devices", data: {
-      "id": id,
-      "push_provider": pushProvider,
+    final response = await post('/devices', data: {
+      'id': id,
+      'push_provider': pushProvider,
     });
     return decode<EmptyResponse>(response.data, EmptyResponse.fromJson);
   }
 
   /// Gets a list of user devices.
   Future<ListDevicesResponse> getDevices() async {
-    final response = await get("/devices");
+    final response = await get('/devices');
     return decode<ListDevicesResponse>(
         response.data, ListDevicesResponse.fromJson);
   }
 
   /// Remove a user's device.
   Future<EmptyResponse> removeDevice(String id) async {
-    final response = await delete("/devices", queryParameters: {
-      "id": id,
+    final response = await delete('/devices', queryParameters: {
+      'id': id,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Get a development token
   String devToken(String userId) {
-    final payload = json.encode({"user_id": userId});
+    final payload = json.encode({'user_id': userId});
     final payloadBytes = utf8.encode(payload);
     final payloadB64 = base64.encode(payloadBytes);
-    return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.$payloadB64.devtoken";
+    return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.$payloadB64.devtoken';
   }
 
   /// Returns a channel client with the given type, id and custom data.
@@ -838,7 +838,7 @@ class Client {
   /// Batch update a list of users
   Future<UpdateUsersResponse> updateUsers(List<User> users) async {
     final response = await post("/users", data: {
-      "users": users.asMap().map((_, u) => MapEntry(u.id, u.toJson())),
+      'users': users.asMap().map((_, u) => MapEntry(u.id, u.toJson())),
     });
     return decode<UpdateUsersResponse>(
       response.data,
@@ -872,7 +872,7 @@ class Client {
         "target_user_id": targetUserID,
       });
     final response = await delete(
-      "/moderation/ban",
+      '/moderation/ban',
       queryParameters: data,
     );
     return decode(response.data, EmptyResponse.fromJson);

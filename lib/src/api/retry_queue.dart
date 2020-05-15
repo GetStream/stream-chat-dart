@@ -78,7 +78,7 @@ class RetryQueue {
           retryPolicy.attempt,
           apiError,
         )) {
-          _sendFailedEvent(message);
+          _messageQueue.toList().forEach(_sendFailedEvent);
           _isRetrying = false;
           return;
         }

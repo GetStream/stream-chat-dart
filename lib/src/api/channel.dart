@@ -132,11 +132,11 @@ class Channel {
 
   /// The main Stream chat client
   Client get client => _client;
-  Client _client;
+  final Client _client;
 
-  String get _channelURL => "/channels/$type/$id";
+  String get _channelURL => '/channels/$type/$id';
 
-  Completer<bool> _initializedCompleter = Completer();
+  final Completer<bool> _initializedCompleter = Completer();
 
   /// True if this is initialized
   /// Call [watch] to initialize the client or instantiate it using [Channel.fromState]
@@ -171,9 +171,9 @@ class Channel {
 
     try {
       final response = await _client.post(
-        "$_channelURL/message",
+        '$_channelURL/message',
         data: {
-          "message": message
+          'message': message
               .copyWith(
                 id: messageId,
               )
@@ -199,7 +199,7 @@ class Channel {
   /// Send a file to this channel
   Future<SendFileResponse> sendFile(MultipartFile file) async {
     final response = await _client.post(
-      "$_channelURL/file",
+      '$_channelURL/file',
       data: FormData.fromMap({'file': file}),
     );
     return _client.decode(response.data, SendFileResponse.fromJson);
@@ -208,7 +208,7 @@ class Channel {
   /// Send an image to this channel
   Future<SendImageResponse> sendImage(MultipartFile file) async {
     final response = await _client.post(
-      "$_channelURL/image",
+      '$_channelURL/image',
       data: FormData.fromMap({'file': file}),
     );
     return _client.decode(response.data, SendImageResponse.fromJson);
@@ -217,14 +217,14 @@ class Channel {
   /// Delete a file from this channel
   Future<EmptyResponse> deleteFile(String url) async {
     final response = await _client
-        .delete("$_channelURL/file", queryParameters: {"url": url});
+        .delete('$_channelURL/file', queryParameters: {'url': url});
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Delete an image from this channel
   Future<EmptyResponse> deleteImage(String url) async {
     final response = await _client
-        .delete("$_channelURL/image", queryParameters: {"url": url});
+        .delete('$_channelURL/image', queryParameters: {'url': url});
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
@@ -232,8 +232,8 @@ class Channel {
   Future<EmptyResponse> sendEvent(Event event) {
     _checkInitialized();
     return _client.post(
-      "$_channelURL/event",
-      data: {"event": event.toJson()},
+      '$_channelURL/event',
+      data: {'event': event.toJson()},
     ).then((res) {
       return _client.decode(res.data, EmptyResponse.fromJson);
     });
@@ -248,7 +248,7 @@ class Channel {
     final messageId = message.id;
     final data = Map<String, dynamic>.from(extraData)
       ..addAll({
-        "type": type,
+        'type': type,
       });
 
     final currentScore = message.ownReactions
@@ -276,8 +276,8 @@ class Channel {
 
     try {
       final res = await _client.post(
-        "/messages/$messageId/reaction",
-        data: {"reaction": data},
+        '/messages/$messageId/reaction',
+        data: {'reaction': data},
       );
       return _client.decode(res.data, SendReactionResponse.fromJson);
     } catch (_) {
@@ -305,7 +305,7 @@ class Channel {
     ));
 
     return client
-        .delete("/messages/${message.id}/reaction/${reaction.type}")
+        .delete('/messages/${message.id}/reaction/${reaction.type}')
         .then((res) => _client.decode(res.data, EmptyResponse.fromJson))
         .catchError((e) {
       _client.handleEvent(Event(
@@ -340,21 +340,21 @@ class Channel {
 
   /// Removes all messages from the channel
   Future<EmptyResponse> truncate() async {
-    final response = await _client.post("$_channelURL/truncate");
+    final response = await _client.post('$_channelURL/truncate');
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Accept invitation to the channel
   Future<AcceptInviteResponse> acceptInvite([Message message]) async {
     final res = await _client.post(_channelURL,
-        data: {"accept_invite": true, "message": message?.toJson()});
+        data: {'accept_invite': true, 'message': message?.toJson()});
     return _client.decode(res.data, AcceptInviteResponse.fromJson);
   }
 
   /// Reject invitation to the channel
   Future<RejectInviteResponse> rejectInvite([Message message]) async {
     final res = await _client.post(_channelURL,
-        data: {"accept_invite": false, "message": message?.toJson()});
+        data: {'accept_invite': false, 'message': message?.toJson()});
     return _client.decode(res.data, RejectInviteResponse.fromJson);
   }
 
@@ -364,8 +364,8 @@ class Channel {
     Message message,
   ) async {
     final res = await _client.post(_channelURL, data: {
-      "add_members": members.map((m) => m.toJson()),
-      "message": message.toJson(),
+      'add_members': members.map((m) => m.toJson()),
+      'message': message.toJson(),
     });
     return _client.decode(res.data, AddMembersResponse.fromJson);
   }
@@ -376,8 +376,8 @@ class Channel {
     Message message,
   ) async {
     final res = await _client.post(_channelURL, data: {
-      "invites": members.map((m) => m.toJson()),
-      "message": message.toJson(),
+      'invites': members.map((m) => m.toJson()),
+      'message': message.toJson(),
     });
     return _client.decode(res.data, InviteMembersResponse.fromJson);
   }
@@ -386,8 +386,8 @@ class Channel {
   Future<RemoveMembersResponse> removeMembers(
       List<Member> members, Message message) async {
     final res = await _client.post(_channelURL, data: {
-      "remove_members": members.map((m) => m.toJson()),
-      "message": message.toJson(),
+      'remove_members': members.map((m) => m.toJson()),
+      'message': message.toJson(),
     });
     return _client.decode(res.data, RemoveMembersResponse.fromJson);
   }
@@ -399,8 +399,8 @@ class Channel {
   ) async {
     _checkInitialized();
 
-    String messageId = message.id;
-    final response = await _client.post("/messages/$messageId/action", data: {
+    final messageId = message.id;
+    final response = await _client.post('/messages/$messageId/action', data: {
       'id': id,
       'type': type,
       'form_data': formData,
@@ -443,16 +443,16 @@ class Channel {
   /// Mark all channel messages as read
   Future<EmptyResponse> markRead() async {
     _checkInitialized();
-    final response = await _client.post("$_channelURL/read", data: {});
+    final response = await _client.post('$_channelURL/read', data: {});
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Loads the initial channel state and watches for changes
   Future<ChannelState> watch([Map<String, dynamic> options = const {}]) async {
     final watchOptions = Map<String, dynamic>.from({
-      "state": true,
-      "watch": true,
-      "presence": false,
+      'state': true,
+      'watch': true,
+      'presence': false,
     })
       ..addAll(options);
 
@@ -484,7 +484,7 @@ class Channel {
 
   /// Stop watching the channel
   Future<EmptyResponse> stopWatching() async {
-    final response = await _client.post("$_channelURL/stop-watching");
+    final response = await _client.post('$_channelURL/stop-watching');
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
@@ -498,7 +498,7 @@ class Channel {
       state?.updateThreadInfo(parentId, cachedReplies);
     }
 
-    final response = await _client.get("/messages/$parentId/replies",
+    final response = await _client.get('/messages/$parentId/replies',
         queryParameters: options.toJson());
 
     final repliesResponse = _client.decode<QueryRepliesResponse>(
@@ -517,7 +517,7 @@ class Channel {
     PaginationParams options,
   ) async {
     final response = await _client.get(
-      "/messages/$messageID/reactions",
+      '/messages/$messageID/reactions',
       queryParameters: options.toJson(),
     );
     return _client.decode<QueryReactionsResponse>(
@@ -528,7 +528,7 @@ class Channel {
   Future<GetMessagesByIdResponse> getMessagesById(
       List<String> messageIDs) async {
     final response = await _client.get(
-      "$_channelURL/messages",
+      '$_channelURL/messages',
       queryParameters: {'ids': messageIDs.join(',')},
     );
     return _client.decode<GetMessagesByIdResponse>(
@@ -538,9 +538,9 @@ class Channel {
   /// Creates a new channel
   Future<ChannelState> create() async {
     return query(options: {
-      "watch": false,
-      "state": false,
-      "presence": false,
+      'watch': false,
+      'state': false,
+      'presence': false,
     });
   }
 
@@ -551,14 +551,14 @@ class Channel {
     PaginationParams membersPagination,
     PaginationParams watchersPagination,
   }) async {
-    var path = "/channels/$type";
+    var path = '/channels/$type';
     if (id != null) {
-      path = "$path/$id";
+      path = '$path/$id';
     }
     path = '$path/query';
 
     final payload = Map<String, dynamic>.from({
-      "state": true,
+      'state': true,
     })
       ..addAll(options);
 
@@ -640,14 +640,14 @@ class Channel {
   Future<EmptyResponse> hide({bool clearHistory = false}) async {
     _checkInitialized();
     final response = await _client
-        .post("$_channelURL/hide", data: {'clear_history': clearHistory});
+        .post('$_channelURL/hide', data: {'clear_history': clearHistory});
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Removes the hidden status for the channel
   Future<EmptyResponse> show() async {
     _checkInitialized();
-    final response = await _client.post("$_channelURL/show");
+    final response = await _client.post('$_channelURL/show');
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
@@ -714,7 +714,7 @@ class Channel {
   void _checkInitialized() {
     if (!_initializedCompleter.isCompleted) {
       throw Exception(
-          "Channel ${this.cid} hasn't been initialized yet. Make sure to call .watch() or to instantiate the client using [Channel.fromState]");
+          "Channel $cid hasn't been initialized yet. Make sure to call .watch() or to instantiate the client using [Channel.fromState]");
     }
   }
 }
@@ -820,14 +820,14 @@ class ChannelClientState {
         .listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
-        _channelState = this._channelState.copyWith(
-              messages: this._channelState.messages.map((message) {
-                if (message.id == event.message.id) {
-                  return _addReactionToMessage(message, event);
-                }
-                return message;
-              }).toList(),
-            );
+        _channelState = _channelState.copyWith(
+          messages: _channelState.messages.map((message) {
+            if (message.id == event.message.id) {
+              return _addReactionToMessage(message, event);
+            }
+            return message;
+          }).toList(),
+        );
       }
 
       if (event.message.parentId != null) {
@@ -850,15 +850,15 @@ class ChannelClientState {
     _channel.on(EventType.messageUpdated).listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
-        _channelState = this._channelState.copyWith(
-              messages: this._channelState.messages.map((message) {
-                if (message.id == event.message.id) {
-                  return event.message;
-                }
+        _channelState = _channelState.copyWith(
+          messages: _channelState.messages.map((message) {
+            if (message.id == event.message.id) {
+              return event.message;
+            }
 
-                return message;
-              }).toList(),
-            );
+            return message;
+          }).toList(),
+        );
       }
 
       if (event.message.parentId != null) {
@@ -882,15 +882,15 @@ class ChannelClientState {
     _channel.on(EventType.messageDeleted).listen((event) {
       if (event.message.parentId == null ||
           event.message.showInChannel == true) {
-        _channelState = this._channelState.copyWith(
-              messages: this._channelState.messages.map((message) {
-                if (message.id == event.message.id) {
-                  return event.message;
-                }
+        _channelState = _channelState.copyWith(
+          messages: _channelState.messages.map((message) {
+            if (message.id == event.message.id) {
+              return event.message;
+            }
 
-                return message;
-              }).toList(),
-            );
+            return message;
+          }).toList(),
+        );
       }
 
       if (event.message.parentId != null) {
@@ -970,7 +970,7 @@ class ChannelClientState {
         }),
     );
 
-    if (event.user.id == this._channel.client.state.user.id) {
+    if (event.user.id == _channel.client.state.user.id) {
       return newMessage.copyWith(
         ownReactions: message.ownReactions..add(event.reaction),
       );
@@ -992,7 +992,7 @@ class ChannelClientState {
 
     newMessage.reactionCounts.removeWhere((_, v) => v <= 0);
 
-    if (event.user.id == this._channel.client.state.user.id) {
+    if (event.user.id == _channel.client.state.user.id) {
       return newMessage.copyWith(
         ownReactions: message.ownReactions
           ..removeWhere((r) => r.type == event.reaction.type),
@@ -1088,7 +1088,7 @@ class ChannelClientState {
 
   /// Update channelState with updated information
   void updateChannelState(ChannelState updatedState) {
-    List<Message> newMessages = [
+    final newMessages = <Message>[
       ...updatedState?.messages ?? [],
       ..._channelState?.messages
               ?.where((m) =>
@@ -1101,7 +1101,7 @@ class ChannelClientState {
 
     newMessages.sort(_sortByCreatedAt);
 
-    List<User> newWatchers = [
+    final newWatchers = <User>[
       ...updatedState?.watchers ?? [],
       ..._channelState?.watchers
               ?.where((w) =>
@@ -1112,7 +1112,7 @@ class ChannelClientState {
           [],
     ];
 
-    List<Member> newMembers = [
+    final newMembers = <Member>[
       ...updatedState?.members ?? [],
       ..._channelState?.members
               ?.where((m) =>
@@ -1123,7 +1123,7 @@ class ChannelClientState {
           [],
     ];
 
-    List<Read> newReads = [
+    final newReads = <Read>[
       ...updatedState?.read ?? [],
       ..._channelState?.read
               ?.where((r) =>
@@ -1217,14 +1217,14 @@ class ChannelClientState {
       return;
     }
 
-    this._channel.on(EventType.typingStart).listen((event) {
+    _channel.on(EventType.typingStart).listen((event) {
       if (event.user.id != _channel.client.state.user.id) {
         _typings[event.user] = DateTime.now();
         _typingEventsController.add(_typings.keys.toList());
       }
     });
 
-    this._channel.on(EventType.typingStop).listen((event) {
+    _channel.on(EventType.typingStop).listen((event) {
       if (event.user.id != _channel.client.state.user.id) {
         _typings.remove(event.user);
         _typingEventsController.add(_typings.keys.toList());
@@ -1236,13 +1236,13 @@ class ChannelClientState {
     final now = DateTime.now();
     _typings.forEach((user, lastTypingEvent) {
       if (now.difference(lastTypingEvent).inSeconds > 7) {
-        this._channel.client.handleEvent(
-              Event(
-                type: EventType.typingStop,
-                user: user,
-                cid: _channel.cid,
-              ),
-            );
+        _channel.client.handleEvent(
+          Event(
+            type: EventType.typingStop,
+            user: user,
+            cid: _channel.cid,
+          ),
+        );
       }
     });
     _typingEventsController.add(_typings.keys.toList());
