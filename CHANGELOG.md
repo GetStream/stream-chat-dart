@@ -1,3 +1,7 @@
+## 0.2.0-alpha+14
+
+- Avoid sending local event for optimistic updates
+
 ## 0.2.0-alpha+13
 
 - Fix offline on app first start up
