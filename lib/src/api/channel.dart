@@ -390,6 +390,14 @@ class Channel {
             .expand((messages) => messages)
             .firstWhere((m) => m.id == messageId, orElse: () => null);
         if (oldMessage?.parentId != null) {
+          final parentMessage = state.messages.firstWhere(
+            (element) => element.id == oldMessage.parentId,
+            orElse: () => null,
+          );
+          if (parentMessage != null) {
+            state.addMessage(parentMessage.copyWith(
+                replyCount: parentMessage.replyCount - 1));
+          }
           state.updateThreadInfo(oldMessage.parentId,
               state.threads[oldMessage.parentId]..remove(oldMessage));
         }
