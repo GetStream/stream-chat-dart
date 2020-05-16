@@ -101,12 +101,8 @@ class RetryQueue {
         : (message.status == MessageSendingStatus.UPDATING
             ? MessageSendingStatus.FAILED_UPDATE
             : MessageSendingStatus.FAILED_DELETE);
-    channel.client.handleEvent(Event(
-      type: EventType.messageUpdated,
-      message: message.copyWith(
-        status: newStatus,
-      ),
-      cid: channel.cid,
+    channel.state.addMessage(message.copyWith(
+      status: newStatus,
     ));
   }
 

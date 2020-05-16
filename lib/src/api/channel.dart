@@ -155,19 +155,13 @@ class Channel {
     if (message.parentId != null && message.id == null) {
       final parentMessage =
           state.messages.firstWhere((m) => m.id == message.parentId);
-      _client.handleEvent(Event(
-        type: EventType.messageUpdated,
-        message: parentMessage.copyWith(
-          replyCount: parentMessage.replyCount + 1,
-        ),
-        cid: cid,
+
+      state.addMessage(parentMessage.copyWith(
+        replyCount: parentMessage.replyCount + 1,
       ));
     }
-    _client.handleEvent(Event(
-      type: EventType.messageNew,
-      message: newMessage,
-      cid: cid,
-    ));
+
+    state.addMessage(newMessage);
 
     try {
       final response = await _client.post(
@@ -183,11 +177,7 @@ class Channel {
 
       final res = _client.decode(response.data, SendMessageResponse.fromJson);
 
-      _client.handleEvent(Event(
-        type: EventType.messageUpdated,
-        message: res.message,
-        cid: cid,
-      ));
+      state.addMessage(res.message);
 
       return res;
     } catch (error) {
@@ -266,13 +256,7 @@ class Channel {
       score: currentScore + 1,
     );
 
-    _client.handleEvent(Event(
-      type: EventType.reactionNew,
-      cid: cid,
-      user: _client.state.user,
-      message: message,
-      reaction: newReaction,
-    ));
+    state._addMessageReaction(message, newReaction);
 
     try {
       final res = await _client.post(
@@ -281,13 +265,7 @@ class Channel {
       );
       return _client.decode(res.data, SendReactionResponse.fromJson);
     } catch (_) {
-      _client.handleEvent(Event(
-        type: EventType.reactionDeleted,
-        cid: cid,
-        message: message,
-        user: _client.state.user,
-        reaction: newReaction,
-      ));
+      state._removeMessageReaction(message, newReaction);
       rethrow;
     }
   }
@@ -296,26 +274,13 @@ class Channel {
   Future<EmptyResponse> deleteReaction(Message message, Reaction reaction) {
     _checkInitialized();
 
-    _client.handleEvent(Event(
-      type: EventType.reactionDeleted,
-      cid: cid,
-      message: message,
-      user: _client.state.user,
-      reaction: reaction,
-    ));
+    state._removeMessageReaction(message, reaction);
 
     return client
         .delete('/messages/${message.id}/reaction/${reaction.type}')
         .then((res) => _client.decode(res.data, EmptyResponse.fromJson))
         .catchError((e) {
-      _client.handleEvent(Event(
-        type: EventType.reactionNew,
-        cid: cid,
-        message: message,
-        user: _client.state.user,
-        reaction: reaction,
-      ));
-
+      state._addMessageReaction(message, reaction);
       throw e;
     });
   }
@@ -410,11 +375,7 @@ class Channel {
     final res = _client.decode(response.data, SendActionResponse.fromJson);
 
     if (res.message != null) {
-      _client.handleEvent(Event(
-        message: res.message,
-        type: EventType.messageUpdated,
-        cid: cid,
-      ));
+      state.addMessage(res.message);
     } else {
       final oldIndex = state.messages?.indexWhere((m) => m.id == messageId);
 
@@ -785,157 +746,120 @@ class ChannelClientState {
 
   void _listenReactionDeleted() {
     _channel.on(EventType.reactionDeleted).listen((event) {
-      if (event.message.parentId == null ||
-          event.message.showInChannel == true) {
-        _channelState = _channelState.copyWith(
-          messages: _channelState?.messages?.map((message) {
-            if (message.id == event.message.id) {
-              return _removeReactionFromMessage(message, event);
-            }
-            return message;
-          })?.toList(),
-        );
-      }
-
-      if (event.message.parentId != null) {
-        final newThreads = threads;
-        if (newThreads.containsKey(event.message.parentId)) {
-          newThreads[event.message.parentId] =
-              newThreads[event.message.parentId].map((message) {
-            if (message.id == event.message.id) {
-              return _removeReactionFromMessage(message, event);
-            }
-            return message;
-          }).toList();
-          _threads = newThreads;
-        }
-      }
+      final reaction = event.reaction;
+      final message = event.message;
+      _removeMessageReaction(message, reaction);
     });
+  }
+
+  void _removeMessageReaction(Message message, Reaction reaction) {
+    if (message.parentId == null || message.showInChannel == true) {
+      _channelState = _channelState.copyWith(
+        messages: _channelState?.messages?.map((m) {
+          if (m.id == message.id) {
+            return _removeReactionFromMessage(message, reaction);
+          }
+          return m;
+        })?.toList(),
+      );
+    }
+
+    if (message.parentId != null) {
+      final newThreads = threads;
+      if (newThreads.containsKey(message.parentId)) {
+        newThreads[message.parentId] =
+            newThreads[message.parentId].map((message) {
+          if (message.id == message.id) {
+            return _removeReactionFromMessage(message, reaction);
+          }
+          return message;
+        }).toList();
+        _threads = newThreads;
+      }
+    }
   }
 
   void _listenReactionNew() {
     _channel
         .on(EventType.reactionNew)
-        .where((e) => _channel._client.state.user.id != e.user.id || e.isLocal)
+        .where((e) => _channel._client.state.user.id != e.user.id)
         .listen((event) {
-      if (event.message.parentId == null ||
-          event.message.showInChannel == true) {
-        _channelState = _channelState.copyWith(
-          messages: _channelState.messages.map((message) {
-            if (message.id == event.message.id) {
-              return _addReactionToMessage(message, event);
-            }
-            return message;
-          }).toList(),
-        );
-      }
+      final message = event.message;
+      final reaction = event.reaction;
 
-      if (event.message.parentId != null) {
-        final newThreads = threads;
-        if (newThreads.containsKey(event.message.parentId)) {
-          newThreads[event.message.parentId] =
-              newThreads[event.message.parentId].map((message) {
-            if (message.id == event.message.id) {
-              return _addReactionToMessage(message, event);
-            }
-            return message;
-          }).toList();
-          _threads = newThreads;
-        }
-      }
+      _addMessageReaction(message, reaction);
     });
+  }
+
+  void _addMessageReaction(Message message, Reaction reaction) {
+    if (message.parentId == null || message.showInChannel == true) {
+      _channelState = _channelState.copyWith(
+        messages: _channelState.messages.map((m) {
+          if (message.id == m.id) {
+            return _addReactionToMessage(message, reaction);
+          }
+          return m;
+        }).toList(),
+      );
+    }
+
+    if (message.parentId != null) {
+      final newThreads = threads;
+      if (newThreads.containsKey(message.parentId)) {
+        newThreads[message.parentId] = newThreads[message.parentId].map((m) {
+          if (message.id == m.id) {
+            return _addReactionToMessage(message, reaction);
+          }
+          return m;
+        }).toList();
+        _threads = newThreads;
+      }
+    }
   }
 
   void _listenMessageUpdated() {
     _channel.on(EventType.messageUpdated).listen((event) {
-      if (event.message.parentId == null ||
-          event.message.showInChannel == true) {
-        _channelState = _channelState.copyWith(
-          messages: _channelState.messages.map((message) {
-            if (message.id == event.message.id) {
-              return event.message;
-            }
-
-            return message;
-          }).toList(),
-        );
-      }
-
-      if (event.message.parentId != null) {
-        final newThreads = Map<String, List<Message>>.from(threads);
-        if (newThreads.containsKey(event.message.parentId)) {
-          newThreads[event.message.parentId] =
-              newThreads[event.message.parentId].map((message) {
-            if (message.id == event.message.id) {
-              return event.message;
-            }
-
-            return message;
-          }).toList();
-          _threads = newThreads;
-        }
-      }
+      final message = event.message;
+      addMessage(message);
     });
   }
 
   void _listenMessageDeleted() {
     _channel.on(EventType.messageDeleted).listen((event) {
-      if (event.message.parentId == null ||
-          event.message.showInChannel == true) {
-        _channelState = _channelState.copyWith(
-          messages: _channelState.messages.map((message) {
-            if (message.id == event.message.id) {
-              return event.message;
-            }
-
-            return message;
-          }).toList(),
-        );
-      }
-
-      if (event.message.parentId != null) {
-        final newThreads = Map<String, List<Message>>.from(threads);
-        if (newThreads.containsKey(event.message.parentId)) {
-          newThreads[event.message.parentId] =
-              newThreads[event.message.parentId].map((message) {
-            if (message.id == event.message.id) {
-              return event.message;
-            }
-
-            return message;
-          }).toList();
-          _threads = newThreads;
-        }
-      }
+      final message = event.message;
+      addMessage(message);
     });
   }
 
   void _listenMessageNew() {
     _channel.on(EventType.messageNew).listen((event) {
-      if (event.message.parentId == null ||
-          event.message.showInChannel == true) {
-        final newMessages = List<Message>.from(_channelState.messages);
-
-        final oldIndex =
-            newMessages.indexWhere((m) => m.id == event.message.id);
-        if (oldIndex != -1) {
-          newMessages[oldIndex] = event.message;
-        } else {
-          newMessages.add(event.message);
-        }
-
-        _channelState = _channelState.copyWith(
-          messages: newMessages,
-          channel: _channelState.channel.copyWith(
-            lastMessageAt: event.message.createdAt,
-          ),
-        );
-      }
-
-      if (event.message.parentId != null) {
-        updateThreadInfo(event.message.parentId, [event.message]);
-      }
+      final message = event.message;
+      addMessage(message);
     });
+  }
+
+  void addMessage(Message message) {
+    if (message.parentId == null || message.showInChannel == true) {
+      final newMessages = List<Message>.from(_channelState.messages);
+
+      final oldIndex = newMessages.indexWhere((m) => m.id == message.id);
+      if (oldIndex != -1) {
+        newMessages[oldIndex] = message;
+      } else {
+        newMessages.add(message);
+      }
+
+      _channelState = _channelState.copyWith(
+        messages: newMessages,
+        channel: _channelState.channel.copyWith(
+          lastMessageAt: message.createdAt,
+        ),
+      );
+    }
+
+    if (message.parentId != null) {
+      updateThreadInfo(message.parentId, [message]);
+    }
   }
 
   void _listenReadEvents() {
@@ -958,44 +882,43 @@ class ChannelClientState {
     });
   }
 
-  Message _addReactionToMessage(Message message, Event event) {
+  Message _addReactionToMessage(Message message, Reaction reaction) {
     final newMessage = message.copyWith(
-      latestReactions: message.latestReactions..add(event.reaction),
+      latestReactions: message.latestReactions..add(reaction),
       reactionCounts: (message.reactionCounts ?? {})
         ..addAll({
-          event.reaction.type: (message.reactionCounts == null
+          reaction.type: (message.reactionCounts == null
                   ? 0
-                  : message.reactionCounts[event.reaction.type] ?? 0) +
+                  : message.reactionCounts[reaction.type] ?? 0) +
               1,
         }),
     );
 
-    if (event.user.id == _channel.client.state.user.id) {
+    if (reaction.user.id == _channel.client.state.user.id) {
       return newMessage.copyWith(
-        ownReactions: message.ownReactions..add(event.reaction),
+        ownReactions: message.ownReactions..add(reaction),
       );
     }
 
     return newMessage;
   }
 
-  Message _removeReactionFromMessage(Message message, Event event) {
+  Message _removeReactionFromMessage(Message message, Reaction reaction) {
     final newMessage = message.copyWith(
       latestReactions: message.latestReactions
-        ..removeWhere((r) => r.type == event.reaction.type),
+        ..removeWhere((r) => r.type == reaction.type),
       reactionCounts: message.reactionCounts
         ..addAll({
-          event.reaction.type:
-              (message.reactionCounts[event.reaction.type] ?? 0) - 1,
+          reaction.type: (message.reactionCounts[reaction.type] ?? 0) - 1,
         }),
     );
 
     newMessage.reactionCounts.removeWhere((_, v) => v <= 0);
 
-    if (event.user.id == _channel.client.state.user.id) {
+    if (reaction.user.id == _channel.client.state.user.id) {
       return newMessage.copyWith(
         ownReactions: message.ownReactions
-          ..removeWhere((r) => r.type == event.reaction.type),
+          ..removeWhere((r) => r.type == reaction.type),
       );
     }
 

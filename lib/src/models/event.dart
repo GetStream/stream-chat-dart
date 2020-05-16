@@ -50,10 +50,6 @@ class Event {
   /// Online status
   final bool online;
 
-  /// True if the event is created by the library.
-  /// Used only for internal state management
-  bool isLocal;
-
   /// Constructor used for json serialization
   Event({
     this.type,
@@ -68,11 +64,10 @@ class Event {
     this.reaction,
     this.online,
     this.channel,
-  }) : this.isLocal = true;
+  });
 
   /// Create a new instance from a json
-  factory Event.fromJson(Map<String, dynamic> json) =>
-      _$EventFromJson(json)..isLocal = false;
+  factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$EventToJson(this);

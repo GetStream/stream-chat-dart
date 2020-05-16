@@ -353,11 +353,9 @@ class Client {
       _connectionId = event.connectionId;
     }
 
-    if (!event.isLocal) {
-      await _offlineStorage?.updateConnectionInfo(event);
-      if (_synced) {
-        await _offlineStorage?.updateLastSyncAt(event.createdAt);
-      }
+    await _offlineStorage?.updateConnectionInfo(event);
+    if (_synced) {
+      await _offlineStorage?.updateLastSyncAt(event.createdAt);
     }
 
     if (event.me != null) {
@@ -942,29 +940,22 @@ class Client {
       updatedAt: message.updatedAt ?? DateTime.now(),
     );
 
-    handleEvent(Event(
-      type: EventType.messageUpdated,
-      message: message,
-      cid: cid,
-    ));
+    final channel = state.channels[cid];
+    channel.state.addMessage(message);
 
-    return post("/messages/${message.id}", data: {'message': message})
+    return post('/messages/${message.id}', data: {'message': message})
         .then((res) {
       final updateMessageResponse = decode(
         res?.data,
         UpdateMessageResponse.fromJson,
       );
 
-      handleEvent(Event(
-        type: EventType.messageUpdated,
-        message: updateMessageResponse?.message,
-        cid: cid,
-      ));
+      channel.state.addMessage(updateMessageResponse?.message);
 
       return updateMessageResponse;
     }).catchError((error) {
       if (state?.channels != null) {
-        state.channels[cid].state.retryQueue.add([message]);
+        channel.state.retryQueue.add([message]);
       }
       throw error;
     });
@@ -973,13 +964,9 @@ class Client {
   /// Deletes the given message
   Future<EmptyResponse> deleteMessage(Message message, [String cid]) async {
     if (message.status == MessageSendingStatus.FAILED) {
-      handleEvent(Event(
-        message: message.copyWith(
-          type: 'deleted',
-          status: MessageSendingStatus.SENT,
-        ),
-        type: EventType.messageDeleted,
-        cid: cid,
+      state.channels[cid].state.addMessage(message.copyWith(
+        type: 'deleted',
+        status: MessageSendingStatus.SENT,
       ));
       return EmptyResponse();
     }
@@ -990,18 +977,14 @@ class Client {
         status: MessageSendingStatus.DELETING,
         deletedAt: message.deletedAt ?? DateTime.now(),
       );
-      handleEvent(Event(
-        message: message,
-        type: EventType.messageDeleted,
-        cid: cid,
-      ));
 
-      final response = await delete("/messages/${message.id}");
-      handleEvent(Event(
-        message: message.copyWith(status: MessageSendingStatus.SENT),
-        type: EventType.messageDeleted,
-        cid: cid,
-      ));
+      state.channels[cid].state.addMessage(message);
+
+      final response = await delete('/messages/${message.id}');
+
+      state.channels[cid].state
+          .addMessage(message.copyWith(status: MessageSendingStatus.SENT));
+
       return decode(response.data, EmptyResponse.fromJson);
     } catch (error) {
       state.channels[cid].state.retryQueue.add([message]);
