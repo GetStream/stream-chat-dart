@@ -166,7 +166,7 @@ class OfflineStorage extends _$OfflineStorage {
   Future<Event> getConnectionInfo() async {
     return select(connectionEvent).map((row) {
       return Event(
-        me: OwnUser.fromJson(row.ownUser),
+        me: row.ownUser != null ? OwnUser.fromJson(row.ownUser) : null,
         totalUnreadCount: row.totalUnreadCount,
         unreadChannels: row.unreadChannels,
       );
@@ -277,28 +277,26 @@ class OfflineStorage extends _$OfflineStorage {
     List<String> cids,
     bool clearQueryCache,
   ) async {
-    await transaction(() async {
-      final hash = _computeHash(filter);
-      if (clearQueryCache) {
-        await (delete(channelQueries)
-              ..where(
-                (_ChannelQueries query) => query.queryHash.equals(hash),
-              ))
-            .go();
-      }
+    final hash = _computeHash(filter);
+    if (clearQueryCache) {
+      await (delete(channelQueries)
+            ..where(
+              (_ChannelQueries query) => query.queryHash.equals(hash),
+            ))
+          .go();
+    }
 
-      await batch((batch) {
-        batch.insertAll(
-          channelQueries,
-          cids.map((cid) {
-            return ChannelQuery(
-              queryHash: hash,
-              channelCid: cid,
-            );
-          }).toList(),
-          mode: InsertMode.insertOrReplace,
-        );
-      });
+    await batch((batch) {
+      batch.insertAll(
+        channelQueries,
+        cids.map((cid) {
+          return ChannelQuery(
+            queryHash: hash,
+            channelCid: cid,
+          );
+        }).toList(),
+        mode: InsertMode.insertOrReplace,
+      );
     });
   }
 
@@ -336,22 +334,21 @@ class OfflineStorage extends _$OfflineStorage {
 
   /// Remove a channel by cid
   Future<void> deleteChannels(List<String> cids) async {
-    await transaction(() async {
-      await deleteChannelsMessages(cids);
-      return batch((batch) {
-        batch.deleteWhere<_Members, _Member>(
-          members,
-          (m) => m.channelCid.isIn(cids),
-        );
-        batch.deleteWhere<_Reads, _Read>(
-          reads,
-          (r) => r.channelCid.isIn(cids),
-        );
-        batch.deleteWhere<_Channels, _Channel>(
-          channels,
-          (c) => c.cid.isIn(cids),
-        );
-      });
+    print('REMOVING CHANNEL FROM OFFLINE');
+    await deleteChannelsMessages(cids);
+    return batch((batch) {
+      batch.deleteWhere<_Members, _Member>(
+        members,
+        (m) => m.channelCid.isIn(cids),
+      );
+      batch.deleteWhere<_Reads, _Read>(
+        reads,
+        (r) => r.channelCid.isIn(cids),
+      );
+      batch.deleteWhere<_Channels, _Channel>(
+        channels,
+        (c) => c.cid.isIn(cids),
+      );
     });
   }
 

@@ -1032,17 +1032,28 @@ class ClientState {
       _totalUnreadCountController.add(totalUnreadCount);
     });
 
-    _client.on(EventType.channelDeleted).listen((event) {
-      final channel = event.channel;
-      _client._offlineStorage?.deleteChannels([channel.cid]);
-      channels = channels..removeWhere((cid, ch) => cid == channel.cid);
-    });
+    _listenChannelDeleted();
 
+    _listenChannelHidden();
+  }
+
+  void _listenChannelHidden() {
     _client.on(EventType.channelHidden).listen((event) {
       final channel = event.channel;
       _client._offlineStorage?.deleteChannels([channel.cid]);
       channels = channels..removeWhere((cid, ch) => cid == channel.cid);
     });
+  }
+
+  void _listenChannelDeleted() {
+    final handler = (Event event) async {
+      print('CHANNEL DELETED EVENT ${event.channel.cid}');
+      final eventChannel = event.channel;
+      await _client._offlineStorage?.deleteChannels([eventChannel.cid]);
+      channels = channels..remove(eventChannel.cid);
+    };
+    _client.on(EventType.channelDeleted).listen(handler);
+    _client.on(EventType.notificationChannelDeleted).listen(handler);
   }
 
   final Client _client;
@@ -1080,10 +1091,11 @@ class ClientState {
     _channelsController.add(v);
   }
 
-  BehaviorSubject<Map<String, Channel>> _channelsController = BehaviorSubject();
-  BehaviorSubject<OwnUser> _userController = BehaviorSubject();
-  BehaviorSubject<int> _unreadChannelsController = BehaviorSubject();
-  BehaviorSubject<int> _totalUnreadCountController = BehaviorSubject();
+  final BehaviorSubject<Map<String, Channel>> _channelsController =
+      BehaviorSubject();
+  final BehaviorSubject<OwnUser> _userController = BehaviorSubject();
+  final BehaviorSubject<int> _unreadChannelsController = BehaviorSubject();
+  final BehaviorSubject<int> _totalUnreadCountController = BehaviorSubject();
 
   /// Call this method to dispose this object
   void dispose() {

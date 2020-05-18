@@ -1,6 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/models/channel_model.dart';
 import 'package:stream_chat/src/models/message.dart';
+import 'package:stream_chat/src/models/serialization.dart';
+import 'package:stream_chat/stream_chat.dart';
 
 import '../event_type.dart';
 import 'member.dart';
@@ -86,9 +88,38 @@ class EventChannel extends ChannelModel {
   ];
 
   /// Constructor used for json serialization
-  EventChannel({this.members});
+  EventChannel({
+    this.members,
+    String id,
+    String type,
+    String cid,
+    ChannelConfig config,
+    User createdBy,
+    bool frozen,
+    DateTime lastMessageAt,
+    DateTime createdAt,
+    DateTime updatedAt,
+    DateTime deletedAt,
+    int memberCount,
+    Map<String, dynamic> extraData,
+  }) : super(
+          id: id,
+          type: type,
+          cid: cid,
+          config: config,
+          createdBy: createdBy,
+          frozen: frozen,
+          lastMessageAt: lastMessageAt,
+          createdAt: createdAt,
+          updatedAt: updatedAt,
+          deletedAt: deletedAt,
+          memberCount: memberCount,
+          extraData: extraData,
+        );
 
   /// Create a new instance from a json
-  static EventChannel fromJson(Map<String, dynamic> json) =>
-      _$EventChannelFromJson(json);
+  factory EventChannel.fromJson(Map<String, dynamic> json) {
+    return _$EventChannelFromJson(
+        Serialization.moveKeysToRoot(json, topLevelFields));
+  }
 }

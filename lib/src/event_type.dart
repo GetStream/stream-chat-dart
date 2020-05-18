@@ -12,6 +12,12 @@ class EventType {
   /// Event sent when receiving a new message
   static const String messageNew = "message.new";
 
+  /// Event sent when receiving a new message
+  static const String notificationMessageNew = "notification.message_new";
+
+  /// Event sent when the unread count changes
+  static const String notificationMarkRead = "notification.mark_read";
+
   /// Event sent when deleting a new message
   static const String messageDeleted = "message.deleted";
 
@@ -30,8 +36,20 @@ class EventType {
   /// Event sent when a channel is deleted
   static const String channelDeleted = "channel.deleted";
 
+  /// Event sent when a channel is deleted
+  static const String notificationChannelDeleted =
+      "notification.channel_deleted";
+
   /// Event sent when a channel is truncated
   static const String channelTruncated = "channel.truncated";
+
+  /// Event sent when a channel is truncated
+  static const String notificationChannelTruncated =
+      "notification.channel_truncated";
+
+  /// Event sent when the user is added to a channel
+  static const String notificationAddedToChannel =
+      "notification.added_to_channel";
 
   /// Event sent when a channel is updated
   static const String channelUpdated = "channel.updated";

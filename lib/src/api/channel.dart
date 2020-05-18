@@ -445,6 +445,7 @@ class Channel {
 
   void _initState(ChannelState channelState) {
     state = ChannelClientState(this, channelState);
+    client.state.channels[cid] = this;
     if (!_initializedCompleter.isCompleted) {
       _initializedCompleter.complete(true);
     }
@@ -453,7 +454,10 @@ class Channel {
 
   /// Stop watching the channel
   Future<EmptyResponse> stopWatching() async {
-    final response = await _client.post('$_channelURL/stop-watching');
+    final response = await _client.post(
+      '$_channelURL/stop-watching',
+      data: {},
+    );
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
@@ -713,12 +717,7 @@ class ChannelClientState {
 
     _listenReadEvents();
 
-    _channel.on(EventType.channelTruncated).listen((event) async {
-      final channel = event.channel;
-      await _channel._client.offlineStorage
-          ?.deleteChannelsMessages([channel.cid]);
-      truncate();
-    });
+    _listenChannelTruncated();
 
     _channel.on(EventType.channelUpdated).listen((Event e) {
       final channel = e.channel;
@@ -734,6 +733,17 @@ class ChannelClientState {
       _threads = threads;
       retryFailedMessages();
     });
+  }
+
+  void _listenChannelTruncated() {
+    final handler = (event) async {
+      final channel = event.channel;
+      await _channel._client.offlineStorage
+          ?.deleteChannelsMessages([channel.cid]);
+      truncate();
+    };
+    _channel.on(EventType.channelTruncated).listen(handler);
+    _channel.on(EventType.notificationChannelTruncated).listen(handler);
   }
 
   RetryQueue retryQueue;
@@ -838,10 +848,12 @@ class ChannelClientState {
   }
 
   void _listenMessageNew() {
-    _channel.on(EventType.messageNew).listen((event) {
+    final handler = (event) {
       final message = event.message;
       addMessage(message);
-    });
+    };
+    _channel.on(EventType.messageNew).listen(handler);
+    _channel.on(EventType.notificationMessageNew).listen(handler);
   }
 
   void addMessage(Message message) {
@@ -873,7 +885,7 @@ class ChannelClientState {
       return;
     }
 
-    _channel.on(EventType.messageRead).listen((event) {
+    final handler = (event) {
       final read = _channelState.read;
       final userReadIndex = read?.indexWhere((r) => r.user.id == event.user.id);
 
@@ -885,7 +897,9 @@ class ChannelClientState {
         ));
         _channelState = _channelState.copyWith(read: read);
       }
-    });
+    };
+    _channel.on(EventType.messageRead).listen(handler);
+    _channel.on(EventType.notificationMarkRead).listen(handler);
   }
 
   Message _addReactionToMessage(Message message, Reaction reaction) {
