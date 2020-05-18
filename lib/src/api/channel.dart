@@ -793,9 +793,7 @@ class ChannelClientState {
         .where((e) => _channel._client.state.user.id != e.user.id)
         .listen((event) {
       final message = event.message;
-      final reaction = event.reaction;
-
-      _addMessageReaction(message, reaction);
+      addMessage(message);
     });
   }
 

@@ -711,9 +711,7 @@ class Client {
   Future<void> disconnect({bool flushOfflineStorage = false}) async {
     logger.info('Disconnecting');
 
-    if (flushOfflineStorage) {
-      await _offlineStorage?.disconnect(flush: true);
-    }
+    await _offlineStorage?.disconnect(flush: flushOfflineStorage);
 
     await _disconnect();
   }

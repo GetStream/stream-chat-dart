@@ -277,26 +277,28 @@ class OfflineStorage extends _$OfflineStorage {
     List<String> cids,
     bool clearQueryCache,
   ) async {
-    final hash = _computeHash(filter);
-    if (clearQueryCache) {
-      await (delete(channelQueries)
-            ..where(
-              (_ChannelQueries query) => query.queryHash.equals(hash),
-            ))
-          .go();
-    }
+    await transaction(() async {
+      final hash = _computeHash(filter);
+      if (clearQueryCache) {
+        await (delete(channelQueries)
+              ..where(
+                (_ChannelQueries query) => query.queryHash.equals(hash),
+              ))
+            .go();
+      }
 
-    await batch((batch) {
-      batch.insertAll(
-        channelQueries,
-        cids.map((cid) {
-          return ChannelQuery(
-            queryHash: hash,
-            channelCid: cid,
-          );
-        }).toList(),
-        mode: InsertMode.insertOrReplace,
-      );
+      await batch((batch) {
+        batch.insertAll(
+          channelQueries,
+          cids.map((cid) {
+            return ChannelQuery(
+              queryHash: hash,
+              channelCid: cid,
+            );
+          }).toList(),
+          mode: InsertMode.insertOrReplace,
+        );
+      });
     });
   }
 
@@ -316,7 +318,7 @@ class OfflineStorage extends _$OfflineStorage {
 
   /// Remove a message by message id
   Future<void> deleteChannelsMessages(List<String> cids) async {
-    final List<String> messageIds = await (select(messages)
+    final messageIds = await (select(messages)
           ..where((m) => m.channelCid.isIn(cids)))
         .map((m) => m.id)
         .get();
@@ -334,20 +336,22 @@ class OfflineStorage extends _$OfflineStorage {
 
   /// Remove a channel by cid
   Future<void> deleteChannels(List<String> cids) async {
-    await deleteChannelsMessages(cids);
-    return batch((batch) {
-      batch.deleteWhere<_Members, _Member>(
-        members,
-        (m) => m.channelCid.isIn(cids),
-      );
-      batch.deleteWhere<_Reads, _Read>(
-        reads,
-        (r) => r.channelCid.isIn(cids),
-      );
-      batch.deleteWhere<_Channels, _Channel>(
-        channels,
-        (c) => c.cid.isIn(cids),
-      );
+    await transaction(() async {
+      await deleteChannelsMessages(cids);
+      return batch((batch) {
+        batch.deleteWhere<_Members, _Member>(
+          members,
+          (m) => m.channelCid.isIn(cids),
+        );
+        batch.deleteWhere<_Reads, _Read>(
+          reads,
+          (r) => r.channelCid.isIn(cids),
+        );
+        batch.deleteWhere<_Channels, _Channel>(
+          channels,
+          (c) => c.cid.isIn(cids),
+        );
+      });
     });
   }
 
@@ -429,7 +433,7 @@ class OfflineStorage extends _$OfflineStorage {
         .map(_messageFromJoinRow)
         .get());
 
-    final threads = Map<String, List<Message>>();
+    final threads = <String, List<Message>>{};
     rowMessages.forEach((message) {
       if (threads.containsKey(message.parentId)) {
         threads[message.parentId].add(message);
@@ -445,9 +449,9 @@ class OfflineStorage extends _$OfflineStorage {
     _Channel channelRow,
     _User userRow,
   ) async {
-    List<Message> rowMessages = await _getChannelMessages(channelRow);
-    List<Read> rowReads = await _getChannelReads(channelRow);
-    List<Member> rowMembers = await _getChannelMembers(channelRow);
+    final rowMessages = await _getChannelMessages(channelRow);
+    final rowReads = await _getChannelReads(channelRow);
+    final rowMembers = await _getChannelMembers(channelRow);
 
     return ChannelState(
       members: rowMembers,
