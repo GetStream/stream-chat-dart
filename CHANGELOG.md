@@ -1,3 +1,7 @@
+## 0.2.0-alpha+15
+
+- Fix receiving reactions
+
 ## 0.2.0-alpha+14
 
 - Avoid sending local event for optimistic updates
