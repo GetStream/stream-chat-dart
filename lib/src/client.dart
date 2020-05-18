@@ -1047,7 +1047,6 @@ class ClientState {
 
   void _listenChannelDeleted() {
     final handler = (Event event) async {
-      print('CHANNEL DELETED EVENT ${event.channel.cid}');
       final eventChannel = event.channel;
       await _client._offlineStorage?.deleteChannels([eventChannel.cid]);
       channels = channels..remove(eventChannel.cid);

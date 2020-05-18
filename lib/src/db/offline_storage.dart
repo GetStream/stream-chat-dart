@@ -334,7 +334,6 @@ class OfflineStorage extends _$OfflineStorage {
 
   /// Remove a channel by cid
   Future<void> deleteChannels(List<String> cids) async {
-    print('REMOVING CHANNEL FROM OFFLINE');
     await deleteChannelsMessages(cids);
     return batch((batch) {
       batch.deleteWhere<_Members, _Member>(
