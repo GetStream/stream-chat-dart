@@ -166,6 +166,8 @@ class WebSocket {
 
   Future<void> _onConnectionError(error, stacktrace) async {
     logger.severe('error connecting');
+    logger.severe(error);
+    logger.severe(stacktrace);
     _connecting = false;
 
     if (!_reconnecting) {
