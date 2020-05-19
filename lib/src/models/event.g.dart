@@ -42,6 +42,11 @@ Event _$EventFromJson(Map json) {
         : EventChannel.fromJson((json['channel'] as Map)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
+    member: json['member'] == null
+        ? null
+        : Member.fromJson((json['member'] as Map)?.map(
+            (k, e) => MapEntry(k as String, e),
+          )),
   );
 }
 
@@ -54,6 +59,7 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'user': instance.user?.toJson(),
       'message': instance.message?.toJson(),
       'channel': instance.channel?.toJson(),
+      'member': instance.member?.toJson(),
       'reaction': instance.reaction?.toJson(),
       'total_unread_count': instance.totalUnreadCount,
       'unread_channels': instance.unreadChannels,

@@ -719,13 +719,11 @@ class ChannelClientState {
 
     _listenChannelTruncated();
 
-    _channel.on(EventType.channelUpdated).listen((Event e) {
-      final channel = e.channel;
-      updateChannelState(channelState.copyWith(
-        channel: channel.copyWith(lastMessageAt: null),
-        members: channel.members,
-      ));
-    });
+    _listenChannelUpdated();
+
+    _listenMemberAdded();
+
+    _listenMemberRemoved();
 
     _channel._client.offlineStorage
         ?.getChannelThreads(_channel.cid)
@@ -733,6 +731,39 @@ class ChannelClientState {
       _threads = threads;
       retryFailedMessages();
     });
+  }
+
+  void _listenMemberAdded() {
+    _channel.on(EventType.memberAdded).listen((Event e) {
+      final member = e.member;
+      updateChannelState(channelState.copyWith(
+        members: [
+          ...channelState.members,
+          member,
+        ],
+      ));
+    });
+  }
+
+  void _listenMemberRemoved() {
+    _channel.on(EventType.memberRemoved).listen((Event e) {
+      final user = e.user;
+      updateChannelState(channelState.copyWith(
+        members: List.from(
+            channelState.members..removeWhere((m) => m.userId == user.id)),
+      ));
+    });
+  }
+
+  void _listenChannelUpdated() {
+    final handler = (Event e) {
+      final channel = e.channel;
+      updateChannelState(channelState.copyWith(
+        channel: channel,
+        members: channel.members,
+      ));
+    };
+    _channel.on(EventType.channelUpdated).listen(handler);
   }
 
   void _listenChannelTruncated() {

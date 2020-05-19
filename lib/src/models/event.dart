@@ -40,6 +40,9 @@ class Event {
   /// The channel sent with the event
   final EventChannel channel;
 
+  /// The member sent with the event
+  final Member member;
+
   /// The reaction sent with the event
   final Reaction reaction;
 
@@ -66,6 +69,7 @@ class Event {
     this.reaction,
     this.online,
     this.channel,
+    this.member,
   });
 
   /// Create a new instance from a json

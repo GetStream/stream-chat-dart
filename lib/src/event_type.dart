@@ -54,6 +54,12 @@ class EventType {
   /// Event sent when a channel is updated
   static const String channelUpdated = "channel.updated";
 
+  /// Event sent when a member is added to a channel
+  static const String memberAdded = "member.added";
+
+  /// Event sent when a member is removed to a channel
+  static const String memberRemoved = "member.removed";
+
   /// Event sent when a channel is updated
   static const String channelHidden = "channel.hidden";
 
