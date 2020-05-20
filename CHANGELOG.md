@@ -1,3 +1,7 @@
+## 0.2.0-alpha+16
+
+- Try QueryChannels when `resync` endpoint returns an error
+
 ## 0.2.0-alpha+15
 
 - Fix receiving reactions

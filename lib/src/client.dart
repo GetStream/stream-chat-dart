@@ -472,25 +472,28 @@ class Client {
       _synced = true;
     } catch (error) {
       logger.severe('Error during resync $error');
-      logger.severe('Trying queryChannels to refresh local data');
-      queryChannels(filter: {
-        'cid': {
-          '\$in': state.channels.keys.toList(),
-        },
-      }, options: {
-        'recovery': true,
-        'last_message_ids': state.channels.map<String, String>(
-          (cid, c) {
-            final lastId = c.state?.messages?.isEmpty == true
-                ? null
-                : c.state.messages.last.id;
-            return MapEntry<String, String>(
-              cid,
-              lastId,
-            );
+
+      if (state?.channels?.isNotEmpty == true) {
+        logger.severe('Trying queryChannels to refresh local data');
+        queryChannels(filter: {
+          'cid': {
+            '\$in': state.channels.keys.toList(),
           },
-        ),
-      }).listen((_) {});
+        }, options: {
+          'recovery': true,
+          'last_message_ids': state.channels.map<String, String>(
+            (cid, c) {
+              final lastId = c.state?.messages?.isEmpty == true
+                  ? null
+                  : c.state.messages.last.id;
+              return MapEntry<String, String>(
+                cid,
+                lastId,
+              );
+            },
+          ),
+        }).listen((_) {});
+      }
     }
   }
 
