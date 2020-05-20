@@ -930,7 +930,6 @@ class ChannelClientState {
       }
     };
     _channel.on(EventType.messageRead).listen(handler);
-    _channel.on(EventType.notificationMarkRead).listen(handler);
   }
 
   Message _addReactionToMessage(Message message, Reaction reaction) {

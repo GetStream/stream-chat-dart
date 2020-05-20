@@ -42,8 +42,20 @@ class WebSocket {
     data['user_details'] = user.toJson();
     qs['json'] = json.encode(data);
 
-    final _uri = Uri.https(baseUrl, 'connect', qs);
-    _path = _uri.toString().replaceFirst('https', 'wss');
+    if (baseUrl.startsWith('https')) {
+      _path = baseUrl.replaceFirst('https://', '');
+      _path = Uri.https(_path, 'connect', qs)
+          .toString()
+          .replaceFirst('https', 'wss');
+    } else if (baseUrl.startsWith('http')) {
+      _path = baseUrl.replaceFirst('http://', '');
+      _path =
+          Uri.http(_path, 'connect', qs).toString().replaceFirst('http', 'ws');
+    } else {
+      _path = Uri.https(baseUrl, 'connect', qs)
+          .toString()
+          .replaceFirst('https', 'wss');
+    }
   }
 
   /// WS base url

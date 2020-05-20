@@ -187,7 +187,15 @@ class Client {
     logger.info('http client setup');
 
     this.httpClient = httpClient ?? Dio();
-    this.httpClient.options.baseUrl = Uri.https(baseURL, '').toString();
+
+    String url;
+    if (!baseURL.startsWith('https') && !baseURL.startsWith('http')) {
+      url = Uri.https(baseURL, '').toString();
+    } else {
+      url = baseURL;
+    }
+
+    this.httpClient.options.baseUrl = url;
     this.httpClient.options.receiveTimeout = receiveTimeout.inMilliseconds;
     this.httpClient.options.connectTimeout = connectTimeout.inMilliseconds;
     this.httpClient.interceptors.add(
@@ -354,7 +362,7 @@ class Client {
     }
 
     await _offlineStorage?.updateConnectionInfo(event);
-    if (_synced) {
+    if (_synced && event.createdAt != null) {
       await _offlineStorage?.updateLastSyncAt(event.createdAt);
     }
 
@@ -408,12 +416,13 @@ class Client {
 
       if (value == ConnectionStatus.connected &&
           state.channels?.isNotEmpty == true) {
+        await resync();
+
         handleEvent(Event(
           type: EventType.connectionRecovered,
           online: true,
         ));
-        await resync();
-      } else if (value == ConnectionStatus.disconnected) {
+      } else {
         _synced = false;
       }
     };
@@ -434,7 +443,6 @@ class Client {
   }
 
   Future<void> resync() async {
-    return;
     final lastSyncAt = await offlineStorage?.getLastSyncAt();
 
     if (lastSyncAt == null) {
@@ -455,11 +463,34 @@ class Client {
         SyncResponse.fromJson,
       );
 
-      res.events.forEach(handleEvent);
+      res.events.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+      res.events.forEach((event) {
+        handleEvent(event);
+      });
 
       _synced = true;
-    } on DioError catch (error) {
+    } catch (error) {
       logger.severe('Error during resync $error');
+      logger.severe('Trying queryChannels to refresh local data');
+      queryChannels(filter: {
+        'cid': {
+          '\$in': state.channels.keys.toList(),
+        },
+      }, options: {
+        'recovery': true,
+        'last_message_ids': state.channels.map<String, String>(
+          (cid, c) {
+            final lastId = c.state?.messages?.isEmpty == true
+                ? null
+                : c.state.messages.last.id;
+            return MapEntry<String, String>(
+              cid,
+              lastId,
+            );
+          },
+        ),
+      }).listen((_) {});
     }
   }
 
@@ -1049,9 +1080,12 @@ class ClientState {
     final handler = (Event event) async {
       final eventChannel = event.channel;
       await _client._offlineStorage?.deleteChannels([eventChannel.cid]);
-      channels = channels..remove(eventChannel.cid);
+      if (channels != null) {
+        channels = channels..remove(eventChannel.cid);
+      }
     };
     _client.on(EventType.channelDeleted).listen(handler);
+    _client.on(EventType.notificationRemovedFromChannel).listen(handler);
     _client.on(EventType.notificationChannelDeleted).listen(handler);
   }
 

@@ -51,6 +51,10 @@ class EventType {
   static const String notificationAddedToChannel =
       "notification.added_to_channel";
 
+  /// Event sent when the user is removed to a channel
+  static const String notificationRemovedFromChannel =
+      "notification.removed_from_channel";
+
   /// Event sent when a channel is updated
   static const String channelUpdated = "channel.updated";
 
