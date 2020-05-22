@@ -51,7 +51,7 @@ class Member {
   factory Member.fromJson(Map<String, dynamic> json) {
     final member = _$MemberFromJson(json);
     return member.copyWith(
-      userId: member.user.id,
+      userId: member.user?.id,
     );
   }
 

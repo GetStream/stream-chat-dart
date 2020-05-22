@@ -64,8 +64,11 @@ class EventType {
   /// Event sent when a member is removed to a channel
   static const String memberRemoved = "member.removed";
 
-  /// Event sent when a channel is updated
+  /// Event sent when a channel is hidden
   static const String channelHidden = "channel.hidden";
+
+  /// Event sent when a channel is visible
+  static const String channelVisible = "channel.visible";
 
   /// Event sent when the connection status changes
   static const String connectionChanged = "connection.changed";

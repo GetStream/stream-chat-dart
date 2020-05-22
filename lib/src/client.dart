@@ -351,8 +351,18 @@ class Client {
 
   /// Stream of [Event] coming from websocket connection
   /// Pass an eventType as parameter in order to filter just a type of event
-  Stream<Event> on([String eventType]) =>
-      stream.where((event) => eventType == null || event.type == eventType);
+  Stream<Event> on([
+    String eventType,
+    String eventType2,
+    String eventType3,
+    String eventType4,
+  ]) =>
+      stream.where((event) =>
+          eventType == null ||
+          event.type == eventType ||
+          event.type == eventType2 ||
+          event.type == eventType3 ||
+          event.type == eventType4);
 
   /// Method called to add a new event to the [_controller].
   void handleEvent(Event event) async {
@@ -416,12 +426,33 @@ class Client {
 
       if (value == ConnectionStatus.connected &&
           state.channels?.isNotEmpty == true) {
-        await resync();
-
-        handleEvent(Event(
-          type: EventType.connectionRecovered,
-          online: true,
-        ));
+        queryChannels(filter: {
+          'cid': {
+            '\$in': state.channels.keys.toList(),
+          },
+        }, options: {
+          'recovery': true,
+          'last_message_ids': state.channels.map<String, String>(
+            (cid, c) {
+              final lastId = c.state?.messages?.isEmpty == true
+                  ? null
+                  : c.state.messages.last.id;
+              return MapEntry<String, String>(
+                cid,
+                lastId,
+              );
+            },
+          ),
+        }).listen(
+          (_) {},
+          onDone: () async {
+            await resync();
+            handleEvent(Event(
+              type: EventType.connectionRecovered,
+              online: true,
+            ));
+          },
+        );
       } else {
         _synced = false;
       }
@@ -442,7 +473,7 @@ class Client {
     return event;
   }
 
-  Future<void> resync() async {
+  Future<void> resync([List<String> cids]) async {
     final lastSyncAt = await offlineStorage?.getLastSyncAt();
 
     if (lastSyncAt == null) {
@@ -450,13 +481,14 @@ class Client {
       return;
     }
 
-    final cids = await offlineStorage?.getChannelCids();
+    cids ??= await offlineStorage?.getChannelCids();
 
     try {
       final rawRes = await post('/sync', data: {
         'channel_cids': cids,
         'last_sync_at': lastSyncAt.toUtc().toIso8601String(),
       });
+      logger.fine('rawRes: $rawRes');
 
       final res = decode<SyncResponse>(
         rawRes.data,
@@ -465,35 +497,19 @@ class Client {
 
       res.events.sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
+      res.events.forEach((element) {
+        logger.fine('element.type: ${element.type}');
+        logger.fine('element.message.text: ${element.message?.text}');
+      });
+
       res.events.forEach((event) {
         handleEvent(event);
       });
 
+      await _offlineStorage?.updateLastSyncAt(DateTime.now());
       _synced = true;
     } catch (error) {
       logger.severe('Error during resync $error');
-
-      if (state?.channels?.isNotEmpty == true) {
-        logger.severe('Trying queryChannels to refresh local data');
-        queryChannels(filter: {
-          'cid': {
-            '\$in': state.channels.keys.toList(),
-          },
-        }, options: {
-          'recovery': true,
-          'last_message_ids': state.channels.map<String, String>(
-            (cid, c) {
-              final lastId = c.state?.messages?.isEmpty == true
-                  ? null
-                  : c.state.messages.last.id;
-              return MapEntry<String, String>(
-                cid,
-                lastId,
-              );
-            },
-          ),
-        }).listen((_) {});
-      }
     }
   }
 
@@ -1073,23 +1089,25 @@ class ClientState {
 
   void _listenChannelHidden() {
     _client.on(EventType.channelHidden).listen((event) {
-      final channel = event.channel;
-      _client._offlineStorage?.deleteChannels([channel.cid]);
-      channels = channels..removeWhere((cid, ch) => cid == channel.cid);
+      _client._offlineStorage?.deleteChannels([event.cid]);
+      channels = channels..removeWhere((cid, ch) => cid == event.cid);
     });
   }
 
   void _listenChannelDeleted() {
-    final handler = (Event event) async {
+    _client
+        .on(
+      EventType.channelDeleted,
+      EventType.notificationRemovedFromChannel,
+      EventType.notificationChannelDeleted,
+    )
+        .listen((Event event) async {
       final eventChannel = event.channel;
       await _client._offlineStorage?.deleteChannels([eventChannel.cid]);
       if (channels != null) {
         channels = channels..remove(eventChannel.cid);
       }
-    };
-    _client.on(EventType.channelDeleted).listen(handler);
-    _client.on(EventType.notificationRemovedFromChannel).listen(handler);
-    _client.on(EventType.notificationChannelDeleted).listen(handler);
+    });
   }
 
   final Client _client;

@@ -626,8 +626,21 @@ class Channel {
 
   /// Stream of [Event] coming from websocket connection specific for the channel
   /// Pass an eventType as parameter in order to filter just a type of event
-  Stream<Event> on([String eventType]) =>
-      _client.on(eventType).where((e) => e.cid == cid);
+  Stream<Event> on([
+    String eventType,
+    String eventType2,
+    String eventType3,
+    String eventType4,
+  ]) {
+    return _client
+        .on(
+          eventType,
+          eventType2,
+          eventType3,
+          eventType4,
+        )
+        .where((e) => e.cid == cid);
+  }
 
   DateTime _lastTypingEvent;
 
@@ -756,25 +769,24 @@ class ChannelClientState {
   }
 
   void _listenChannelUpdated() {
-    final handler = (Event e) {
+    _channel.on(EventType.channelUpdated).listen((Event e) {
       final channel = e.channel;
       updateChannelState(channelState.copyWith(
         channel: channel,
         members: channel.members,
       ));
-    };
-    _channel.on(EventType.channelUpdated).listen(handler);
+    });
   }
 
   void _listenChannelTruncated() {
-    final handler = (event) async {
+    _channel
+        .on(EventType.channelTruncated, EventType.notificationChannelTruncated)
+        .listen((event) async {
       final channel = event.channel;
       await _channel._client.offlineStorage
           ?.deleteChannelsMessages([channel.cid]);
       truncate();
-    };
-    _channel.on(EventType.channelTruncated).listen(handler);
-    _channel.on(EventType.notificationChannelTruncated).listen(handler);
+    });
   }
 
   RetryQueue retryQueue;
@@ -879,12 +891,15 @@ class ChannelClientState {
   }
 
   void _listenMessageNew() {
-    final handler = (event) {
+    _channel
+        .on(
+      EventType.messageNew,
+      EventType.notificationMessageNew,
+    )
+        .listen((event) {
       final message = event.message;
       addMessage(message);
-    };
-    _channel.on(EventType.messageNew).listen(handler);
-    _channel.on(EventType.notificationMessageNew).listen(handler);
+    });
   }
 
   void addMessage(Message message) {
@@ -893,7 +908,27 @@ class ChannelClientState {
 
       final oldIndex = newMessages.indexWhere((m) => m.id == message.id);
       if (oldIndex != -1) {
-        newMessages[oldIndex] = message;
+        newMessages[oldIndex] = newMessages[oldIndex].copyWith(
+          text: message.text,
+          type: message.type,
+          attachments: message.attachments,
+          mentionedUsers: message.mentionedUsers,
+          reactionCounts: message.reactionCounts,
+          reactionScores: message.reactionScores,
+          latestReactions: message.latestReactions,
+          ownReactions: message.ownReactions,
+          parentId: message.parentId,
+          replyCount: message.replyCount,
+          showInChannel: message.showInChannel,
+          command: message.command,
+          silent: message.silent,
+          createdAt: message.createdAt,
+          updatedAt: message.updatedAt,
+          deletedAt: message.deletedAt,
+          user: message.user,
+          status: message.status,
+          extraData: message.extraData,
+        );
       } else {
         newMessages.add(message);
       }
@@ -916,7 +951,7 @@ class ChannelClientState {
       return;
     }
 
-    final handler = (event) {
+    _channel.on(EventType.messageRead).listen((event) {
       final read = _channelState.read;
       final userReadIndex = read?.indexWhere((r) => r.user.id == event.user.id);
 
@@ -928,8 +963,7 @@ class ChannelClientState {
         ));
         _channelState = _channelState.copyWith(read: read);
       }
-    };
-    _channel.on(EventType.messageRead).listen(handler);
+    });
   }
 
   Message _addReactionToMessage(Message message, Reaction reaction) {
