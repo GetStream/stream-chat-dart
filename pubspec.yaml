@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   json_annotation: ^3.0.1
-  shared_preferences: ^0.5.7+1
+  shared_preferences: ^0.5.7+3
   logging: ^0.11.4
   dio: ^3.0.9
   web_socket_channel: ^1.1.0
@@ -19,7 +19,7 @@ dependencies:
   stream_channel: ^2.0.0
   moor: ^3.1.0
   moor_ffi: ^0.6.0
-  path_provider: ^1.6.7
+  path_provider: ^1.6.9
   path: ^1.6.4
   rxdart: ^0.24.0
   collection: ^1.14.11

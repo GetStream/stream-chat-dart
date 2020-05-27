@@ -371,9 +371,15 @@ class Client {
       _connectionId = event.connectionId;
     }
 
-    await _offlineStorage?.updateConnectionInfo(event);
-    if (_synced && event.createdAt != null) {
-      await _offlineStorage?.updateLastSyncAt(event.createdAt);
+    if (!event.isLocal) {
+      if (_synced && event.createdAt != null) {
+        await _offlineStorage?.updateConnectionInfo(event);
+        await _offlineStorage?.updateLastSyncAt(event.createdAt);
+      }
+    }
+
+    if (event.user != null) {
+      state.updateUser(event.user);
     }
 
     if (event.me != null) {
@@ -384,6 +390,7 @@ class Client {
 
   /// Connect the client websocket
   Future<Event> connect() async {
+    logger.info('connecting');
     if (wsConnectionStatus.value == ConnectionStatus.connecting) {
       logger.warning('Already connecting');
       throw Exception('Already connecting');
@@ -592,6 +599,11 @@ class Client {
       QueryChannelsResponse.fromJson,
     );
 
+    final users = res.channels
+        .expand((element) => element.members.map((element) => element.user))
+        .toList();
+    state.updateUsers(users);
+
     logger.info('Got ${res.channels?.length} channels from api');
 
     newChannels = Map<String, Channel>.from(state.channels ?? {});
@@ -762,6 +774,7 @@ class Client {
     logger.info('Disconnecting');
 
     await _offlineStorage?.disconnect(flush: flushOfflineStorage);
+    _offlineStorage = null;
 
     await _disconnect();
   }
@@ -793,16 +806,21 @@ class Client {
       payload.addAll(options);
     }
 
-    final response = await get(
+    final rawRes = await get(
       '/users',
       queryParameters: {
         'payload': jsonEncode(payload),
       },
     );
-    return decode<QueryUsersResponse>(
-      response.data,
+
+    final response = decode<QueryUsersResponse>(
+      rawRes.data,
       QueryUsersResponse.fromJson,
     );
+
+    state?.updateUsers(response.users);
+
+    return response;
   }
 
   /// A message search.
@@ -1117,11 +1135,29 @@ class ClientState {
     _userController.add(user);
   }
 
+  void updateUsers(List<User> users) {
+    users.forEach(updateUser);
+  }
+
+  void updateUser(User user) {
+    final newUsers = {
+      ...users ?? {},
+      user.id: user,
+    };
+    _usersController.add(newUsers);
+  }
+
   /// The current user
   OwnUser get user => _userController.value;
 
   /// The current user as a stream
   Stream<OwnUser> get userStream => _userController.stream;
+
+  /// The current user
+  Map<String, User> get users => _usersController.value;
+
+  /// The current user as a stream
+  Stream<Map<String, User>> get usersStream => _usersController.stream;
 
   /// The current unread channels count
   int get unreadChannels => _unreadChannelsController.value;
@@ -1148,6 +1184,8 @@ class ClientState {
   final BehaviorSubject<Map<String, Channel>> _channelsController =
       BehaviorSubject();
   final BehaviorSubject<OwnUser> _userController = BehaviorSubject();
+  final BehaviorSubject<Map<String, User>> _usersController =
+      BehaviorSubject.seeded({});
   final BehaviorSubject<int> _unreadChannelsController = BehaviorSubject();
   final BehaviorSubject<int> _totalUnreadCountController = BehaviorSubject();
 

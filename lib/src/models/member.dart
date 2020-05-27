@@ -57,15 +57,15 @@ class Member {
 
   /// Creates a copy of [Member] with specified attributes overridden.
   Member copyWith({
-    user,
-    inviteAcceptedAt,
-    inviteRejectedAt,
-    invited,
-    role,
-    userId,
-    isModerator,
-    createdAt,
-    updatedAt,
+    User user,
+    DateTime inviteAcceptedAt,
+    DateTime inviteRejectedAt,
+    bool invited,
+    String role,
+    String userId,
+    bool isModerator,
+    DateTime createdAt,
+    DateTime updatedAt,
   }) =>
       Member(
         user: user ?? this.user,

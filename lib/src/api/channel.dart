@@ -1017,11 +1017,21 @@ class ChannelClientState {
       channelStateStream.map((cs) => cs.messages);
 
   /// Channel members list
-  List<Member> get members => _channelState.members;
+  List<Member> get members => _channelState.members
+      .map((e) => e.copyWith(user: _channel.client.state.users[e.user.id]))
+      .toList();
 
   /// Channel members list as a stream
-  Stream<List<Member>> get membersStream =>
-      channelStateStream.map((cs) => cs.members);
+  Stream<List<Member>> get membersStream => CombineLatestStream.combine2<
+          List<Member>, Map<String, User>, List<Member>>(
+        channelStateStream.map((cs) => cs.members),
+        _channel.client.state.usersStream,
+        (members, users) {
+          return members
+              .map((e) => e.copyWith(user: users[e.user.id]))
+              .toList();
+        },
+      );
 
   /// Channel watcher count
   int get watcherCount => _channelState.watcherCount;
@@ -1031,11 +1041,19 @@ class ChannelClientState {
       channelStateStream.map((cs) => cs.watcherCount);
 
   /// Channel watchers list
-  List<User> get watchers => _channelState.watchers;
+  List<User> get watchers => _channelState.watchers
+      .map((e) => _channel.client.state.users[e.id] ?? e)
+      .toList();
 
   /// Channel watchers list as a stream
   Stream<List<User>> get watchersStream =>
-      channelStateStream.map((cs) => cs.watchers);
+      CombineLatestStream.combine2<List<User>, Map<String, User>, List<User>>(
+        channelStateStream.map((cs) => cs.watchers),
+        _channel.client.state.usersStream,
+        (watchers, users) {
+          return watchers.map((e) => users[e.id] ?? e).toList();
+        },
+      );
 
   /// Channel read list
   List<Read> get read => _channelState.read;
