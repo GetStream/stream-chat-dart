@@ -1,3 +1,9 @@
+## 0.2.0-alpha+17
+
+- Add user list to client
+
+- Synchronize channel members status
+
 ## 0.2.0-alpha+16
 
 - Try QueryChannels when `resync` endpoint returns an error
