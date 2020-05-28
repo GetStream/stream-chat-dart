@@ -20,6 +20,7 @@ class _BaseResponse {
 /// Model response for [Client.resync] api call
 @JsonSerializable(createToJson: false)
 class SyncResponse extends _BaseResponse {
+  /// The list of events
   List<Event> events;
 
   /// Create a new instance from a json

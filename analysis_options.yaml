@@ -4,6 +4,7 @@ analyzer:
   exclude:
     - lib/**/*.g.dart
     - example/*
+    - test/*
 
 linter:
   rules:

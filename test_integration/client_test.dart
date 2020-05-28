@@ -5,7 +5,7 @@ import 'package:stream_chat/stream_chat.dart';
 
 const API_KEY = '6xjf3dex3n7d';
 const TOKEN =
-    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo";
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoid2lsZC1icmVlemUtNyJ9.VM2EX1EXOfgqa-bTH_3JzeY0T99ngWzWahSauP3dBMo';
 
 void main() {
   test('test', () async {
@@ -14,7 +14,7 @@ void main() {
       logLevel: Level.INFO,
       tokenProvider: (_) async => '',
     );
-    final user = User(id: "wild-breeze-7");
+    final user = User(id: 'wild-breeze-7');
 
     await client.setGuestUser(user);
   });

@@ -45,9 +45,7 @@ class NotificationService {
 
   static SharedPreferences _sharedPreferences;
   static Future<SharedPreferences> _getSharedPreferences() async {
-    if (_sharedPreferences == null) {
-      _sharedPreferences = await SharedPreferences.getInstance();
-    }
+    _sharedPreferences ??= await SharedPreferences.getInstance();
     return _sharedPreferences;
   }
 

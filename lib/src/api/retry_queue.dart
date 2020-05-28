@@ -9,10 +9,15 @@ import 'package:stream_chat/src/exceptions.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/stream_chat.dart';
 
+/// The retry queue associated to a channel
 class RetryQueue {
+  /// The channel of this queue
   final Channel channel;
+
+  /// The logger associated to this queue
   final Logger logger;
 
+  /// Instantiate a new RetryQueue object
   RetryQueue({
     @required this.channel,
     this.logger,
@@ -36,8 +41,9 @@ class RetryQueue {
   bool _isRetrying = false;
   RetryPolicy _retryPolicy;
 
+  /// Add a list of messages
   void add(List<Message> messages) {
-    logger.info('add ${messages.length} messages');
+    logger?.info('add ${messages.length} messages');
     _messageQueue
         .addAll(messages.where((element) => !_messageQueue.contains(element)));
 
@@ -46,19 +52,15 @@ class RetryQueue {
     }
   }
 
-  void clear() {
-    _messageQueue.clear();
-  }
-
   Future<void> _startRetrying() async {
-    logger.info('start retrying');
+    logger?.info('start retrying');
     _isRetrying = true;
     final retryPolicy = _retryPolicy.copyWith(attempt: 0);
 
     while (_messageQueue.isNotEmpty) {
       final message = _messageQueue.first;
       try {
-        logger.info('retry attempt ${retryPolicy.attempt}');
+        logger?.info('retry attempt ${retryPolicy.attempt}');
         await _sendMessage(message);
         _messageQueue.removeFirst();
         retryPolicy.attempt = 0;
@@ -139,7 +141,7 @@ class RetryQueue {
               MessageSendingStatus.FAILED,
               MessageSendingStatus.FAILED_DELETE,
             ].contains(event.message.status)) {
-          logger.info('add message from events');
+          logger?.info('add message from events');
           add([event.message]);
         } else if (messageIndex != -1 &&
             [

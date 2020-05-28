@@ -91,6 +91,7 @@ class Client {
 
   bool _synced = false;
 
+  /// The retry policy options getter
   RetryPolicy get retryPolicy => _retryPolicy;
 
   /// Method used to show a local notification while the app is in background
@@ -379,7 +380,7 @@ class Client {
     }
 
     if (event.user != null) {
-      state.updateUser(event.user);
+      state._updateUser(event.user);
     }
 
     if (event.me != null) {
@@ -480,6 +481,7 @@ class Client {
     return event;
   }
 
+  /// Get the events missed while offline to sync the offline storage
   Future<void> resync([List<String> cids]) async {
     final lastSyncAt = await offlineStorage?.getLastSyncAt();
 
@@ -602,7 +604,7 @@ class Client {
     final users = res.channels
         .expand((element) => element.members.map((element) => element.user))
         .toList();
-    state.updateUsers(users);
+    state._updateUsers(users);
 
     logger.info('Got ${res.channels?.length} channels from api');
 
@@ -818,7 +820,7 @@ class Client {
       QueryUsersResponse.fromJson,
     );
 
-    state?.updateUsers(response.users);
+    state?._updateUsers(response.users);
 
     return response;
   }
@@ -901,7 +903,7 @@ class Client {
 
   /// Batch update a list of users
   Future<UpdateUsersResponse> updateUsers(List<User> users) async {
-    final response = await post("/users", data: {
+    final response = await post('/users', data: {
       'users': users.asMap().map((_, u) => MapEntry(u.id, u.toJson())),
     });
     return decode<UpdateUsersResponse>(
@@ -917,10 +919,10 @@ class Client {
   ]) async {
     final data = Map<String, dynamic>.from(options)
       ..addAll({
-        "target_user_id": targetUserID,
+        'target_user_id': targetUserID,
       });
     final response = await post(
-      "/moderation/ban",
+      '/moderation/ban',
       data: data,
     );
     return decode(response.data, EmptyResponse.fromJson);
@@ -933,7 +935,7 @@ class Client {
   ]) async {
     final data = Map<String, dynamic>.from(options)
       ..addAll({
-        "target_user_id": targetUserID,
+        'target_user_id': targetUserID,
       });
     final response = await delete(
       '/moderation/ban',
@@ -944,55 +946,55 @@ class Client {
 
   /// Mutes a user
   Future<EmptyResponse> muteUser(String targetID) async {
-    final response = await post("/moderation/mute", data: {
-      "target_id": targetID,
+    final response = await post('/moderation/mute', data: {
+      'target_id': targetID,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Unmutes a user
   Future<EmptyResponse> unmuteUser(String targetID) async {
-    final response = await post("/moderation/unmute", data: {
-      "target_id": targetID,
+    final response = await post('/moderation/unmute', data: {
+      'target_id': targetID,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Flag a message
   Future<EmptyResponse> flagMessage(String messageID) async {
-    final response = await post("/moderation/flag", data: {
-      "target_message_id": messageID,
+    final response = await post('/moderation/flag', data: {
+      'target_message_id': messageID,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Unflag a message
   Future<EmptyResponse> unflagMessage(String messageId) async {
-    final response = await post("/moderation/unflag", data: {
-      "target_message_id": messageId,
+    final response = await post('/moderation/unflag', data: {
+      'target_message_id': messageId,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Flag a user
   Future<EmptyResponse> flagUser(String userId) async {
-    final response = await post("/moderation/flag", data: {
-      "target_user_id": userId,
+    final response = await post('/moderation/flag', data: {
+      'target_user_id': userId,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Unflag a message
   Future<EmptyResponse> unflagUser(String userId) async {
-    final response = await post("/moderation/unflag", data: {
-      "target_user_id": userId,
+    final response = await post('/moderation/unflag', data: {
+      'target_user_id': userId,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Mark all channels for this user as read
   Future<EmptyResponse> markAllRead() async {
-    final response = await post("/channels/read");
+    final response = await post('/channels/read');
     return decode(response.data, EmptyResponse.fromJson);
   }
 
@@ -1060,7 +1062,7 @@ class Client {
 
   /// Get a message by id
   Future<GetMessageResponse> getMessage(String messageId) async {
-    final response = await get("/messages/$messageId");
+    final response = await get('/messages/$messageId');
     return decode(response.data, GetMessageResponse.fromJson);
   }
 }
@@ -1135,11 +1137,11 @@ class ClientState {
     _userController.add(user);
   }
 
-  void updateUsers(List<User> users) {
-    users.forEach(updateUser);
+  void _updateUsers(List<User> users) {
+    users.forEach(_updateUser);
   }
 
-  void updateUser(User user) {
+  void _updateUser(User user) {
     final newUsers = {
       ...users ?? {},
       user.id: user,

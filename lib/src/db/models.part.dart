@@ -1,6 +1,6 @@
 part of 'offline_storage.dart';
 
-@DataClassName("ChannelQuery")
+@DataClassName('ChannelQuery')
 class _ChannelQueries extends Table {
   TextColumn get queryHash => text()();
 

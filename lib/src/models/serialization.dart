@@ -1,7 +1,7 @@
 import 'user.dart';
 
 /// Used to avoid to serialize properties to json
-readonly(_) => null;
+Null readonly(_) => null;
 
 /// Helper class for serialization to and from json
 class Serialization {
@@ -22,7 +22,7 @@ class Serialization {
       return json;
     }
     var clone = Map<String, dynamic>.from(json);
-    clone['extra_data'] = Map<String, dynamic>();
+    clone['extra_data'] = <String, dynamic>{};
 
     json?.keys?.forEach((key) {
       if (!topLevelFields.contains(key)) {

@@ -84,6 +84,7 @@ class Event {
   Map<String, dynamic> toJson() => _$EventToJson(this);
 }
 
+/// The channel embedded in the event object
 @JsonSerializable()
 class EventChannel extends ChannelModel {
   /// A paginated list of channel members

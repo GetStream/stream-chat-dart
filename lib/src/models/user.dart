@@ -55,11 +55,11 @@ class User {
     this.id, {
     this.online,
     this.extraData,
-  })  : this.createdAt = null,
-        this.updatedAt = null,
-        this.lastActive = null,
-        this.banned = null,
-        this.role = null;
+  })  : createdAt = null,
+        updatedAt = null,
+        lastActive = null,
+        banned = null,
+        role = null;
 
   /// Constructor used for json serialization
   User({

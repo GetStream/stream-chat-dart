@@ -111,6 +111,7 @@ class Message {
   /// True is the message is ephemeral
   bool get isEphemeral => type == 'ephemeral';
 
+  /// Reserved field indicating when the message was deleted.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final DateTime deletedAt;
 

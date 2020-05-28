@@ -789,6 +789,7 @@ class ChannelClientState {
     });
   }
 
+  /// The retry queue associated to this channel
   RetryQueue retryQueue;
 
   /// Retry failed message
@@ -902,6 +903,7 @@ class ChannelClientState {
     });
   }
 
+  /// Add a message to this channel
   void addMessage(Message message) {
     if (message.parentId == null || message.showInChannel == true) {
       final newMessages = List<Message>.from(_channelState.messages);
