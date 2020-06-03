@@ -1,3 +1,7 @@
+## 0.2.0-alpha+18
+
+- Revert moor_ffi version to 0.5.0
+
 ## 0.2.0-alpha+17
 
 - Add user list to client
