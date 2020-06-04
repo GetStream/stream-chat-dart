@@ -68,6 +68,27 @@ class _ConnectionEventData extends DataClass
     return map;
   }
 
+  _ConnectionEventCompanion toCompanion(bool nullToAbsent) {
+    return _ConnectionEventCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      ownUser: ownUser == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ownUser),
+      totalUnreadCount: totalUnreadCount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(totalUnreadCount),
+      unreadChannels: unreadChannels == null && nullToAbsent
+          ? const Value.absent()
+          : Value(unreadChannels),
+      lastEventAt: lastEventAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastEventAt),
+      lastSyncAt: lastSyncAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSyncAt),
+    );
+  }
+
   factory _ConnectionEventData.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -471,6 +492,39 @@ class _Channel extends DataClass implements Insertable<_Channel> {
       map['created_by'] = Variable<String>(createdBy);
     }
     return map;
+  }
+
+  _ChannelsCompanion toCompanion(bool nullToAbsent) {
+    return _ChannelsCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
+      cid: cid == null && nullToAbsent ? const Value.absent() : Value(cid),
+      config:
+          config == null && nullToAbsent ? const Value.absent() : Value(config),
+      frozen:
+          frozen == null && nullToAbsent ? const Value.absent() : Value(frozen),
+      lastMessageAt: lastMessageAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastMessageAt),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      memberCount: memberCount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(memberCount),
+      extraData: extraData == null && nullToAbsent
+          ? const Value.absent()
+          : Value(extraData),
+      createdBy: createdBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdBy),
+    );
   }
 
   factory _Channel.fromJson(Map<String, dynamic> json,
@@ -1068,6 +1122,29 @@ class _User extends DataClass implements Insertable<_User> {
     return map;
   }
 
+  _UsersCompanion toCompanion(bool nullToAbsent) {
+    return _UsersCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      role: role == null && nullToAbsent ? const Value.absent() : Value(role),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      lastActive: lastActive == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastActive),
+      online:
+          online == null && nullToAbsent ? const Value.absent() : Value(online),
+      banned:
+          banned == null && nullToAbsent ? const Value.absent() : Value(banned),
+      extraData: extraData == null && nullToAbsent
+          ? const Value.absent()
+          : Value(extraData),
+    );
+  }
+
   factory _User.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -1568,6 +1645,56 @@ class _Message extends DataClass implements Insertable<_Message> {
       map['extra_data'] = Variable<String>(converter.mapToSql(extraData));
     }
     return map;
+  }
+
+  _MessagesCompanion toCompanion(bool nullToAbsent) {
+    return _MessagesCompanion(
+      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      messageText: messageText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(messageText),
+      attachmentJson: attachmentJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(attachmentJson),
+      status:
+          status == null && nullToAbsent ? const Value.absent() : Value(status),
+      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
+      reactionCounts: reactionCounts == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reactionCounts),
+      reactionScores: reactionScores == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reactionScores),
+      parentId: parentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parentId),
+      replyCount: replyCount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(replyCount),
+      showInChannel: showInChannel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(showInChannel),
+      command: command == null && nullToAbsent
+          ? const Value.absent()
+          : Value(command),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      channelCid: channelCid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(channelCid),
+      extraData: extraData == null && nullToAbsent
+          ? const Value.absent()
+          : Value(extraData),
+    );
   }
 
   factory _Message.fromJson(Map<String, dynamic> json,
@@ -2321,6 +2448,19 @@ class _Read extends DataClass implements Insertable<_Read> {
     return map;
   }
 
+  _ReadsCompanion toCompanion(bool nullToAbsent) {
+    return _ReadsCompanion(
+      lastRead: lastRead == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastRead),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      channelCid: channelCid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(channelCid),
+    );
+  }
+
   factory _Read.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -2590,6 +2730,35 @@ class _Member extends DataClass implements Insertable<_Member> {
       map['updated_at'] = Variable<DateTime>(updatedAt);
     }
     return map;
+  }
+
+  _MembersCompanion toCompanion(bool nullToAbsent) {
+    return _MembersCompanion(
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      channelCid: channelCid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(channelCid),
+      role: role == null && nullToAbsent ? const Value.absent() : Value(role),
+      inviteAcceptedAt: inviteAcceptedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(inviteAcceptedAt),
+      inviteRejectedAt: inviteRejectedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(inviteRejectedAt),
+      invited: invited == null && nullToAbsent
+          ? const Value.absent()
+          : Value(invited),
+      isModerator: isModerator == null && nullToAbsent
+          ? const Value.absent()
+          : Value(isModerator),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+    );
   }
 
   factory _Member.fromJson(Map<String, dynamic> json,
@@ -3042,6 +3211,17 @@ class ChannelQuery extends DataClass implements Insertable<ChannelQuery> {
     return map;
   }
 
+  _ChannelQueriesCompanion toCompanion(bool nullToAbsent) {
+    return _ChannelQueriesCompanion(
+      queryHash: queryHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(queryHash),
+      channelCid: channelCid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(channelCid),
+    );
+  }
+
   factory ChannelQuery.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
@@ -3254,6 +3434,25 @@ class _Reaction extends DataClass implements Insertable<_Reaction> {
       map['extra_data'] = Variable<String>(converter.mapToSql(extraData));
     }
     return map;
+  }
+
+  _ReactionsCompanion toCompanion(bool nullToAbsent) {
+    return _ReactionsCompanion(
+      messageId: messageId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(messageId),
+      type: type == null && nullToAbsent ? const Value.absent() : Value(type),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      score:
+          score == null && nullToAbsent ? const Value.absent() : Value(score),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      extraData: extraData == null && nullToAbsent
+          ? const Value.absent()
+          : Value(extraData),
+    );
   }
 
   factory _Reaction.fromJson(Map<String, dynamic> json,

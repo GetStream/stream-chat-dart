@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
@@ -566,6 +567,39 @@ class Channel {
 
     state?.updateChannelState(updatedState);
     return updatedState;
+  }
+
+  /// Query channel members
+  Future<QueryMembersResponse> queryMembers({
+    Map<String, dynamic> filter,
+    List<SortOption> sort,
+    PaginationParams pagination,
+  }) async {
+    final payload = <String, dynamic>{
+      'sort': sort,
+      'filter_conditions': filter,
+      'type': type,
+    };
+
+    if (pagination != null) {
+      payload.addAll(pagination.toJson());
+    }
+
+    if (id != null) {
+      payload['id'] = id;
+    } else if (state?.members?.isNotEmpty == true) {
+      payload['members'] = state.members;
+    }
+
+    final rawRes = await _client.get('/members', queryParameters: {
+      'payload': jsonEncode(payload),
+    });
+    final response = _client.decode(rawRes.data, QueryMembersResponse.fromJson);
+
+    state?.updateChannelState(ChannelState(
+      members: response.members,
+    ));
+    return response;
   }
 
   /// Mutes the channel

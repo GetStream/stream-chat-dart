@@ -26,6 +26,18 @@ QueryChannelsResponse _$QueryChannelsResponseFromJson(Map json) {
         ?.toList();
 }
 
+QueryMembersResponse _$QueryMembersResponseFromJson(Map json) {
+  return QueryMembersResponse()
+    ..duration = json['duration'] as String
+    ..members = (json['members'] as List)
+        ?.map((e) => e == null
+            ? null
+            : Member.fromJson((e as Map)?.map(
+                (k, e) => MapEntry(k as String, e),
+              )))
+        ?.toList();
+}
+
 QueryUsersResponse _$QueryUsersResponseFromJson(Map json) {
   return QueryUsersResponse()
     ..duration = json['duration'] as String

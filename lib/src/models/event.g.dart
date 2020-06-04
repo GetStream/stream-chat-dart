@@ -47,7 +47,7 @@ Event _$EventFromJson(Map json) {
         : Member.fromJson((json['member'] as Map)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
-  );
+  )..isLocal = json['is_local'] as bool;
 }
 
 Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
@@ -64,6 +64,7 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'total_unread_count': instance.totalUnreadCount,
       'unread_channels': instance.unreadChannels,
       'online': instance.online,
+      'is_local': instance.isLocal,
     };
 
 EventChannel _$EventChannelFromJson(Map json) {

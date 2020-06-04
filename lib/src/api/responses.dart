@@ -39,6 +39,17 @@ class QueryChannelsResponse extends _BaseResponse {
       _$QueryChannelsResponseFromJson(json);
 }
 
+/// Model response for [Client.queryChannels] api call
+@JsonSerializable(createToJson: false)
+class QueryMembersResponse extends _BaseResponse {
+  /// List of channels state returned by the query
+  List<Member> members;
+
+  /// Create a new instance from a json
+  static QueryMembersResponse fromJson(Map<String, dynamic> json) =>
+      _$QueryMembersResponseFromJson(json);
+}
+
 /// Model response for [Client.queryUsers] api call
 @JsonSerializable(createToJson: false)
 class QueryUsersResponse extends _BaseResponse {
