@@ -1,3 +1,8 @@
+## 0.2.0-alpha+19
+
+- Add translate message api call
+- Add queryMembers api call
+
 ## 0.2.0-alpha+18
 
 - Revert moor_ffi version to 0.5.0
