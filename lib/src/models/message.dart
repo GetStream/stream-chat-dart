@@ -216,3 +216,22 @@ class Message {
         status: status ?? this.status,
       );
 }
+
+@JsonSerializable()
+class TranslatedMessage extends Message {
+  TranslatedMessage(this.i18n);
+
+  final Map<String, String> i18n;
+
+  static final topLevelFields = [
+    'i18n',
+    ...Message.topLevelFields,
+  ];
+
+  /// Create a new instance from a json
+  factory TranslatedMessage.fromJson(Map<String, dynamic> json) {
+    return _$TranslatedMessageFromJson(
+      Serialization.moveKeysToRoot(json, topLevelFields),
+    );
+  }
+}

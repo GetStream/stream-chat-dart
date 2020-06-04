@@ -26,6 +26,16 @@ QueryChannelsResponse _$QueryChannelsResponseFromJson(Map json) {
         ?.toList();
 }
 
+TranslateMessageResponse _$TranslateMessageResponseFromJson(Map json) {
+  return TranslateMessageResponse()
+    ..duration = json['duration'] as String
+    ..message = json['message'] == null
+        ? null
+        : TranslatedMessage.fromJson((json['message'] as Map)?.map(
+            (k, e) => MapEntry(k as String, e),
+          ));
+}
+
 QueryMembersResponse _$QueryMembersResponseFromJson(Map json) {
   return QueryMembersResponse()
     ..duration = json['duration'] as String

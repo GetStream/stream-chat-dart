@@ -509,6 +509,23 @@ class Channel {
         response.data, GetMessagesByIdResponse.fromJson);
   }
 
+  /// Retrieves a list of messages by ID
+  Future<TranslateMessageResponse> translateMessage(
+    String messageId,
+    String language,
+  ) async {
+    final response = await _client.post(
+      '/messages/$messageId/translate',
+      data: {
+        'language': language,
+      },
+    );
+    return _client.decode<TranslateMessageResponse>(
+      response.data,
+      TranslateMessageResponse.fromJson,
+    );
+  }
+
   /// Creates a new channel
   Future<ChannelState> create() async {
     return query(options: {

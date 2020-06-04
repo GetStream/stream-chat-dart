@@ -102,3 +102,16 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   writeNotNull('deleted_at', readonly(instance.deletedAt));
   return val;
 }
+
+TranslatedMessage _$TranslatedMessageFromJson(Map json) {
+  return TranslatedMessage(
+    (json['i18n'] as Map)?.map(
+      (k, e) => MapEntry(k as String, e as String),
+    ),
+  );
+}
+
+Map<String, dynamic> _$TranslatedMessageToJson(TranslatedMessage instance) =>
+    <String, dynamic>{
+      'i18n': instance.i18n,
+    };
