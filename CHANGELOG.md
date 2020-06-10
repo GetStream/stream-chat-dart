@@ -1,3 +1,7 @@
+## 0.2.0-alpha+20
+
+- More robust offline storage insertions
+
 ## 0.2.0-alpha+19
 
 - Add translate message api call
