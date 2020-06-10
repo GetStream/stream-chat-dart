@@ -609,25 +609,27 @@ class Client {
     logger.info('Got ${res.channels?.length} channels from api');
 
     newChannels = Map<String, Channel>.from(state.channels ?? {});
-    channels = res.channels?.map((channelState) {
+    channels.clear();
+    for (final channelState in res.channels) {
       final channel = newChannels[channelState.channel.cid];
       if (channel != null) {
         channel.state?.updateChannelState(channelState);
-        return channel;
+        channels.add(channel);
       } else {
         final newChannel = Channel.fromState(this, channelState);
-        _offlineStorage?.updateChannelState(newChannel.state.channelState);
+        await _offlineStorage
+            ?.updateChannelState(newChannel.state.channelState);
         newChannel.state?.updateChannelState(channelState);
         newChannels[newChannel.cid] = newChannel;
-        return newChannel;
+        channels.add(newChannel);
       }
-    })?.toList();
+    }
 
     yield channels;
 
     state.channels = newChannels;
 
-    _offlineStorage?.updateChannelQueries(
+    await _offlineStorage?.updateChannelQueries(
       filter,
       res.channels.map((c) => c.channel.cid).toList(),
       paginationParams?.offset == null || paginationParams.offset == 0,

@@ -273,7 +273,7 @@ class OfflineStorage extends _$OfflineStorage {
   /// Update list of channel queries
   /// If [clearQueryCache] is true before the insert
   /// the list of matching rows will be deleted
-  void updateChannelQueries(
+  Future<void> updateChannelQueries(
     Map<String, dynamic> filter,
     List<String> cids,
     bool clearQueryCache,
@@ -287,7 +287,7 @@ class OfflineStorage extends _$OfflineStorage {
           .go();
     }
 
-    await batch((batch) {
+    return batch((batch) {
       batch.insertAll(
         channelQueries,
         cids.map((cid) {
