@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -99,8 +100,9 @@ class WebSocket {
       ValueNotifier(ConnectionStatus.disconnected);
 
   String _path;
+  int _retryAttempt = 0;
   WebSocketChannel _channel;
-  Timer _healthCheck, _reconnectionMonitor, _reconnectionTimer;
+  Timer _healthCheck, _reconnectionMonitor;
   DateTime _lastEventAt;
   bool _manuallyClosed = false, _connecting = false, _reconnecting = false;
 
@@ -163,6 +165,7 @@ class WebSocket {
       _lastEventAt = DateTime.now();
 
       connectionStatus.value = ConnectionStatus.connected;
+      _retryAttempt = 1;
 
       if (!_connectionCompleter.isCompleted) {
         _connectionCompleter.complete(event);
@@ -211,33 +214,33 @@ class WebSocket {
     reconnectionTimer(_reconnectionMonitor);
   }
 
+  void _reconnectTimer() async {
+    if (!_reconnecting) {
+      return;
+    }
+    if (_connecting) {
+      logger.info('already connecting');
+      return;
+    }
+
+    logger.info('reconnecting..');
+
+    _cancelTimers();
+
+    await connect();
+
+    await Future.delayed(Duration(seconds: min(_retryAttempt * 5, 25)));
+    _reconnectTimer();
+    _retryAttempt++;
+  }
+
   Future<void> _reconnect() async {
     if (!_reconnecting) {
       _reconnecting = true;
       connectionStatus.value = ConnectionStatus.connecting;
     }
 
-    final reconnectionTimer = (timer) {
-      if (!_reconnecting) {
-        timer.cancel();
-        return;
-      }
-      if (_connecting) {
-        logger.info('already connecting');
-        return null;
-      }
-
-      logger.info('reconnecting..');
-
-      _cancelTimers();
-
-      connect();
-    };
-
-    _reconnectionTimer =
-        Timer.periodic(Duration(seconds: 5), reconnectionTimer);
-
-    reconnectionTimer(_reconnectionTimer);
+    _reconnectTimer();
   }
 
   void _cancelTimers() {
@@ -270,9 +273,6 @@ class WebSocket {
   Future<void> disconnect() {
     logger.info('disconnecting');
     _connectionCompleter = Completer();
-    if (_reconnectionTimer != null) {
-      _reconnectionTimer.cancel();
-    }
     _cancelTimers();
     _manuallyClosed = true;
     connectionStatus.value = ConnectionStatus.disconnected;
