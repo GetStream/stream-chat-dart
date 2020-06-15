@@ -1,3 +1,7 @@
+## 0.2.0-alpha+21
+
+- Incremental websocket reconnection timeout
+
 ## 0.2.0-alpha+20
 
 - More robust offline storage insertions
