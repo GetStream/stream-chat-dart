@@ -105,10 +105,13 @@ class Message {
   @JsonKey(includeIfNull: false)
   final Map<String, dynamic> extraData;
 
-  /// True is the message has been deleted
+  /// True if the message is a system info
+  bool get isSystem => type == 'system';
+
+  /// True if the message has been deleted
   bool get isDeleted => type == 'deleted';
 
-  /// True is the message is ephemeral
+  /// True if the message is ephemeral
   bool get isEphemeral => type == 'ephemeral';
 
   /// Reserved field indicating when the message was deleted.
