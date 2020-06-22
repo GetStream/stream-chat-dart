@@ -1,3 +1,7 @@
+## 0.2.0-alpha+22
+
+- Add `isSystem` property to Message
+
 ## 0.2.0-alpha+21
 
 - Incremental websocket reconnection timeout
