@@ -1005,13 +1005,13 @@ class ChannelClientState {
     }
 
     _channel.on(EventType.messageRead).listen((event) {
-      final read = _channelState.read;
+      final read = List<Read>.from(_channelState.read);
       final userReadIndex = read?.indexWhere((r) => r.user.id == event.user.id);
 
       if (userReadIndex != null && userReadIndex != -1) {
-        final userRead = read.removeAt(userReadIndex);
+        read.removeAt(userReadIndex);
         read.add(Read(
-          user: userRead.user,
+          user: event.user,
           lastRead: event.createdAt,
         ));
         _channelState = _channelState.copyWith(read: read);
