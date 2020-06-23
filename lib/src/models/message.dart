@@ -220,12 +220,18 @@ class Message {
       );
 }
 
+/// A translated message
+/// It has an additional property called [i18n]
 @JsonSerializable()
 class TranslatedMessage extends Message {
+  /// Constructor used for json serialization
   TranslatedMessage(this.i18n);
 
+  /// A Map of
   final Map<String, String> i18n;
 
+  /// Known top level fields.
+  /// Useful for [Serialization] methods.
   static final topLevelFields = [
     'i18n',
     ...Message.topLevelFields,
