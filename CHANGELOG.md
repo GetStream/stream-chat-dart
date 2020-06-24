@@ -1,3 +1,7 @@
+## 0.2.0-alpha+23
+
+- Add `lastMessage` getter to `Channel.state`
+
 ## 0.2.0-alpha+22
 
 - Add `isSystem` property to Message
