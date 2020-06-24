@@ -1069,6 +1069,15 @@ class ChannelClientState {
   Stream<List<Message>> get messagesStream =>
       channelStateStream.map((cs) => cs.messages);
 
+  /// Get channel last message
+  Message get lastMessage => _channelState.messages?.isNotEmpty == true
+      ? _channelState.messages.last
+      : null;
+
+  /// Get channel last message
+  Stream<Message> get lastMessageStream => messagesStream
+      .map((event) => event?.isNotEmpty == true ? event.last : null);
+
   /// Channel members list
   List<Member> get members => _channelState.members
       .map((e) => e.copyWith(user: _channel.client.state.users[e.user.id]))
