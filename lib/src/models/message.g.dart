@@ -25,6 +25,7 @@ Message _$MessageFromJson(Map json) {
                 (k, e) => MapEntry(k as String, e),
               )))
         ?.toList(),
+    silent: json['silent'] as bool,
     reactionCounts: (json['reaction_counts'] as Map)?.map(
       (k, e) => MapEntry(k as String, e as int),
     ),
@@ -66,7 +67,6 @@ Message _$MessageFromJson(Map json) {
     deletedAt: json['deleted_at'] == null
         ? null
         : DateTime.parse(json['deleted_at'] as String),
-    silent: json['silent'] as bool,
   );
 }
 

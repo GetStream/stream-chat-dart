@@ -1005,7 +1005,7 @@ class ChannelClientState {
     }
 
     _channel.on(EventType.messageRead).listen((event) {
-      final read = List<Read>.from(_channelState.read);
+      final read = List<Read>.from(_channelState?.read ?? []);
       final userReadIndex = read?.indexWhere((r) => r.user.id == event.user.id);
 
       if (userReadIndex != null && userReadIndex != -1) {

@@ -88,6 +88,18 @@
 
 - Minor bug fixes
 
+## 0.1.30
+
+- Add silent property to message
+
+## 0.1.29
+
+- Fix read event handling
+
+## 0.1.28
+
+- Fix bug clearing members when receiving a message
+
 ## 0.1.27
 
 - Update dependencies

@@ -82,7 +82,7 @@ class Message {
   /// Check if this message needs to show in the channel.
   final bool showInChannel;
 
-  /// Check if this message needs to show in the channel.
+  /// If true the message is silent
   final bool silent;
 
   /// A used command name.
@@ -131,6 +131,7 @@ class Message {
     'mentioned_users',
     'reaction_counts',
     'reaction_scores',
+    'silent',
     'parent_id',
     'reply_count',
     'show_in_channel',
@@ -148,6 +149,7 @@ class Message {
     this.type,
     this.attachments,
     this.mentionedUsers,
+    this.silent,
     this.reactionCounts,
     this.reactionScores,
     this.latestReactions,
@@ -161,7 +163,6 @@ class Message {
     this.user,
     this.extraData,
     this.deletedAt,
-    this.silent,
     this.status = MessageSendingStatus.SENT,
   });
 
@@ -187,8 +188,8 @@ class Message {
     String parentId,
     int replyCount,
     bool showInChannel,
-    String command,
     bool silent,
+    String command,
     DateTime createdAt,
     DateTime updatedAt,
     DateTime deletedAt,
@@ -211,10 +212,10 @@ class Message {
         showInChannel: showInChannel ?? this.showInChannel,
         command: command ?? this.command,
         createdAt: createdAt ?? this.createdAt,
+        silent: silent ?? this.silent,
         extraData: extraData ?? this.extraData,
         user: user ?? this.user,
         updatedAt: updatedAt ?? this.updatedAt,
-        silent: silent ?? this.silent,
         deletedAt: deletedAt ?? this.deletedAt,
         status: status ?? this.status,
       );
