@@ -328,8 +328,7 @@ void main() {
 
     final mockWSChannel = MockWSChannel();
 
-    final StreamController<String> streamController =
-        StreamController<String>.broadcast();
+    final streamController = StreamController<String>.broadcast();
 
     final computedUrl =
         'wss://baseurl/connect?test=true&json=%7B%22payload%22%3A%22test%22%2C%22user_details%22%3A%7B%22id%22%3A%22testid%22%7D%7D';
@@ -340,18 +339,15 @@ void main() {
       return streamController.stream;
     });
 
-    final timer = Timer.periodic(
-      Duration(milliseconds: 100),
-      (_) => streamController.sink.addError('testerror'),
+    Future.delayed(
+      Duration(milliseconds: 1000),
+      () => streamController.sink.addError('test error'),
     );
 
     try {
       expect(await ws.connect(), throwsA(isA<String>()));
-    } catch (_) {}
-
-    verify(connectFunc(computedUrl)).called(1);
-
-    await streamController.close();
-    timer.cancel();
+    } catch (e) {
+      verify(connectFunc(computedUrl)).called(greaterThanOrEqualTo(1));
+    }
   });
 }

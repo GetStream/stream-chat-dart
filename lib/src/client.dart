@@ -602,26 +602,32 @@ class Client {
     );
 
     final users = res.channels
-        .expand((element) => element.members.map((element) => element.user))
-        .toList();
-    state._updateUsers(users);
+        ?.expand((channel) => channel.members.map((member) => member.user))
+        ?.toList();
+
+    if (users != null) {
+      state._updateUsers(users);
+    }
 
     logger.info('Got ${res.channels?.length} channels from api');
 
     newChannels = Map<String, Channel>.from(state.channels ?? {});
     channels.clear();
-    for (final channelState in res.channels) {
-      final channel = newChannels[channelState.channel.cid];
-      if (channel != null) {
-        channel.state?.updateChannelState(channelState);
-        channels.add(channel);
-      } else {
-        final newChannel = Channel.fromState(this, channelState);
-        await _offlineStorage
-            ?.updateChannelState(newChannel.state.channelState);
-        newChannel.state?.updateChannelState(channelState);
-        newChannels[newChannel.cid] = newChannel;
-        channels.add(newChannel);
+
+    if (res.channels != null) {
+      for (final channelState in res.channels) {
+        final channel = newChannels[channelState.channel.cid];
+        if (channel != null) {
+          channel.state?.updateChannelState(channelState);
+          channels.add(channel);
+        } else {
+          final newChannel = Channel.fromState(this, channelState);
+          await _offlineStorage
+              ?.updateChannelState(newChannel.state.channelState);
+          newChannel.state?.updateChannelState(channelState);
+          newChannels[newChannel.cid] = newChannel;
+          channels.add(newChannel);
+        }
       }
     }
 
@@ -1010,8 +1016,8 @@ class Client {
       updatedAt: message.updatedAt ?? DateTime.now(),
     );
 
-    final channel = state.channels[cid];
-    channel.state.addMessage(message);
+    final channel = state?.channels != null ? state?.channels[cid] : null;
+    channel?.state?.addMessage(message);
 
     return post('/messages/${message.id}', data: {'message': message})
         .then((res) {
@@ -1020,12 +1026,12 @@ class Client {
         UpdateMessageResponse.fromJson,
       );
 
-      channel.state.addMessage(updateMessageResponse?.message);
+      channel?.state?.addMessage(updateMessageResponse?.message);
 
       return updateMessageResponse;
     }).catchError((error) {
       if (state?.channels != null) {
-        channel.state.retryQueue.add([message]);
+        channel?.state?.retryQueue?.add([message]);
       }
       throw error;
     });
@@ -1048,16 +1054,22 @@ class Client {
         deletedAt: message.deletedAt ?? DateTime.now(),
       );
 
-      state.channels[cid].state.addMessage(message);
+      if (state?.channels != null) {
+        state.channels[cid].state.addMessage(message);
+      }
 
       final response = await delete('/messages/${message.id}');
 
-      state.channels[cid].state
-          .addMessage(message.copyWith(status: MessageSendingStatus.SENT));
+      if (state?.channels != null) {
+        state.channels[cid].state
+            .addMessage(message.copyWith(status: MessageSendingStatus.SENT));
+      }
 
       return decode(response.data, EmptyResponse.fromJson);
     } catch (error) {
-      state.channels[cid].state.retryQueue.add([message]);
+      if (state?.channels != null) {
+        state.channels[cid].state.retryQueue.add([message]);
+      }
       rethrow;
     }
   }
@@ -1140,7 +1152,7 @@ class ClientState {
   }
 
   void _updateUsers(List<User> users) {
-    users.forEach(_updateUser);
+    users?.forEach(_updateUser);
   }
 
   void _updateUser(User user) {

@@ -157,12 +157,12 @@ class Channel {
       final parentMessage =
           state.messages.firstWhere((m) => m.id == message.parentId);
 
-      state.addMessage(parentMessage.copyWith(
+      state?.addMessage(parentMessage.copyWith(
         replyCount: parentMessage.replyCount + 1,
       ));
     }
 
-    state.addMessage(newMessage);
+    state?.addMessage(newMessage);
 
     try {
       final response = await _client.post(
@@ -178,11 +178,11 @@ class Channel {
 
       final res = _client.decode(response.data, SendMessageResponse.fromJson);
 
-      state.addMessage(res.message);
+      state?.addMessage(res.message);
 
       return res;
     } catch (error) {
-      state.retryQueue.add([newMessage]);
+      state?.retryQueue?.add([newMessage]);
       rethrow;
     }
   }
@@ -257,7 +257,7 @@ class Channel {
       score: currentScore + 1,
     );
 
-    state._addMessageReaction(message, newReaction);
+    state?._addMessageReaction(message, newReaction);
 
     try {
       final res = await _client.post(
@@ -266,7 +266,7 @@ class Channel {
       );
       return _client.decode(res.data, SendReactionResponse.fromJson);
     } catch (_) {
-      state._removeMessageReaction(message, newReaction);
+      state?._removeMessageReaction(message, newReaction);
       rethrow;
     }
   }
@@ -459,7 +459,7 @@ class Channel {
       '$_channelURL/stop-watching',
       data: {},
     );
-    return _client.decode(response.data, EmptyResponse.fromJson);
+    return _client.decode(response?.data, EmptyResponse.fromJson);
   }
 
   /// List the message replies for a parent message

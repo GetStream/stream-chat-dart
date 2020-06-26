@@ -1481,7 +1481,7 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging');
-        final Map<String, dynamic> options = {
+        final options = {
           'watch': true,
           'state': true,
           'presence': true,
@@ -1797,13 +1797,17 @@ void main() {
         );
         final channelClient = client.channel('messaging', id: 'testid');
 
-        when(mockDio.post<String>('/channels/messaging/testid/stop-watching'))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(mockDio.post<String>(
+          '/channels/messaging/testid/stop-watching',
+          data: {},
+        )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await channelClient.stopWatching();
 
-        verify(mockDio.post<String>('/channels/messaging/testid/stop-watching'))
-            .called(1);
+        verify(mockDio.post<String>(
+          '/channels/messaging/testid/stop-watching',
+          data: {},
+        )).called(1);
       });
 
       test('update', () async {

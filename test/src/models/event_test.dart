@@ -76,7 +76,8 @@ void main() {
           'total_unread_count': 1,
           'unread_channels': 1,
           'online': true,
-          'is_local': true
+          'is_local': true,
+          'member': null,
         },
       );
     });

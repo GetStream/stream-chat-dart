@@ -150,7 +150,7 @@ void main() {
           offset: 2,
         );
 
-        final Map<String, dynamic> queryParams = {
+        final queryParams = {
           'payload': json.encode({
             "filter_conditions": queryFilter,
             "sort": sortOptions,
