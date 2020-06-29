@@ -267,6 +267,16 @@ class OfflineStorage extends _$OfflineStorage {
 
     _logger.info('Got ${cachedChannels.length} channels');
 
+    if (sort?.isEmpty != false && cachedChannels?.isNotEmpty == true) {
+      cachedChannels
+          .sort((a, b) => b.channel.updatedAt.compareTo(a.channel.updatedAt));
+      cachedChannels.sort((a, b) {
+        final dateA = a.channel.lastMessageAt ?? a.channel.createdAt;
+        final dateB = b.channel.lastMessageAt ?? b.channel.createdAt;
+        return dateB.compareTo(dateA);
+      });
+    }
+
     return cachedChannels;
   }
 

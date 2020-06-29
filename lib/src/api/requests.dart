@@ -24,7 +24,7 @@ class SortOption {
   /// // Sort channels by the last message date:
   /// final sorting = SortOption("lastMessageDate")
   /// ```
-  SortOption(this.field, {this.direction = DESC});
+  const SortOption(this.field, {this.direction = DESC});
 
   /// Serialize model to json
   Map<String, dynamic> toJson() => _$SortOptionToJson(this);
