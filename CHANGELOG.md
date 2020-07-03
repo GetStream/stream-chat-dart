@@ -1,3 +1,15 @@
+## 0.2.0
+
+- Add `lastMessage` getter to Channel.state
+- Add `isSystem` property to Message
+- Incremental websocket reconnection timeout
+- Add translate message api call
+- Add queryMembers api call
+- Add user list to client state
+- Synchronize channel members status
+- Add offline storage
+- Add push notifications helper functions
+
 ## 0.2.0-alpha+23
 
 - Add `lastMessage` getter to `Channel.state`
