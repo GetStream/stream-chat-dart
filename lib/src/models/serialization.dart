@@ -1,13 +1,14 @@
 import 'user.dart';
 
 /// Used to avoid to serialize properties to json
-readonly(_) => null;
+Null readonly(_) => null;
 
 /// Helper class for serialization to and from json
 class Serialization {
   /// Used to avoid to serialize properties to json
   static const Function readOnly = readonly;
 
+  /// List of users to list of userIds
   static List<String> userIds(List<User> users) {
     return users?.map((u) => u.id)?.toList();
   }
@@ -21,7 +22,7 @@ class Serialization {
       return json;
     }
     var clone = Map<String, dynamic>.from(json);
-    clone['extra_data'] = Map<String, dynamic>();
+    clone['extra_data'] = <String, dynamic>{};
 
     json?.keys?.forEach((key) {
       if (!topLevelFields.contains(key)) {

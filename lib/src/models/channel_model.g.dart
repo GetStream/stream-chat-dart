@@ -6,17 +6,21 @@ part of 'channel_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ChannelModel _$ChannelModelFromJson(Map<String, dynamic> json) {
+ChannelModel _$ChannelModelFromJson(Map json) {
   return ChannelModel(
     id: json['id'] as String,
     type: json['type'] as String,
     cid: json['cid'] as String,
     config: json['config'] == null
         ? null
-        : ChannelConfig.fromJson(json['config'] as Map<String, dynamic>),
+        : ChannelConfig.fromJson((json['config'] as Map)?.map(
+            (k, e) => MapEntry(k as String, e),
+          )),
     createdBy: json['created_by'] == null
         ? null
-        : User.fromJson(json['created_by'] as Map<String, dynamic>),
+        : User.fromJson((json['created_by'] as Map)?.map(
+            (k, e) => MapEntry(k as String, e),
+          )),
     frozen: json['frozen'] as bool,
     lastMessageAt: json['last_message_at'] == null
         ? null
@@ -31,7 +35,9 @@ ChannelModel _$ChannelModelFromJson(Map<String, dynamic> json) {
         ? null
         : DateTime.parse(json['deleted_at'] as String),
     memberCount: json['member_count'] as int,
-    extraData: json['extra_data'] as Map<String, dynamic>,
+    extraData: (json['extra_data'] as Map)?.map(
+      (k, e) => MapEntry(k as String, e),
+    ),
   );
 }
 

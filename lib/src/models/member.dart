@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+
 import '../models/user.dart';
 
 part 'member.g.dart';
@@ -47,7 +48,36 @@ class Member {
   });
 
   /// Create a new instance from a json
-  factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(json);
+  factory Member.fromJson(Map<String, dynamic> json) {
+    final member = _$MemberFromJson(json);
+    return member.copyWith(
+      userId: member.user?.id,
+    );
+  }
+
+  /// Creates a copy of [Member] with specified attributes overridden.
+  Member copyWith({
+    User user,
+    DateTime inviteAcceptedAt,
+    DateTime inviteRejectedAt,
+    bool invited,
+    String role,
+    String userId,
+    bool isModerator,
+    DateTime createdAt,
+    DateTime updatedAt,
+  }) =>
+      Member(
+        user: user ?? this.user,
+        inviteAcceptedAt: inviteAcceptedAt ?? this.inviteAcceptedAt,
+        inviteRejectedAt: inviteRejectedAt ?? this.inviteRejectedAt,
+        invited: invited ?? this.invited,
+        role: role ?? this.role,
+        userId: userId ?? this.userId,
+        isModerator: isModerator ?? this.isModerator,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$MemberToJson(this);

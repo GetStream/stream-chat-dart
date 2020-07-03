@@ -58,6 +58,7 @@ void main() {
         me: OwnUser(id: 'id2'),
         totalUnreadCount: 1,
         unreadChannels: 1,
+        online: true,
       );
 
       expect(
@@ -71,8 +72,12 @@ void main() {
           'user': {'id': 'id'},
           'reaction': null,
           'message': null,
+          'channel': null,
           'total_unread_count': 1,
           'unread_channels': 1,
+          'online': true,
+          'is_local': true,
+          'member': null,
         },
       );
     });

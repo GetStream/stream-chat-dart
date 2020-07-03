@@ -87,6 +87,10 @@ class ChannelModel {
     this.extraData,
   });
 
+  /// Shortcut for channel name
+  String get name =>
+      extraData?.containsKey('name') == true ? extraData['name'] : cid;
+
   /// Create a new instance from a json
   factory ChannelModel.fromJson(Map<String, dynamic> json) {
     return _$ChannelModelFromJson(

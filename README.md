@@ -31,8 +31,6 @@ Thanks to whoever tries these versions and reports bugs or suggestions.
 
 There is a detailed Flutter example project in the `example` folder. You can directly run and play on it. 
 
-At [this link](https://getstream.github.io/stream-chat-dart/#/) you can find the example compiled with Hummingbird
-
 ## Setup API Client
 
 First you need to instantiate a chat client. The Chat client will manage API call, event handling and manage the websocket connection to Stream Chat servers. You should only create the client once and re-use it across your application.
@@ -64,6 +62,12 @@ myLogHandlerFunction = (LogRecord record) {
 
 var client = Client("stream-chat-api-key", logHandlerFunction: myLogHandlerFunction);
 ```
+
+### Offline storage 
+
+By default the library saves information about channels and messages in a SQLite DB.
+
+Set the property `persistenceEnabled` to false if you don't want to use the offline storage.
 
 ## Contributing
 

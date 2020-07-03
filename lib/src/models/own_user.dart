@@ -34,7 +34,8 @@ class OwnUser extends User {
     'mutes',
     'total_unread_count',
     'unread_channels',
-  ]..addAll(User.topLevelFields);
+    ...User.topLevelFields,
+  ];
 
   /// Constructor used for json serialization
   OwnUser({
@@ -68,6 +69,7 @@ class OwnUser extends User {
   }
 
   /// Serialize to json
+  @override
   Map<String, dynamic> toJson() {
     return Serialization.moveKeysToMapInPlace(
         _$OwnUserToJson(this), topLevelFields);

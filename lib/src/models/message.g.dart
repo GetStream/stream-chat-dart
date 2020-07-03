@@ -6,33 +6,45 @@ part of 'message.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Message _$MessageFromJson(Map<String, dynamic> json) {
+Message _$MessageFromJson(Map json) {
   return Message(
     id: json['id'] as String,
     text: json['text'] as String,
     type: json['type'] as String,
     attachments: (json['attachments'] as List)
-        ?.map((e) =>
-            e == null ? null : Attachment.fromJson(e as Map<String, dynamic>))
+        ?.map((e) => e == null
+            ? null
+            : Attachment.fromJson((e as Map)?.map(
+                (k, e) => MapEntry(k as String, e),
+              )))
         ?.toList(),
     mentionedUsers: (json['mentioned_users'] as List)
-        ?.map(
-            (e) => e == null ? null : User.fromJson(e as Map<String, dynamic>))
+        ?.map((e) => e == null
+            ? null
+            : User.fromJson((e as Map)?.map(
+                (k, e) => MapEntry(k as String, e),
+              )))
         ?.toList(),
     silent: json['silent'] as bool,
-    reactionCounts: (json['reaction_counts'] as Map<String, dynamic>)?.map(
-      (k, e) => MapEntry(k, e as int),
+    reactionCounts: (json['reaction_counts'] as Map)?.map(
+      (k, e) => MapEntry(k as String, e as int),
     ),
-    reactionScores: (json['reaction_scores'] as Map<String, dynamic>)?.map(
-      (k, e) => MapEntry(k, e as int),
+    reactionScores: (json['reaction_scores'] as Map)?.map(
+      (k, e) => MapEntry(k as String, e as int),
     ),
     latestReactions: (json['latest_reactions'] as List)
-        ?.map((e) =>
-            e == null ? null : Reaction.fromJson(e as Map<String, dynamic>))
+        ?.map((e) => e == null
+            ? null
+            : Reaction.fromJson((e as Map)?.map(
+                (k, e) => MapEntry(k as String, e),
+              )))
         ?.toList(),
     ownReactions: (json['own_reactions'] as List)
-        ?.map((e) =>
-            e == null ? null : Reaction.fromJson(e as Map<String, dynamic>))
+        ?.map((e) => e == null
+            ? null
+            : Reaction.fromJson((e as Map)?.map(
+                (k, e) => MapEntry(k as String, e),
+              )))
         ?.toList(),
     parentId: json['parent_id'] as String,
     replyCount: json['reply_count'] as int,
@@ -46,9 +58,15 @@ Message _$MessageFromJson(Map<String, dynamic> json) {
         : DateTime.parse(json['updated_at'] as String),
     user: json['user'] == null
         ? null
-        : User.fromJson(json['user'] as Map<String, dynamic>),
-    extraData: json['extra_data'] as Map<String, dynamic>,
-    status: _$enumDecodeNullable(_$MessageSendingStatusEnumMap, json['status']),
+        : User.fromJson((json['user'] as Map)?.map(
+            (k, e) => MapEntry(k as String, e),
+          )),
+    extraData: (json['extra_data'] as Map)?.map(
+      (k, e) => MapEntry(k as String, e),
+    ),
+    deletedAt: json['deleted_at'] == null
+        ? null
+        : DateTime.parse(json['deleted_at'] as String),
   );
 }
 
@@ -56,7 +74,6 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   final val = <String, dynamic>{
     'id': instance.id,
     'text': instance.text,
-    'status': _$MessageSendingStatusEnumMap[instance.status],
   };
 
   void writeNotNull(String key, dynamic value) {
@@ -82,43 +99,19 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   writeNotNull('updated_at', readonly(instance.updatedAt));
   writeNotNull('user', readonly(instance.user));
   writeNotNull('extra_data', instance.extraData);
+  writeNotNull('deleted_at', readonly(instance.deletedAt));
   return val;
 }
 
-T _$enumDecode<T>(
-  Map<T, dynamic> enumValues,
-  dynamic source, {
-  T unknownValue,
-}) {
-  if (source == null) {
-    throw ArgumentError('A value must be provided. Supported values: '
-        '${enumValues.values.join(', ')}');
-  }
-
-  final value = enumValues.entries
-      .singleWhere((e) => e.value == source, orElse: () => null)
-      ?.key;
-
-  if (value == null && unknownValue == null) {
-    throw ArgumentError('`$source` is not one of the supported values: '
-        '${enumValues.values.join(', ')}');
-  }
-  return value ?? unknownValue;
+TranslatedMessage _$TranslatedMessageFromJson(Map json) {
+  return TranslatedMessage(
+    (json['i18n'] as Map)?.map(
+      (k, e) => MapEntry(k as String, e as String),
+    ),
+  );
 }
 
-T _$enumDecodeNullable<T>(
-  Map<T, dynamic> enumValues,
-  dynamic source, {
-  T unknownValue,
-}) {
-  if (source == null) {
-    return null;
-  }
-  return _$enumDecode<T>(enumValues, source, unknownValue: unknownValue);
-}
-
-const _$MessageSendingStatusEnumMap = {
-  MessageSendingStatus.SENDING: 'SENDING',
-  MessageSendingStatus.SENT: 'SENT',
-  MessageSendingStatus.FAILED: 'FAILED',
-};
+Map<String, dynamic> _$TranslatedMessageToJson(TranslatedMessage instance) =>
+    <String, dynamic>{
+      'i18n': instance.i18n,
+    };

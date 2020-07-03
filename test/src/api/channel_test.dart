@@ -8,6 +8,7 @@ import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/models/event.dart';
 import 'package:stream_chat/src/models/member.dart';
 import 'package:stream_chat/src/models/message.dart';
+import 'package:stream_chat/src/models/reaction.dart';
 
 class MockDio extends Mock implements DioForNative {}
 
@@ -133,7 +134,7 @@ void main() {
           'message_id': 'messageid',
         })).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
-        await channelClient.sendAction('messageid', data);
+        await channelClient.sendAction(Message(id: 'messageid'), data);
 
         verify(mockDio.post<String>('/messages/messageid/action', data: {
           'id': 'testid',
@@ -392,7 +393,12 @@ void main() {
           },
         )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
-        await channelClient.sendReaction('messageid', reactionType);
+        await channelClient.sendReaction(
+          Message(
+            id: 'messageid',
+          ),
+          reactionType,
+        );
 
         verify(mockDio.post<String>('/messages/messageid/reaction', data: {
           'reaction': {
@@ -426,7 +432,10 @@ void main() {
         when(mockDio.delete<String>('/messages/messageid/reaction/test'))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
-        await channelClient.deleteReaction('messageid', 'test');
+        await channelClient.deleteReaction(
+          Message(id: 'messageid'),
+          Reaction(type: 'test'),
+        );
 
         verify(mockDio.delete<String>('/messages/messageid/reaction/test'))
             .called(1);
@@ -1472,7 +1481,7 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging');
-        final Map<String, dynamic> options = {
+        final options = {
           'watch': true,
           'state': true,
           'presence': true,
@@ -1788,13 +1797,17 @@ void main() {
         );
         final channelClient = client.channel('messaging', id: 'testid');
 
-        when(mockDio.post<String>('/channels/messaging/testid/stop-watching'))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(mockDio.post<String>(
+          '/channels/messaging/testid/stop-watching',
+          data: {},
+        )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await channelClient.stopWatching();
 
-        verify(mockDio.post<String>('/channels/messaging/testid/stop-watching'))
-            .called(1);
+        verify(mockDio.post<String>(
+          '/channels/messaging/testid/stop-watching',
+          data: {},
+        )).called(1);
       });
 
       test('update', () async {

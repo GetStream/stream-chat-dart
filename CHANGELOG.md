@@ -1,3 +1,93 @@
+## 0.2.0-alpha+23
+
+- Add `lastMessage` getter to `Channel.state`
+
+## 0.2.0-alpha+22
+
+- Add `isSystem` property to Message
+
+## 0.2.0-alpha+21
+
+- Incremental websocket reconnection timeout
+
+## 0.2.0-alpha+20
+
+- More robust offline storage insertions
+
+## 0.2.0-alpha+19
+
+- Add translate message api call
+- Add queryMembers api call
+
+## 0.2.0-alpha+18
+
+- Revert moor_ffi version to 0.5.0
+
+## 0.2.0-alpha+17
+
+- Add user list to client
+
+- Synchronize channel members status
+
+## 0.2.0-alpha+16
+
+- Try QueryChannels when `resync` endpoint returns an error
+
+## 0.2.0-alpha+15
+
+- Fix receiving reactions
+
+## 0.2.0-alpha+14
+
+- Avoid sending local event for optimistic updates
+
+## 0.2.0-alpha+13
+
+- Fix offline on app first start up
+
+## 0.2.0-alpha+12
+
+- Fix retry mechanism in threads
+- Fix delete channel query
+
+## 0.2.0-alpha+9
+
+- Add retry mechanism and retry queue
+
+## 0.2.0-alpha+8
+
+- Add copyWith to Attachment
+
+## 0.2.0-alpha+7
+
+- Add channel deleted/updated event handling
+
+## 0.2.0-alpha+6
+
+- Align with stable release
+
+## 0.2.0-alpha+5
+
+- Rename client parameters
+
+## 0.2.0-alpha+3
+
+- Remove dependencies on notification service
+
+- Expose some helping method for integrate offline storage with push notifications
+
+## 0.2.0-alpha+2
+
+- Fix unread count
+
+## 0.2.0-alpha
+
+- Offline storage
+
+- Push notifications
+
+- Minor bug fixes
+
 ## 0.1.30
 
 - Add silent property to message

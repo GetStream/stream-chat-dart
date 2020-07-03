@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -39,11 +40,23 @@ class WebSocket {
 
     final data = Map<String, dynamic>.from(connectPayload);
 
-    data["user_details"] = user.toJson();
-    qs["json"] = json.encode(data);
+    data['user_details'] = user.toJson();
+    qs['json'] = json.encode(data);
 
-    _uri = Uri.https(baseUrl, "connect", qs);
-    _path = _uri.toString().replaceFirst("https", "wss");
+    if (baseUrl.startsWith('https')) {
+      _path = baseUrl.replaceFirst('https://', '');
+      _path = Uri.https(_path, 'connect', qs)
+          .toString()
+          .replaceFirst('https', 'wss');
+    } else if (baseUrl.startsWith('http')) {
+      _path = baseUrl.replaceFirst('http://', '');
+      _path =
+          Uri.http(_path, 'connect', qs).toString().replaceFirst('http', 'ws');
+    } else {
+      _path = Uri.https(baseUrl, 'connect', qs)
+          .toString()
+          .replaceFirst('https', 'wss');
+    }
   }
 
   /// WS base url
@@ -83,12 +96,11 @@ class WebSocket {
   final int reconnectionMonitorTimeout;
 
   /// This notifies of connection status changes
-  ValueNotifier<ConnectionStatus> connectionStatus =
+  final ValueNotifier<ConnectionStatus> connectionStatus =
       ValueNotifier(ConnectionStatus.disconnected);
 
-  Uri _uri;
   String _path;
-
+  int _retryAttempt = 0;
   WebSocketChannel _channel;
   Timer _healthCheck, _reconnectionMonitor;
   DateTime _lastEventAt;
@@ -102,9 +114,6 @@ class WebSocket {
 
   /// Connect the WS using the parameters passed in the constructor
   Future<Event> connect() {
-    if (_manuallyClosed) {
-      connectionStatus = ValueNotifier(ConnectionStatus.disconnected);
-    }
     _manuallyClosed = false;
 
     if (_connecting) {
@@ -146,32 +155,34 @@ class WebSocket {
   }
 
   void _onData(data) {
-    logger.info('new data: $data');
     final event = _decodeEvent(data);
-    if (_lastEventAt != null) {
-      handler(event);
-    } else {
+    logger.info('received new event: $data');
+
+    if (_lastEventAt == null) {
       logger.info('connection estabilished');
       _connecting = false;
       _reconnecting = false;
       _lastEventAt = DateTime.now();
 
       connectionStatus.value = ConnectionStatus.connected;
+      _retryAttempt = 1;
 
       if (!_connectionCompleter.isCompleted) {
         _connectionCompleter.complete(event);
       }
 
-      handler(event);
-
       _startReconnectionMonitor();
       _startHealthCheck();
     }
+
+    handler(event);
     _lastEventAt = DateTime.now();
   }
 
   Future<void> _onConnectionError(error, stacktrace) async {
     logger.severe('error connecting');
+    logger.severe(error);
+    logger.severe(stacktrace);
     _connecting = false;
 
     if (!_reconnecting) {
@@ -203,32 +214,33 @@ class WebSocket {
     reconnectionTimer(_reconnectionMonitor);
   }
 
+  void _reconnectTimer() async {
+    if (!_reconnecting) {
+      return;
+    }
+    if (_connecting) {
+      logger.info('already connecting');
+      return;
+    }
+
+    logger.info('reconnecting..');
+
+    _cancelTimers();
+
+    await connect();
+
+    await Future.delayed(Duration(seconds: min(_retryAttempt * 5, 25)));
+    _reconnectTimer();
+    _retryAttempt++;
+  }
+
   Future<void> _reconnect() async {
     if (!_reconnecting) {
       _reconnecting = true;
       connectionStatus.value = ConnectionStatus.connecting;
     }
 
-    final reconnectionTimer = (timer) {
-      if (!_reconnecting) {
-        timer.cancel();
-        return;
-      }
-      if (_connecting) {
-        logger.info('already connecting');
-        return null;
-      }
-
-      logger.info('reconnecting..');
-
-      _cancelTimers();
-
-      connect();
-    };
-
-    final timer = Timer.periodic(Duration(seconds: 5), reconnectionTimer);
-
-    reconnectionTimer(timer);
+    _reconnectTimer();
   }
 
   void _cancelTimers() {

@@ -12,6 +12,7 @@ void main() {
       "id": "4637f7e4-a06b-42db-ba5a-8d8270dd926f",
       "text": "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
       "type": "regular",
+      "silent": false,
       "status": "SENT",
       "user": {
           "id": "c1c9b454-2bcc-402d-8bb0-2f3706ce1680",
@@ -76,6 +77,7 @@ void main() {
           "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA");
       expect(message.type, "regular");
       expect(message.user, isA<User>());
+      expect(message.silent, isA<bool>());
       expect(message.attachments, isA<List<Attachment>>());
       expect(message.latestReactions, isA<List<Reaction>>());
       expect(message.ownReactions, isA<List<Reaction>>());
@@ -91,6 +93,7 @@ void main() {
         id: "4637f7e4-a06b-42db-ba5a-8d8270dd926f",
         text:
             "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
+        silent: false,
         attachments: [
           Attachment.fromJson({
             "type": "video",
@@ -113,6 +116,7 @@ void main() {
         showInChannel: true,
         parentId: 'parentId',
         extraData: {'hey': 'test'},
+        status: MessageSendingStatus.SENT,
       );
 
       expect(
@@ -121,7 +125,7 @@ void main() {
         {
             "id": "4637f7e4-a06b-42db-ba5a-8d8270dd926f",
             "text": "https://giphy.com/gifs/the-lion-king-live-action-5zvN79uTGfLMOVfQaA",
-            "status": "SENT",
+            "silent": false,
             "attachments": [
               {
                 "type": "video",

@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_chat/src/client.dart';
 import 'package:stream_chat/src/models/device.dart';
+import 'package:stream_chat/src/models/event.dart';
 
 import '../models/channel_model.dart';
 import '../models/channel_state.dart';
@@ -16,6 +17,17 @@ class _BaseResponse {
   String duration;
 }
 
+/// Model response for [Client.resync] api call
+@JsonSerializable(createToJson: false)
+class SyncResponse extends _BaseResponse {
+  /// The list of events
+  List<Event> events;
+
+  /// Create a new instance from a json
+  static SyncResponse fromJson(Map<String, dynamic> json) =>
+      _$SyncResponseFromJson(json);
+}
+
 /// Model response for [Client.queryChannels] api call
 @JsonSerializable(createToJson: false)
 class QueryChannelsResponse extends _BaseResponse {
@@ -25,6 +37,28 @@ class QueryChannelsResponse extends _BaseResponse {
   /// Create a new instance from a json
   static QueryChannelsResponse fromJson(Map<String, dynamic> json) =>
       _$QueryChannelsResponseFromJson(json);
+}
+
+/// Model response for [Client.queryChannels] api call
+@JsonSerializable(createToJson: false)
+class TranslateMessageResponse extends _BaseResponse {
+  /// List of channels state returned by the query
+  TranslatedMessage message;
+
+  /// Create a new instance from a json
+  static TranslateMessageResponse fromJson(Map<String, dynamic> json) =>
+      _$TranslateMessageResponseFromJson(json);
+}
+
+/// Model response for [Client.queryChannels] api call
+@JsonSerializable(createToJson: false)
+class QueryMembersResponse extends _BaseResponse {
+  /// List of channels state returned by the query
+  List<Member> members;
+
+  /// Create a new instance from a json
+  static QueryMembersResponse fromJson(Map<String, dynamic> json) =>
+      _$QueryMembersResponseFromJson(json);
 }
 
 /// Model response for [Client.queryUsers] api call
@@ -160,9 +194,18 @@ class GetMessageResponse extends _BaseResponse {
   /// Message returned by the api call
   Message message;
 
+  /// Channel of the message
+  ChannelModel channel;
+
   /// Create a new instance from a json
-  static GetMessageResponse fromJson(Map<String, dynamic> json) =>
-      _$GetMessageResponseFromJson(json);
+  static GetMessageResponse fromJson(Map<String, dynamic> json) {
+    final res = _$GetMessageResponseFromJson(json);
+    final jsonChannel = res.message?.extraData?.remove('channel');
+    if (jsonChannel != null) {
+      res.channel = ChannelModel.fromJson(jsonChannel);
+    }
+    return res;
+  }
 }
 
 /// Model response for [Client.search] api call

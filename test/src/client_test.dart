@@ -43,6 +43,7 @@ void main() {
       test('should create the object correctly', () {
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
         );
 
         expect(client.baseURL, 'chat-us-east-1.stream-io-api.com');
@@ -59,6 +60,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           connectTimeout: Duration(seconds: 10),
           receiveTimeout: Duration(seconds: 12),
           logLevel: Level.INFO,
@@ -82,6 +84,7 @@ void main() {
       test('Channel', () {
         final client = Client(
           'test',
+          persistenceEnabled: false,
         );
         final Map<String, dynamic> data = {'test': 1};
         final channelClient = client.channel('type', id: 'id', extraData: data);
@@ -100,6 +103,7 @@ void main() {
         final client = Client(
           'api-key',
           httpClient: mockDio,
+          persistenceEnabled: false,
         );
 
         final queryParams = {
@@ -116,7 +120,7 @@ void main() {
         when(mockDio.get<String>('/channels', queryParameters: queryParams))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
-        await client.queryChannels();
+        await client.queryChannels().toList();
 
         verify(mockDio.get<String>('/channels', queryParameters: queryParams))
             .called(1);
@@ -131,6 +135,7 @@ void main() {
         final client = Client(
           'api-key',
           httpClient: mockDio,
+          persistenceEnabled: false,
         );
 
         final Map<String, dynamic> queryFilter = {
@@ -145,7 +150,7 @@ void main() {
           offset: 2,
         );
 
-        final Map<String, dynamic> queryParams = {
+        final queryParams = {
           'payload': json.encode({
             "filter_conditions": queryFilter,
             "sort": sortOptions,
@@ -160,12 +165,14 @@ void main() {
           return Response(data: '{}', statusCode: 200);
         });
 
-        await client.queryChannels(
-          filter: queryFilter,
-          sort: sortOptions,
-          options: options,
-          paginationParams: paginationParams,
-        );
+        await client
+            .queryChannels(
+              filter: queryFilter,
+              sort: sortOptions,
+              options: options,
+              paginationParams: paginationParams,
+            )
+            .toList();
 
         verify(mockDio.get<String>('/channels', queryParameters: queryParams))
             .called(1);
@@ -181,6 +188,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -209,6 +217,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -252,6 +261,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -274,6 +284,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -293,6 +304,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -310,6 +322,7 @@ void main() {
     test('devToken', () {
       final client = Client(
         'api-key',
+        persistenceEnabled: false,
       );
       final token = client.devToken('test');
 
@@ -328,6 +341,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -356,6 +370,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -399,6 +414,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -420,6 +436,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -435,6 +452,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -456,6 +474,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -481,6 +500,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -510,6 +530,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -531,6 +552,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -553,6 +575,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -574,6 +597,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -597,6 +621,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -618,6 +643,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -639,19 +665,24 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
-        final message = Message(id: 'test');
+        final message = Message(
+          id: 'test',
+          updatedAt: DateTime.now(),
+        );
 
-        when(mockDio.post<String>('/messages/${message.id}',
-                data: {'message': message}))
-            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(mockDio.post<String>(
+          '/messages/${message.id}',
+          data: {'message': message},
+        )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await client.updateMessage(message);
 
         verify(mockDio.post<String>('/messages/${message.id}',
-            data: {'message': message})).called(1);
+            data: {'message': anything})).called(1);
       });
 
       test('deleteMessage', () async {
@@ -662,6 +693,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -683,6 +715,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -704,6 +737,7 @@ void main() {
 
         final client = Client(
           'api-key',
+          persistenceEnabled: false,
           httpClient: mockDio,
         );
 
@@ -726,6 +760,7 @@ void main() {
 
           final client = Client(
             'api-key',
+            persistenceEnabled: false,
             httpClient: mockDio,
           );
 
@@ -751,6 +786,7 @@ void main() {
 
           final client = Client(
             'api-key',
+            persistenceEnabled: false,
             httpClient: dioHttp,
           );
 
@@ -770,6 +806,7 @@ void main() {
 
           final client = Client(
             'api-key',
+            persistenceEnabled: false,
             httpClient: mockDio,
           );
 
@@ -793,6 +830,7 @@ void main() {
 
           final client = Client(
             'api-key',
+            persistenceEnabled: false,
             httpClient: dioHttp,
           );
 
@@ -812,6 +850,7 @@ void main() {
 
           final client = Client(
             'api-key',
+            persistenceEnabled: false,
             httpClient: mockDio,
           );
 
@@ -835,6 +874,7 @@ void main() {
 
           final client = Client(
             'api-key',
+            persistenceEnabled: false,
             httpClient: dioHttp,
           );
 
@@ -854,6 +894,7 @@ void main() {
 
           final client = Client(
             'api-key',
+            persistenceEnabled: false,
             httpClient: mockDio,
           );
 
@@ -878,6 +919,7 @@ void main() {
 
           final client = Client(
             'api-key',
+            persistenceEnabled: false,
             httpClient: dioHttp,
           );
 
@@ -897,6 +939,7 @@ void main() {
 
           final client = Client(
             'api-key',
+            persistenceEnabled: false,
             httpClient: mockDio,
           );
 
@@ -922,6 +965,7 @@ void main() {
 
           final client = Client(
             'api-key',
+            persistenceEnabled: false,
             httpClient: dioHttp,
           );
 

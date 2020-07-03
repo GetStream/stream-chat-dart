@@ -6,27 +6,41 @@ part of 'channel_state.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ChannelState _$ChannelStateFromJson(Map<String, dynamic> json) {
+ChannelState _$ChannelStateFromJson(Map json) {
   return ChannelState(
     channel: json['channel'] == null
         ? null
-        : ChannelModel.fromJson(json['channel'] as Map<String, dynamic>),
+        : ChannelModel.fromJson((json['channel'] as Map)?.map(
+            (k, e) => MapEntry(k as String, e),
+          )),
     messages: (json['messages'] as List)
-        ?.map((e) =>
-            e == null ? null : Message.fromJson(e as Map<String, dynamic>))
+        ?.map((e) => e == null
+            ? null
+            : Message.fromJson((e as Map)?.map(
+                (k, e) => MapEntry(k as String, e),
+              )))
         ?.toList(),
     members: (json['members'] as List)
-        ?.map((e) =>
-            e == null ? null : Member.fromJson(e as Map<String, dynamic>))
+        ?.map((e) => e == null
+            ? null
+            : Member.fromJson((e as Map)?.map(
+                (k, e) => MapEntry(k as String, e),
+              )))
         ?.toList(),
     watcherCount: json['watcher_count'] as int,
     watchers: (json['watchers'] as List)
-        ?.map(
-            (e) => e == null ? null : User.fromJson(e as Map<String, dynamic>))
+        ?.map((e) => e == null
+            ? null
+            : User.fromJson((e as Map)?.map(
+                (k, e) => MapEntry(k as String, e),
+              )))
         ?.toList(),
     read: (json['read'] as List)
-        ?.map(
-            (e) => e == null ? null : Read.fromJson(e as Map<String, dynamic>))
+        ?.map((e) => e == null
+            ? null
+            : Read.fromJson((e as Map)?.map(
+                (k, e) => MapEntry(k as String, e),
+              )))
         ?.toList(),
   );
 }

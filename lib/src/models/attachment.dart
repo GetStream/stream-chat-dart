@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:json_annotation/json_annotation.dart';
+
 import 'action.dart';
 import 'serialization.dart';
 
@@ -48,6 +49,8 @@ class Attachment {
 
   /// Actions from a command
   final List<Action> actions;
+
+  final Uri localUri;
 
   /// Map of custom channel extraData
   @JsonKey(includeIfNull: false)
@@ -97,15 +100,63 @@ class Attachment {
     this.assetUrl,
     this.actions,
     this.extraData,
+    this.localUri,
   });
 
   /// Create a new instance from a json
-  factory Attachment.fromJson(Map<String, dynamic> json) =>
-      _$AttachmentFromJson(Serialization.moveKeysToRoot(json, topLevelFields));
+  factory Attachment.fromJson(Map<String, dynamic> json) {
+    return _$AttachmentFromJson(
+        Serialization.moveKeysToRoot(json, topLevelFields));
+  }
 
   /// Serialize to json
   Map<String, dynamic> toJson() => Serialization.moveKeysToMapInPlace(
       _$AttachmentToJson(this), topLevelFields);
+
+  Attachment copyWith({
+    String type,
+    String titleLink,
+    String title,
+    String thumbUrl,
+    String text,
+    String pretext,
+    String ogScrapeUrl,
+    String imageUrl,
+    String footerIcon,
+    String footer,
+    dynamic fields,
+    String fallback,
+    String color,
+    String authorName,
+    String authorLink,
+    String authorIcon,
+    String assetUrl,
+    List<Action> actions,
+    Uri localUri,
+    Map<String, dynamic> extraData,
+  }) =>
+      Attachment(
+        type: type ?? this.type,
+        titleLink: titleLink ?? this.titleLink,
+        title: title ?? this.title,
+        thumbUrl: thumbUrl ?? this.thumbUrl,
+        text: text ?? this.text,
+        pretext: pretext ?? this.pretext,
+        ogScrapeUrl: ogScrapeUrl ?? this.ogScrapeUrl,
+        imageUrl: imageUrl ?? this.imageUrl,
+        footerIcon: footerIcon ?? this.footerIcon,
+        footer: footer ?? this.footer,
+        fields: fields ?? this.fields,
+        fallback: fallback ?? this.fallback,
+        color: color ?? this.color,
+        authorName: authorName ?? this.authorName,
+        authorLink: authorLink ?? this.authorLink,
+        authorIcon: authorIcon ?? this.authorIcon,
+        assetUrl: assetUrl ?? this.assetUrl,
+        actions: actions ?? this.actions,
+        localUri: localUri ?? this.localUri,
+        extraData: extraData ?? this.extraData,
+      );
 
   @override
   bool operator ==(Object other) =>

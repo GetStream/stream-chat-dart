@@ -1,11 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stream_chat/src/api/retry_policy.dart';
 import 'package:stream_chat/src/event_type.dart';
+import 'package:stream_chat/src/models/channel_model.dart';
+import 'package:stream_chat/src/models/own_user.dart';
 import 'package:stream_chat/version.dart';
 import 'package:uuid/uuid.dart';
 
@@ -14,6 +19,7 @@ import 'api/connection_status.dart';
 import 'api/requests.dart';
 import 'api/responses.dart';
 import 'api/websocket.dart';
+import 'db/offline_storage.dart';
 import 'exceptions.dart';
 import 'models/event.dart';
 import 'models/message.dart';
@@ -22,6 +28,15 @@ import 'models/user.dart';
 typedef LogHandlerFunction = void Function(LogRecord record);
 typedef DecoderFunction<T> = T Function(Map<String, dynamic>);
 typedef TokenProvider = Future<String> Function(String userId);
+
+/// The key used to save the userId to sharedPreferences
+const String KEY_USER_ID = 'KEY_USER_ID';
+
+/// The key used to save the token to sharedPreferences
+const String KEY_TOKEN = 'KEY_TOKEN';
+
+/// The key used to save the apiKey to sharedPreferences
+const String KEY_API_KEY = 'KEY_API_KEY';
 
 /// The official Dart client for Stream Chat,
 /// a service for building chat applications.
@@ -43,10 +58,22 @@ class Client {
     this.baseURL = _defaultBaseURL,
     this.logLevel = Level.WARNING,
     this.logHandlerFunction,
+    this.persistenceEnabled = true,
     Duration connectTimeout = const Duration(seconds: 6),
     Duration receiveTimeout = const Duration(seconds: 6),
     Dio httpClient,
+    this.showLocalNotification,
+    this.backgroundKeepAlive = const Duration(minutes: 1),
+    RetryPolicy retryPolicy,
   }) {
+    WidgetsFlutterBinding.ensureInitialized();
+
+    _retryPolicy ??= RetryPolicy(
+      retryTimeout: (Client client, int attempt, ApiError error) =>
+          Duration(seconds: 1 * attempt),
+      shouldRetry: (Client client, int attempt, ApiError error) => attempt < 5,
+    );
+
     state = ClientState(this);
 
     _setupLogger();
@@ -55,11 +82,31 @@ class Client {
     logger.info('instantiating new client');
   }
 
+  OfflineStorage _offlineStorage;
+
+  /// If true chat data will persist on disk
+  final bool persistenceEnabled;
+
+  RetryPolicy _retryPolicy;
+
+  bool _synced = false;
+
+  /// The retry policy options getter
+  RetryPolicy get retryPolicy => _retryPolicy;
+
+  /// Method used to show a local notification while the app is in background
+  /// Switching to another application will not disconnect the client immediately
+  /// So, use this method to show the notification when receiving a new message via events
+  final void Function(Message, ChannelModel) showLocalNotification;
+
+  /// The amount of time that will pass before disconnecting the client in the background
+  final Duration backgroundKeepAlive;
+
+  /// Client offline database
+  OfflineStorage get offlineStorage => _offlineStorage;
+
   /// This client state
   ClientState state;
-
-  /// A map of <id, channel>
-  Map<String, Channel> channels = {};
 
   /// By default the Chat Client will write all messages with level Warn or Error to stdout.
   /// During development you might want to enable more logging information, you can change the default log level when constructing the client.
@@ -106,7 +153,7 @@ class Client {
   @visibleForTesting
   Dio httpClient = Dio();
 
-  static const _defaultBaseURL = "chat-us-east-1.stream-io-api.com";
+  static const _defaultBaseURL = 'chat-us-east-1.stream-io-api.com';
   static const _tokenExpiredErrorCode = 40;
   VoidCallback _connectionStatusListener;
 
@@ -119,18 +166,19 @@ class Client {
   /// This notifies the connection status of the websocket connection.
   /// Listen to this to get notified when the websocket tries to reconnect.
   final ValueNotifier<ConnectionStatus> wsConnectionStatus =
-      ValueNotifier(null);
+      ValueNotifier(ConnectionStatus.disconnected);
+
+  /// The current user token
+  String token;
 
   /// The id of the current websocket connection
   String get connectionId => _connectionId;
 
-  String _token;
   bool _anonymous = false;
   String _connectionId;
   WebSocket _ws;
 
   bool get _hasConnectionId => _connectionId != null;
-  Completer _tokenExpiredCompleter;
 
   void _setupDio(
     Dio httpClient,
@@ -140,33 +188,39 @@ class Client {
     logger.info('http client setup');
 
     this.httpClient = httpClient ?? Dio();
-    this.httpClient.options.baseUrl = Uri.https(baseURL, '').toString();
+
+    String url;
+    if (!baseURL.startsWith('https') && !baseURL.startsWith('http')) {
+      url = Uri.https(baseURL, '').toString();
+    } else {
+      url = baseURL;
+    }
+
+    this.httpClient.options.baseUrl = url;
     this.httpClient.options.receiveTimeout = receiveTimeout.inMilliseconds;
     this.httpClient.options.connectTimeout = connectTimeout.inMilliseconds;
-    this.httpClient.interceptors.add(InterceptorsWrapper(
-          onRequest: (options) async {
-            if (_tokenExpiredCompleter != null) {
-              await _tokenExpiredCompleter.future;
-            }
+    this.httpClient.interceptors.add(
+          InterceptorsWrapper(
+            onRequest: (options) async {
+              options.queryParameters.addAll(_commonQueryParams);
+              options.headers.addAll(_httpHeaders);
 
-            options.queryParameters.addAll(_commonQueryParams);
-            options.headers.addAll(_httpHeaders);
+              if (_connectionId != null && options.data is Map) {
+                options.data = {
+                  'connection_id': _connectionId,
+                  ...options.data,
+                };
+              }
 
-            if (_connectionId != null && options.data is Map) {
-              options.data = {
-                'connection_id': _connectionId,
-                ...options.data,
-              };
-            }
+              var stringData = options.data.toString();
 
-            String stringData = options.data.toString();
+              if (options.data is FormData) {
+                final multiPart = (options.data as FormData).files[0]?.value;
+                stringData =
+                    '${multiPart?.filename} - ${multiPart?.contentType}';
+              }
 
-            if (options.data is FormData) {
-              final multiPart = (options.data as FormData).files[0]?.value;
-              stringData = '${multiPart?.filename} - ${multiPart?.contentType}';
-            }
-
-            logger.info('''
+              logger.info('''
     
           method: ${options.method}
           url: ${options.uri} 
@@ -175,13 +229,14 @@ class Client {
     
         ''');
 
-            return options;
-          },
-          onError: _tokenExpiredInterceptor,
-        ));
+              return options;
+            },
+            onError: _tokenExpiredInterceptor,
+          ),
+        );
   }
 
-  _tokenExpiredInterceptor(DioError err) async {
+  Future<void> _tokenExpiredInterceptor(DioError err) async {
     final apiError = ApiError(
       err.response?.data,
       err.response?.statusCode,
@@ -190,32 +245,32 @@ class Client {
     if (apiError.code == _tokenExpiredErrorCode) {
       logger.info('token expired');
 
-      if (this.tokenProvider != null) {
-        _tokenExpiredCompleter = Completer();
+      if (tokenProvider != null) {
+        httpClient.lock();
         final userId = state.user.id;
 
         _ws.connectionStatus.removeListener(_connectionStatusListener);
 
-        await disconnect();
+        await _disconnect();
 
-        final newToken = await this.tokenProvider(userId);
+        final newToken = await tokenProvider(userId);
         await Future.delayed(Duration(seconds: 4));
-        this._token = newToken;
+        token = newToken;
+
+        httpClient.unlock();
 
         await setUser(User(id: userId), newToken);
 
-        _tokenExpiredCompleter.complete();
-
         try {
-          return await this.httpClient.request(
-                err.request.path,
-                cancelToken: err.request.cancelToken,
-                data: err.request.data,
-                onReceiveProgress: err.request.onReceiveProgress,
-                onSendProgress: err.request.onSendProgress,
-                queryParameters: err.request.queryParameters,
-                options: err.request,
-              );
+          return await httpClient.request(
+            err.request.path,
+            cancelToken: err.request.cancelToken,
+            data: err.request.data,
+            onReceiveProgress: err.request.onReceiveProgress,
+            onSendProgress: err.request.onSendProgress,
+            queryParameters: err.request.queryParameters,
+            options: err.request,
+          );
         } catch (err) {
           return err;
         }
@@ -252,31 +307,39 @@ class Client {
 
   /// Call this function to dispose the client
   void dispose() async {
-    await this.disconnect();
+    await _offlineStorage?.disconnect();
+    await _disconnect();
     httpClient.close();
     await _controller.close();
-    channels.values.forEach((c) => c.dispose());
+    state.channels.values.forEach((c) => c.dispose());
     state.dispose();
   }
 
   Map<String, String> get _httpHeaders => {
-        "Authorization": _token,
-        "stream-auth-type": _authType,
-        "x-stream-client": _userAgent,
+        'Authorization': token,
+        'stream-auth-type': _authType,
+        'x-stream-client': _userAgent,
       };
 
   /// Set the current user, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
   Future<Event> setUser(User user, String token) async {
-    state.user = user;
-    _token = token;
+    logger.info('set user');
+    state.user = OwnUser.fromJson(user.toJson());
+    this.token = token;
     _anonymous = false;
-    return _connect();
+
+    final sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences.setString(KEY_USER_ID, user.id);
+    await sharedPreferences.setString(KEY_TOKEN, token);
+    await sharedPreferences.setString(KEY_API_KEY, apiKey);
+
+    return connect();
   }
 
   /// Set the current user using the [tokenProvider] to fetch the token.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<Event> setUserWithProvider(User user) async {
+  Future<void> setUserWithProvider(User user) async {
     if (tokenProvider == null) {
       throw Exception('''
       TokenProvider must be provided in the constructor in order to use `setUserWithProvider` method.
@@ -289,80 +352,196 @@ class Client {
 
   /// Stream of [Event] coming from websocket connection
   /// Pass an eventType as parameter in order to filter just a type of event
-  Stream<Event> on([String eventType]) =>
-      stream.where((event) => eventType == null || event.type == eventType);
+  Stream<Event> on([
+    String eventType,
+    String eventType2,
+    String eventType3,
+    String eventType4,
+  ]) =>
+      stream.where((event) =>
+          eventType == null ||
+          event.type == eventType ||
+          event.type == eventType2 ||
+          event.type == eventType3 ||
+          event.type == eventType4);
 
   /// Method called to add a new event to the [_controller].
-  void handleEvent(Event event) {
+  void handleEvent(Event event) async {
+    logger.info('handle new event: ${event.toJson()}');
     if (event.connectionId != null) {
-      // ws was just reconnected
       _connectionId = event.connectionId;
+    }
+
+    if (!event.isLocal) {
+      if (_synced && event.createdAt != null) {
+        await _offlineStorage?.updateConnectionInfo(event);
+        await _offlineStorage?.updateLastSyncAt(event.createdAt);
+      }
+    }
+
+    if (event.user != null) {
+      state._updateUser(event.user);
+    }
+
+    if (event.me != null) {
+      state.user = event.me;
     }
     _controller.add(event);
   }
 
-  Future<Event> _connect() async {
+  /// Connect the client websocket
+  Future<Event> connect() async {
+    logger.info('connecting');
+    if (wsConnectionStatus.value == ConnectionStatus.connecting) {
+      logger.warning('Already connecting');
+      throw Exception('Already connecting');
+    }
+
+    if (wsConnectionStatus.value == ConnectionStatus.connected) {
+      logger.warning('Already connected');
+      throw Exception('Already connected');
+    }
+
+    wsConnectionStatus.value = ConnectionStatus.connecting;
+
+    if (persistenceEnabled && _offlineStorage == null) {
+      _offlineStorage = await connectDatabase(state.user, Logger('💽'));
+    }
+
     _ws = WebSocket(
       baseUrl: baseURL,
       user: state.user,
       connectParams: {
-        "api_key": apiKey,
-        "authorization": _token,
-        "stream-auth-type": _authType,
+        'api_key': apiKey,
+        'authorization': token,
+        'stream-auth-type': _authType,
       },
       connectPayload: {
-        "user_id": state.user.id,
-        "server_determines_connection_id": true,
+        'user_id': state.user.id,
+        'server_determines_connection_id': true,
       },
       handler: handleEvent,
-      logger: Logger('WS'),
+      logger: Logger('🔌'),
     );
 
-    _connectionStatusListener = () {
+    _connectionStatusListener = () async {
       final value = _ws.connectionStatus.value;
-      this.wsConnectionStatus.value = value;
+      wsConnectionStatus.value = value;
+      handleEvent(Event(
+        type: EventType.connectionChanged,
+        online: value == ConnectionStatus.connected,
+      ));
 
-      if (value == ConnectionStatus.connected && channels?.isNotEmpty == true) {
+      if (value == ConnectionStatus.connected &&
+          state.channels?.isNotEmpty == true) {
         queryChannels(filter: {
           'cid': {
-            '\$in': channels.keys.toList(),
+            '\$in': state.channels.keys.toList(),
           },
         }, options: {
           'recovery': true,
-          'last_message_ids':
-              channels.map<String, String>((cid, c) => MapEntry<String, String>(
-                    cid,
-                    c.state.messages?.last?.id,
-                  ))
-        });
+          'last_message_ids': state.channels.map<String, String>(
+            (cid, c) {
+              final lastId = c.state?.messages?.isEmpty == true
+                  ? null
+                  : c.state.messages.last.id;
+              return MapEntry<String, String>(
+                cid,
+                lastId,
+              );
+            },
+          ),
+        }).listen(
+          (_) {},
+          onDone: () async {
+            await resync();
+            handleEvent(Event(
+              type: EventType.connectionRecovered,
+              online: true,
+            ));
+          },
+        );
+      } else {
+        _synced = false;
       }
     };
 
     _ws.connectionStatus.addListener(_connectionStatusListener);
 
-    final connectEvent = await _ws.connect();
-    _connectionId = connectEvent.connectionId;
-    return connectEvent;
+    var event = await _offlineStorage?.getConnectionInfo();
+
+    await _ws.connect().then((e) async {
+      await _offlineStorage?.updateConnectionInfo(e);
+      event = e;
+      await resync();
+    }).catchError((err, stacktrace) {
+      logger.severe('error connecting ws', err, stacktrace);
+    });
+
+    return event;
+  }
+
+  /// Get the events missed while offline to sync the offline storage
+  Future<void> resync([List<String> cids]) async {
+    final lastSyncAt = await offlineStorage?.getLastSyncAt();
+
+    if (lastSyncAt == null) {
+      _synced = true;
+      return;
+    }
+
+    cids ??= await offlineStorage?.getChannelCids();
+
+    try {
+      final rawRes = await post('/sync', data: {
+        'channel_cids': cids,
+        'last_sync_at': lastSyncAt.toUtc().toIso8601String(),
+      });
+      logger.fine('rawRes: $rawRes');
+
+      final res = decode<SyncResponse>(
+        rawRes.data,
+        SyncResponse.fromJson,
+      );
+
+      res.events.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+      res.events.forEach((element) {
+        logger.fine('element.type: ${element.type}');
+        logger.fine('element.message.text: ${element.message?.text}');
+      });
+
+      res.events.forEach((event) {
+        handleEvent(event);
+      });
+
+      await _offlineStorage?.updateLastSyncAt(DateTime.now());
+      _synced = true;
+    } catch (error) {
+      logger.severe('Error during resync $error');
+    }
   }
 
   /// Requests channels with a given query.
-  Future<List<Channel>> queryChannels({
+  Stream<List<Channel>> queryChannels({
     Map<String, dynamic> filter,
     List<SortOption> sort,
     Map<String, dynamic> options,
     PaginationParams paginationParams,
     int messageLimit,
-  }) async {
-    final Map<String, dynamic> defaultOptions = {
-      "state": true,
-      "watch": true,
-      "presence": false,
+    bool onlyOffline = false,
+  }) async* {
+    logger.info('Query channel start');
+    final defaultOptions = {
+      'state': true,
+      'watch': true,
+      'presence': false,
     };
 
-    Map<String, dynamic> payload = {
-      "filter_conditions": filter,
-      "sort": sort,
-      "user_details": state.user,
+    var payload = <String, dynamic>{
+      'filter_conditions': filter,
+      'sort': sort,
+      'user_details': state.user,
     };
 
     if (messageLimit != null) {
@@ -379,34 +558,96 @@ class Client {
       payload.addAll(paginationParams.toJson());
     }
 
+    final offlineChannels = await _offlineStorage?.getChannelStates(
+          filter: filter,
+          sort: sort,
+          paginationParams: paginationParams,
+        ) ??
+        [];
+    var newChannels = Map<String, Channel>.from(state.channels ?? {});
+    logger.info('Got ${offlineChannels.length} channels from storage');
+    var channels = offlineChannels.map((channelState) {
+      final channel = newChannels[channelState.channel.cid];
+      if (channel != null) {
+        channel.state?.updateChannelState(channelState);
+        return channel;
+      } else {
+        final newChannel = Channel.fromState(this, channelState);
+        _offlineStorage?.updateChannelState(newChannel.state.channelState);
+        newChannels[newChannel.cid] = newChannel;
+        return newChannel;
+      }
+    }).toList();
+
+    if (channels.isNotEmpty) {
+      yield channels;
+
+      state.channels = newChannels;
+    }
+
+    if (onlyOffline) {
+      return;
+    }
+
     final response = await get(
-      "/channels",
+      '/channels',
       queryParameters: {
-        "payload": jsonEncode(payload),
+        'payload': jsonEncode(payload),
       },
     );
 
-    final newChannels = decode<QueryChannelsResponse>(
+    final res = decode<QueryChannelsResponse>(
       response.data,
       QueryChannelsResponse.fromJson,
-    )?.channels?.map((channelState) {
-      if (channels.containsKey(channelState.channel.cid)) {
-        final client = channels[channelState.channel.cid];
-        client.state.updateChannelState(channelState);
-      } else {
-        channels[channelState.channel.cid] =
-            Channel.fromState(this, channelState);
+    );
+
+    final users = res.channels
+        ?.expand((channel) => channel.members.map((member) => member.user))
+        ?.toList();
+
+    if (users != null) {
+      state._updateUsers(users);
+    }
+
+    logger.info('Got ${res.channels?.length} channels from api');
+
+    newChannels = Map<String, Channel>.from(state.channels ?? {});
+    channels.clear();
+
+    if (res.channels != null) {
+      for (final channelState in res.channels) {
+        final channel = newChannels[channelState.channel.cid];
+        if (channel != null) {
+          channel.state?.updateChannelState(channelState);
+          channels.add(channel);
+        } else {
+          final newChannel = Channel.fromState(this, channelState);
+          await _offlineStorage
+              ?.updateChannelState(newChannel.state.channelState);
+          newChannel.state?.updateChannelState(channelState);
+          newChannels[newChannel.cid] = newChannel;
+          channels.add(newChannel);
+        }
       }
+    }
 
-      return channels[channelState.channel.cid];
-    })?.toList();
+    yield channels;
 
-    return newChannels;
+    state.channels = newChannels;
+
+    await _offlineStorage?.updateChannelQueries(
+      filter,
+      res.channels.map((c) => c.channel.cid).toList(),
+      paginationParams?.offset == null || paginationParams.offset == 0,
+    );
   }
 
   _parseError(DioError error) {
     if (error.type == DioErrorType.RESPONSE) {
-      return ApiError(error.response?.data, error.response?.statusCode);
+      final apiError =
+          ApiError(error.response?.data, error.response?.statusCode);
+      logger.severe('apiError: ${apiError.toString()}');
+      return apiError;
     }
 
     return error;
@@ -494,6 +735,9 @@ class Client {
   /// Used to log errors and stacktrace in case of bad json deserialization
   T decode<T>(String j, DecoderFunction<T> decoderFunction) {
     try {
+      if (j == null) {
+        return null;
+      }
       return decoderFunction(json.decode(j));
     } catch (error, stacktrace) {
       logger.severe('Error decoding response', error, stacktrace);
@@ -504,43 +748,51 @@ class Client {
   String get _authType => _anonymous ? 'anonymous' : 'jwt';
 
   // TODO: get the right version of the lib from the build toolchain
-  String get _userAgent => "stream_chat_dart-client-$PACKAGE_VERSION";
+  String get _userAgent => 'stream-chat-dart-client-$PACKAGE_VERSION';
 
   Map<String, String> get _commonQueryParams => {
-        "user_id": state.user?.id,
-        "api_key": apiKey,
-        "connection_id": _connectionId,
+        'user_id': state.user?.id,
+        'api_key': apiKey,
+        'connection_id': _connectionId,
       };
 
   /// Set the current user with an anonymous id, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
   Future<Event> setAnonymousUser() async {
-    this._anonymous = true;
+    _anonymous = true;
     final uuid = Uuid();
-    state.user = User(id: uuid.v4());
-    return _connect();
+    state.user = OwnUser(id: uuid.v4());
+    return connect();
   }
 
   /// Set the current user as guest, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
-  Future<Event> setGuestUser(User user) async {
+  Future<void> setGuestUser(User user) async {
     _anonymous = true;
-    final response = await post("/guest", data: {"user": user.toJson()})
+    final response = await post('/guest', data: {'user': user.toJson()})
         .then((res) => decode<SetGuestUserResponse>(
             res.data, SetGuestUserResponse.fromJson))
         .whenComplete(() => _anonymous = false);
-    return setUser(response.user, response.accessToken);
+    return setUser(
+      response.user,
+      response.accessToken,
+    );
   }
 
   /// Closes the websocket connection and resets the client
-  Future<void> disconnect() async {
+  Future<void> disconnect({bool flushOfflineStorage = false}) async {
+    logger.info('Disconnecting');
+
+    await _offlineStorage?.disconnect(flush: flushOfflineStorage);
+    _offlineStorage = null;
+
+    await _disconnect();
+  }
+
+  Future<void> _disconnect() async {
     logger.info('Client disconnecting');
 
-    this._anonymous = false;
-    this._connectionId = null;
-    await this._ws.disconnect();
-    this._token = null;
-    state.user = null;
+    await _ws.disconnect();
   }
 
   /// Requests users with a given query.
@@ -549,13 +801,13 @@ class Client {
     List<SortOption> sort,
     Map<String, dynamic> options,
   ) async {
-    final Map<String, dynamic> defaultOptions = {
-      "presence": this._hasConnectionId,
+    final defaultOptions = {
+      'presence': _hasConnectionId,
     };
 
-    Map<String, dynamic> payload = {
-      "filter_conditions": filter ?? {},
-      "sort": sort,
+    final payload = <String, dynamic>{
+      'filter_conditions': filter ?? {},
+      'sort': sort,
     };
 
     payload.addAll(defaultOptions);
@@ -564,16 +816,21 @@ class Client {
       payload.addAll(options);
     }
 
-    final response = await get(
-      "/users",
+    final rawRes = await get(
+      '/users',
       queryParameters: {
-        "payload": jsonEncode(payload),
+        'payload': jsonEncode(payload),
       },
     );
-    return decode<QueryUsersResponse>(
-      response.data,
+
+    final response = decode<QueryUsersResponse>(
+      rawRes.data,
       QueryUsersResponse.fromJson,
     );
+
+    state?._updateUsers(response.users);
+
+    return response;
   }
 
   /// A message search.
@@ -593,7 +850,7 @@ class Client {
       payload.addAll(paginationParams.toJson());
     }
 
-    final response = await get("/search",
+    final response = await get('/search',
         queryParameters: {'payload': json.encode(payload)});
     return decode<SearchMessagesResponse>(
         response.data, SearchMessagesResponse.fromJson);
@@ -601,34 +858,34 @@ class Client {
 
   /// Add a device for Push Notifications.
   Future<EmptyResponse> addDevice(String id, String pushProvider) async {
-    final response = await post("/devices", data: {
-      "id": id,
-      "push_provider": pushProvider,
+    final response = await post('/devices', data: {
+      'id': id,
+      'push_provider': pushProvider,
     });
     return decode<EmptyResponse>(response.data, EmptyResponse.fromJson);
   }
 
   /// Gets a list of user devices.
   Future<ListDevicesResponse> getDevices() async {
-    final response = await get("/devices");
+    final response = await get('/devices');
     return decode<ListDevicesResponse>(
         response.data, ListDevicesResponse.fromJson);
   }
 
   /// Remove a user's device.
   Future<EmptyResponse> removeDevice(String id) async {
-    final response = await delete("/devices", queryParameters: {
-      "id": id,
+    final response = await delete('/devices', queryParameters: {
+      'id': id,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Get a development token
   String devToken(String userId) {
-    final payload = json.encode({"user_id": userId});
+    final payload = json.encode({'user_id': userId});
     final payloadBytes = utf8.encode(payload);
     final payloadB64 = base64.encode(payloadBytes);
-    return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.$payloadB64.devtoken";
+    return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.$payloadB64.devtoken';
   }
 
   /// Returns a channel client with the given type, id and custom data.
@@ -639,7 +896,10 @@ class Client {
   }) {
     final channel = Channel(this, type, id, extraData);
 
-    channels[channel.cid] = channel;
+    state.channels = {
+      ...state.channels ?? {},
+      channel.cid: channel,
+    };
 
     return channel;
   }
@@ -651,8 +911,8 @@ class Client {
 
   /// Batch update a list of users
   Future<UpdateUsersResponse> updateUsers(List<User> users) async {
-    final response = await post("/users", data: {
-      "users": users.asMap().map((_, u) => MapEntry(u.id, u.toJson())),
+    final response = await post('/users', data: {
+      'users': users.asMap().map((_, u) => MapEntry(u.id, u.toJson())),
     });
     return decode<UpdateUsersResponse>(
       response.data,
@@ -667,10 +927,10 @@ class Client {
   ]) async {
     final data = Map<String, dynamic>.from(options)
       ..addAll({
-        "target_user_id": targetUserID,
+        'target_user_id': targetUserID,
       });
     final response = await post(
-      "/moderation/ban",
+      '/moderation/ban',
       data: data,
     );
     return decode(response.data, EmptyResponse.fromJson);
@@ -683,10 +943,10 @@ class Client {
   ]) async {
     final data = Map<String, dynamic>.from(options)
       ..addAll({
-        "target_user_id": targetUserID,
+        'target_user_id': targetUserID,
       });
     final response = await delete(
-      "/moderation/ban",
+      '/moderation/ban',
       queryParameters: data,
     );
     return decode(response.data, EmptyResponse.fromJson);
@@ -694,81 +954,129 @@ class Client {
 
   /// Mutes a user
   Future<EmptyResponse> muteUser(String targetID) async {
-    final response = await post("/moderation/mute", data: {
-      "target_id": targetID,
+    final response = await post('/moderation/mute', data: {
+      'target_id': targetID,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Unmutes a user
   Future<EmptyResponse> unmuteUser(String targetID) async {
-    final response = await post("/moderation/unmute", data: {
-      "target_id": targetID,
+    final response = await post('/moderation/unmute', data: {
+      'target_id': targetID,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Flag a message
   Future<EmptyResponse> flagMessage(String messageID) async {
-    final response = await post("/moderation/flag", data: {
-      "target_message_id": messageID,
+    final response = await post('/moderation/flag', data: {
+      'target_message_id': messageID,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Unflag a message
   Future<EmptyResponse> unflagMessage(String messageId) async {
-    final response = await post("/moderation/unflag", data: {
-      "target_message_id": messageId,
+    final response = await post('/moderation/unflag', data: {
+      'target_message_id': messageId,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Flag a user
   Future<EmptyResponse> flagUser(String userId) async {
-    final response = await post("/moderation/flag", data: {
-      "target_user_id": userId,
+    final response = await post('/moderation/flag', data: {
+      'target_user_id': userId,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Unflag a message
   Future<EmptyResponse> unflagUser(String userId) async {
-    final response = await post("/moderation/unflag", data: {
-      "target_user_id": userId,
+    final response = await post('/moderation/unflag', data: {
+      'target_user_id': userId,
     });
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Mark all channels for this user as read
   Future<EmptyResponse> markAllRead() async {
-    final response = await post("/channels/read");
+    final response = await post('/channels/read');
     return decode(response.data, EmptyResponse.fromJson);
   }
 
   /// Update the given message
-  Future<UpdateMessageResponse> updateMessage(Message message) async {
-    return post("/messages/${message.id}", data: {'message': message})
-        .then((res) => decode(res.data, UpdateMessageResponse.fromJson));
+  Future<UpdateMessageResponse> updateMessage(
+    Message message, [
+    String cid,
+  ]) async {
+    message = message.copyWith(
+      status: MessageSendingStatus.UPDATING,
+      updatedAt: message.updatedAt ?? DateTime.now(),
+    );
+
+    final channel = state?.channels != null ? state?.channels[cid] : null;
+    channel?.state?.addMessage(message);
+
+    return post('/messages/${message.id}', data: {'message': message})
+        .then((res) {
+      final updateMessageResponse = decode(
+        res?.data,
+        UpdateMessageResponse.fromJson,
+      );
+
+      channel?.state?.addMessage(updateMessageResponse?.message);
+
+      return updateMessageResponse;
+    }).catchError((error) {
+      if (state?.channels != null) {
+        channel?.state?.retryQueue?.add([message]);
+      }
+      throw error;
+    });
   }
 
   /// Deletes the given message
   Future<EmptyResponse> deleteMessage(Message message, [String cid]) async {
     if (message.status == MessageSendingStatus.FAILED) {
-      handleEvent(Event(
-        message: message.copyWith(type: 'deleted'),
-        type: EventType.messageDeleted,
-        cid: cid,
+      state.channels[cid].state.addMessage(message.copyWith(
+        type: 'deleted',
+        status: MessageSendingStatus.SENT,
       ));
       return EmptyResponse();
     }
-    final response = await delete("/messages/${message.id}");
-    return decode(response.data, EmptyResponse.fromJson);
+
+    try {
+      message = message.copyWith(
+        type: 'deleted',
+        status: MessageSendingStatus.DELETING,
+        deletedAt: message.deletedAt ?? DateTime.now(),
+      );
+
+      if (state?.channels != null) {
+        state.channels[cid].state.addMessage(message);
+      }
+
+      final response = await delete('/messages/${message.id}');
+
+      if (state?.channels != null) {
+        state.channels[cid].state
+            .addMessage(message.copyWith(status: MessageSendingStatus.SENT));
+      }
+
+      return decode(response.data, EmptyResponse.fromJson);
+    } catch (error) {
+      if (state?.channels != null) {
+        state.channels[cid].state.retryQueue.add([message]);
+      }
+      rethrow;
+    }
   }
 
   /// Get a message by id
   Future<GetMessageResponse> getMessage(String messageId) async {
-    final response = await get("/messages/$messageId");
+    final response = await get('/messages/$messageId');
     return decode(response.data, GetMessageResponse.fromJson);
   }
 }
@@ -807,20 +1115,65 @@ class ClientState {
         .listen((totalUnreadCount) {
       _totalUnreadCountController.add(totalUnreadCount);
     });
+
+    _listenChannelDeleted();
+
+    _listenChannelHidden();
+  }
+
+  void _listenChannelHidden() {
+    _client.on(EventType.channelHidden).listen((event) {
+      _client._offlineStorage?.deleteChannels([event.cid]);
+      channels = channels..removeWhere((cid, ch) => cid == event.cid);
+    });
+  }
+
+  void _listenChannelDeleted() {
+    _client
+        .on(
+      EventType.channelDeleted,
+      EventType.notificationRemovedFromChannel,
+      EventType.notificationChannelDeleted,
+    )
+        .listen((Event event) async {
+      final eventChannel = event.channel;
+      await _client._offlineStorage?.deleteChannels([eventChannel.cid]);
+      if (channels != null) {
+        channels = channels..remove(eventChannel.cid);
+      }
+    });
   }
 
   final Client _client;
 
   /// Update user information
-  set user(User user) {
+  set user(OwnUser user) {
     _userController.add(user);
   }
 
+  void _updateUsers(List<User> users) {
+    users?.forEach(_updateUser);
+  }
+
+  void _updateUser(User user) {
+    final newUsers = {
+      ...users ?? {},
+      user.id: user,
+    };
+    _usersController.add(newUsers);
+  }
+
   /// The current user
-  User get user => _userController.value;
+  OwnUser get user => _userController.value;
 
   /// The current user as a stream
-  Stream<User> get userStream => _userController.stream;
+  Stream<OwnUser> get userStream => _userController.stream;
+
+  /// The current user
+  Map<String, User> get users => _usersController.value;
+
+  /// The current user as a stream
+  Stream<Map<String, User>> get usersStream => _usersController.stream;
 
   /// The current unread channels count
   int get unreadChannels => _unreadChannelsController.value;
@@ -834,14 +1187,29 @@ class ClientState {
   /// The current total unread messages count as a stream
   Stream<int> get totalUnreadCountStream => _totalUnreadCountController.stream;
 
-  BehaviorSubject<User> _userController = BehaviorSubject();
-  BehaviorSubject<int> _unreadChannelsController = BehaviorSubject();
-  BehaviorSubject<int> _totalUnreadCountController = BehaviorSubject();
+  /// The current list of channels in memory as a stream
+  Stream<Map<String, Channel>> get channelsStream => _channelsController.stream;
+
+  /// The current list of channels in memory
+  Map<String, Channel> get channels => _channelsController.value;
+
+  set channels(Map<String, Channel> v) {
+    _channelsController.add(v);
+  }
+
+  final BehaviorSubject<Map<String, Channel>> _channelsController =
+      BehaviorSubject();
+  final BehaviorSubject<OwnUser> _userController = BehaviorSubject();
+  final BehaviorSubject<Map<String, User>> _usersController =
+      BehaviorSubject.seeded({});
+  final BehaviorSubject<int> _unreadChannelsController = BehaviorSubject();
+  final BehaviorSubject<int> _totalUnreadCountController = BehaviorSubject();
 
   /// Call this method to dispose this object
   void dispose() {
     _userController.close();
     _unreadChannelsController.close();
     _totalUnreadCountController.close();
+    _channelsController.close();
   }
 }

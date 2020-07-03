@@ -7,10 +7,28 @@ import 'user.dart';
 
 part 'message.g.dart';
 
+/// Enum defining the status of a sending message
 enum MessageSendingStatus {
+  /// Message is being sent
   SENDING,
-  SENT,
+
+  /// Message is being updated
+  UPDATING,
+
+  /// Message is being deleted
+  DELETING,
+
+  /// Message failed to send
   FAILED,
+
+  /// Message failed to updated
+  FAILED_UPDATE,
+
+  /// Message failed to delete
+  FAILED_DELETE,
+
+  /// Message correctly sent
+  SENT,
 }
 
 /// The class that contains the information about a message
@@ -23,6 +41,7 @@ class Message {
   final String text;
 
   /// The status of a sending message
+  @JsonKey(ignore: true)
   final MessageSendingStatus status;
 
   /// The message type
@@ -86,11 +105,18 @@ class Message {
   @JsonKey(includeIfNull: false)
   final Map<String, dynamic> extraData;
 
-  /// True is the message has been deleted
+  /// True if the message is a system info
+  bool get isSystem => type == 'system';
+
+  /// True if the message has been deleted
   bool get isDeleted => type == 'deleted';
 
-  /// True is the message is ephemeral
+  /// True if the message is ephemeral
   bool get isEphemeral => type == 'ephemeral';
+
+  /// Reserved field indicating when the message was deleted.
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  final DateTime deletedAt;
 
   /// Known top level fields.
   /// Useful for [Serialization] methods.
@@ -98,6 +124,7 @@ class Message {
     'id',
     'text',
     'type',
+    'silent',
     'attachments',
     'latest_reactions',
     'own_reactions',
@@ -111,6 +138,7 @@ class Message {
     'command',
     'created_at',
     'updated_at',
+    'deleted_at',
     'user',
   ];
 
@@ -134,6 +162,7 @@ class Message {
     this.updatedAt,
     this.user,
     this.extraData,
+    this.deletedAt,
     this.status = MessageSendingStatus.SENT,
   });
 
@@ -163,6 +192,7 @@ class Message {
     String command,
     DateTime createdAt,
     DateTime updatedAt,
+    DateTime deletedAt,
     User user,
     Map<String, dynamic> extraData,
     MessageSendingStatus status,
@@ -186,6 +216,32 @@ class Message {
         extraData: extraData ?? this.extraData,
         user: user ?? this.user,
         updatedAt: updatedAt ?? this.updatedAt,
+        deletedAt: deletedAt ?? this.deletedAt,
         status: status ?? this.status,
       );
+}
+
+/// A translated message
+/// It has an additional property called [i18n]
+@JsonSerializable()
+class TranslatedMessage extends Message {
+  /// Constructor used for json serialization
+  TranslatedMessage(this.i18n);
+
+  /// A Map of
+  final Map<String, String> i18n;
+
+  /// Known top level fields.
+  /// Useful for [Serialization] methods.
+  static final topLevelFields = [
+    'i18n',
+    ...Message.topLevelFields,
+  ];
+
+  /// Create a new instance from a json
+  factory TranslatedMessage.fromJson(Map<String, dynamic> json) {
+    return _$TranslatedMessageFromJson(
+      Serialization.moveKeysToRoot(json, topLevelFields),
+    );
+  }
 }
