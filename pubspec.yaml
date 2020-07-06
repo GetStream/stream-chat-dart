@@ -4,7 +4,6 @@ description: The official Dart client for Stream Chat, a service for building ch
 version: 0.2.0
 repository: https://github.com/GetStream/stream-chat-dart
 issue_tracker: https://github.com/GetStream/stream-chat-dart/issues
-documentation: https://getstream.io/chat/docs
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
