@@ -24,6 +24,13 @@ OwnUser _$OwnUserFromJson(Map json) {
         ?.toList(),
     totalUnreadCount: json['total_unread_count'] as int,
     unreadChannels: json['unread_channels'] as int,
+    channelMutes: (json['channel_mutes'] as List)
+        ?.map((e) => e == null
+            ? null
+            : Mute.fromJson((e as Map)?.map(
+                (k, e) => MapEntry(k as String, e),
+              )))
+        ?.toList(),
     id: json['id'] as String,
     role: json['role'] as String,
     createdAt: json['created_at'] == null
@@ -63,6 +70,7 @@ Map<String, dynamic> _$OwnUserToJson(OwnUser instance) {
   writeNotNull('extra_data', instance.extraData);
   writeNotNull('devices', readonly(instance.devices));
   writeNotNull('mutes', readonly(instance.mutes));
+  writeNotNull('channel_mutes', readonly(instance.channelMutes));
   writeNotNull('total_unread_count', readonly(instance.totalUnreadCount));
   writeNotNull('unread_channels', readonly(instance.unreadChannels));
   return val;
