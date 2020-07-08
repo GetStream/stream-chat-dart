@@ -245,6 +245,19 @@ class _ConnectionEventCompanion extends UpdateCompanion<_ConnectionEventData> {
     }
     return map;
   }
+
+  @override
+  String toString() {
+    return (StringBuffer('_ConnectionEventCompanion(')
+          ..write('id: $id, ')
+          ..write('ownUser: $ownUser, ')
+          ..write('totalUnreadCount: $totalUnreadCount, ')
+          ..write('unreadChannels: $unreadChannels, ')
+          ..write('lastEventAt: $lastEventAt, ')
+          ..write('lastSyncAt: $lastSyncAt')
+          ..write(')'))
+        .toString();
+  }
 }
 
 class $_ConnectionEventTable extends _ConnectionEvent
@@ -796,6 +809,25 @@ class _ChannelsCompanion extends UpdateCompanion<_Channel> {
     }
     return map;
   }
+
+  @override
+  String toString() {
+    return (StringBuffer('_ChannelsCompanion(')
+          ..write('id: $id, ')
+          ..write('type: $type, ')
+          ..write('cid: $cid, ')
+          ..write('config: $config, ')
+          ..write('frozen: $frozen, ')
+          ..write('lastMessageAt: $lastMessageAt, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('memberCount: $memberCount, ')
+          ..write('extraData: $extraData, ')
+          ..write('createdBy: $createdBy')
+          ..write(')'))
+        .toString();
+  }
 }
 
 class $_ChannelsTable extends _Channels
@@ -1336,6 +1368,21 @@ class _UsersCompanion extends UpdateCompanion<_User> {
       map['extra_data'] = Variable<String>(converter.mapToSql(extraData.value));
     }
     return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('_UsersCompanion(')
+          ..write('id: $id, ')
+          ..write('role: $role, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('lastActive: $lastActive, ')
+          ..write('online: $online, ')
+          ..write('banned: $banned, ')
+          ..write('extraData: $extraData')
+          ..write(')'))
+        .toString();
   }
 }
 
@@ -2064,6 +2111,30 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
     }
     return map;
   }
+
+  @override
+  String toString() {
+    return (StringBuffer('_MessagesCompanion(')
+          ..write('id: $id, ')
+          ..write('messageText: $messageText, ')
+          ..write('attachmentJson: $attachmentJson, ')
+          ..write('status: $status, ')
+          ..write('type: $type, ')
+          ..write('reactionCounts: $reactionCounts, ')
+          ..write('reactionScores: $reactionScores, ')
+          ..write('parentId: $parentId, ')
+          ..write('replyCount: $replyCount, ')
+          ..write('showInChannel: $showInChannel, ')
+          ..write('command: $command, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('userId: $userId, ')
+          ..write('channelCid: $channelCid, ')
+          ..write('extraData: $extraData')
+          ..write(')'))
+        .toString();
+  }
 }
 
 class $_MessagesTable extends _Messages
@@ -2561,6 +2632,16 @@ class _ReadsCompanion extends UpdateCompanion<_Read> {
     }
     return map;
   }
+
+  @override
+  String toString() {
+    return (StringBuffer('_ReadsCompanion(')
+          ..write('lastRead: $lastRead, ')
+          ..write('userId: $userId, ')
+          ..write('channelCid: $channelCid')
+          ..write(')'))
+        .toString();
+  }
 }
 
 class $_ReadsTable extends _Reads with TableInfo<$_ReadsTable, _Read> {
@@ -2974,6 +3055,22 @@ class _MembersCompanion extends UpdateCompanion<_Member> {
     }
     return map;
   }
+
+  @override
+  String toString() {
+    return (StringBuffer('_MembersCompanion(')
+          ..write('userId: $userId, ')
+          ..write('channelCid: $channelCid, ')
+          ..write('role: $role, ')
+          ..write('inviteAcceptedAt: $inviteAcceptedAt, ')
+          ..write('inviteRejectedAt: $inviteRejectedAt, ')
+          ..write('invited: $invited, ')
+          ..write('isModerator: $isModerator, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
 }
 
 class $_MembersTable extends _Members with TableInfo<$_MembersTable, _Member> {
@@ -3303,6 +3400,15 @@ class _ChannelQueriesCompanion extends UpdateCompanion<ChannelQuery> {
     }
     return map;
   }
+
+  @override
+  String toString() {
+    return (StringBuffer('_ChannelQueriesCompanion(')
+          ..write('queryHash: $queryHash, ')
+          ..write('channelCid: $channelCid')
+          ..write(')'))
+        .toString();
+  }
 }
 
 class $_ChannelQueriesTable extends _ChannelQueries
@@ -3613,6 +3719,19 @@ class _ReactionsCompanion extends UpdateCompanion<_Reaction> {
       map['extra_data'] = Variable<String>(converter.mapToSql(extraData.value));
     }
     return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('_ReactionsCompanion(')
+          ..write('messageId: $messageId, ')
+          ..write('type: $type, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('score: $score, ')
+          ..write('userId: $userId, ')
+          ..write('extraData: $extraData')
+          ..write(')'))
+        .toString();
   }
 }
 

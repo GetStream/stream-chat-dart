@@ -1201,13 +1201,6 @@ class ChannelClientState {
 
     final newMembers = <Member>[
       ...updatedState?.members ?? [],
-      ..._channelState?.members
-              ?.where((m) =>
-                  updatedState.members
-                      ?.any((newMember) => newMember.userId == m.userId) !=
-                  true)
-              ?.toList() ??
-          [],
     ];
 
     final newReads = <Read>[

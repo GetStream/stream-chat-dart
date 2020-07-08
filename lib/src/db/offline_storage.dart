@@ -650,7 +650,11 @@ class OfflineStorage extends _$OfflineStorage {
     );
   }
 
-  void _updateMembers(List<ChannelState> channelStates, Batch batch) {
+  void _updateMembers(List<ChannelState> channelStates, Batch batch) async {
+    await (delete(members)
+          ..where((tbl) =>
+              tbl.channelCid.isIn(channelStates.map((e) => e.channel.cid))))
+        .go();
     final newMembers = channelStates
         .map((cs) => cs.members.map((m) => _Member(
               userId: m.user.id,
