@@ -1,3 +1,9 @@
+## 0.2.0+1
+
+- Fix offline members update
+- Add channel mutes
+- Fix default channel sort
+
 ## 0.2.0
 
 - Add `lastMessage` getter to Channel.state
