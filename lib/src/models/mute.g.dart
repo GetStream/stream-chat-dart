@@ -13,9 +13,9 @@ Mute _$MuteFromJson(Map json) {
         : User.fromJson((json['user'] as Map)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
-    target: json['target'] == null
+    channel: json['channel'] == null
         ? null
-        : User.fromJson((json['target'] as Map)?.map(
+        : ChannelModel.fromJson((json['channel'] as Map)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
     createdAt: json['created_at'] == null
@@ -37,7 +37,7 @@ Map<String, dynamic> _$MuteToJson(Mute instance) {
   }
 
   writeNotNull('user', readonly(instance.user));
-  writeNotNull('target', readonly(instance.target));
+  writeNotNull('channel', readonly(instance.channel));
   writeNotNull('created_at', readonly(instance.createdAt));
   writeNotNull('updated_at', readonly(instance.updatedAt));
   return val;

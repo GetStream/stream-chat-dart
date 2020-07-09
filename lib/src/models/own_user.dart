@@ -19,6 +19,10 @@ class OwnUser extends User {
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final List<Mute> mutes;
 
+  /// List of users muted by the user
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  final List<Mute> channelMutes;
+
   /// Total unread messages by the user
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final int totalUnreadCount;
@@ -34,6 +38,7 @@ class OwnUser extends User {
     'mutes',
     'total_unread_count',
     'unread_channels',
+    'channel_mutes',
     ...User.topLevelFields,
   ];
 
@@ -43,6 +48,7 @@ class OwnUser extends User {
     this.mutes,
     this.totalUnreadCount,
     this.unreadChannels,
+    this.channelMutes,
     String id,
     String role,
     DateTime createdAt,

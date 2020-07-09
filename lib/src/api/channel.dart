@@ -53,6 +53,12 @@ class Channel {
   String _cid;
   Map<String, dynamic> _extraData;
 
+  /// Returns true if the channel is muted
+  bool get isMuted =>
+      _client.state.user?.channelMutes
+          ?.any((element) => element.channel.cid == cid) ==
+      true;
+
   /// Channel configuration
   ChannelConfig get config => state?._channelState?.channel?.config;
 
@@ -1201,13 +1207,6 @@ class ChannelClientState {
 
     final newMembers = <Member>[
       ...updatedState?.members ?? [],
-      ..._channelState?.members
-              ?.where((m) =>
-                  updatedState.members
-                      ?.any((newMember) => newMember.userId == m.userId) !=
-                  true)
-              ?.toList() ??
-          [],
     ];
 
     final newReads = <Read>[
