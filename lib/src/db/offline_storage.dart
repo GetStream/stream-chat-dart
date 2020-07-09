@@ -239,8 +239,8 @@ class OfflineStorage extends _$OfflineStorage {
       final query = select(channels)..where((c) => c.cid.isIn(cids));
 
       sort = sort
-          .where((s) => ChannelModel.topLevelFields.contains(s.field))
-          .toList();
+          ?.where((s) => ChannelModel.topLevelFields.contains(s.field))
+          ?.toList();
 
       if (sort != null && sort.isNotEmpty) {
         query.orderBy(sort.map((s) {
