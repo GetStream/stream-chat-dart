@@ -1,3 +1,7 @@
+## 0.2.0+2
+
+- Fix search messages response class
+
 ## 0.2.0+1
 
 - Fix offline members update
