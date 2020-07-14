@@ -123,7 +123,7 @@ SearchMessagesResponse _$SearchMessagesResponseFromJson(
     Map<String, dynamic> json) {
   return SearchMessagesResponse()
     ..duration = json['duration'] as String
-    ..messages = (json['messages'] as List)
+    ..results = (json['results'] as List)
         ?.map((e) =>
             e == null ? null : Message.fromJson(e as Map<String, dynamic>))
         ?.toList();
