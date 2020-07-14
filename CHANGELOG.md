@@ -1,3 +1,7 @@
+## 0.1.31
+
+- Fix message search response class
+
 ## 0.1.30
 
 - Add silent property to message
