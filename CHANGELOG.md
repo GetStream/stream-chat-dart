@@ -1,4 +1,4 @@
-## 0.1.31
+## 0.1.32
 
 - Fix message search response class
 

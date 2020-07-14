@@ -169,11 +169,22 @@ class GetMessageResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class SearchMessagesResponse extends _BaseResponse {
   /// List of messages returned by the api call
-  List<Message> results;
+  List<MessageResult> results;
 
   /// Create a new instance from a json
   static SearchMessagesResponse fromJson(Map<String, dynamic> json) =>
       _$SearchMessagesResponseFromJson(json);
+}
+
+/// Model response for [Client.search] api call
+@JsonSerializable(createToJson: false)
+class MessageResult extends _BaseResponse {
+  /// List of messages returned by the api call
+  Message message;
+
+  /// Create a new instance from a json
+  static MessageResult fromJson(Map<String, dynamic> json) =>
+      _$MessageResultFromJson(json);
 }
 
 /// Model response for [Channel.getMessagesById] api call

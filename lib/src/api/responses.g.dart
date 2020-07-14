@@ -124,9 +124,18 @@ SearchMessagesResponse _$SearchMessagesResponseFromJson(
   return SearchMessagesResponse()
     ..duration = json['duration'] as String
     ..results = (json['results'] as List)
-        ?.map((e) =>
-            e == null ? null : Message.fromJson(e as Map<String, dynamic>))
+        ?.map((e) => e == null
+            ? null
+            : MessageResult.fromJson(e as Map<String, dynamic>))
         ?.toList();
+}
+
+MessageResult _$MessageResultFromJson(Map<String, dynamic> json) {
+  return MessageResult()
+    ..duration = json['duration'] as String
+    ..message = json['message'] == null
+        ? null
+        : Message.fromJson(json['message'] as Map<String, dynamic>);
 }
 
 GetMessagesByIdResponse _$GetMessagesByIdResponseFromJson(
