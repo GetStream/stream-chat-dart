@@ -1,3 +1,9 @@
+## 0.2.1
+
+- Add `isMutedStream` to `Channel`
+- Add `isGroup` to `Channel`
+- Add `isDistinct` to `Channel`
+
 ## 0.2.0+2
 
 - Fix search messages response class

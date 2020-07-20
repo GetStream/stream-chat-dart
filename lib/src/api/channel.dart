@@ -59,6 +59,16 @@ class Channel {
           ?.any((element) => element.channel.cid == cid) ==
       true;
 
+  /// Returns true if the channel is muted as a stream
+  Stream<bool> get isMutedStream => _client.state.userStream?.map((event) =>
+      event.channelMutes?.any((element) => element.channel.cid == cid) == true);
+
+  /// True if the channel is a group
+  bool get isGroup => memberCount != 2;
+
+  /// True if the channel is distinct
+  bool get isDistinct => id?.startsWith('!members') == true;
+
   /// Channel configuration
   ChannelConfig get config => state?._channelState?.channel?.config;
 
@@ -356,10 +366,12 @@ class Channel {
 
   /// Remove members from the channel
   Future<RemoveMembersResponse> removeMembers(
-      List<Member> members, Message message) async {
+    List<Member> members, [
+    Message message,
+  ]) async {
     final res = await _client.post(_channelURL, data: {
-      'remove_members': members.map((m) => m.toJson()),
-      'message': message.toJson(),
+      'remove_members': members.map((m) => m.userId).toList(),
+      'message': message?.toJson(),
     });
     return _client.decode(res.data, RemoveMembersResponse.fromJson);
   }
