@@ -3365,7 +3365,7 @@ void main() {
 
     test('SearchMessagesResponse', () {
       const jsonExample = r'''
-      { "messages": [
+      { "results": [
           {
               "id": "9db3ef01-e779-4279-8c54-ffd021eccec4",
               "text": "A lustred seal is an alto of the mind.",
@@ -3432,7 +3432,7 @@ void main() {
       ''';
       final response =
           SearchMessagesResponse.fromJson(json.decode(jsonExample));
-      expect(response.messages, isA<List<Message>>());
+      expect(response.results, isA<List<Message>>());
     });
 
     test('ListDevicesResponse', () {
