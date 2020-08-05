@@ -342,35 +342,35 @@ class Channel {
 
   /// Add members to the channel
   Future<AddMembersResponse> addMembers(
-    List<Member> members,
+    List<String> memberIds, [
     Message message,
-  ) async {
+  ]) async {
     final res = await _client.post(_channelURL, data: {
-      'add_members': members.map((m) => m.toJson()),
-      'message': message.toJson(),
+      'add_members': memberIds,
+      'message': message?.toJson(),
     });
     return _client.decode(res.data, AddMembersResponse.fromJson);
   }
 
   /// Invite members to the channel
   Future<InviteMembersResponse> inviteMembers(
-    List<Member> members,
+    List<String> memberIds, [
     Message message,
-  ) async {
+  ]) async {
     final res = await _client.post(_channelURL, data: {
-      'invites': members.map((m) => m.toJson()),
-      'message': message.toJson(),
+      'invites': memberIds,
+      'message': message?.toJson(),
     });
     return _client.decode(res.data, InviteMembersResponse.fromJson);
   }
 
   /// Remove members from the channel
   Future<RemoveMembersResponse> removeMembers(
-    List<Member> members, [
+    List<String> memberIds, [
     Message message,
   ]) async {
     final res = await _client.post(_channelURL, data: {
-      'remove_members': members.map((m) => m.userId).toList(),
+      'remove_members': memberIds,
       'message': message?.toJson(),
     });
     return _client.decode(res.data, RemoveMembersResponse.fromJson);
