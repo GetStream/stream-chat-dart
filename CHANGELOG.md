@@ -1,3 +1,7 @@
+## 0.2.2
+
+- Fix add/remove/invite members api calls
+
 ## 0.2.1
 
 - Add `isMutedStream` to `Channel`
