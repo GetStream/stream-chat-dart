@@ -110,7 +110,6 @@ void main() {
           'payload': json.encode({
             "filter_conditions": null,
             "sort": null,
-            "user_details": null,
             "state": true,
             "watch": true,
             "presence": false,
@@ -154,7 +153,6 @@ void main() {
           'payload': json.encode({
             "filter_conditions": queryFilter,
             "sort": sortOptions,
-            "user_details": null,
           }
             ..addAll(options)
             ..addAll(paginationParams.toJson())),

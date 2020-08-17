@@ -541,7 +541,6 @@ class Client {
     var payload = <String, dynamic>{
       'filter_conditions': filter,
       'sort': sort,
-      'user_details': state.user,
     };
 
     if (messageLimit != null) {
