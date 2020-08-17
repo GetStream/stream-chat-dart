@@ -1,3 +1,7 @@
+## 0.1.32+1
+
+- Fix queryChannels payload
+
 ## 0.1.32
 
 - Fix message search response class
