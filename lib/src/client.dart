@@ -359,10 +359,9 @@ class Client {
       "presence": false,
     };
 
-    Map<String, dynamic> payload = {
-      "filter_conditions": filter,
-      "sort": sort,
-      "user_details": state.user,
+    var payload = <String, dynamic>{
+      'filter_conditions': filter,
+      'sort': sort,
     };
 
     if (messageLimit != null) {
