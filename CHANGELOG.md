@@ -1,3 +1,9 @@
+## 0.2.3
+
+- Fix reject invite payload
+
+- Add multi-tenant properties to channel and user
+
 ## 0.2.2+1
 
 - Fix queryChannels payload
