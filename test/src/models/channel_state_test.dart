@@ -18,6 +18,7 @@ void main() {
      "last_message_at": "2020-01-30T13:43:41.062362Z",
      "created_at": "2019-04-03T18:43:33.213373Z",
      "updated_at": "2019-04-03T18:43:33.213374Z",
+     "team": "test",
      "created_by": {
        "id": "guido",
        "role": "user",
@@ -745,6 +746,7 @@ void main() {
       final channelState = ChannelState.fromJson(json.decode(jsonExample));
       expect(channelState.channel.cid, 'team:dev');
       expect(channelState.channel.id, 'dev');
+      expect(channelState.channel.team, 'test');
       expect(channelState.channel.type, 'team');
       expect(channelState.channel.config, isA<ChannelConfig>());
       expect(channelState.channel.config, isNotNull);

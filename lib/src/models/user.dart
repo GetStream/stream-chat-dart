@@ -14,6 +14,10 @@ class User {
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final String role;
 
+  /// User role
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  final List<String> teams;
+
   /// Date of user creation
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final DateTime createdAt;
@@ -48,6 +52,7 @@ class User {
     'last_active',
     'online',
     'banned',
+    'teams',
   ];
 
   /// Use this named constructor to create a new user instance
@@ -59,6 +64,7 @@ class User {
         updatedAt = null,
         lastActive = null,
         banned = null,
+        teams = null,
         role = null;
 
   /// Constructor used for json serialization
@@ -71,6 +77,7 @@ class User {
     this.online,
     this.extraData,
     this.banned,
+    this.teams,
   });
 
   /// Shortcut for user name
