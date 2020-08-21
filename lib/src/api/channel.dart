@@ -336,7 +336,7 @@ class Channel {
   /// Reject invitation to the channel
   Future<RejectInviteResponse> rejectInvite([Message message]) async {
     final res = await _client.post(_channelURL,
-        data: {'accept_invite': false, 'message': message?.toJson()});
+        data: {'reject_invite': true, 'message': message?.toJson()});
     return _client.decode(res.data, RejectInviteResponse.fromJson);
   }
 

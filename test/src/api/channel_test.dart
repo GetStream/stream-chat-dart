@@ -1892,13 +1892,13 @@ void main() {
         final message = Message(text: 'test');
 
         when(mockDio.post<String>('/channels/messaging/testid',
-                data: {'accept_invite': false, 'message': message.toJson()}))
+                data: {'reject_invite': true, 'message': message.toJson()}))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await channelClient.rejectInvite(message);
 
         verify(mockDio.post<String>('/channels/messaging/testid',
-                data: {'accept_invite': false, 'message': message.toJson()}))
+                data: {'reject_invite': true, 'message': message.toJson()}))
             .called(1);
       });
 
