@@ -55,6 +55,10 @@ class ChannelModel {
   @JsonKey(includeIfNull: false)
   final Map<String, dynamic> extraData;
 
+  /// The team the channel belongs to
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  final String team;
+
   /// Known top level fields.
   /// Useful for [Serialization] methods.
   static const topLevelFields = [
@@ -69,6 +73,7 @@ class ChannelModel {
     'updated_at',
     'deleted_at',
     'member_count',
+    'team',
   ];
 
   /// Constructor used for json serialization
@@ -85,6 +90,7 @@ class ChannelModel {
     this.deletedAt,
     this.memberCount,
     this.extraData,
+    this.team,
   });
 
   /// Shortcut for channel name
@@ -119,6 +125,7 @@ class ChannelModel {
     DateTime deletedAt,
     int memberCount,
     Map<String, dynamic> extraData,
+    String team,
   }) =>
       ChannelModel(
         id: id ?? this.id,
@@ -133,5 +140,6 @@ class ChannelModel {
         deletedAt: deletedAt ?? this.deletedAt,
         memberCount: memberCount ?? this.memberCount,
         extraData: extraData ?? this.extraData,
+        team: team ?? this.team,
       );
 }

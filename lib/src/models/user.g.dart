@@ -24,6 +24,7 @@ User _$UserFromJson(Map json) {
       (k, e) => MapEntry(k as String, e),
     ),
     banned: json['banned'] as bool,
+    teams: (json['teams'] as List)?.map((e) => e as String)?.toList(),
   );
 }
 
@@ -39,6 +40,7 @@ Map<String, dynamic> _$UserToJson(User instance) {
   }
 
   writeNotNull('role', readonly(instance.role));
+  writeNotNull('teams', readonly(instance.teams));
   writeNotNull('created_at', readonly(instance.createdAt));
   writeNotNull('updated_at', readonly(instance.updatedAt));
   writeNotNull('last_active', readonly(instance.lastActive));

@@ -135,6 +135,9 @@ class Channel {
   /// Channel cid
   String get cid => state?._channelState?.channel?.cid ?? _cid;
 
+  /// Channel team
+  String get team => state?._channelState?.channel?.team;
+
   /// Channel cid as a stream
   Stream<String> get cidStream =>
       state?.channelStateStream?.map((cs) => cs.channel?.cid ?? _cid);
