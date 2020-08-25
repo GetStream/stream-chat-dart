@@ -1,3 +1,7 @@
+## 0.2.3+1
+
+- Removed moor_ffi from dependencies in favor of moor/ffi
+
 ## 0.2.3
 
 - Fix reject invite payload
