@@ -876,7 +876,7 @@ class ChannelClientState {
       _channelState = _channelState.copyWith(
         messages: _channelState?.messages?.map((m) {
           if (m.id == message.id) {
-            return _removeReactionFromMessage(message, reaction);
+            return _removeReactionFromMessage(m, reaction);
           }
           return m;
         })?.toList(),
@@ -886,12 +886,11 @@ class ChannelClientState {
     if (message.parentId != null) {
       final newThreads = threads;
       if (newThreads.containsKey(message.parentId)) {
-        newThreads[message.parentId] =
-            newThreads[message.parentId].map((message) {
-          if (message.id == message.id) {
-            return _removeReactionFromMessage(message, reaction);
+        newThreads[message.parentId] = newThreads[message.parentId].map((m) {
+          if (m.id == message.id) {
+            return _removeReactionFromMessage(m, reaction);
           }
-          return message;
+          return m;
         }).toList();
         _threads = newThreads;
       }
@@ -904,7 +903,7 @@ class ChannelClientState {
         .where((e) => _channel._client.state.user.id != e.user.id)
         .listen((event) {
       final message = event.message;
-      addMessage(message);
+      _addMessageReaction(message, event.reaction);
     });
   }
 
@@ -913,7 +912,7 @@ class ChannelClientState {
       _channelState = _channelState.copyWith(
         messages: _channelState.messages.map((m) {
           if (message.id == m.id) {
-            return _addReactionToMessage(message, reaction);
+            return _addReactionToMessage(m, reaction);
           }
           return m;
         }).toList(),
@@ -925,7 +924,7 @@ class ChannelClientState {
       if (newThreads.containsKey(message.parentId)) {
         newThreads[message.parentId] = newThreads[message.parentId].map((m) {
           if (message.id == m.id) {
-            return _addReactionToMessage(message, reaction);
+            return _addReactionToMessage(m, reaction);
           }
           return m;
         }).toList();
