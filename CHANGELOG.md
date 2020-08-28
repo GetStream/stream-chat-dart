@@ -1,3 +1,7 @@
+## 0.2.3+3
+
+- Fix reaction add/remove logic
+
 ## 0.2.3+2
 
 - Skip system messages during unreadCount computation
