@@ -6,7 +6,6 @@ import 'package:stream_chat/src/api/requests.dart';
 import 'package:stream_chat/src/client.dart';
 import 'package:stream_chat/src/event_type.dart';
 import 'package:stream_chat/src/models/event.dart';
-import 'package:stream_chat/src/models/member.dart';
 import 'package:stream_chat/src/models/message.dart';
 import 'package:stream_chat/src/models/reaction.dart';
 
@@ -480,20 +479,18 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final List<Member> members = [Member(invited: true)];
+        final members = ['vishal'];
         final message = Message(text: 'test');
 
-        when(mockDio.post<String>('/channels/messaging/testid', data: {
-          'add_members': members.map((m) => m.toJson()),
-          'message': message.toJson()
-        })).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(mockDio.post<String>('/channels/messaging/testid',
+                data: {'add_members': members, 'message': message.toJson()}))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await channelClient.addMembers(members, message);
 
-        verify(mockDio.post<String>('/channels/messaging/testid', data: {
-          'add_members': members.map((m) => m.toJson()),
-          'message': message.toJson()
-        })).called(1);
+        verify(mockDio.post<String>('/channels/messaging/testid',
+                data: {'add_members': members, 'message': message.toJson()}))
+            .called(1);
       });
 
       test('acceptInvite', () async {
@@ -1895,13 +1892,13 @@ void main() {
         final message = Message(text: 'test');
 
         when(mockDio.post<String>('/channels/messaging/testid',
-                data: {'accept_invite': false, 'message': message.toJson()}))
+                data: {'reject_invite': true, 'message': message.toJson()}))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await channelClient.rejectInvite(message);
 
         verify(mockDio.post<String>('/channels/messaging/testid',
-                data: {'accept_invite': false, 'message': message.toJson()}))
+                data: {'reject_invite': true, 'message': message.toJson()}))
             .called(1);
       });
 
@@ -1917,20 +1914,17 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final List<Member> members = [Member(invited: true)];
+        final members = ['vishal'];
         final message = Message(text: 'test');
 
-        when(mockDio.post<String>('/channels/messaging/testid', data: {
-          'invites': members.map((m) => m.toJson()),
-          'message': message.toJson()
-        })).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(mockDio.post<String>('/channels/messaging/testid',
+                data: {'invites': members, 'message': message.toJson()}))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await channelClient.inviteMembers(members, message);
 
-        verify(mockDio.post<String>('/channels/messaging/testid', data: {
-          'invites': members.map((m) => m.toJson()),
-          'message': message.toJson()
-        })).called(1);
+        verify(mockDio.post<String>('/channels/messaging/testid',
+            data: {'invites': members, 'message': message.toJson()})).called(1);
       });
 
       test('removeMembers', () async {
@@ -1945,20 +1939,18 @@ void main() {
           tokenProvider: (_) async => '',
         );
         final channelClient = client.channel('messaging', id: 'testid');
-        final List<Member> members = [Member(invited: true)];
+        final members = ['vishal'];
         final message = Message(text: 'test');
 
-        when(mockDio.post<String>('/channels/messaging/testid', data: {
-          'remove_members': members.map((m) => m.toJson()),
-          'message': message.toJson()
-        })).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
+        when(mockDio.post<String>('/channels/messaging/testid',
+                data: {'remove_members': members, 'message': message.toJson()}))
+            .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await channelClient.removeMembers(members, message);
 
-        verify(mockDio.post<String>('/channels/messaging/testid', data: {
-          'remove_members': members.map((m) => m.toJson()),
-          'message': message.toJson()
-        })).called(1);
+        verify(mockDio.post<String>('/channels/messaging/testid',
+                data: {'remove_members': members, 'message': message.toJson()}))
+            .called(1);
       });
 
       test('hide', () async {

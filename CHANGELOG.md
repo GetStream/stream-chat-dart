@@ -1,3 +1,41 @@
+## 0.2.3+2
+
+- Skip system messages during unreadCount computation
+
+## 0.2.3+1
+
+- Removed moor_ffi from dependencies in favor of moor/ffi
+
+## 0.2.3
+
+- Fix reject invite payload
+
+- Add multi-tenant properties to channel and user
+
+## 0.2.2+1
+
+- Fix queryChannels payload
+
+## 0.2.2
+
+- Fix add/remove/invite members api calls
+
+## 0.2.1
+
+- Add `isMutedStream` to `Channel`
+- Add `isGroup` to `Channel`
+- Add `isDistinct` to `Channel`
+
+## 0.2.0+2
+
+- Fix search messages response class
+
+## 0.2.0+1
+
+- Fix offline members update
+- Add channel mutes
+- Fix default channel sort
+
 ## 0.2.0
 
 - Add `lastMessage` getter to Channel.state

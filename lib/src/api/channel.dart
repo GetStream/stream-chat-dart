@@ -59,6 +59,16 @@ class Channel {
           ?.any((element) => element.channel.cid == cid) ==
       true;
 
+  /// Returns true if the channel is muted as a stream
+  Stream<bool> get isMutedStream => _client.state.userStream?.map((event) =>
+      event.channelMutes?.any((element) => element.channel.cid == cid) == true);
+
+  /// True if the channel is a group
+  bool get isGroup => memberCount != 2;
+
+  /// True if the channel is distinct
+  bool get isDistinct => id?.startsWith('!members') == true;
+
   /// Channel configuration
   ChannelConfig get config => state?._channelState?.channel?.config;
 
@@ -124,6 +134,9 @@ class Channel {
 
   /// Channel cid
   String get cid => state?._channelState?.channel?.cid ?? _cid;
+
+  /// Channel team
+  String get team => state?._channelState?.channel?.team;
 
   /// Channel cid as a stream
   Stream<String> get cidStream =>
@@ -326,40 +339,42 @@ class Channel {
   /// Reject invitation to the channel
   Future<RejectInviteResponse> rejectInvite([Message message]) async {
     final res = await _client.post(_channelURL,
-        data: {'accept_invite': false, 'message': message?.toJson()});
+        data: {'reject_invite': true, 'message': message?.toJson()});
     return _client.decode(res.data, RejectInviteResponse.fromJson);
   }
 
   /// Add members to the channel
   Future<AddMembersResponse> addMembers(
-    List<Member> members,
+    List<String> memberIds, [
     Message message,
-  ) async {
+  ]) async {
     final res = await _client.post(_channelURL, data: {
-      'add_members': members.map((m) => m.toJson()),
-      'message': message.toJson(),
+      'add_members': memberIds,
+      'message': message?.toJson(),
     });
     return _client.decode(res.data, AddMembersResponse.fromJson);
   }
 
   /// Invite members to the channel
   Future<InviteMembersResponse> inviteMembers(
-    List<Member> members,
+    List<String> memberIds, [
     Message message,
-  ) async {
+  ]) async {
     final res = await _client.post(_channelURL, data: {
-      'invites': members.map((m) => m.toJson()),
-      'message': message.toJson(),
+      'invites': memberIds,
+      'message': message?.toJson(),
     });
     return _client.decode(res.data, InviteMembersResponse.fromJson);
   }
 
   /// Remove members from the channel
   Future<RemoveMembersResponse> removeMembers(
-      List<Member> members, Message message) async {
+    List<String> memberIds, [
+    Message message,
+  ]) async {
     final res = await _client.post(_channelURL, data: {
-      'remove_members': members.map((m) => m.toJson()),
-      'message': message.toJson(),
+      'remove_members': memberIds,
+      'message': message?.toJson(),
     });
     return _client.decode(res.data, RemoveMembersResponse.fromJson);
   }
@@ -1141,7 +1156,8 @@ class ChannelClientState {
       return _channelState.messages.fold<int>(0, (count, message) {
         if (message.user.id != userId &&
             message.createdAt.isAfter(userRead.lastRead) &&
-            message.silent != true) {
+            message.silent != true &&
+            !message.isSystem) {
           return count + 1;
         }
         return count;

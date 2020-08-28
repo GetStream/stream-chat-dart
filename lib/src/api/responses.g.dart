@@ -186,7 +186,7 @@ GetMessageResponse _$GetMessageResponseFromJson(Map json) {
 SearchMessagesResponse _$SearchMessagesResponseFromJson(Map json) {
   return SearchMessagesResponse()
     ..duration = json['duration'] as String
-    ..messages = (json['messages'] as List)
+    ..results = (json['results'] as List)
         ?.map((e) => e == null
             ? null
             : Message.fromJson((e as Map)?.map(

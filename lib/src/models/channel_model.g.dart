@@ -38,6 +38,7 @@ ChannelModel _$ChannelModelFromJson(Map json) {
     extraData: (json['extra_data'] as Map)?.map(
       (k, e) => MapEntry(k as String, e),
     ),
+    team: json['team'] as String,
   );
 }
 
@@ -63,5 +64,6 @@ Map<String, dynamic> _$ChannelModelToJson(ChannelModel instance) {
   writeNotNull('deleted_at', readonly(instance.deletedAt));
   writeNotNull('member_count', readonly(instance.memberCount));
   writeNotNull('extra_data', instance.extraData);
+  writeNotNull('team', readonly(instance.team));
   return val;
 }
