@@ -438,19 +438,6 @@ class Client {
           'cid': {
             '\$in': state.channels.keys.toList(),
           },
-        }, options: {
-          'recovery': true,
-          'last_message_ids': state.channels.map<String, String>(
-            (cid, c) {
-              final lastId = c.state?.messages?.isEmpty == true
-                  ? null
-                  : c.state.messages.last.id;
-              return MapEntry<String, String>(
-                cid,
-                lastId,
-              );
-            },
-          ),
         }).listen(
           (_) {},
           onDone: () async {
