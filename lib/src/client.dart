@@ -597,6 +597,12 @@ class Client {
 
     logger.info('Got ${res.channels?.length} channels from api');
 
+    if (res.channels?.isEmpty != false) {
+      logger.warning('''We could not find any channel for this query.
+          Please make sure to take a look at the Flutter tutorial: https://getstream.io/chat/flutter/tutorial
+          If your application already has users and channels, you might need to adjust your query channel as explained in the docs https://getstream.io/chat/docs/query_channels/?language=dart''');
+    }
+
     newChannels = Map<String, Channel>.from(state.channels ?? {});
     channels.clear();
 
