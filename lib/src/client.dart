@@ -784,7 +784,7 @@ class Client {
   Future<void> _disconnect() async {
     logger.info('Client disconnecting');
 
-    await _ws.disconnect();
+    await _ws?.disconnect();
   }
 
   /// Requests users with a given query.
