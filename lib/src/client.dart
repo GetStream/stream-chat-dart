@@ -788,11 +788,12 @@ class Client {
   }
 
   /// Requests users with a given query.
-  Future<QueryUsersResponse> queryUsers(
+  Future<QueryUsersResponse> queryUsers({
     Map<String, dynamic> filter,
     List<SortOption> sort,
     Map<String, dynamic> options,
-  ) async {
+    PaginationParams pagination,
+  }) async {
     final defaultOptions = {
       'presence': _hasConnectionId,
     };
@@ -803,6 +804,10 @@ class Client {
     };
 
     payload.addAll(defaultOptions);
+
+    if (pagination != null) {
+      payload.addAll(pagination.toJson());
+    }
 
     if (options != null) {
       payload.addAll(options);
