@@ -1,7 +1,7 @@
 name: stream_chat
 homepage: https://getstream.io/
 description: The official Dart client for Stream Chat, a service for building chat applications.
-version: 0.2.3+3
+version: 0.2.4
 repository: https://github.com/GetStream/stream-chat-dart
 issue_tracker: https://github.com/GetStream/stream-chat-dart/issues
 
@@ -16,7 +16,7 @@ dependencies:
   logging: ^0.11.4
   dio: ^3.0.10
   web_socket_channel: ^1.1.0
-  uuid: ^2.1.0
+  uuid: ^2.2.2
   async: ^2.4.1
   stream_channel: ^2.0.0
   moor: ^3.3.1

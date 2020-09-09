@@ -1,3 +1,8 @@
+## 0.2.4
+
+- Add null-safety to ws disconnect
+- Add pagination parameters to queryUsers request
+
 ## 0.2.3+3
 
 - Fix reaction add/remove logic
