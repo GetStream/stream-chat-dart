@@ -4,9 +4,9 @@ import 'dart:isolate';
 
 import 'package:flutter/material.dart' show WidgetsFlutterBinding;
 import 'package:logging/logging.dart';
+import 'package:moor/ffi.dart';
 import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
-import 'package:moor/ffi.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat/src/models/event.dart';
@@ -116,7 +116,7 @@ class OfflineStorage extends _$OfflineStorage {
   // you should bump this number whenever you change or add a table definition. Migrations
   // are covered later in this readme.
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(

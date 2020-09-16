@@ -479,6 +479,10 @@ class Client {
 
     cids ??= await offlineStorage?.getChannelCids();
 
+    if (cids?.isEmpty == true) {
+      return;
+    }
+
     try {
       final rawRes = await post('/sync', data: {
         'channel_cids': cids,
