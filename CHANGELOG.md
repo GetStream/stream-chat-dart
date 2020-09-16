@@ -1,3 +1,7 @@
+## 0.2.4+1
+
+- Do not resync if there is no channel in offlinestorage
+
 ## 0.2.4
 
 - Add null-safety to ws disconnect
