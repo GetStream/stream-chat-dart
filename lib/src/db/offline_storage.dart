@@ -6,9 +6,9 @@ import 'package:flutter/material.dart' show WidgetsFlutterBinding;
 import 'package:logging/logging.dart';
 import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
-import 'package:moor/ffi.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:stream_chat/src/db/shared_database.dart';
 import 'package:stream_chat/src/models/event.dart';
 import 'package:stream_chat/src/models/own_user.dart';
 
@@ -42,7 +42,7 @@ Future<MoorIsolate> _createMoorIsolate(String userId) async {
 
 void _startBackground(_IsolateStartRequest request) {
   final executor = LazyDatabase(() async {
-    return VmDatabase(File(request.targetPath));
+    return SharedDB.constructDatabase(request.targetPath);
   });
   final moorIsolate = MoorIsolate.inCurrent(
     () => DatabaseConnection.fromExecutor(executor),
@@ -75,8 +75,7 @@ LazyDatabase _openConnection(String userId) {
   return LazyDatabase(() async {
     final dir = await getApplicationDocumentsDirectory();
     final path = p.join(dir.path, 'db_$userId.sqlite');
-    final file = File(path);
-    return VmDatabase(file);
+    return SharedDB.constructDatabase(path);
   });
 }
 
