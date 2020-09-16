@@ -633,10 +633,6 @@ class Channel {
       'payload': jsonEncode(payload),
     });
     final response = _client.decode(rawRes.data, QueryMembersResponse.fromJson);
-
-    state?.updateChannelState(ChannelState(
-      members: response.members,
-    ));
     return response;
   }
 
