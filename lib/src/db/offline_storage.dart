@@ -7,7 +7,7 @@ import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:stream_chat/src/db/shared_database.dart';
+import 'package:stream_chat/src/db/shared/shared_database.dart';
 import 'package:stream_chat/src/models/event.dart';
 import 'package:stream_chat/src/models/own_user.dart';
 
