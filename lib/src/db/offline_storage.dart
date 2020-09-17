@@ -33,7 +33,7 @@ Future<MoorIsolate> _createMoorIsolate(String userId) async {
   final receivePort = ReceivePort();
   await Isolate.spawn(
     _startBackground,
-    _IsolateStartRequest(receivePort.sendPort, path),
+    _IsolateStartRequest(receivePort.sendPort, path, 'db_$userId.sqlite'),
   );
 
   return (await receivePort.first as MoorIsolate);
@@ -41,7 +41,7 @@ Future<MoorIsolate> _createMoorIsolate(String userId) async {
 
 void _startBackground(_IsolateStartRequest request) {
   final executor = LazyDatabase(() async {
-    return SharedDB.constructDatabase(request.targetPath);
+    return SharedDB.constructDatabase(request.targetPath, request.dbName);
   });
   final moorIsolate = MoorIsolate.inCurrent(
     () => DatabaseConnection.fromExecutor(executor),
@@ -65,8 +65,9 @@ Future<OfflineStorage> connectDatabase(User user, Logger logger) async {
 class _IsolateStartRequest {
   final SendPort sendMoorIsolate;
   final String targetPath;
+  final String dbName;
 
-  _IsolateStartRequest(this.sendMoorIsolate, this.targetPath);
+  _IsolateStartRequest(this.sendMoorIsolate, this.targetPath, this.dbName);
 }
 
 LazyDatabase _openConnection(String userId) {
@@ -74,7 +75,7 @@ LazyDatabase _openConnection(String userId) {
   return LazyDatabase(() async {
     final dir = await getApplicationDocumentsDirectory();
     final path = p.join(dir.path, 'db_$userId.sqlite');
-    return SharedDB.constructDatabase(path);
+    return SharedDB.constructDatabase(path, 'db_$userId.sqlite');
   });
 }
 
