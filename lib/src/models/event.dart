@@ -22,6 +22,12 @@ class Event {
   /// The channel cid to which the event belongs
   final String cid;
 
+  /// The channel id to which the event belongs
+  final String channelId;
+
+  /// The channel type to which the event belongs
+  final String channelType;
+
   /// The connection id in which the event has been sent
   final String connectionId;
 
@@ -73,6 +79,8 @@ class Event {
     this.online,
     this.channel,
     this.member,
+    this.channelId,
+    this.channelType,
   }) : isLocal = true;
 
   /// Create a new instance from a json
