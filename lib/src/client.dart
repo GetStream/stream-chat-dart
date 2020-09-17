@@ -1125,7 +1125,9 @@ class ClientState {
   void _listenChannelHidden() {
     _client.on(EventType.channelHidden).listen((event) {
       _client._offlineStorage?.deleteChannels([event.cid]);
-      channels = channels..removeWhere((cid, ch) => cid == event.cid);
+      if (channels != null) {
+        channels = channels..removeWhere((cid, ch) => cid == event.cid);
+      }
     });
   }
 
