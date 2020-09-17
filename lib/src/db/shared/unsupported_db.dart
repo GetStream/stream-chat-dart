@@ -1,5 +1,5 @@
 class SharedDB {
-  static constructDatabase(doc, dbName) {
+  static constructDatabase(dbName) async {
     print('Unsupported Platform');
     return null;
   }

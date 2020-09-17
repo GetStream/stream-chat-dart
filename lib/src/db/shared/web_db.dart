@@ -1,7 +1,7 @@
 import 'package:moor/moor_web.dart';
 
 class SharedDB {
-  static constructDatabase(path, dbName) {
+  static constructDatabase(dbName) async {
     return WebDatabase(dbName);
   }
 }

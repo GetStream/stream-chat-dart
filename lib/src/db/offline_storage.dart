@@ -27,13 +27,11 @@ part 'offline_storage.g.dart';
 
 Future<MoorIsolate> _createMoorIsolate(String userId) async {
   WidgetsFlutterBinding.ensureInitialized();
-  final dir = await getApplicationDocumentsDirectory();
-  final path = p.join(dir.path, 'db_$userId.sqlite');
 
   final receivePort = ReceivePort();
   await Isolate.spawn(
     _startBackground,
-    _IsolateStartRequest(receivePort.sendPort, path, 'db_$userId.sqlite'),
+    _IsolateStartRequest(receivePort.sendPort, 'db_$userId.sqlite'),
   );
 
   return (await receivePort.first as MoorIsolate);
@@ -41,7 +39,7 @@ Future<MoorIsolate> _createMoorIsolate(String userId) async {
 
 void _startBackground(_IsolateStartRequest request) {
   final executor = LazyDatabase(() async {
-    return SharedDB.constructDatabase(request.targetPath, request.dbName);
+    return await SharedDB.constructDatabase(request.dbName);
   });
   final moorIsolate = MoorIsolate.inCurrent(
     () => DatabaseConnection.fromExecutor(executor),
@@ -64,18 +62,15 @@ Future<OfflineStorage> connectDatabase(User user, Logger logger) async {
 
 class _IsolateStartRequest {
   final SendPort sendMoorIsolate;
-  final String targetPath;
   final String dbName;
 
-  _IsolateStartRequest(this.sendMoorIsolate, this.targetPath, this.dbName);
+  _IsolateStartRequest(this.sendMoorIsolate, this.dbName);
 }
 
 LazyDatabase _openConnection(String userId) {
   moorRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   return LazyDatabase(() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final path = p.join(dir.path, 'db_$userId.sqlite');
-    return SharedDB.constructDatabase(path, 'db_$userId.sqlite');
+    return await SharedDB.constructDatabase('db_$userId.sqlite');
   });
 }
 
