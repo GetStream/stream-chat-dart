@@ -6,8 +6,10 @@ class SharedDB {
     return WebDatabase(dbName);
   }
 
-  static Future<OfflineStorage> constructOfflineStorage(
-      {connection, userId, isolate, logger}) async {
+  static Future<OfflineStorage> constructOfflineStorage({
+    userId,
+    logger,
+  }) async {
     return OfflineStorage(
       userId,
       logger,

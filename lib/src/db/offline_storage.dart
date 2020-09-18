@@ -27,7 +27,8 @@ Future<OfflineStorage> connectDatabase(User user, Logger logger) async {
   WidgetsFlutterBinding.ensureInitialized();
   return SharedDB.constructOfflineStorage(
     userId: user.id,
-    logger: logger,);
+    logger: logger,
+  );
 }
 
 LazyDatabase _openConnection(String userId) {
