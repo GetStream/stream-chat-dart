@@ -9,8 +9,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat/src/db/offline_storage.dart';
 
 class SharedDB {
-  static constructDatabase(path) async {
-    return VmDatabase(File(path));
+  static constructDatabase(dbName) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final path = join(dir.path, dbName);
+    final file = File(path);
+    return VmDatabase(file);
   }
 
   static Future<MoorIsolate> createMoorIsolate(String userId) async {
