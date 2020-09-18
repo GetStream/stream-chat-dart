@@ -27,8 +27,6 @@ part 'models.part.dart';
 part 'offline_storage.g.dart';
 
 Future<MoorIsolate> _createMoorIsolate(String userId) async {
-  WidgetsFlutterBinding.ensureInitialized();
-
   final receivePort = ReceivePort();
   await Isolate.spawn(
     _startBackground,
@@ -50,6 +48,7 @@ void _startBackground(_IsolateStartRequest request) {
 
 /// Gets a new instance of the database running on a background isolate
 Future<OfflineStorage> connectDatabase(User user, Logger logger) async {
+  WidgetsFlutterBinding.ensureInitialized();
   if(kIsWeb) {
     return OfflineStorage(
       user.id,

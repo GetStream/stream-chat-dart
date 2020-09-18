@@ -6,7 +6,6 @@ import 'package:path_provider/path_provider.dart';
 
 class SharedDB {
   static constructDatabase(dbName) async {
-    WidgetsFlutterBinding.ensureInitialized();
     final dir = await getApplicationDocumentsDirectory();
     final path = join(dir.path, dbName);
 
