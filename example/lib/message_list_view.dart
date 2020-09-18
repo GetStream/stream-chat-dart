@@ -25,6 +25,7 @@ class MessageListView extends StatefulWidget {
   final ParentMessageBuilder parentMessageBuilder;
   final OnThreadSelectCallback onThreadSelect;
   final Message parentMessage;
+  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
 
   @override
   _MessageListViewState createState() => _MessageListViewState();
@@ -56,6 +57,7 @@ class _MessageListViewState extends State<MessageListView> {
       child: ListView.custom(
         physics: AlwaysScrollableScrollPhysics(),
         controller: _scrollController,
+        keyboardDismissBehavior: widget.keyboardDismissBehavior,
         reverse: true,
         childrenDelegate: SliverChildBuilderDelegate(
           (context, i) {
