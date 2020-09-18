@@ -3,4 +3,8 @@ class SharedDB {
     print('Unsupported Platform');
     return null;
   }
+
+  static createMoorIsolate(userId) {}
+
+  static startBackground(request) {}
 }

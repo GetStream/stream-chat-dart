@@ -1,13 +1,9 @@
 import 'dart:convert';
-import 'dart:isolate';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show WidgetsFlutterBinding;
 import 'package:logging/logging.dart';
 import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 import 'package:stream_chat/src/db/shared/shared_database.dart';
 import 'package:stream_chat/src/models/event.dart';
 import 'package:stream_chat/src/models/own_user.dart';
@@ -26,26 +22,6 @@ import '../models/user.dart';
 part 'models.part.dart';
 part 'offline_storage.g.dart';
 
-Future<MoorIsolate> _createMoorIsolate(String userId) async {
-  final receivePort = ReceivePort();
-  await Isolate.spawn(
-    _startBackground,
-    _IsolateStartRequest(receivePort.sendPort, 'db_$userId.sqlite'),
-  );
-
-  return (await receivePort.first as MoorIsolate);
-}
-
-void _startBackground(_IsolateStartRequest request) {
-  final executor = LazyDatabase(() async {
-    return await SharedDB.constructDatabase(request.dbName);
-  });
-  final moorIsolate = MoorIsolate.inCurrent(
-    () => DatabaseConnection.fromExecutor(executor),
-  );
-  request.sendMoorIsolate.send(moorIsolate);
-}
-
 /// Gets a new instance of the database running on a background isolate
 Future<OfflineStorage> connectDatabase(User user, Logger logger) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,7 +32,7 @@ Future<OfflineStorage> connectDatabase(User user, Logger logger) async {
     );
   } else {
     logger.info('Connecting on background isolate');
-    final isolate = await _createMoorIsolate(user.id);
+    final isolate = await SharedDB.createMoorIsolate(user.id);
     final connection = await isolate.connect();
     return OfflineStorage.connect(
       connection,
@@ -65,13 +41,6 @@ Future<OfflineStorage> connectDatabase(User user, Logger logger) async {
       logger,
     );
   }
-}
-
-class _IsolateStartRequest {
-  final SendPort sendMoorIsolate;
-  final String dbName;
-
-  _IsolateStartRequest(this.sendMoorIsolate, this.dbName);
 }
 
 LazyDatabase _openConnection(String userId) {
