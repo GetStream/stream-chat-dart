@@ -25,22 +25,9 @@ part 'offline_storage.g.dart';
 /// Gets a new instance of the database running on a background isolate
 Future<OfflineStorage> connectDatabase(User user, Logger logger) async {
   WidgetsFlutterBinding.ensureInitialized();
-  if(kIsWeb) {
-    return OfflineStorage(
-      user.id,
-      logger,
-    );
-  } else {
-    logger.info('Connecting on background isolate');
-    final isolate = await SharedDB.createMoorIsolate(user.id);
-    final connection = await isolate.connect();
-    return OfflineStorage.connect(
-      connection,
-      user.id,
-      isolate,
-      logger,
-    );
-  }
+  return SharedDB.constructOfflineStorage(
+    userId: user.id,
+    logger: logger,);
 }
 
 LazyDatabase _openConnection(String userId) {

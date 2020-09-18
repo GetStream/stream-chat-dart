@@ -6,6 +6,7 @@ import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:stream_chat/src/db/offline_storage.dart';
 
 class SharedDB {
   static constructDatabase(path) async {
@@ -31,11 +32,25 @@ class SharedDB {
       return VmDatabase(File(request.targetPath));
     });
     final moorIsolate = MoorIsolate.inCurrent(
-          () => DatabaseConnection.fromExecutor(executor),
+      () => DatabaseConnection.fromExecutor(executor),
     );
     request.sendMoorIsolate.send(moorIsolate);
   }
 
+  static Future<OfflineStorage> constructOfflineStorage({
+    userId,
+    logger,
+  }) async {
+    logger.info('Connecting on background isolate');
+    final isolate = await createMoorIsolate(userId);
+    final connection = await isolate.connect();
+    return OfflineStorage.connect(
+      connection,
+      userId,
+      isolate,
+      logger,
+    );
+  }
 }
 
 class _IsolateStartRequest {

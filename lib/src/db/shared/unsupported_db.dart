@@ -7,4 +7,6 @@ class SharedDB {
   static createMoorIsolate(userId) {}
 
   static startBackground(request) {}
+
+  static constructOfflineStorage({userId, logger}) {}
 }
