@@ -354,7 +354,7 @@ void main() {
         when(mockDio.get<String>('/users', queryParameters: queryParams))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
-        await client.queryUsers(null, null, null);
+        await client.queryUsers();
 
         verify(mockDio.get<String>('/users', queryParameters: queryParams))
             .called(1);
@@ -393,9 +393,9 @@ void main() {
         });
 
         await client.queryUsers(
-          queryFilter,
-          sortOptions,
-          options,
+          filter: queryFilter,
+          sort: sortOptions,
+          options: options,
         );
 
         verify(mockDio.get<String>('/users', queryParameters: queryParams))

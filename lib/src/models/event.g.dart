@@ -47,12 +47,16 @@ Event _$EventFromJson(Map json) {
         : Member.fromJson((json['member'] as Map)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
+    channelId: json['channel_id'] as String,
+    channelType: json['channel_type'] as String,
   )..isLocal = json['is_local'] as bool;
 }
 
 Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'type': instance.type,
       'cid': instance.cid,
+      'channel_id': instance.channelId,
+      'channel_type': instance.channelType,
       'connection_id': instance.connectionId,
       'created_at': instance.createdAt?.toIso8601String(),
       'me': instance.me?.toJson(),

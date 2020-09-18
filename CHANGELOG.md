@@ -1,3 +1,15 @@
+## 0.2.5
+
+- Add `channelType` and `channelId` properties to event object
+
+## 0.2.4+2
+
+- Fix query members messing channel state
+
+## 0.2.4+1
+
+- Do not resync if there is no channel in offlinestorage
+
 ## 0.2.4
 
 - Add null-safety to ws disconnect

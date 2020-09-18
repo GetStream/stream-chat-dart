@@ -479,6 +479,10 @@ class Client {
 
     cids ??= await offlineStorage?.getChannelCids();
 
+    if (cids?.isEmpty == true) {
+      return;
+    }
+
     try {
       final rawRes = await post('/sync', data: {
         'channel_cids': cids,
@@ -1121,7 +1125,9 @@ class ClientState {
   void _listenChannelHidden() {
     _client.on(EventType.channelHidden).listen((event) {
       _client._offlineStorage?.deleteChannels([event.cid]);
-      channels = channels..removeWhere((cid, ch) => cid == event.cid);
+      if (channels != null) {
+        channels = channels..removeWhere((cid, ch) => cid == event.cid);
+      }
     });
   }
 

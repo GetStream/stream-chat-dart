@@ -78,6 +78,8 @@ void main() {
           'online': true,
           'is_local': true,
           'member': null,
+          'channel_id': null,
+          'channel_type': null,
         },
       );
     });
