@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:isolate';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show WidgetsFlutterBinding;
 import 'package:logging/logging.dart';
 import 'package:moor/isolate.dart';
@@ -49,15 +50,22 @@ void _startBackground(_IsolateStartRequest request) {
 
 /// Gets a new instance of the database running on a background isolate
 Future<OfflineStorage> connectDatabase(User user, Logger logger) async {
-  logger.info('Connecting on background isolate');
-  final isolate = await _createMoorIsolate(user.id);
-  final connection = await isolate.connect();
-  return OfflineStorage.connect(
-    connection,
-    user.id,
-    isolate,
-    logger,
-  );
+  if(kIsWeb) {
+    return OfflineStorage(
+      user.id,
+      logger,
+    );
+  } else {
+    logger.info('Connecting on background isolate');
+    final isolate = await _createMoorIsolate(user.id);
+    final connection = await isolate.connect();
+    return OfflineStorage.connect(
+      connection,
+      user.id,
+      isolate,
+      logger,
+    );
+  }
 }
 
 class _IsolateStartRequest {
