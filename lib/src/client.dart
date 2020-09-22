@@ -205,10 +205,11 @@ class Client {
               options.queryParameters.addAll(_commonQueryParams);
               options.headers.addAll(_httpHeaders);
 
-              if (_connectionId != null && options.data is Map) {
+              if (_connectionId != null &&
+                  (options.data is Map || options.data == null)) {
                 options.data = {
                   'connection_id': _connectionId,
-                  ...options.data,
+                  ...(options.data ?? {}),
                 };
               }
 
@@ -601,7 +602,8 @@ class Client {
 
     logger.info('Got ${res.channels?.length} channels from api');
 
-    if (res.channels?.isEmpty != false) {
+    if (res.channels?.isEmpty != false &&
+        (paginationParams?.offset ?? 0) == 0) {
       logger.warning('''We could not find any channel for this query.
           Please make sure to take a look at the Flutter tutorial: https://getstream.io/chat/flutter/tutorial
           If your application already has users and channels, you might need to adjust your query channel as explained in the docs https://getstream.io/chat/docs/query_channels/?language=dart''');
