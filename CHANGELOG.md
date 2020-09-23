@@ -1,3 +1,7 @@
+## 0.2.5+1
+
+- Fix `channel.show` api call
+
 ## 0.2.5
 
 - Add `channelType` and `channelId` properties to event object
