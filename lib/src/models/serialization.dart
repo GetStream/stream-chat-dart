@@ -18,14 +18,11 @@ class Serialization {
     Map<String, dynamic> json,
     List<String> topLevelFields,
   ) {
-    final rootFields = Map<String, dynamic>.from(json)
-      ..removeWhere(
-        (key, value) => !topLevelFields.contains(key),
-      );
     final extraDataFields = Map<String, dynamic>.from(json)
       ..removeWhere(
         (key, value) => topLevelFields.contains(key),
       );
+    final rootFields = json..remove(extraDataFields.keys);
     return {
       ...rootFields,
       ...{
