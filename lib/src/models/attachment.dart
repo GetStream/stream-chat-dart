@@ -106,11 +106,11 @@ class Attachment {
   /// Create a new instance from a json
   factory Attachment.fromJson(Map<String, dynamic> json) {
     return _$AttachmentFromJson(
-        Serialization.moveKeysToRoot(json, topLevelFields));
+        Serialization.moveToExtraDataFromRoot(json, topLevelFields));
   }
 
   /// Serialize to json
-  Map<String, dynamic> toJson() => Serialization.moveKeysToMapInPlace(
+  Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
       _$AttachmentToJson(this), topLevelFields);
 
   Attachment copyWith({

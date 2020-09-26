@@ -167,12 +167,12 @@ class Message {
   });
 
   /// Create a new instance from a json
-  factory Message.fromJson(Map<String, dynamic> json) =>
-      _$MessageFromJson(Serialization.moveKeysToRoot(json, topLevelFields));
+  factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(
+      Serialization.moveToExtraDataFromRoot(json, topLevelFields));
 
   /// Serialize to json
-  Map<String, dynamic> toJson() =>
-      Serialization.moveKeysToMapInPlace(_$MessageToJson(this), topLevelFields);
+  Map<String, dynamic> toJson() => Serialization.moveFromExtraDataToRoot(
+      _$MessageToJson(this), topLevelFields);
 
   /// Creates a copy of [Message] with specified attributes overridden.
   Message copyWith({
@@ -241,7 +241,7 @@ class TranslatedMessage extends Message {
   /// Create a new instance from a json
   factory TranslatedMessage.fromJson(Map<String, dynamic> json) {
     return _$TranslatedMessageFromJson(
-      Serialization.moveKeysToRoot(json, topLevelFields),
+      Serialization.moveToExtraDataFromRoot(json, topLevelFields),
     );
   }
 }

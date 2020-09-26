@@ -86,12 +86,13 @@ class User {
 
   /// Create a new instance from a json
   factory User.fromJson(Map<String, dynamic> json) {
-    return _$UserFromJson(Serialization.moveKeysToRoot(json, topLevelFields));
+    return _$UserFromJson(
+        Serialization.moveToExtraDataFromRoot(json, topLevelFields));
   }
 
   /// Serialize to json
   Map<String, dynamic> toJson() {
-    return Serialization.moveKeysToMapInPlace(
+    return Serialization.moveFromExtraDataToRoot(
         _$UserToJson(this), topLevelFields);
   }
 

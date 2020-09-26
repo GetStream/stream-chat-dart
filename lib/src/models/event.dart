@@ -138,6 +138,6 @@ class EventChannel extends ChannelModel {
   /// Create a new instance from a json
   factory EventChannel.fromJson(Map<String, dynamic> json) {
     return _$EventChannelFromJson(
-        Serialization.moveKeysToRoot(json, topLevelFields));
+        Serialization.moveToExtraDataFromRoot(json, topLevelFields));
   }
 }
