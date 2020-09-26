@@ -18,17 +18,15 @@ class Serialization {
     Map<String, dynamic> json,
     List<String> topLevelFields,
   ) {
-    final extraDataFields = Map<String, dynamic>.from(json)
+    final extraDataMap = Map<String, dynamic>.from(json)
       ..removeWhere(
         (key, value) => topLevelFields.contains(key),
       );
-    final rootFields = json..remove(extraDataFields.keys);
-    return {
-      ...rootFields,
-      ...{
-        'extra_data': extraDataFields,
-      },
-    };
+    final rootFields = json..remove(extraDataMap.keys);
+    return rootFields
+      ..addAll({
+        'extra_data': extraDataMap,
+      });
   }
 
   /// Takes values in `extra_data` key and puts them on the root level of the json map
