@@ -41,7 +41,7 @@ class Serialization {
   ) {
     return {
       ...json,
-      if (json.containsKey('extra_data')) ...json['extra_data'],
+      if (json['extra_data'] != null) ...json['extra_data'],
     };
   }
 }
