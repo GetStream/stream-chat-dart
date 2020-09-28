@@ -18,11 +18,14 @@ class Serialization {
     Map<String, dynamic> json,
     List<String> topLevelFields,
   ) {
+    if (json == null) return null;
+
     final extraDataMap = Map<String, dynamic>.from(json)
       ..removeWhere(
         (key, value) => topLevelFields.contains(key),
       );
-    final rootFields = json..remove(extraDataMap.keys);
+    final rootFields = json
+      ..removeWhere((key, value) => extraDataMap.keys.contains(key));
     return rootFields
       ..addAll({
         'extra_data': extraDataMap,
