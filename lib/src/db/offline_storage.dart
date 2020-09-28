@@ -4,7 +4,7 @@ import 'package:flutter/material.dart' show WidgetsFlutterBinding;
 import 'package:logging/logging.dart';
 import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
-import 'package:stream_chat/src/db/shared/native_db.dart';
+import 'package:stream_chat/src/db/shared/shared_db.dart';
 import 'package:stream_chat/src/models/event.dart';
 import 'package:stream_chat/src/models/own_user.dart';
 
