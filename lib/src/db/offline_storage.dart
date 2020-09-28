@@ -1,14 +1,10 @@
 import 'dart:convert';
-import 'dart:io';
-import 'dart:isolate';
 
 import 'package:flutter/material.dart' show WidgetsFlutterBinding;
 import 'package:logging/logging.dart';
-import 'package:moor/ffi.dart';
 import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import 'package:stream_chat/src/db/shared/native_db.dart';
 import 'package:stream_chat/src/models/event.dart';
 import 'package:stream_chat/src/models/own_user.dart';
 
@@ -26,57 +22,20 @@ import '../models/user.dart';
 part 'models.part.dart';
 part 'offline_storage.g.dart';
 
-Future<MoorIsolate> _createMoorIsolate(String userId) async {
-  WidgetsFlutterBinding.ensureInitialized();
-  final dir = await getApplicationDocumentsDirectory();
-  final path = p.join(dir.path, 'db_$userId.sqlite');
-
-  final receivePort = ReceivePort();
-  await Isolate.spawn(
-    _startBackground,
-    _IsolateStartRequest(receivePort.sendPort, path),
-  );
-
-  return (await receivePort.first as MoorIsolate);
-}
-
-void _startBackground(_IsolateStartRequest request) {
-  final executor = LazyDatabase(() async {
-    return VmDatabase(File(request.targetPath));
-  });
-  final moorIsolate = MoorIsolate.inCurrent(
-    () => DatabaseConnection.fromExecutor(executor),
-  );
-  request.sendMoorIsolate.send(moorIsolate);
-}
-
 /// Gets a new instance of the database running on a background isolate
 Future<OfflineStorage> connectDatabase(User user, Logger logger) async {
   logger.info('Connecting on background isolate');
-  final isolate = await _createMoorIsolate(user.id);
-  final connection = await isolate.connect();
-  return OfflineStorage.connect(
-    connection,
-    user.id,
-    isolate,
-    logger,
+  WidgetsFlutterBinding.ensureInitialized();
+  return SharedDB.constructOfflineStorage(
+    userId: user.id,
+    logger: logger,
   );
-}
-
-class _IsolateStartRequest {
-  final SendPort sendMoorIsolate;
-  final String targetPath;
-
-  _IsolateStartRequest(this.sendMoorIsolate, this.targetPath);
 }
 
 LazyDatabase _openConnection(String userId) {
   moorRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   return LazyDatabase(() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final path = p.join(dir.path, 'db_$userId.sqlite');
-    final file = File(path);
-    return VmDatabase(file);
+    return await SharedDB.constructDatabase('db_$userId.sqlite');
   });
 }
 
