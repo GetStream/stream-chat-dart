@@ -57,12 +57,12 @@ class Reaction {
   /// Create a new instance from a json
   factory Reaction.fromJson(Map<String, dynamic> json) {
     return _$ReactionFromJson(
-        Serialization.moveKeysToRoot(json, topLevelFields));
+        Serialization.moveToExtraDataFromRoot(json, topLevelFields));
   }
 
   /// Serialize to json
   Map<String, dynamic> toJson() {
-    return Serialization.moveKeysToMapInPlace(
+    return Serialization.moveFromExtraDataToRoot(
         _$ReactionToJson(this), topLevelFields);
   }
 }

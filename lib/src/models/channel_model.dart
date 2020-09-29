@@ -100,12 +100,12 @@ class ChannelModel {
   /// Create a new instance from a json
   factory ChannelModel.fromJson(Map<String, dynamic> json) {
     return _$ChannelModelFromJson(
-        Serialization.moveKeysToRoot(json, topLevelFields));
+        Serialization.moveToExtraDataFromRoot(json, topLevelFields));
   }
 
   /// Serialize to json
   Map<String, dynamic> toJson() {
-    return Serialization.moveKeysToMapInPlace(
+    return Serialization.moveFromExtraDataToRoot(
       _$ChannelModelToJson(this),
       topLevelFields,
     );
