@@ -37,9 +37,10 @@ class Serialization {
     Map<String, dynamic> json,
     List<String> topLevelFields,
   ) {
-    return {
-      ...json,
-      if (json['extra_data'] != null) ...json['extra_data'],
-    };
+    return json
+      ..addAll({
+        if (json['extra_data'] != null) ...json['extra_data'],
+      })
+      ..remove('extra_data');
   }
 }
