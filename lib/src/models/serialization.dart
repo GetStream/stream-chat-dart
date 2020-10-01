@@ -20,11 +20,13 @@ class Serialization {
   ) {
     if (json == null) return null;
 
+    final jsonClone = Map<String, dynamic>.from(json);
+
     final extraDataMap = Map<String, dynamic>.from(json)
       ..removeWhere(
         (key, value) => topLevelFields.contains(key),
       );
-    final rootFields = json
+    final rootFields = jsonClone
       ..removeWhere((key, value) => extraDataMap.keys.contains(key));
     return rootFields
       ..addAll({
@@ -37,7 +39,8 @@ class Serialization {
     Map<String, dynamic> json,
     List<String> topLevelFields,
   ) {
-    return json
+    final jsonClone = Map<String, dynamic>.from(json);
+    return jsonClone
       ..addAll({
         if (json['extra_data'] != null) ...json['extra_data'],
       })
