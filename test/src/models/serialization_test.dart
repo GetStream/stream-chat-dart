@@ -4,7 +4,7 @@ import 'package:stream_chat/src/models/serialization.dart';
 void main() {
   group('src/models/serialization', () {
     test('should move unknown keys from root to dedicate property', () {
-      final result = Serialization.moveKeysToRoot({
+      final result = Serialization.moveToExtraDataFromRoot({
         'prop1': 'test',
         'prop2': 123,
         'prop3': true,
@@ -23,7 +23,7 @@ void main() {
     });
 
     test('should have empty extraData', () {
-      final result = Serialization.moveKeysToRoot({
+      final result = Serialization.moveToExtraDataFromRoot({
         'prop1': 'test',
         'prop2': 123,
         'prop3': true,
@@ -42,7 +42,7 @@ void main() {
     });
 
     test('should return null', () {
-      final result = Serialization.moveKeysToRoot(null, [
+      final result = Serialization.moveToExtraDataFromRoot(null, [
         'prop1',
         'prop2',
       ]);

@@ -71,13 +71,13 @@ class OwnUser extends User {
   /// Create a new instance from a json
   factory OwnUser.fromJson(Map<String, dynamic> json) {
     return _$OwnUserFromJson(
-        Serialization.moveKeysToRoot(json, topLevelFields));
+        Serialization.moveToExtraDataFromRoot(json, topLevelFields));
   }
 
   /// Serialize to json
   @override
   Map<String, dynamic> toJson() {
-    return Serialization.moveKeysToMapInPlace(
+    return Serialization.moveFromExtraDataToRoot(
         _$OwnUserToJson(this), topLevelFields);
   }
 }

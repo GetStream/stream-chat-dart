@@ -13,44 +13,34 @@ class Serialization {
     return users?.map((u) => u.id)?.toList();
   }
 
-  /// Takes values in `extra_data` key and puts them on the root level of the json map
-  static Map<String, dynamic> moveKeysToRoot(
+  /// Takes unknown json keys and puts them in the `extra_data` key
+  static Map<String, dynamic> moveToExtraDataFromRoot(
     Map<String, dynamic> json,
     List<String> topLevelFields,
   ) {
-    if (json == null) {
-      return json;
-    }
-    var clone = Map<String, dynamic>.from(json);
-    clone['extra_data'] = <String, dynamic>{};
+    if (json == null) return null;
 
-    json?.keys?.forEach((key) {
-      if (!topLevelFields.contains(key)) {
-        clone['extra_data'][key] = clone.remove(key);
-      }
-    });
-
-    return clone;
+    final extraDataMap = Map<String, dynamic>.from(json)
+      ..removeWhere(
+        (key, value) => topLevelFields.contains(key),
+      );
+    final rootFields = json
+      ..removeWhere((key, value) => extraDataMap.keys.contains(key));
+    return rootFields
+      ..addAll({
+        'extra_data': extraDataMap,
+      });
   }
 
-  /// Takes unknown json keys and puts them in the `extra_data` key
-  static Map<String, dynamic> moveKeysToMapInPlace(
-    Map<String, dynamic> intermediateMap,
+  /// Takes values in `extra_data` key and puts them on the root level of the json map
+  static Map<String, dynamic> moveFromExtraDataToRoot(
+    Map<String, dynamic> json,
     List<String> topLevelFields,
   ) {
-    if (intermediateMap == null) {
-      return intermediateMap;
-    }
-
-    var clone = Map<String, dynamic>.from(intermediateMap);
-    Map<String, dynamic> extraData = clone.remove('extra_data');
-
-    extraData?.keys?.forEach((key) {
-      if (!topLevelFields.contains(key)) {
-        clone[key] = extraData[key];
-      }
-    });
-
-    return clone;
+    return json
+      ..addAll({
+        if (json['extra_data'] != null) ...json['extra_data'],
+      })
+      ..remove('extra_data');
   }
 }
