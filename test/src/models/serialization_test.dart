@@ -4,11 +4,12 @@ import 'package:stream_chat/src/models/serialization.dart';
 void main() {
   group('src/models/serialization', () {
     test('should move unknown keys from root to dedicate property', () {
-      final result = Serialization.moveToExtraDataFromRoot({
+      final json = {
         'prop1': 'test',
         'prop2': 123,
         'prop3': true,
-      }, [
+      };
+      final result = Serialization.moveToExtraDataFromRoot(json, [
         'prop1',
         'prop2',
       ]);
@@ -19,6 +20,12 @@ void main() {
         'extra_data': {
           'prop3': true,
         },
+      });
+
+      expect(json, {
+        'prop1': 'test',
+        'prop2': 123,
+        'prop3': true,
       });
     });
 
