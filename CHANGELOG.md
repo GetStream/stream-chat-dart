@@ -1,3 +1,7 @@
+## 0.2.5+2
+
+- Cleaned up Serialization on extra_data
+
 ## 0.2.5+1
 
 - Fix `channel.show` api call
