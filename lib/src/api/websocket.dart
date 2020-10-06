@@ -33,7 +33,7 @@ class WebSocket {
     this.logger,
     this.connectFunc = connectWebSocket,
     this.reconnectionMonitorInterval = 1,
-    this.healthCheckInterval = 30,
+    this.healthCheckInterval = 20,
     this.reconnectionMonitorTimeout = 40,
   }) {
     final qs = Map<String, String>.from(connectParams);
