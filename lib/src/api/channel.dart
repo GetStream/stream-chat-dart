@@ -486,11 +486,18 @@ class Channel {
   /// List the message replies for a parent message
   Future<QueryRepliesResponse> getReplies(
     String parentId,
-    PaginationParams options,
-  ) async {
-    final cachedReplies = await _client.offlineStorage?.getReplies(parentId);
+    PaginationParams options, {
+    bool preferOffline = false,
+  }) async {
+    final cachedReplies = await _client.offlineStorage?.getReplies(
+      parentId,
+      lessThan: options?.lessThan,
+    );
     if (cachedReplies != null && cachedReplies.isNotEmpty) {
       state?.updateThreadInfo(parentId, cachedReplies);
+      if (preferOffline) {
+        return QueryRepliesResponse()..messages = cachedReplies;
+      }
     }
 
     final response = await _client.get('/messages/$parentId/replies',
@@ -562,6 +569,7 @@ class Channel {
     PaginationParams messagesPagination,
     PaginationParams membersPagination,
     PaginationParams watchersPagination,
+    bool preferOffline = false,
   }) async {
     var path = '/channels/$type';
     if (id != null) {
@@ -589,9 +597,17 @@ class Channel {
     }
 
     if (cid != null) {
-      final updatedState = await _client.offlineStorage?.getChannel(cid);
-      if (state == null && updatedState != null) {
-        _initState(updatedState);
+      final updatedState = await _client.offlineStorage
+          ?.getChannel(cid, messageLessThan: messagesPagination.lessThan);
+      if (updatedState != null && updatedState.messages.isNotEmpty) {
+        if (state == null) {
+          _initState(updatedState);
+        } else {
+          state?.updateChannelState(updatedState);
+        }
+        if (preferOffline) {
+          return updatedState;
+        }
       }
     }
 
@@ -1276,7 +1292,7 @@ class ChannelClientState {
   ChannelState get channelState => _channelStateController.value;
   BehaviorSubject<ChannelState> _channelStateController;
 
-  set _channelState(v) {
+  set _channelState(ChannelState v) {
     _channelStateController.add(v);
     _channel._client.offlineStorage?.updateChannelState(v);
   }
