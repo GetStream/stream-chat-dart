@@ -88,6 +88,8 @@ You can grab the latest version of sql-wasm.js and sql-wasm.wasm [here](https://
 
 ### Running tests 
 
+- run `flutter test`
+
 ### Releasing a new version
 
 - update the package version on `pubspec.yaml` and `version.dart`
