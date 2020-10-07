@@ -65,6 +65,7 @@ Set the property `persistenceEnabled` to false if you don't want to use the offl
 
 Due to Moor web (for offline storage) you need to include the sql.js library:
 
+```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -74,6 +75,7 @@ Due to Moor web (for offline storage) you need to include the sql.js library:
 </head>
 <body></body>
 </html>
+```
 
 You can grab the latest version of sql-wasm.js and sql-wasm.wasm [here](https://github.com/sql-js/sql.js/releases) and copy them into your `/web` folder.
 
