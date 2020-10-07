@@ -1,3 +1,7 @@
+## 0.2.6
+
+- Experimental support for Flutter web and MacOs
+
 ## 0.2.5+2
 
 - Cleaned up Serialization on extra_data

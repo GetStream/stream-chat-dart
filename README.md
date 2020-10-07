@@ -61,6 +61,22 @@ By default the library saves information about channels and messages in a SQLite
 
 Set the property `persistenceEnabled` to false if you don't want to use the offline storage.
 
+## Flutter Web
+
+Due to Moor web (for offline storage) you need to include the sql.js library:
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script defer src="sql-wasm.js"></script>
+    <script defer src="main.dart.js" type="application/javascript"></script>
+</head>
+<body></body>
+</html>
+
+You can grab the latest version of sql-wasm.js and sql-wasm.wasm [here](https://github.com/sql-js/sql.js/releases) and copy them into your `/web` folder.
+
 ## Contributing
 
 ### Code conventions
