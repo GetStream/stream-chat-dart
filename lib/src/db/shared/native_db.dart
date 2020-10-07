@@ -35,7 +35,7 @@ class SharedDB {
       return VmDatabase(File(request.targetPath));
     });
     final moorIsolate = MoorIsolate.inCurrent(
-          () => DatabaseConnection.fromExecutor(executor),
+      () => DatabaseConnection.fromExecutor(executor),
     );
     request.sendMoorIsolate.send(moorIsolate);
   }
