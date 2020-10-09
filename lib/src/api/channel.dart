@@ -845,7 +845,7 @@ class ChannelClientState {
 
   void _checkExpiredAttachmentMessages(ChannelState channelState) {
     final expiredAttachmentMessagesId = channelState.messages
-        .where((m) =>
+        ?.where((m) =>
             !_updatedMessagesIds.contains(m.id) &&
             (m.id == '243caa85-5fb7-44d0-96a1-ec46ed3f237a' ||
                 m.attachments?.isNotEmpty == true &&
@@ -859,11 +859,11 @@ class ChannelClientState {
                           return expiration.isBefore(DateTime.now());
                         }) ==
                         true))
-        .map((e) => e.id)
-        .toList();
-    _updatedMessagesIds.addAll(expiredAttachmentMessagesId);
-    if (expiredAttachmentMessagesId.isNotEmpty) {
+        ?.map((e) => e.id)
+        ?.toList();
+    if (expiredAttachmentMessagesId?.isNotEmpty == true) {
       _channel.getMessagesById(expiredAttachmentMessagesId);
+      _updatedMessagesIds.addAll(expiredAttachmentMessagesId);
     }
   }
 

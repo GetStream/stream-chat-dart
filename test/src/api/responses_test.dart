@@ -3540,7 +3540,7 @@ void main() {
     });
 
     test('GetMessagesByIdResponse', () {
-      const jsonExample = r'''{"message":{
+      const jsonExample = r'''{"messages":[{
                     "id": "c6076f11-7768-4a04-bdf2-c43dddd6d666",
                     "text": "What we don't know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.",
                     "html": "\u003cp\u003eWhat we don’t know for sure is whether or not a step-daughter of the bear is assumed to be a farci hourglass.\u003c/p\u003e\n",
@@ -3564,10 +3564,10 @@ void main() {
                     "created_at": "2020-01-28T22:17:31.092262Z",
                     "updated_at": "2020-01-28T22:17:31.092262Z",
                     "mentioned_users": []
-                },"duration":"4.66ms"}''';
+                }],"duration":"4.66ms"}''';
       final response =
           GetMessagesByIdResponse.fromJson(json.decode(jsonExample));
-      expect(response.message, isA<Message>());
+      expect(response.messages, isA<List<Message>>());
     });
 
     test('SendActionResponse', () {
