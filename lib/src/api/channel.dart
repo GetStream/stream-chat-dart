@@ -533,8 +533,15 @@ class Channel {
       '$_channelURL/messages',
       queryParameters: {'ids': messageIDs.join(',')},
     );
-    return _client.decode<GetMessagesByIdResponse>(
-        response.data, GetMessagesByIdResponse.fromJson);
+
+    final res = _client.decode<GetMessagesByIdResponse>(
+      response.data,
+      GetMessagesByIdResponse.fromJson,
+    );
+
+    state?.updateChannelState(ChannelState(messages: res.messages));
+
+    return res;
   }
 
   /// Retrieves a list of messages by ID
@@ -597,8 +604,10 @@ class Channel {
     }
 
     if (cid != null) {
-      final updatedState = await _client.offlineStorage
-          ?.getChannel(cid, messageLessThan: messagesPagination.lessThan);
+      final updatedState = await _client.offlineStorage?.getChannel(
+        cid,
+        messageLessThan: messagesPagination.lessThan,
+      );
       if (updatedState != null && updatedState.messages.isNotEmpty) {
         if (state == null) {
           _initState(updatedState);
@@ -798,6 +807,8 @@ class ChannelClientState {
       logger: Logger('RETRY QUEUE ${_channel.cid}'),
     );
 
+    _checkExpiredAttachmentMessages(channelState);
+
     _channelStateController = BehaviorSubject.seeded(channelState);
 
     _listenTypingEvents();
@@ -828,6 +839,30 @@ class ChannelClientState {
       _threads = threads;
       retryFailedMessages();
     });
+  }
+
+  void _checkExpiredAttachmentMessages(ChannelState channelState) {
+    final expiredAttachmentMessagesId = channelState.messages
+        .where((m) =>
+            !_updatedMessagesIds.contains(m.id) &&
+            (m.id == '243caa85-5fb7-44d0-96a1-ec46ed3f237a' ||
+                m.attachments?.isNotEmpty == true &&
+                    m.attachments?.any((e) {
+                          final url = e.imageUrl ?? e.assetUrl;
+                          if (!url.contains('stream-io-cdn.com')) {
+                            return false;
+                          }
+                          final expiration = DateTime.parse(
+                              Uri.parse(url).queryParameters['Expires']);
+                          return expiration.isBefore(DateTime.now());
+                        }) ==
+                        true))
+        .map((e) => e.id)
+        .toList();
+    _updatedMessagesIds.addAll(expiredAttachmentMessagesId);
+    if (expiredAttachmentMessagesId.isNotEmpty) {
+      _channel.getMessagesById(expiredAttachmentMessagesId);
+    }
   }
 
   void _listenMemberAdded() {
@@ -1206,6 +1241,8 @@ class ChannelClientState {
     );
   }
 
+  final List<String> _updatedMessagesIds = [];
+
   /// Update channelState with updated information
   void updateChannelState(ChannelState updatedState) {
     final newMessages = <Message>[
@@ -1246,6 +1283,8 @@ class ChannelClientState {
               ?.toList() ??
           [],
     ];
+
+    _checkExpiredAttachmentMessages(updatedState);
 
     _channelState = _channelState.copyWith(
       messages: newMessages,
