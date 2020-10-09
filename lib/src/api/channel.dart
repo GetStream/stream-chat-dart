@@ -484,6 +484,7 @@ class Channel {
   }
 
   /// List the message replies for a parent message
+  /// Set [preferOffline] to true to avoid the api call if the data is already in the offline storage
   Future<QueryRepliesResponse> getReplies(
     String parentId,
     PaginationParams options, {
@@ -571,6 +572,7 @@ class Channel {
   }
 
   /// Query the API, get messages, members or other channel fields
+  /// Set [preferOffline] to true to avoid the api call if the data is already in the offline storage
   Future<ChannelState> query({
     Map<String, dynamic> options = const {},
     PaginationParams messagesPagination,
