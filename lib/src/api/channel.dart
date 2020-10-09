@@ -847,18 +847,17 @@ class ChannelClientState {
     final expiredAttachmentMessagesId = channelState.messages
         ?.where((m) =>
             !_updatedMessagesIds.contains(m.id) &&
-            (m.id == '243caa85-5fb7-44d0-96a1-ec46ed3f237a' ||
-                m.attachments?.isNotEmpty == true &&
-                    m.attachments?.any((e) {
-                          final url = e.imageUrl ?? e.assetUrl;
-                          if (!url.contains('stream-io-cdn.com')) {
-                            return false;
-                          }
-                          final expiration = DateTime.parse(
-                              Uri.parse(url).queryParameters['Expires']);
-                          return expiration.isBefore(DateTime.now());
-                        }) ==
-                        true))
+            m.attachments?.isNotEmpty == true &&
+            m.attachments?.any((e) {
+                  final url = e.imageUrl ?? e.assetUrl;
+                  if (!url.contains('stream-io-cdn.com')) {
+                    return false;
+                  }
+                  final expiration =
+                      DateTime.parse(Uri.parse(url).queryParameters['Expires']);
+                  return expiration.isBefore(DateTime.now());
+                }) ==
+                true)
         ?.map((e) => e.id)
         ?.toList();
     if (expiredAttachmentMessagesId?.isNotEmpty == true) {
