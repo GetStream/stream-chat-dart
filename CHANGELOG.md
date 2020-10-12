@@ -1,3 +1,10 @@
+## 0.2.7
+
+- `Client.channel` returns an existing channel if available
+- Update message in the offline storage if attachment has expired (for the new CDN)
+- Fix `GetMessagesByIdResponse` format
+- Do not query messages if already existing in offline storage
+
 ## 0.2.6
 
 - Experimental support for Flutter web and MacOs
