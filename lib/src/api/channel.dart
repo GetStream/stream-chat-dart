@@ -850,7 +850,7 @@ class ChannelClientState {
             m.attachments?.isNotEmpty == true &&
             m.attachments?.any((e) {
                   final url = e.imageUrl ?? e.assetUrl;
-                  if (url?.contains('stream-io-cdn.com') == false) {
+                  if (url == null || !url.contains('stream-io-cdn.com')) {
                     return false;
                   }
                   final expiration =
