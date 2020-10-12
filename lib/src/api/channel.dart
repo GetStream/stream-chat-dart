@@ -608,7 +608,7 @@ class Channel {
     if (cid != null) {
       final updatedState = await _client.offlineStorage?.getChannel(
         cid,
-        messageLessThan: messagesPagination.lessThan,
+        messageLessThan: messagesPagination?.lessThan,
       );
       if (updatedState != null && updatedState.messages.isNotEmpty) {
         if (state == null) {
