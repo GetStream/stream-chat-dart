@@ -1,4 +1,4 @@
-## 0.2.7
+## 0.2.7+1
 
 - `Client.channel` returns an existing channel if available
 - Update message in the offline storage if attachment has expired (for the new CDN)
