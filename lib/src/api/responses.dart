@@ -223,7 +223,7 @@ class SearchMessagesResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class GetMessagesByIdResponse extends _BaseResponse {
   /// Message returned by the api call
-  Message message;
+  List<Message> messages;
 
   /// Create a new instance from a json
   static GetMessagesByIdResponse fromJson(Map<String, dynamic> json) =>

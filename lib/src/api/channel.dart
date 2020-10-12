@@ -484,13 +484,21 @@ class Channel {
   }
 
   /// List the message replies for a parent message
+  /// Set [preferOffline] to true to avoid the api call if the data is already in the offline storage
   Future<QueryRepliesResponse> getReplies(
     String parentId,
-    PaginationParams options,
-  ) async {
-    final cachedReplies = await _client.offlineStorage?.getReplies(parentId);
+    PaginationParams options, {
+    bool preferOffline = false,
+  }) async {
+    final cachedReplies = await _client.offlineStorage?.getReplies(
+      parentId,
+      lessThan: options?.lessThan,
+    );
     if (cachedReplies != null && cachedReplies.isNotEmpty) {
       state?.updateThreadInfo(parentId, cachedReplies);
+      if (preferOffline) {
+        return QueryRepliesResponse()..messages = cachedReplies;
+      }
     }
 
     final response = await _client.get('/messages/$parentId/replies',
@@ -526,8 +534,15 @@ class Channel {
       '$_channelURL/messages',
       queryParameters: {'ids': messageIDs.join(',')},
     );
-    return _client.decode<GetMessagesByIdResponse>(
-        response.data, GetMessagesByIdResponse.fromJson);
+
+    final res = _client.decode<GetMessagesByIdResponse>(
+      response.data,
+      GetMessagesByIdResponse.fromJson,
+    );
+
+    state?.updateChannelState(ChannelState(messages: res.messages));
+
+    return res;
   }
 
   /// Retrieves a list of messages by ID
@@ -557,11 +572,13 @@ class Channel {
   }
 
   /// Query the API, get messages, members or other channel fields
+  /// Set [preferOffline] to true to avoid the api call if the data is already in the offline storage
   Future<ChannelState> query({
     Map<String, dynamic> options = const {},
     PaginationParams messagesPagination,
     PaginationParams membersPagination,
     PaginationParams watchersPagination,
+    bool preferOffline = false,
   }) async {
     var path = '/channels/$type';
     if (id != null) {
@@ -589,9 +606,19 @@ class Channel {
     }
 
     if (cid != null) {
-      final updatedState = await _client.offlineStorage?.getChannel(cid);
-      if (state == null && updatedState != null) {
-        _initState(updatedState);
+      final updatedState = await _client.offlineStorage?.getChannel(
+        cid,
+        messageLessThan: messagesPagination.lessThan,
+      );
+      if (updatedState != null && updatedState.messages.isNotEmpty) {
+        if (state == null) {
+          _initState(updatedState);
+        } else {
+          state?.updateChannelState(updatedState);
+        }
+        if (preferOffline) {
+          return updatedState;
+        }
       }
     }
 
@@ -782,6 +809,8 @@ class ChannelClientState {
       logger: Logger('RETRY QUEUE ${_channel.cid}'),
     );
 
+    _checkExpiredAttachmentMessages(channelState);
+
     _channelStateController = BehaviorSubject.seeded(channelState);
 
     _listenTypingEvents();
@@ -812,6 +841,29 @@ class ChannelClientState {
       _threads = threads;
       retryFailedMessages();
     });
+  }
+
+  void _checkExpiredAttachmentMessages(ChannelState channelState) {
+    final expiredAttachmentMessagesId = channelState.messages
+        ?.where((m) =>
+            !_updatedMessagesIds.contains(m.id) &&
+            m.attachments?.isNotEmpty == true &&
+            m.attachments?.any((e) {
+                  final url = e.imageUrl ?? e.assetUrl;
+                  if (!url.contains('stream-io-cdn.com')) {
+                    return false;
+                  }
+                  final expiration =
+                      DateTime.parse(Uri.parse(url).queryParameters['Expires']);
+                  return expiration.isBefore(DateTime.now());
+                }) ==
+                true)
+        ?.map((e) => e.id)
+        ?.toList();
+    if (expiredAttachmentMessagesId?.isNotEmpty == true) {
+      _channel.getMessagesById(expiredAttachmentMessagesId);
+      _updatedMessagesIds.addAll(expiredAttachmentMessagesId);
+    }
   }
 
   void _listenMemberAdded() {
@@ -1190,6 +1242,8 @@ class ChannelClientState {
     );
   }
 
+  final List<String> _updatedMessagesIds = [];
+
   /// Update channelState with updated information
   void updateChannelState(ChannelState updatedState) {
     final newMessages = <Message>[
@@ -1230,6 +1284,8 @@ class ChannelClientState {
               ?.toList() ??
           [],
     ];
+
+    _checkExpiredAttachmentMessages(updatedState);
 
     _channelState = _channelState.copyWith(
       messages: newMessages,
@@ -1276,7 +1332,7 @@ class ChannelClientState {
   ChannelState get channelState => _channelStateController.value;
   BehaviorSubject<ChannelState> _channelStateController;
 
-  set _channelState(v) {
+  set _channelState(ChannelState v) {
     _channelStateController.add(v);
     _channel._client.offlineStorage?.updateChannelState(v);
   }

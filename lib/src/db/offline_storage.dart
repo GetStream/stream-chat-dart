@@ -20,6 +20,7 @@ import '../models/read.dart';
 import '../models/user.dart';
 
 part 'models.part.dart';
+
 part 'offline_storage.g.dart';
 
 /// Gets a new instance of the database running on a background isolate
@@ -109,8 +110,11 @@ class OfflineStorage extends _$OfflineStorage {
   }
 
   /// Get stored replies by messageId
-  Future<List<Message>> getReplies(String parentId) async {
-    return await Future.wait(await (select(messages).join([
+  Future<List<Message>> getReplies(
+    String parentId, {
+    String lessThan,
+  }) async {
+    final offlineList = await Future.wait(await (select(messages).join([
       innerJoin(users, messages.userId.equalsExp(users.id)),
     ])
           ..where(messages.parentId.equals(parentId))
@@ -119,6 +123,12 @@ class OfflineStorage extends _$OfflineStorage {
           ]))
         .map(_messageFromJoinRow)
         .get());
+    if (lessThan != null) {
+      final lessThanIndex = offlineList.indexWhere((m) => m.id == lessThan);
+      offlineList.removeRange(lessThanIndex, offlineList.length);
+    }
+
+    return offlineList;
   }
 
   /// Get stored connection event
@@ -171,13 +181,17 @@ class OfflineStorage extends _$OfflineStorage {
   }
 
   /// Get channel data by cid
-  Future<ChannelState> getChannel(String cid) async {
+  Future<ChannelState> getChannel(
+    String cid, {
+    String messageLessThan,
+  }) async {
     return await (select(channels)..where((c) => c.cid.equals(cid))).join([
       leftOuterJoin(users, channels.createdBy.equalsExp(users.id)),
     ]).map((row) {
       return _channelFromRow(
         row.readTable(channels),
         row.readTable(users),
+        messageLessThan: messageLessThan,
       );
     }).getSingle();
   }
@@ -417,9 +431,13 @@ class OfflineStorage extends _$OfflineStorage {
 
   Future<ChannelState> _channelFromRow(
     _Channel channelRow,
-    _User userRow,
-  ) async {
-    final rowMessages = await _getChannelMessages(channelRow);
+    _User userRow, {
+    String messageLessThan,
+  }) async {
+    final rowMessages = await _getChannelMessages(
+      channelRow,
+      lessThan: messageLessThan,
+    );
     final rowReads = await _getChannelReads(channelRow);
     final rowMembers = await _getChannelMembers(channelRow);
 
@@ -452,7 +470,10 @@ class OfflineStorage extends _$OfflineStorage {
     return hash;
   }
 
-  Future<List<Message>> _getChannelMessages(_Channel channelRow) async {
+  Future<List<Message>> _getChannelMessages(
+    _Channel channelRow, {
+    String lessThan,
+  }) async {
     final rowMessages = await Future.wait(await (select(messages).join([
       leftOuterJoin(users, messages.userId.equalsExp(users.id)),
     ])
@@ -464,6 +485,11 @@ class OfflineStorage extends _$OfflineStorage {
           ]))
         .map(_messageFromJoinRow)
         .get());
+
+    if (lessThan != null) {
+      final lessThanIndex = rowMessages.indexWhere((m) => m.id == lessThan);
+      rowMessages.removeRange(lessThanIndex, rowMessages.length);
+    }
     return rowMessages;
   }
 

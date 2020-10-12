@@ -897,6 +897,12 @@ class Client {
     String id,
     Map<String, dynamic> extraData,
   }) {
+    if (type != null &&
+        id != null &&
+        state.channels?.containsKey('$type:$id') == true) {
+      return state.channels['$type:$id'];
+    }
+
     final channel = Channel(this, type, id, extraData);
 
     state.channels = {

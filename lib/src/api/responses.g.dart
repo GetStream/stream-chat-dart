@@ -198,11 +198,13 @@ SearchMessagesResponse _$SearchMessagesResponseFromJson(Map json) {
 GetMessagesByIdResponse _$GetMessagesByIdResponseFromJson(Map json) {
   return GetMessagesByIdResponse()
     ..duration = json['duration'] as String
-    ..message = json['message'] == null
-        ? null
-        : Message.fromJson((json['message'] as Map)?.map(
-            (k, e) => MapEntry(k as String, e),
-          ));
+    ..messages = (json['messages'] as List)
+        ?.map((e) => e == null
+            ? null
+            : Message.fromJson((e as Map)?.map(
+                (k, e) => MapEntry(k as String, e),
+              )))
+        ?.toList();
 }
 
 UpdateChannelResponse _$UpdateChannelResponseFromJson(Map json) {
