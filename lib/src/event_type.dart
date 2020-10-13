@@ -75,4 +75,10 @@ class EventType {
 
   /// Event sent when the connection is recovered
   static const String connectionRecovered = 'connection.recovered';
+
+  /// Event sent when the user is accepts an invite
+  static const String inviteAccepted = 'notification.invite_accepted';
+
+  /// Event sent when the user is invited
+  static const String invited = 'notification.invited';
 }
