@@ -77,8 +77,12 @@ class EventType {
   static const String connectionRecovered = 'connection.recovered';
 
   /// Event sent when the user is accepts an invite
-  static const String inviteAccepted = 'notification.invite_accepted';
+  static const String notificationInviteAccepted =
+      'notification.invite_accepted';
 
   /// Event sent when the user is invited
-  static const String invited = 'notification.invited';
+  static const String notificationInvited = 'notification.invited';
+
+  /// Event sent when the user's mutes list is updated
+  static const String notificationMutesUpdated = 'notification.mutes_updated';
 }
