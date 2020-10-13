@@ -1,3 +1,8 @@
+## 0.2.8
+
+- Add missing event types
+- Fix local sorting on offline storage
+
 ## 0.2.7+1
 
 - `Client.channel` returns an existing channel if available
