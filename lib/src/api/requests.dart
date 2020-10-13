@@ -22,7 +22,7 @@ class SortOption {
   /// For example:
   /// ```dart
   /// // Sort channels by the last message date:
-  /// final sorting = SortOption("lastMessageDate")
+  /// final sorting = SortOption("last_message_at")
   /// ```
   const SortOption(this.field, {this.direction = DESC});
 
