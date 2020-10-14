@@ -43,9 +43,9 @@ class RetryQueue {
 
   /// Add a list of messages
   void add(List<Message> messages) {
-    logger?.info('add ${messages.length} messages');
-    _messageQueue
-        .addAll(messages.where((element) => !_messageQueue.contains(element)));
+    final messageList = _messageQueue.toList();
+    _messageQueue.addAll(messages
+        .where((element) => !messageList.any((m) => m.id == element.id)));
 
     if (_messageQueue.isNotEmpty && !_isRetrying) {
       _startRetrying();
@@ -62,7 +62,9 @@ class RetryQueue {
       try {
         logger?.info('retry attempt ${retryPolicy.attempt}');
         await _sendMessage(message);
+        logger?.info('message sent - removing it from the queue');
         _messageQueue.removeFirst();
+        logger?.info('now ${_messageQueue.length} messages in the queue');
         retryPolicy.attempt = 0;
       } catch (error) {
         ApiError apiError;
