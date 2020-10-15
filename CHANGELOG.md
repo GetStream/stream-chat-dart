@@ -1,3 +1,7 @@
+## 0.2.8+1
+
+- Fix retry logic
+
 ## 0.2.8
 
 - Add missing event types
