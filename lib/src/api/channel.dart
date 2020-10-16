@@ -999,7 +999,17 @@ class ChannelClientState {
   void _listenMessageUpdated() {
     _channel.on(EventType.messageUpdated).listen((event) {
       final message = event.message;
-      addMessage(message);
+
+      final oldMessageIndex =
+          messages.indexWhere((element) => element.id == message.id);
+      if (oldMessageIndex != -1) {
+        final oldMessage = messages[oldMessageIndex];
+        addMessage(message.copyWith(
+          ownReactions: oldMessage.ownReactions,
+        ));
+      } else {
+        addMessage(message);
+      }
     });
   }
 
