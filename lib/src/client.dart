@@ -1035,7 +1035,9 @@ class Client {
         UpdateMessageResponse.fromJson,
       );
 
-      channel?.state?.addMessage(updateMessageResponse?.message);
+      channel?.state?.addMessage(updateMessageResponse?.message?.copyWith(
+        ownReactions: message.ownReactions,
+      ));
 
       return updateMessageResponse;
     }).catchError((error) {
