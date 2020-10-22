@@ -1,3 +1,7 @@
+## 0.2.9
+
+- Adding a message on `Channel.update` is now optional
+
 ## 0.2.8+1
 
 - Fix retry logic

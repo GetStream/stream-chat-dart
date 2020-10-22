@@ -307,11 +307,12 @@ class Channel {
 
   /// Edit the channel custom data
   Future<UpdateChannelResponse> update(
-    Map<String, dynamic> channelData,
+    Map<String, dynamic> channelData, [
     Message updateMessage,
-  ) async {
+  ]) async {
     final response = await _client.post(_channelURL, data: {
-      'message': updateMessage.copyWith(updatedAt: DateTime.now()).toJson(),
+      if (updateMessage != null)
+        'message': updateMessage.copyWith(updatedAt: DateTime.now()).toJson(),
       'data': channelData,
     });
     return _client.decode(response.data, UpdateChannelResponse.fromJson);
