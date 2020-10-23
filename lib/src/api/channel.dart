@@ -1083,7 +1083,12 @@ class ChannelClientState {
       return;
     }
 
-    _channel.on(EventType.messageRead).listen((event) {
+    _channel
+        .on(
+      EventType.messageRead,
+      EventType.notificationMarkRead,
+    )
+        .listen((event) {
       final read = List<Read>.from(_channelState?.read ?? []);
       final userReadIndex = read?.indexWhere((r) => r.user.id == event.user.id);
 
@@ -1204,15 +1209,19 @@ class ChannelClientState {
 
   /// Unread count getter
   int get unreadCount {
+    return _computeUnreadCount(_channelState);
+  }
+
+  int _computeUnreadCount(ChannelState channelState) {
     final userId = _channel.client.state?.user?.id;
-    final userRead = _channelState.read?.firstWhere(
+    final userRead = channelState.read?.firstWhere(
       (read) => read.user.id == userId,
       orElse: () => null,
     );
     if (userRead == null) {
-      return _channelState.messages?.length ?? 0;
+      return channelState.messages?.length ?? 0;
     } else {
-      return _channelState.messages.fold<int>(0, (count, message) {
+      return channelState.messages.fold<int>(0, (count, message) {
         if (message.user.id != userId &&
             message.createdAt.isAfter(userRead.lastRead) &&
             message.silent != true &&
@@ -1223,6 +1232,10 @@ class ChannelClientState {
       });
     }
   }
+
+  /// Unread count getter as a stream
+  Stream<int> get unreadCountStream =>
+      channelStateStream.map((cs) => _computeUnreadCount(cs)).distinct();
 
   /// Update threads with updated information about messages
   void updateThreadInfo(String parentId, List<Message> messages) {
