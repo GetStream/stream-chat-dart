@@ -113,6 +113,7 @@ void main() {
             "state": true,
             "watch": true,
             "presence": false,
+            "limit": 10,
           }),
         };
 
@@ -232,6 +233,7 @@ void main() {
             "filter_conditions": filters,
             'query': query,
             'sort': sortOptions,
+            "limit": 10,
           }),
         };
 
