@@ -65,8 +65,8 @@ class PaginationParams {
   /// // limit to 50 with offset
   /// final paginationParams = PaginationParams(limit: 50, offset: 50);
   /// ```
-  PaginationParams({
-    this.limit,
+  const PaginationParams({
+    this.limit = 10,
     this.offset,
     this.greaterThan,
     this.greaterThanOrEqual,

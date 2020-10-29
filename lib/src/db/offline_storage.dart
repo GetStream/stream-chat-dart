@@ -226,7 +226,7 @@ class OfflineStorage extends _$OfflineStorage {
 
       if (paginationParams != null) {
         query.limit(
-          paginationParams.limit,
+          paginationParams.limit ?? 10,
           offset: paginationParams.offset,
         );
       }

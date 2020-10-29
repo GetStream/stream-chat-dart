@@ -519,7 +519,7 @@ class Client {
     Map<String, dynamic> filter,
     List<SortOption> sort,
     Map<String, dynamic> options,
-    PaginationParams paginationParams,
+    PaginationParams paginationParams = const PaginationParams(limit: 10),
     int messageLimit,
     bool onlyOffline = false,
   }) async* {
