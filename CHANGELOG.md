@@ -1,3 +1,7 @@
+## 0.2.10+1
+
+- Add default limit to pagination
+
 ## 0.2.10
 
 - Added `channel.state.unreadCountStream`
