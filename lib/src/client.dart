@@ -320,6 +320,7 @@ class Client {
         'Authorization': token,
         'stream-auth-type': _authType,
         'x-stream-client': _userAgent,
+        'Content-Encoding': 'gzip',
       };
 
   /// Set the current user, this triggers a connection to the API.
@@ -361,10 +362,11 @@ class Client {
   ]) =>
       stream.where((event) =>
           eventType == null ||
-          event.type == eventType ||
-          event.type == eventType2 ||
-          event.type == eventType3 ||
-          event.type == eventType4);
+          (event.type != null &&
+              (event.type == eventType ||
+                  event.type == eventType2 ||
+                  event.type == eventType3 ||
+                  event.type == eventType4)));
 
   /// Method called to add a new event to the [_controller].
   void handleEvent(Event event) async {
@@ -1150,6 +1152,7 @@ class ClientState {
     )
         .listen((Event event) async {
       final eventChannel = event.channel;
+      print('event.toJson(): ${event.toJson()}');
       await _client._offlineStorage?.deleteChannels([eventChannel.cid]);
       if (channels != null) {
         channels = channels..remove(eventChannel.cid);
