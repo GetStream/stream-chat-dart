@@ -1,3 +1,7 @@
+## 0.2.10+2
+
+- Fix bug with event filtering
+
 ## 0.2.10+1
 
 - Add default limit to pagination
