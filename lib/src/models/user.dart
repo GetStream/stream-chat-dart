@@ -82,7 +82,9 @@ class User {
 
   /// Shortcut for user name
   String get name =>
-      extraData?.containsKey('name') == true ? extraData['name'] : id;
+      (extraData?.containsKey('name') == true && extraData['name'] != '')
+          ? extraData['name']
+          : id;
 
   /// Create a new instance from a json
   factory User.fromJson(Map<String, dynamic> json) {
