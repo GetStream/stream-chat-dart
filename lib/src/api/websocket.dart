@@ -100,7 +100,7 @@ class WebSocket {
       ValueNotifier(ConnectionStatus.disconnected);
 
   String _path;
-  int _retryAttempt = 0;
+  int _retryAttempt = 1;
   WebSocketChannel _channel;
   Timer _healthCheck, _reconnectionMonitor;
   DateTime _lastEventAt;
@@ -129,6 +129,10 @@ class WebSocket {
     _channel = connectFunc(_path);
     _channel.stream.listen(
       (data) {
+        final jsonData = json.decode(data);
+        if (jsonData['error'] != null) {
+          return _onConnectionError(jsonData['error']);
+        }
         _onData(data);
       },
       onError: (error, stacktrace) {
@@ -142,6 +146,7 @@ class WebSocket {
   }
 
   void _onDone() {
+    _connecting = false;
     if (_manuallyClosed) {
       return;
     }
@@ -179,10 +184,12 @@ class WebSocket {
     _lastEventAt = DateTime.now();
   }
 
-  Future<void> _onConnectionError(error, stacktrace) async {
+  Future<void> _onConnectionError(error, [stacktrace]) async {
     logger.severe('error connecting');
     logger.severe(error);
-    logger.severe(stacktrace);
+    if (stacktrace != null) {
+      logger.severe(stacktrace);
+    }
     _connecting = false;
 
     if (!_reconnecting) {
@@ -227,14 +234,21 @@ class WebSocket {
 
     _cancelTimers();
 
-    await connect();
-
-    await Future.delayed(Duration(seconds: min(_retryAttempt * 5, 25)));
-    _reconnectTimer();
-    _retryAttempt++;
+    print('await connect();');
+    try {
+      await connect();
+    } catch (e) {}
+    await Future.delayed(
+      Duration(seconds: min(_retryAttempt * 5, 25)),
+      () {
+        _reconnectTimer();
+        _retryAttempt++;
+      },
+    );
   }
 
   Future<void> _reconnect() async {
+    logger.info('reconnect');
     if (!_reconnecting) {
       _reconnecting = true;
       connectionStatus.value = ConnectionStatus.connecting;

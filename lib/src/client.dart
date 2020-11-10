@@ -118,7 +118,7 @@ class Client {
 
   /// Client specific logger instance.
   /// Refer to the class [Logger] to learn more about the specific implementation.
-  final Logger logger = Logger('📡');
+  final Logger logger = Logger.detached('📡');
 
   /// A function that has a parameter of type [LogRecord].
   /// This is called on every new log record.
@@ -137,7 +137,7 @@ class Client {
 
   /// Your project Stream Chat api key.
   /// Find your API keys here https://getstream.io/dashboard/
-  final String apiKey;
+  String apiKey;
 
   /// Your project Stream Chat base url.
   final String baseURL;
@@ -296,8 +296,16 @@ class Client {
     };
   }
 
+  Logger _detachedLogger(
+    String name,
+  ) {
+    return Logger.detached(name)
+      ..level = logLevel
+      ..onRecord.listen(logHandlerFunction ?? _getDefaultLogHandler());
+  }
+
   void _setupLogger() {
-    Logger.root.level = logLevel;
+    logger.level = logLevel;
 
     logHandlerFunction ??= _getDefaultLogHandler();
 
@@ -408,7 +416,8 @@ class Client {
     wsConnectionStatus.value = ConnectionStatus.connecting;
 
     if (persistenceEnabled && _offlineStorage == null) {
-      _offlineStorage = await connectDatabase(state.user, Logger('💽'));
+      _offlineStorage =
+          await connectDatabase(state.user, _detachedLogger('💽'));
     }
 
     _ws = WebSocket(
@@ -424,7 +433,7 @@ class Client {
         'server_determines_connection_id': true,
       },
       handler: handleEvent,
-      logger: Logger('🔌'),
+      logger: _detachedLogger('🔌'),
     );
 
     _connectionStatusListener = () async {
@@ -466,6 +475,9 @@ class Client {
       await resync();
     }).catchError((err, stacktrace) {
       logger.severe('error connecting ws', err, stacktrace);
+      if (err is Map) {
+        throw err;
+      }
     });
 
     return event;
