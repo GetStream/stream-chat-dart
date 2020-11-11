@@ -1,3 +1,10 @@
+## 0.2.11
+
+- Fix user.name getter
+- Use detached loggers
+- Throw error while connecting if it comes from backend
+- Fix ws reconnection
+
 ## 0.2.10+2
 
 - Fix bug with event filtering
