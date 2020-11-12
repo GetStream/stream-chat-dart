@@ -917,14 +917,7 @@ class Client {
       return state.channels['$type:$id'];
     }
 
-    final channel = Channel(this, type, id, extraData);
-
-    state.channels = {
-      ...state.channels ?? {},
-      channel.cid: channel,
-    };
-
-    return channel;
+    return Channel(this, type, id, extraData);
   }
 
   /// Update or Create the given user object.
