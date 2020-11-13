@@ -234,7 +234,6 @@ class WebSocket {
 
     _cancelTimers();
 
-    print('await connect();');
     try {
       await connect();
     } catch (e) {}

@@ -1,3 +1,7 @@
+## 0.2.12
+
+- Do not save channels in memory if not being watched. This was leading to some bugs in some specific use-cases.
+
 ## 0.2.11
 
 - Fix user.name getter

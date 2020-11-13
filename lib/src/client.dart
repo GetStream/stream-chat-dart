@@ -917,14 +917,7 @@ class Client {
       return state.channels['$type:$id'];
     }
 
-    final channel = Channel(this, type, id, extraData);
-
-    state.channels = {
-      ...state.channels ?? {},
-      channel.cid: channel,
-    };
-
-    return channel;
+    return Channel(this, type, id, extraData);
   }
 
   /// Update or Create the given user object.
@@ -1080,20 +1073,20 @@ class Client {
       );
 
       if (state?.channels != null) {
-        state.channels[cid].state.addMessage(message);
+        state.channels[cid]?.state?.addMessage(message);
       }
 
       final response = await delete('/messages/${message.id}');
 
       if (state?.channels != null) {
-        state.channels[cid].state
-            .addMessage(message.copyWith(status: MessageSendingStatus.SENT));
+        state.channels[cid]?.state
+            ?.addMessage(message.copyWith(status: MessageSendingStatus.SENT));
       }
 
       return decode(response.data, EmptyResponse.fromJson);
     } catch (error) {
       if (state?.channels != null) {
-        state.channels[cid].state.retryQueue.add([message]);
+        state.channels[cid]?.state?.retryQueue?.add([message]);
       }
       rethrow;
     }
@@ -1164,7 +1157,6 @@ class ClientState {
     )
         .listen((Event event) async {
       final eventChannel = event.channel;
-      print('event.toJson(): ${event.toJson()}');
       await _client._offlineStorage?.deleteChannels([eventChannel.cid]);
       if (channels != null) {
         channels = channels..remove(eventChannel.cid);
@@ -1226,7 +1218,7 @@ class ClientState {
   }
 
   final BehaviorSubject<Map<String, Channel>> _channelsController =
-      BehaviorSubject();
+      BehaviorSubject.seeded({});
   final BehaviorSubject<OwnUser> _userController = BehaviorSubject();
   final BehaviorSubject<Map<String, User>> _usersController =
       BehaviorSubject.seeded({});
