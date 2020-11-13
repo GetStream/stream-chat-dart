@@ -1157,7 +1157,6 @@ class ClientState {
     )
         .listen((Event event) async {
       final eventChannel = event.channel;
-      print('event.toJson(): ${event.toJson()}');
       await _client._offlineStorage?.deleteChannels([eventChannel.cid]);
       if (channels != null) {
         channels = channels..remove(eventChannel.cid);
