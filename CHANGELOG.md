@@ -1,4 +1,4 @@
-## 0.2.12+1
+## 0.2.12+2
 
 - Fix error with reactions with null user
 
