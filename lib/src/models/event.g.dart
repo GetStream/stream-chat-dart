@@ -49,6 +49,7 @@ Event _$EventFromJson(Map json) {
           )),
     channelId: json['channel_id'] as String,
     channelType: json['channel_type'] as String,
+    parentId: json['parent_id'] as String,
   )..isLocal = json['is_local'] as bool;
 }
 
@@ -68,6 +69,7 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'total_unread_count': instance.totalUnreadCount,
       'unread_channels': instance.unreadChannels,
       'online': instance.online,
+      'parent_id': instance.parentId,
       'is_local': instance.isLocal,
     };
 
