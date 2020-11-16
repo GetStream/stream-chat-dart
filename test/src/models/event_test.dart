@@ -24,6 +24,7 @@ void main() {
          "image": "https://getstream.io/random_svg/?name=Dry+meadow",
          "name": "Dry meadow"
        },
+        "parent_id": null,
         "user": {
          "id": "dry-meadow-0",
          "role": "user",
@@ -80,6 +81,7 @@ void main() {
           'member': null,
           'channel_id': null,
           'channel_type': null,
+          'parent_id': null,
         },
       );
     });
