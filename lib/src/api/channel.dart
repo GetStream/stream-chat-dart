@@ -714,7 +714,7 @@ class Channel {
 
   /// First of the [EventType.typingStart] and [EventType.typingStop] events based on the users keystrokes.
   /// Call this on every keystroke.
-  Future<void> keyStroke() async {
+  Future<void> keyStroke([String parentId]) async {
     if (config?.typingEvents == false) {
       return;
     }
@@ -725,19 +725,25 @@ class Channel {
     if (_lastTypingEvent == null ||
         now.difference(_lastTypingEvent).inSeconds >= 2) {
       _lastTypingEvent = now;
-      await sendEvent(Event(type: EventType.typingStart));
+      await sendEvent(Event(
+        type: EventType.typingStart,
+        parentId: parentId,
+      ));
     }
   }
 
   /// Sets last typing to null and sends the typing.stop event
-  Future<void> stopTyping() async {
+  Future<void> stopTyping([String parentId]) async {
     if (config?.typingEvents == false) {
       return;
     }
 
     client.logger.info('stop typing');
     _lastTypingEvent = null;
-    await sendEvent(Event(type: EventType.typingStop));
+    await sendEvent(Event(
+      type: EventType.typingStop,
+      parentId: parentId,
+    ));
   }
 
   Timer _cleaningTimer;
