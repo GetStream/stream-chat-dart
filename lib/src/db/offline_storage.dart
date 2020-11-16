@@ -755,7 +755,7 @@ class OfflineStorage extends _$OfflineStorage {
       extraData: r.extraData,
       score: r.score,
       createdAt: r.createdAt,
-      userId: r.user.id,
+      userId: r.userId,
     );
   }
 
