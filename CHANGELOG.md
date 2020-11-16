@@ -1,3 +1,7 @@
+## 0.2.13
+
+- Add parent_id to events for typing indicators in threads
+
 ## 0.2.12+2
 
 - Fix error with reactions with null user
