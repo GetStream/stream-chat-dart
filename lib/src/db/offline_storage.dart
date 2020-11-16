@@ -75,7 +75,7 @@ class OfflineStorage extends _$OfflineStorage {
   // you should bump this number whenever you change or add a table definition. Migrations
   // are covered later in this readme.
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -694,9 +694,11 @@ class OfflineStorage extends _$OfflineStorage {
                             _userDataFromUser(m.user),
                             if (m.latestReactions != null)
                               ...m.latestReactions
+                                  .where((r) => r.user != null)
                                   .map((r) => _userDataFromUser(r.user)),
                             if (m.ownReactions != null)
                               ...m.ownReactions
+                                  .where((r) => r.user != null)
                                   .map((r) => _userDataFromUser(r.user)),
                           ])
                       .expand((v) => v),
@@ -720,14 +722,16 @@ class OfflineStorage extends _$OfflineStorage {
     );
     final newReactions = channelStates
         .map((cs) => cs.messages.map((m) {
-              final ownReactions = m.ownReactions?.map(
-                    (r) => _reactionDataFromReaction(m, r),
-                  ) ??
-                  [];
-              final latestReactions = m.latestReactions?.map(
-                    (r) => _reactionDataFromReaction(m, r),
-                  ) ??
-                  [];
+              final ownReactions =
+                  m.ownReactions?.where((e) => e.userId != null)?.map(
+                            (r) => _reactionDataFromReaction(m, r),
+                          ) ??
+                      [];
+              final latestReactions =
+                  m.latestReactions?.where((e) => e.userId != null)?.map(
+                            (r) => _reactionDataFromReaction(m, r),
+                          ) ??
+                      [];
               return [
                 ...ownReactions,
                 ...latestReactions,

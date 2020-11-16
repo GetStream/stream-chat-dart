@@ -1,3 +1,7 @@
+## 0.2.12+1
+
+- Fix error with reactions with null user
+
 ## 0.2.12
 
 - Do not save channels in memory if not being watched. This was leading to some bugs in some specific use-cases.
