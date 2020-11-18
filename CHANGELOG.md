@@ -1,3 +1,7 @@
+## 0.2.13+1
+
+- Let user change channel.extradata if the channel is not initialized yet
+
 ## 0.2.13
 
 - Add parent_id to events for typing indicators in threads
