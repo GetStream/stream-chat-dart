@@ -53,6 +53,14 @@ class Channel {
   String _cid;
   Map<String, dynamic> _extraData;
 
+  set extraData(Map<String, dynamic> extraData) {
+    if (_initializedCompleter.isCompleted) {
+      throw Exception(
+          'Once the channel is initialized you should use channel.update to update channel data');
+    }
+    _extraData = extraData;
+  }
+
   /// Returns true if the channel is muted
   bool get isMuted =>
       _client.state.user?.channelMutes
@@ -893,14 +901,15 @@ class ChannelClientState {
 
   /// Retry failed message
   Future<void> retryFailedMessages() async {
-    final failedMessages = <Message>[
-      ...messages,
-      ...threads.values.expand((v) => v)
-    ]
-        .where((message) =>
-            message.status != null &&
-            message.status != MessageSendingStatus.SENT)
-        .toList();
+    final failedMessages =
+        <Message>[...messages, ...threads.values.expand((v) => v)]
+            .where((message) =>
+                message.status != null &&
+                message.status != MessageSendingStatus.SENT &&
+                message.createdAt.isBefore(DateTime.now().subtract(Duration(
+                  seconds: 1,
+                ))))
+            .toList();
 
     retryQueue.add(failedMessages);
   }
