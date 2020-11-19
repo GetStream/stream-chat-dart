@@ -1,3 +1,7 @@
+## 0.2.14
+
+- Add event.extradata
+
 ## 0.2.13+1
 
 - Let user change channel.extradata if the channel is not initialized yet
