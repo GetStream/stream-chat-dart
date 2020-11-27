@@ -1,3 +1,7 @@
+## 0.2.15
+
+- Fix search message response
+
 ## 0.2.14
 
 - Add event.extradata
