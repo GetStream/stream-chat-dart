@@ -3367,6 +3367,7 @@ void main() {
       const jsonExample = r'''
       { "results": [
           {
+            "message": {
               "id": "9db3ef01-e779-4279-8c54-ffd021eccec4",
               "text": "A lustred seal is an alto of the mind.",
               "html": "\u003cp\u003eA lustred seal is an alto of the mind.\u003c/p\u003e\n",
@@ -3390,49 +3391,13 @@ void main() {
               "created_at": "2020-01-28T22:17:31.167579Z",
               "updated_at": "2020-01-28T22:17:31.167579Z",
               "mentioned_users": []
-          },
-          {
-              "id": "3232e92f-a96f-4b5e-bacb-3565e7155dc4",
-              "text": "https://giphy.com/gifs/netflix-marvel-the-punisher-l3mZsRS7ZfftbdLdS",
-              "html": "\u003cp\u003e\u003ca href=\"https://giphy.com/gifs/netflix-marvel-the-punisher-l3mZsRS7ZfftbdLdS\" rel=\"nofollow\"\u003ehttps://giphy.com/gifs/netflix-marvel-the-punisher-l3mZsRS7ZfftbdLdS\u003c/a\u003e\u003c/p\u003e\n",
-              "type": "regular",
-              "user": {
-                  "id": "spring-voice-7",
-                  "role": "user",
-                  "created_at": "2020-01-28T22:17:30.834135Z",
-                  "updated_at": "2020-01-28T22:17:31.186771Z",
-                  "banned": false,
-                  "online": false,
-                  "image": "https://getstream.io/random_svg/?id=spring-voice-7\u0026name=Spring+voice",
-                  "name": "Spring voice"
-              },
-              "attachments": [
-                  {
-                      "type": "video",
-                      "author_name": "GIPHY",
-                      "title": "The Punisher Marvel GIF by NETFLIX - Find \u0026 Share on GIPHY",
-                      "title_link": "https://media.giphy.com/media/l3mZsRS7ZfftbdLdS/giphy.gif",
-                      "text": "See What's Next in entertainment and Netflix original series, movies, TV, docs, and comedies. You can stream Netflix anytime, anywhere, on any device.",
-                      "image_url": "https://media.giphy.com/media/l3mZsRS7ZfftbdLdS/giphy.gif",
-                      "thumb_url": "https://media.giphy.com/media/l3mZsRS7ZfftbdLdS/giphy.gif",
-                      "asset_url": "https://media.giphy.com/media/l3mZsRS7ZfftbdLdS/giphy.mp4",
-                      "og_scrape_url": "https://giphy.com/gifs/netflix-marvel-the-punisher-l3mZsRS7ZfftbdLdS"
-                  }
-              ],
-              "latest_reactions": [],
-              "own_reactions": [],
-              "reaction_counts": {},
-              "reaction_scores": {},
-              "reply_count": 1,
-              "created_at": "2020-01-28T22:17:31.168454Z",
-              "updated_at": "2020-01-28T22:17:31.168454Z",
-              "mentioned_users": []
           }
-      ]}
+          }]
+          }
       ''';
       final response =
           SearchMessagesResponse.fromJson(json.decode(jsonExample));
-      expect(response.results, isA<List<Message>>());
+      expect(response.results, isA<List<GetMessageResponse>>());
     });
 
     test('ListDevicesResponse', () {

@@ -187,11 +187,7 @@ SearchMessagesResponse _$SearchMessagesResponseFromJson(Map json) {
   return SearchMessagesResponse()
     ..duration = json['duration'] as String
     ..results = (json['results'] as List)
-        ?.map((e) => e == null
-            ? null
-            : Message.fromJson((e as Map)?.map(
-                (k, e) => MapEntry(k as String, e),
-              )))
+        ?.map((e) => e == null ? null : GetMessageResponse.fromJson(e as Map))
         ?.toList();
 }
 
