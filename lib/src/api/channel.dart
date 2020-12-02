@@ -586,10 +586,12 @@ class Channel {
       payload['watchers'] = watchersPagination.toJson();
     }
 
-    if (cid != null) {
+    if (preferOffline && cid != null) {
       final updatedState = await _client.offlineStorage?.getChannel(
         cid,
+        limit: messagesPagination?.limit,
         messageLessThan: messagesPagination?.lessThan,
+        messageGreaterThan: messagesPagination?.greaterThan,
       );
       if (updatedState != null && updatedState.messages.isNotEmpty) {
         if (state == null) {
@@ -597,9 +599,7 @@ class Channel {
         } else {
           state?.updateChannelState(updatedState);
         }
-        if (preferOffline) {
-          return updatedState;
-        }
+        return updatedState;
       }
     }
 

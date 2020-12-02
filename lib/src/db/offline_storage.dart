@@ -20,6 +20,7 @@ import '../models/read.dart';
 import '../models/user.dart';
 
 part 'models.part.dart';
+
 part 'offline_storage.g.dart';
 
 /// Gets a new instance of the database running on a background isolate
@@ -182,7 +183,9 @@ class OfflineStorage extends _$OfflineStorage {
   /// Get channel data by cid
   Future<ChannelState> getChannel(
     String cid, {
+    int limit,
     String messageLessThan,
+    String messageGreaterThan,
   }) async {
     return await (select(channels)..where((c) => c.cid.equals(cid))).join([
       leftOuterJoin(users, channels.createdBy.equalsExp(users.id)),
@@ -190,7 +193,9 @@ class OfflineStorage extends _$OfflineStorage {
       return _channelFromRow(
         row.readTable(channels),
         row.readTable(users),
+        limit: limit,
         messageLessThan: messageLessThan,
+        messageGreaterThan: messageGreaterThan,
       );
     }).getSingle();
   }
@@ -431,11 +436,15 @@ class OfflineStorage extends _$OfflineStorage {
   Future<ChannelState> _channelFromRow(
     _Channel channelRow,
     _User userRow, {
+    int limit,
     String messageLessThan,
+    String messageGreaterThan,
   }) async {
     final rowMessages = await _getChannelMessages(
       channelRow,
+      limit: limit,
       lessThan: messageLessThan,
+      greaterThan: messageGreaterThan,
     );
     final rowReads = await _getChannelReads(channelRow);
     final rowMembers = await _getChannelMembers(channelRow);
@@ -471,7 +480,9 @@ class OfflineStorage extends _$OfflineStorage {
 
   Future<List<Message>> _getChannelMessages(
     _Channel channelRow, {
+    int limit,
     String lessThan,
+    String greaterThan,
   }) async {
     final rowMessages = await Future.wait(await (select(messages).join([
       leftOuterJoin(users, messages.userId.equalsExp(users.id)),
@@ -487,7 +498,19 @@ class OfflineStorage extends _$OfflineStorage {
 
     if (lessThan != null) {
       final lessThanIndex = rowMessages.indexWhere((m) => m.id == lessThan);
-      rowMessages.removeRange(lessThanIndex, rowMessages.length);
+      if (lessThanIndex != -1) {
+        rowMessages.removeRange(lessThanIndex, rowMessages.length);
+      }
+    }
+    if (greaterThan != null) {
+      final greaterThanIndex =
+          rowMessages.indexWhere((m) => m.id == greaterThan);
+      if (greaterThanIndex != -1) {
+        rowMessages.removeRange(0, greaterThanIndex);
+      }
+    }
+    if (limit != null) {
+      return rowMessages.take(limit).toList();
     }
     return rowMessages;
   }
