@@ -27,6 +27,9 @@ class EventType {
   /// Event sent when deleting a reaction
   static const String reactionDeleted = 'reaction.deleted';
 
+  /// Event sent when updating a reaction
+  static const String reactionUpdated = 'reaction.updated';
+
   /// Event sent when updating a message
   static const String messageUpdated = 'message.updated';
 

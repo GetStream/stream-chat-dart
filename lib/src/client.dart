@@ -427,6 +427,7 @@ class Client {
         'api_key': apiKey,
         'authorization': token,
         'stream-auth-type': _authType,
+        'x-stream-client': _userAgent,
       },
       connectPayload: {
         'user_id': state.user.id,

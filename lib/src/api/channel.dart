@@ -808,7 +808,7 @@ class ChannelClientState {
 
     _listenMessageUpdated();
 
-    _listenReactionNew();
+    _listenReactions();
 
     _listenReactionDeleted();
 
@@ -948,8 +948,13 @@ class ChannelClientState {
     }
   }
 
-  void _listenReactionNew() {
-    _channel.on(EventType.reactionNew).listen((event) {
+  void _listenReactions() {
+    _channel
+        .on(
+      EventType.reactionNew,
+      EventType.reactionUpdated,
+    )
+        .listen((event) {
       final message = event.message;
       _addMessageReaction(message, event.reaction);
     });
