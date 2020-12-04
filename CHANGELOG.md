@@ -1,3 +1,7 @@
+## 0.2.15+1
+
+- Listen to message.updated event
+
 ## 0.2.15
 
 - Fix search message response
