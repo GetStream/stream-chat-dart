@@ -1,3 +1,7 @@
+## 0.2.16
+
+- Listen for user.updated events
+
 ## 0.2.15+2
 
 - Fix reaction score updates

@@ -1138,6 +1138,8 @@ class ClientState {
     _listenChannelDeleted();
 
     _listenChannelHidden();
+
+    _listenUserUpdated();
   }
 
   void _listenChannelHidden() {
@@ -1146,6 +1148,15 @@ class ClientState {
       if (channels != null) {
         channels = channels..removeWhere((cid, ch) => cid == event.cid);
       }
+    });
+  }
+
+  void _listenUserUpdated() {
+    _client.on(EventType.userUpdated).listen((event) {
+      if (event.user.id == user.id) {
+        user = OwnUser.fromJson(event.user.toJson());
+      }
+      _updateUser(event.user);
     });
   }
 
