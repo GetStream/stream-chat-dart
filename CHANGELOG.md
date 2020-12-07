@@ -1,6 +1,10 @@
+## 0.2.15+2
+
+- Fix reaction score updates
+
 ## 0.2.15+1
 
-- Listen to message.updated event
+- Listen to reaction.updated event
 
 ## 0.2.15
 

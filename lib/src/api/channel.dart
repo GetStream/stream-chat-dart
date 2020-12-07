@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
@@ -956,6 +957,9 @@ class ChannelClientState {
     )
         .listen((event) {
       final message = event.message;
+      if (event.type == EventType.reactionUpdated) {
+        _removeMessageReaction(message, event.reaction);
+      }
       _addMessageReaction(message, event.reaction);
     });
   }
@@ -1095,13 +1099,20 @@ class ChannelClientState {
   Message _addReactionToMessage(Message message, Reaction reaction) {
     final newMessage = message.copyWith(
       latestReactions: message.latestReactions..add(reaction),
-      reactionCounts: (message.reactionCounts ?? {})
-        ..addAll({
-          reaction.type: (message.reactionCounts == null
-                  ? 0
-                  : message.reactionCounts[reaction.type] ?? 0) +
-              1,
-        }),
+      reactionCounts: {
+        ...message.reactionCounts ?? {},
+        reaction.type: (message.reactionCounts == null
+                ? 0
+                : message.reactionCounts[reaction.type] ?? 0) +
+            1,
+      },
+      reactionScores: {
+        ...message.reactionScores ?? {},
+        reaction.type: (message.reactionScores == null
+                ? 0
+                : message.reactionScores[reaction.type] ?? 0) +
+            reaction.score,
+      },
     );
 
     if (reaction.user.id == _channel.client.state.user.id) {
@@ -1118,10 +1129,19 @@ class ChannelClientState {
       latestReactions: message.latestReactions
         ..removeWhere(
             (r) => r.type == reaction.type && r.userId == reaction.userId),
-      reactionCounts: message.reactionCounts
-        ..addAll({
-          reaction.type: (message.reactionCounts[reaction.type] ?? 0) - 1,
-        }),
+      reactionCounts: {
+        ...message.reactionCounts,
+        reaction.type: (message.reactionCounts[reaction.type] ?? 0) - 1,
+      },
+      reactionScores: {
+        ...message.reactionScores ?? {},
+        reaction.type: max(
+            (message.reactionScores == null
+                    ? 0
+                    : message.reactionScores[reaction.type] ?? 0) -
+                reaction.score,
+            0),
+      },
     );
 
     newMessage.reactionCounts.removeWhere((_, v) => v <= 0);
