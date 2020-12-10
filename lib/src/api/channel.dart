@@ -685,6 +685,29 @@ class Channel {
     });
   }
 
+  /// Shadow bans a user from the channel
+  Future<EmptyResponse> shadowBan(
+    String userID,
+    Map<String, dynamic> options,
+  ) async {
+    _checkInitialized();
+    final opts = Map<String, dynamic>.from(options)
+      ..addAll({
+        'type': type,
+        'id': id,
+      });
+    return _client.shadowBan(userID, opts);
+  }
+
+  /// Remove the shadow ban for a user in the channel
+  Future<EmptyResponse> removeShadowBan(String userID) async {
+    _checkInitialized();
+    return _client.removeShadowBan(userID, {
+      'type': type,
+      'id': id,
+    });
+  }
+
   /// Hides the channel from [Client.queryChannels] for the user until a message is added
   ///	If [clearHistory] is set to true - all messages will be removed for the user
   Future<EmptyResponse> hide({bool clearHistory = false}) async {
