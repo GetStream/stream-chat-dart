@@ -896,6 +896,12 @@ class ChannelClientState {
     });
   }
 
+  /// Flag which indicates if [ChannelClientState] contain latest/recent messages or not.
+  /// This flag should be managed by UI sdks.
+  /// When false, any new message (received by WebSocket event - [EventType.messageNew]) will not
+  /// be pushed on to message list.
+  bool isUpToDate = true;
+
   /// The retry queue associated to this channel
   RetryQueue retryQueue;
 
@@ -1013,7 +1019,7 @@ class ChannelClientState {
     )
         .listen((event) {
       final message = event.message;
-      addMessage(message);
+      if (isUpToDate) addMessage(message);
     });
   }
 
@@ -1317,6 +1323,11 @@ class ChannelClientState {
       members: newMembers,
       read: newReads,
     );
+  }
+
+  /// Clear all the messages from [ChannelState]
+  void clearMessages() {
+    _channelState = _channelState.copyWith(messages: <Message>[]);
   }
 
   int _sortByCreatedAt(a, b) {
