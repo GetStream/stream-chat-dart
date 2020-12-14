@@ -1325,11 +1325,6 @@ class ChannelClientState {
     );
   }
 
-  /// Clear all the messages from [ChannelState]
-  void clearMessages() {
-    _channelState = _channelState.copyWith(messages: <Message>[]);
-  }
-
   int _sortByCreatedAt(a, b) {
     if (a.createdAt == null) {
       return 1;
