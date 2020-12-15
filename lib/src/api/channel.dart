@@ -1258,6 +1258,7 @@ class ChannelClientState {
         if (message.user.id != userId &&
             message.createdAt.isAfter(userRead.lastRead) &&
             message.silent != true &&
+            message.shadowed != true &&
             !message.isSystem) {
           return count + 1;
         }
