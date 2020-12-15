@@ -1,6 +1,6 @@
 ## 0.2.17
 
-- Add shadowed ban feature
+- Add shadow ban feature
 
 ## 0.2.16
 
