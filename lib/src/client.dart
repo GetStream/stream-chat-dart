@@ -529,8 +529,41 @@ class Client {
     }
   }
 
+  final _queryChannelsStreams = <String, Stream<List<Channel>>>{};
+
   /// Requests channels with a given query.
   Stream<List<Channel>> queryChannels({
+    Map<String, dynamic> filter,
+    List<SortOption> sort,
+    Map<String, dynamic> options,
+    PaginationParams paginationParams = const PaginationParams(limit: 10),
+    int messageLimit,
+    bool onlyOffline = false,
+  }) {
+    final hash = base64.encode(utf8.encode(
+        '$filter${sort.map((s) => s.toJson())}$options${paginationParams.toJson()}$messageLimit$onlyOffline'));
+
+    if (_queryChannelsStreams.containsKey(hash)) {
+      return _queryChannelsStreams[hash];
+    }
+
+    final s = _doQueryChannels(
+      filter: filter,
+      sort: sort,
+      options: options,
+      paginationParams: paginationParams,
+      messageLimit: messageLimit,
+      onlyOffline: onlyOffline,
+    ).doOnDone(() {
+      return _queryChannelsStreams.remove(hash);
+    });
+
+    _queryChannelsStreams[hash] = s;
+
+    return s;
+  }
+
+  Stream<List<Channel>> _doQueryChannels({
     Map<String, dynamic> filter,
     List<SortOption> sort,
     Map<String, dynamic> options,
