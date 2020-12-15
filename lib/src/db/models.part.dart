@@ -141,6 +141,8 @@ class _Messages extends Table {
 
   BoolColumn get showInChannel => boolean().nullable()();
 
+  BoolColumn get shadowed => boolean().nullable()();
+
   TextColumn get command => text().nullable()();
 
   DateTimeColumn get createdAt => dateTime()();
