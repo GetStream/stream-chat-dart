@@ -210,7 +210,9 @@ class Channel {
 
       return res;
     } catch (error) {
-      state?.retryQueue?.add([newMessage]);
+      if (error is DioError && error.type != DioErrorType.RESPONSE) {
+        state?.retryQueue?.add([newMessage]);
+      }
       rethrow;
     }
   }

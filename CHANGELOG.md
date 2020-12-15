@@ -1,3 +1,7 @@
+## 0.2.17+1
+
+- Do not retry messages when server returns error 
+
 ## 0.2.17
 
 - Add shadow ban feature

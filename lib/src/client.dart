@@ -1071,7 +1071,9 @@ class Client {
 
       return updateMessageResponse;
     }).catchError((error) {
-      if (state?.channels != null) {
+      if (error is DioError &&
+          error.type != DioErrorType.RESPONSE &&
+          state?.channels != null) {
         channel?.state?.retryQueue?.add([message]);
       }
       throw error;
@@ -1108,7 +1110,9 @@ class Client {
 
       return decode(response.data, EmptyResponse.fromJson);
     } catch (error) {
-      if (state?.channels != null) {
+      if (error is DioError &&
+          error.type != DioErrorType.RESPONSE &&
+          state?.channels != null) {
         state.channels[cid]?.state?.retryQueue?.add([message]);
       }
       rethrow;
