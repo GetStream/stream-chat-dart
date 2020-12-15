@@ -86,6 +86,7 @@ class Message {
   final bool silent;
 
   /// If true the message is shadowed
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final bool shadowed;
 
   /// A used command name.

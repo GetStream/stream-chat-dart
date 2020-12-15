@@ -95,7 +95,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   writeNotNull('reply_count', readonly(instance.replyCount));
   val['show_in_channel'] = instance.showInChannel;
   val['silent'] = instance.silent;
-  val['shadowed'] = instance.shadowed;
+  writeNotNull('shadowed', readonly(instance.shadowed));
   writeNotNull('command', readonly(instance.command));
   writeNotNull('created_at', readonly(instance.createdAt));
   writeNotNull('updated_at', readonly(instance.updatedAt));
