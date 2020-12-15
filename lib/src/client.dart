@@ -793,11 +793,19 @@ class Client {
   }
 
   /// Closes the websocket connection and resets the client
-  Future<void> disconnect({bool flushOfflineStorage = false}) async {
+  Future<void> disconnect({
+    bool flushOfflineStorage = false,
+    bool clearUser = false,
+  }) async {
     logger.info('Disconnecting');
 
     await _offlineStorage?.disconnect(flush: flushOfflineStorage);
     _offlineStorage = null;
+
+    if (clearUser == true) {
+      state.dispose();
+      state = ClientState(this);
+    }
 
     await _disconnect();
   }
