@@ -1,3 +1,7 @@
+## 0.2.17
+
+- Add shadow ban feature
+
 ## 0.2.16
 
 - Listen for user.updated events

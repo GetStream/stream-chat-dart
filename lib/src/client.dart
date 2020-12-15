@@ -969,6 +969,28 @@ class Client {
     return decode(response.data, EmptyResponse.fromJson);
   }
 
+  /// Shadow bans a user
+  Future<EmptyResponse> shadowBan(
+    String targetID, [
+    Map<String, dynamic> options = const {},
+  ]) async {
+    return banUser(targetID, {
+      'shadow': true,
+      ...options,
+    });
+  }
+
+  /// Removes shadow ban from a user
+  Future<EmptyResponse> removeShadowBan(
+    String targetID, [
+    Map<String, dynamic> options = const {},
+  ]) async {
+    return unbanUser(targetID, {
+      'shadow': true,
+      ...options,
+    });
+  }
+
   /// Mutes a user
   Future<EmptyResponse> muteUser(String targetID) async {
     final response = await post('/moderation/mute', data: {

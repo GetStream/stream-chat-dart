@@ -85,6 +85,10 @@ class Message {
   /// If true the message is silent
   final bool silent;
 
+  /// If true the message is shadowed
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  final bool shadowed;
+
   /// A used command name.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final String command;
@@ -127,6 +131,7 @@ class Message {
     'silent',
     'attachments',
     'latest_reactions',
+    'shadowed',
     'own_reactions',
     'mentioned_users',
     'reaction_counts',
@@ -150,6 +155,7 @@ class Message {
     this.attachments,
     this.mentionedUsers,
     this.silent,
+    this.shadowed,
     this.reactionCounts,
     this.reactionScores,
     this.latestReactions,
@@ -188,6 +194,7 @@ class Message {
     String parentId,
     int replyCount,
     bool showInChannel,
+    bool shadowed,
     bool silent,
     String command,
     DateTime createdAt,
@@ -215,6 +222,7 @@ class Message {
         silent: silent ?? this.silent,
         extraData: extraData ?? this.extraData,
         user: user ?? this.user,
+        shadowed: shadowed ?? this.shadowed,
         updatedAt: updatedAt ?? this.updatedAt,
         deletedAt: deletedAt ?? this.deletedAt,
         status: status ?? this.status,
