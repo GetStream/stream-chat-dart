@@ -529,6 +529,10 @@ class Client {
     }
   }
 
+  String _asMap(sort) {
+    return sort?.map((s) => s.toJson());
+  }
+
   final _queryChannelsStreams = <String, Stream<List<Channel>>>{};
 
   /// Requests channels with a given query.
@@ -541,7 +545,7 @@ class Client {
     bool onlyOffline = false,
   }) {
     final hash = base64.encode(utf8.encode(
-        '$filter${sort?.map((s) => s.toJson())}$options${paginationParams?.toJson()}$messageLimit$onlyOffline'));
+        '$filter${_asMap(sort)}$options${paginationParams?.toJson()}$messageLimit$onlyOffline'));
 
     if (_queryChannelsStreams.containsKey(hash)) {
       return _queryChannelsStreams[hash];
