@@ -1465,6 +1465,7 @@ class ChannelClientState {
 
   /// Call this method to dispose this object
   void dispose() {
+    retryQueue.dispose();
     _subscriptions.forEach((s) => s.cancel());
     _channelStateController.close();
     _threadsController.close();
