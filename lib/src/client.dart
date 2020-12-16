@@ -547,7 +547,7 @@ class Client {
       return _queryChannelsStreams[hash];
     }
 
-    final s = _doQueryChannels(
+    final newQueryChannelsStream = _doQueryChannels(
       filter: filter,
       sort: sort,
       options: options,
@@ -558,9 +558,9 @@ class Client {
       return _queryChannelsStreams.remove(hash);
     });
 
-    _queryChannelsStreams[hash] = s;
+    _queryChannelsStreams[hash] = newQueryChannelsStream;
 
-    return s;
+    return newQueryChannelsStream;
   }
 
   Stream<List<Channel>> _doQueryChannels({
