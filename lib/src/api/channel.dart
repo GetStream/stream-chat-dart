@@ -900,7 +900,15 @@ class ChannelClientState {
   /// This flag should be managed by UI sdks.
   /// When false, any new message (received by WebSocket event - [EventType.messageNew]) will not
   /// be pushed on to message list.
-  bool isUpToDate = true;
+  bool get isUpToDate => _isUpToDateController.value;
+
+  set isUpToDate(bool isUpToDate) => _isUpToDateController.add(isUpToDate);
+
+  /// [isUpToDate] flag count as a stream
+  Stream<bool> get isUpToDateStream => _isUpToDateController.stream;
+
+  final BehaviorSubject<bool> _isUpToDateController =
+      BehaviorSubject.seeded(true);
 
   /// The retry queue associated to this channel
   RetryQueue retryQueue;
@@ -1419,6 +1427,7 @@ class ChannelClientState {
   /// Call this method to dispose this object
   void dispose() {
     _channelStateController.close();
+    _isUpToDateController.close();
     _threadsController.close();
     _typingEventsController.close();
   }
