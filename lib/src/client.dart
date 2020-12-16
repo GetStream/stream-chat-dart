@@ -564,11 +564,11 @@ class Client {
   }
 
   Stream<List<Channel>> _doQueryChannels({
-    Map<String, dynamic> filter,
-    List<SortOption> sort,
-    Map<String, dynamic> options,
+    @required Map<String, dynamic> filter,
+    @required List<SortOption> sort,
+    @required Map<String, dynamic> options,
+    @required int messageLimit,
     PaginationParams paginationParams = const PaginationParams(limit: 10),
-    int messageLimit,
     bool onlyOffline = false,
   }) async* {
     logger.info('Query channel start');
