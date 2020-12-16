@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
@@ -209,7 +210,9 @@ class Channel {
 
       return res;
     } catch (error) {
-      state?.retryQueue?.add([newMessage]);
+      if (error is DioError && error.type != DioErrorType.RESPONSE) {
+        state?.retryQueue?.add([newMessage]);
+      }
       rethrow;
     }
   }
@@ -684,6 +687,29 @@ class Channel {
     });
   }
 
+  /// Shadow bans a user from the channel
+  Future<EmptyResponse> shadowBan(
+    String userID,
+    Map<String, dynamic> options,
+  ) async {
+    _checkInitialized();
+    final opts = Map<String, dynamic>.from(options)
+      ..addAll({
+        'type': type,
+        'id': id,
+      });
+    return _client.shadowBan(userID, opts);
+  }
+
+  /// Remove the shadow ban for a user in the channel
+  Future<EmptyResponse> removeShadowBan(String userID) async {
+    _checkInitialized();
+    return _client.removeShadowBan(userID, {
+      'type': type,
+      'id': id,
+    });
+  }
+
   /// Hides the channel from [Client.queryChannels] for the user until a message is added
   ///	If [clearHistory] is set to true - all messages will be removed for the user
   Future<EmptyResponse> hide({bool clearHistory = false}) async {
@@ -808,7 +834,7 @@ class ChannelClientState {
 
     _listenMessageUpdated();
 
-    _listenReactionNew();
+    _listenReactions();
 
     _listenReactionDeleted();
 
@@ -962,9 +988,17 @@ class ChannelClientState {
     }
   }
 
-  void _listenReactionNew() {
-    _channel.on(EventType.reactionNew).listen((event) {
+  void _listenReactions() {
+    _channel
+        .on(
+      EventType.reactionNew,
+      EventType.reactionUpdated,
+    )
+        .listen((event) {
       final message = event.message;
+      if (event.type == EventType.reactionUpdated) {
+        _removeMessageReaction(message, event.reaction);
+      }
       _addMessageReaction(message, event.reaction);
     });
   }
@@ -1104,13 +1138,20 @@ class ChannelClientState {
   Message _addReactionToMessage(Message message, Reaction reaction) {
     final newMessage = message.copyWith(
       latestReactions: message.latestReactions..add(reaction),
-      reactionCounts: (message.reactionCounts ?? {})
-        ..addAll({
-          reaction.type: (message.reactionCounts == null
-                  ? 0
-                  : message.reactionCounts[reaction.type] ?? 0) +
-              1,
-        }),
+      reactionCounts: {
+        ...message.reactionCounts ?? {},
+        reaction.type: (message.reactionCounts == null
+                ? 0
+                : message.reactionCounts[reaction.type] ?? 0) +
+            1,
+      },
+      reactionScores: {
+        ...message.reactionScores ?? {},
+        reaction.type: (message.reactionScores == null
+                ? 0
+                : message.reactionScores[reaction.type] ?? 0) +
+            reaction.score,
+      },
     );
 
     if (reaction.user.id == _channel.client.state.user.id) {
@@ -1127,10 +1168,19 @@ class ChannelClientState {
       latestReactions: message.latestReactions
         ..removeWhere(
             (r) => r.type == reaction.type && r.userId == reaction.userId),
-      reactionCounts: message.reactionCounts
-        ..addAll({
-          reaction.type: (message.reactionCounts[reaction.type] ?? 0) - 1,
-        }),
+      reactionCounts: {
+        ...message.reactionCounts,
+        reaction.type: (message.reactionCounts[reaction.type] ?? 0) - 1,
+      },
+      reactionScores: {
+        ...message.reactionScores ?? {},
+        reaction.type: max(
+            (message.reactionScores == null
+                    ? 0
+                    : message.reactionScores[reaction.type] ?? 0) -
+                reaction.score,
+            0),
+      },
     );
 
     newMessage.reactionCounts.removeWhere((_, v) => v <= 0);
@@ -1224,6 +1274,7 @@ class ChannelClientState {
         if (message.user.id != userId &&
             message.createdAt.isAfter(userRead.lastRead) &&
             message.silent != true &&
+            message.shadowed != true &&
             !message.isSystem) {
           return count + 1;
         }

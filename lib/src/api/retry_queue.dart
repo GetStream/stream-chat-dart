@@ -63,18 +63,26 @@ class RetryQueue {
         logger?.info('retry attempt ${retryPolicy.attempt}');
         await _sendMessage(message);
         logger?.info('message sent - removing it from the queue');
-        _messageQueue.removeFirst();
+        _messageQueue.remove(message);
         logger?.info('now ${_messageQueue.length} messages in the queue');
         retryPolicy.attempt = 0;
       } catch (error) {
         ApiError apiError;
         if (error is DioError) {
+          if (error.type == DioErrorType.RESPONSE) {
+            _messageQueue.remove(message);
+            return;
+          }
           apiError = ApiError(
             error.response?.data,
             error.response?.statusCode,
           );
         } else if (error is ApiError) {
           apiError = error;
+          if (apiError.status?.toString()?.startsWith('4') == true) {
+            _messageQueue.remove(message);
+            return;
+          }
         }
 
         if (!retryPolicy.shouldRetry(

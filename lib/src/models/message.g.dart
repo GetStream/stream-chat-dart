@@ -26,6 +26,7 @@ Message _$MessageFromJson(Map json) {
               )))
         ?.toList(),
     silent: json['silent'] as bool,
+    shadowed: json['shadowed'] as bool,
     reactionCounts: (json['reaction_counts'] as Map)?.map(
       (k, e) => MapEntry(k as String, e as int),
     ),
@@ -94,6 +95,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   writeNotNull('reply_count', readonly(instance.replyCount));
   val['show_in_channel'] = instance.showInChannel;
   val['silent'] = instance.silent;
+  writeNotNull('shadowed', readonly(instance.shadowed));
   writeNotNull('command', readonly(instance.command));
   writeNotNull('created_at', readonly(instance.createdAt));
   writeNotNull('updated_at', readonly(instance.updatedAt));

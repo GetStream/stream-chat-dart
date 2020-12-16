@@ -427,6 +427,7 @@ class Client {
         'api_key': apiKey,
         'authorization': token,
         'stream-auth-type': _authType,
+        'x-stream-client': _userAgent,
       },
       connectPayload: {
         'user_id': state.user.id,
@@ -968,6 +969,28 @@ class Client {
     return decode(response.data, EmptyResponse.fromJson);
   }
 
+  /// Shadow bans a user
+  Future<EmptyResponse> shadowBan(
+    String targetID, [
+    Map<String, dynamic> options = const {},
+  ]) async {
+    return banUser(targetID, {
+      'shadow': true,
+      ...options,
+    });
+  }
+
+  /// Removes shadow ban from a user
+  Future<EmptyResponse> removeShadowBan(
+    String targetID, [
+    Map<String, dynamic> options = const {},
+  ]) async {
+    return unbanUser(targetID, {
+      'shadow': true,
+      ...options,
+    });
+  }
+
   /// Mutes a user
   Future<EmptyResponse> muteUser(String targetID) async {
     final response = await post('/moderation/mute', data: {
@@ -1048,7 +1071,9 @@ class Client {
 
       return updateMessageResponse;
     }).catchError((error) {
-      if (state?.channels != null) {
+      if (error is DioError &&
+          error.type != DioErrorType.RESPONSE &&
+          state?.channels != null) {
         channel?.state?.retryQueue?.add([message]);
       }
       throw error;
@@ -1085,7 +1110,9 @@ class Client {
 
       return decode(response.data, EmptyResponse.fromJson);
     } catch (error) {
-      if (state?.channels != null) {
+      if (error is DioError &&
+          error.type != DioErrorType.RESPONSE &&
+          state?.channels != null) {
         state.channels[cid]?.state?.retryQueue?.add([message]);
       }
       rethrow;
@@ -1137,6 +1164,8 @@ class ClientState {
     _listenChannelDeleted();
 
     _listenChannelHidden();
+
+    _listenUserUpdated();
   }
 
   void _listenChannelHidden() {
@@ -1145,6 +1174,15 @@ class ClientState {
       if (channels != null) {
         channels = channels..removeWhere((cid, ch) => cid == event.cid);
       }
+    });
+  }
+
+  void _listenUserUpdated() {
+    _client.on(EventType.userUpdated).listen((event) {
+      if (event.user.id == user.id) {
+        user = OwnUser.fromJson(event.user.toJson());
+      }
+      _updateUser(event.user);
     });
   }
 

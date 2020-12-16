@@ -76,7 +76,7 @@ class OfflineStorage extends _$OfflineStorage {
   // you should bump this number whenever you change or add a table definition. Migrations
   // are covered later in this readme.
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -363,6 +363,7 @@ class OfflineStorage extends _$OfflineStorage {
               parentId: m.parentId,
               command: m.command,
               createdAt: m.createdAt,
+              shadowed: m.shadowed,
               showInChannel: m.showInChannel,
               replyCount: m.replyCount,
               reactionScores: m.reactionScores,
@@ -523,6 +524,7 @@ class OfflineStorage extends _$OfflineStorage {
     final ownReactions = await _getOwnReactions(messageRow);
 
     return Message(
+      shadowed: messageRow.shadowed,
       latestReactions: latestReactions,
       ownReactions: ownReactions,
       attachments: messageRow.attachmentJson != null

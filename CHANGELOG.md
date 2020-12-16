@@ -1,3 +1,23 @@
+## 0.2.17+1
+
+- Do not retry messages when server returns error 
+
+## 0.2.17
+
+- Add shadow ban feature
+
+## 0.2.16
+
+- Listen for user.updated events
+
+## 0.2.15+2
+
+- Fix reaction score updates
+
+## 0.2.15+1
+
+- Listen to reaction.updated event
+
 ## 0.2.15
 
 - Fix search message response

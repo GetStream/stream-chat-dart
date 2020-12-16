@@ -1564,6 +1564,7 @@ class _Message extends DataClass implements Insertable<_Message> {
   final String parentId;
   final int replyCount;
   final bool showInChannel;
+  final bool shadowed;
   final String command;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -1582,6 +1583,7 @@ class _Message extends DataClass implements Insertable<_Message> {
       this.parentId,
       this.replyCount,
       this.showInChannel,
+      this.shadowed,
       this.command,
       @required this.createdAt,
       this.updatedAt,
@@ -1615,6 +1617,8 @@ class _Message extends DataClass implements Insertable<_Message> {
           .mapFromDatabaseResponse(data['${effectivePrefix}reply_count']),
       showInChannel: boolType
           .mapFromDatabaseResponse(data['${effectivePrefix}show_in_channel']),
+      shadowed:
+          boolType.mapFromDatabaseResponse(data['${effectivePrefix}shadowed']),
       command:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}command']),
       createdAt: dateTimeType
@@ -1669,6 +1673,9 @@ class _Message extends DataClass implements Insertable<_Message> {
     if (!nullToAbsent || showInChannel != null) {
       map['show_in_channel'] = Variable<bool>(showInChannel);
     }
+    if (!nullToAbsent || shadowed != null) {
+      map['shadowed'] = Variable<bool>(shadowed);
+    }
     if (!nullToAbsent || command != null) {
       map['command'] = Variable<String>(command);
     }
@@ -1721,6 +1728,9 @@ class _Message extends DataClass implements Insertable<_Message> {
       showInChannel: showInChannel == null && nullToAbsent
           ? const Value.absent()
           : Value(showInChannel),
+      shadowed: shadowed == null && nullToAbsent
+          ? const Value.absent()
+          : Value(shadowed),
       command: command == null && nullToAbsent
           ? const Value.absent()
           : Value(command),
@@ -1760,6 +1770,7 @@ class _Message extends DataClass implements Insertable<_Message> {
       parentId: serializer.fromJson<String>(json['parentId']),
       replyCount: serializer.fromJson<int>(json['replyCount']),
       showInChannel: serializer.fromJson<bool>(json['showInChannel']),
+      shadowed: serializer.fromJson<bool>(json['shadowed']),
       command: serializer.fromJson<String>(json['command']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -1783,6 +1794,7 @@ class _Message extends DataClass implements Insertable<_Message> {
       'parentId': serializer.toJson<String>(parentId),
       'replyCount': serializer.toJson<int>(replyCount),
       'showInChannel': serializer.toJson<bool>(showInChannel),
+      'shadowed': serializer.toJson<bool>(shadowed),
       'command': serializer.toJson<String>(command),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -1804,6 +1816,7 @@ class _Message extends DataClass implements Insertable<_Message> {
           String parentId,
           int replyCount,
           bool showInChannel,
+          bool shadowed,
           String command,
           DateTime createdAt,
           DateTime updatedAt,
@@ -1822,6 +1835,7 @@ class _Message extends DataClass implements Insertable<_Message> {
         parentId: parentId ?? this.parentId,
         replyCount: replyCount ?? this.replyCount,
         showInChannel: showInChannel ?? this.showInChannel,
+        shadowed: shadowed ?? this.shadowed,
         command: command ?? this.command,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
@@ -1843,6 +1857,7 @@ class _Message extends DataClass implements Insertable<_Message> {
           ..write('parentId: $parentId, ')
           ..write('replyCount: $replyCount, ')
           ..write('showInChannel: $showInChannel, ')
+          ..write('shadowed: $shadowed, ')
           ..write('command: $command, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -1876,20 +1891,24 @@ class _Message extends DataClass implements Insertable<_Message> {
                                       $mrjc(
                                           showInChannel.hashCode,
                                           $mrjc(
-                                              command.hashCode,
+                                              shadowed.hashCode,
                                               $mrjc(
-                                                  createdAt.hashCode,
+                                                  command.hashCode,
                                                   $mrjc(
-                                                      updatedAt.hashCode,
+                                                      createdAt.hashCode,
                                                       $mrjc(
-                                                          deletedAt.hashCode,
+                                                          updatedAt.hashCode,
                                                           $mrjc(
-                                                              userId.hashCode,
+                                                              deletedAt
+                                                                  .hashCode,
                                                               $mrjc(
-                                                                  channelCid
+                                                                  userId
                                                                       .hashCode,
-                                                                  extraData
-                                                                      .hashCode)))))))))))))))));
+                                                                  $mrjc(
+                                                                      channelCid
+                                                                          .hashCode,
+                                                                      extraData
+                                                                          .hashCode))))))))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -1904,6 +1923,7 @@ class _Message extends DataClass implements Insertable<_Message> {
           other.parentId == this.parentId &&
           other.replyCount == this.replyCount &&
           other.showInChannel == this.showInChannel &&
+          other.shadowed == this.shadowed &&
           other.command == this.command &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -1924,6 +1944,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
   final Value<String> parentId;
   final Value<int> replyCount;
   final Value<bool> showInChannel;
+  final Value<bool> shadowed;
   final Value<String> command;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -1942,6 +1963,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
     this.parentId = const Value.absent(),
     this.replyCount = const Value.absent(),
     this.showInChannel = const Value.absent(),
+    this.shadowed = const Value.absent(),
     this.command = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1961,6 +1983,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
     this.parentId = const Value.absent(),
     this.replyCount = const Value.absent(),
     this.showInChannel = const Value.absent(),
+    this.shadowed = const Value.absent(),
     this.command = const Value.absent(),
     @required DateTime createdAt,
     this.updatedAt = const Value.absent(),
@@ -1981,6 +2004,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
     Expression<String> parentId,
     Expression<int> replyCount,
     Expression<bool> showInChannel,
+    Expression<bool> shadowed,
     Expression<String> command,
     Expression<DateTime> createdAt,
     Expression<DateTime> updatedAt,
@@ -2000,6 +2024,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
       if (parentId != null) 'parent_id': parentId,
       if (replyCount != null) 'reply_count': replyCount,
       if (showInChannel != null) 'show_in_channel': showInChannel,
+      if (shadowed != null) 'shadowed': shadowed,
       if (command != null) 'command': command,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -2021,6 +2046,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
       Value<String> parentId,
       Value<int> replyCount,
       Value<bool> showInChannel,
+      Value<bool> shadowed,
       Value<String> command,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -2039,6 +2065,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
       parentId: parentId ?? this.parentId,
       replyCount: replyCount ?? this.replyCount,
       showInChannel: showInChannel ?? this.showInChannel,
+      shadowed: shadowed ?? this.shadowed,
       command: command ?? this.command,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -2087,6 +2114,9 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
     if (showInChannel.present) {
       map['show_in_channel'] = Variable<bool>(showInChannel.value);
     }
+    if (shadowed.present) {
+      map['shadowed'] = Variable<bool>(shadowed.value);
+    }
     if (command.present) {
       map['command'] = Variable<String>(command.value);
     }
@@ -2125,6 +2155,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
           ..write('parentId: $parentId, ')
           ..write('replyCount: $replyCount, ')
           ..write('showInChannel: $showInChannel, ')
+          ..write('shadowed: $shadowed, ')
           ..write('command: $command, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -2272,6 +2303,18 @@ class $_MessagesTable extends _Messages
     );
   }
 
+  final VerificationMeta _shadowedMeta = const VerificationMeta('shadowed');
+  GeneratedBoolColumn _shadowed;
+  @override
+  GeneratedBoolColumn get shadowed => _shadowed ??= _constructShadowed();
+  GeneratedBoolColumn _constructShadowed() {
+    return GeneratedBoolColumn(
+      'shadowed',
+      $tableName,
+      true,
+    );
+  }
+
   final VerificationMeta _commandMeta = const VerificationMeta('command');
   GeneratedTextColumn _command;
   @override
@@ -2368,6 +2411,7 @@ class $_MessagesTable extends _Messages
         parentId,
         replyCount,
         showInChannel,
+        shadowed,
         command,
         createdAt,
         updatedAt,
@@ -2426,6 +2470,10 @@ class $_MessagesTable extends _Messages
           _showInChannelMeta,
           showInChannel.isAcceptableOrUnknown(
               data['show_in_channel'], _showInChannelMeta));
+    }
+    if (data.containsKey('shadowed')) {
+      context.handle(_shadowedMeta,
+          shadowed.isAcceptableOrUnknown(data['shadowed'], _shadowedMeta));
     }
     if (data.containsKey('command')) {
       context.handle(_commandMeta,
