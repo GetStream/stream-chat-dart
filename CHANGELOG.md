@@ -1,3 +1,9 @@
+## 0.2.18
+
+- Correctly dispose resources when disposing the client state
+- Limit parallel queryChannels with same parameters to 1
+- Added `clearUser` parameter to `client.disconnect` to remove the user instance of the client
+
 ## 0.2.17+1
 
 - Do not retry messages when server returns error 
