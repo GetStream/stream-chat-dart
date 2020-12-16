@@ -202,7 +202,7 @@ void main() {
         when(mockDio.get<String>('/search', queryParameters: queryParams))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
-        await client.search(null, null, null, null);
+        await client.search(null, null, null, null, null);
 
         verify(mockDio.get<String>('/search', queryParameters: queryParams))
             .called(1);
@@ -237,11 +237,14 @@ void main() {
           }),
         };
 
+        final messageFilters = {};
+
         when(mockDio.get<String>('/search', queryParameters: queryParams))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
         await client.search(
           filters,
+          messageFilters,
           sortOptions,
           query,
           PaginationParams(),
