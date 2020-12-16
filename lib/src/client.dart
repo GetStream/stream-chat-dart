@@ -793,11 +793,22 @@ class Client {
   }
 
   /// Closes the websocket connection and resets the client
-  Future<void> disconnect({bool flushOfflineStorage = false}) async {
-    logger.info('Disconnecting');
+  /// If [flushOfflineStorage] is true the client deletes all offline user's data
+  /// If [clearUser] is true the client unsets the current user
+  Future<void> disconnect({
+    bool flushOfflineStorage = false,
+    bool clearUser = false,
+  }) async {
+    logger.info(
+        'Disconnecting flushOfflineStorage: $flushOfflineStorage; clearUser: $clearUser');
 
     await _offlineStorage?.disconnect(flush: flushOfflineStorage);
     _offlineStorage = null;
+
+    if (clearUser == true) {
+      state.dispose();
+      state = ClientState(this);
+    }
 
     await _disconnect();
   }
@@ -1128,38 +1139,40 @@ class Client {
 
 /// The class that handles the state of the channel listening to the events
 class ClientState {
+  final _subscriptions = <StreamSubscription>[];
+
   /// Creates a new instance listening to events and updating the state
   ClientState(this._client) {
-    _client
-        .on()
-        .where((event) => event.me != null)
-        .map((e) => e.me)
-        .listen((user) {
-      _userController.add(user);
-      if (user.totalUnreadCount != null) {
-        _totalUnreadCountController.add(user.totalUnreadCount);
-      }
+    _subscriptions.addAll([
+      _client
+          .on()
+          .where((event) => event.me != null)
+          .map((e) => e.me)
+          .listen((user) {
+        _userController.add(user);
+        if (user.totalUnreadCount != null) {
+          _totalUnreadCountController.add(user.totalUnreadCount);
+        }
 
-      if (user.unreadChannels != null) {
-        _unreadChannelsController.add(user.unreadChannels);
-      }
-    });
-
-    _client
-        .on()
-        .where((event) => event.unreadChannels != null)
-        .map((e) => e.unreadChannels)
-        .listen((unreadChannels) {
-      _unreadChannelsController.add(unreadChannels);
-    });
-
-    _client
-        .on()
-        .where((event) => event.totalUnreadCount != null)
-        .map((e) => e.totalUnreadCount)
-        .listen((totalUnreadCount) {
-      _totalUnreadCountController.add(totalUnreadCount);
-    });
+        if (user.unreadChannels != null) {
+          _unreadChannelsController.add(user.unreadChannels);
+        }
+      }),
+      _client
+          .on()
+          .where((event) => event.unreadChannels != null)
+          .map((e) => e.unreadChannels)
+          .listen((unreadChannels) {
+        _unreadChannelsController.add(unreadChannels);
+      }),
+      _client
+          .on()
+          .where((event) => event.totalUnreadCount != null)
+          .map((e) => e.totalUnreadCount)
+          .listen((totalUnreadCount) {
+        _totalUnreadCountController.add(totalUnreadCount);
+      }),
+    ]);
 
     _listenChannelDeleted();
 
@@ -1169,25 +1182,25 @@ class ClientState {
   }
 
   void _listenChannelHidden() {
-    _client.on(EventType.channelHidden).listen((event) {
+    _subscriptions.add(_client.on(EventType.channelHidden).listen((event) {
       _client._offlineStorage?.deleteChannels([event.cid]);
       if (channels != null) {
         channels = channels..removeWhere((cid, ch) => cid == event.cid);
       }
-    });
+    }));
   }
 
   void _listenUserUpdated() {
-    _client.on(EventType.userUpdated).listen((event) {
+    _subscriptions.add(_client.on(EventType.userUpdated).listen((event) {
       if (event.user.id == user.id) {
         user = OwnUser.fromJson(event.user.toJson());
       }
       _updateUser(event.user);
-    });
+    }));
   }
 
   void _listenChannelDeleted() {
-    _client
+    _subscriptions.add(_client
         .on(
       EventType.channelDeleted,
       EventType.notificationRemovedFromChannel,
@@ -1199,7 +1212,7 @@ class ClientState {
       if (channels != null) {
         channels = channels..remove(eventChannel.cid);
       }
-    });
+    }));
   }
 
   final Client _client;
@@ -1265,9 +1278,11 @@ class ClientState {
 
   /// Call this method to dispose this object
   void dispose() {
+    _subscriptions.forEach((s) => s.cancel());
     _userController.close();
     _unreadChannelsController.close();
     _totalUnreadCountController.close();
+    channels.values.forEach((c) => c.dispose());
     _channelsController.close();
   }
 }
