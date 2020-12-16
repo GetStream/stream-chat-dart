@@ -171,6 +171,7 @@ class RetryQueue {
 
   /// Call this method to dispose this object
   void dispose() {
+    _messageQueue.clear();
     _subscriptions.forEach((s) => s.cancel());
   }
 
