@@ -854,12 +854,14 @@ class Client {
   /// A message search.
   Future<SearchMessagesResponse> search(
     Map<String, dynamic> filters,
+    Map<String, dynamic> messageFilters,
     List<SortOption> sort,
     String query,
     PaginationParams paginationParams,
   ) async {
     final payload = {
       'filter_conditions': filters,
+      'message_filter_conditions': messageFilters,
       'query': query,
       'sort': sort,
     };
