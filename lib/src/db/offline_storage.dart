@@ -176,7 +176,7 @@ class OfflineStorage extends _$OfflineStorage {
 
   /// Get the channel cids saved in the offline storage
   Future<List<String>> getChannelCids() async {
-    return select(channels).map((c) => c.cid).get();
+    return (select(channels)..limit(250)).map((c) => c.cid).get();
   }
 
   /// Get channel data by cid
