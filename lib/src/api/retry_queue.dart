@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -29,12 +31,15 @@ class RetryQueue {
     _listenFailedEvents();
   }
 
+  final _subscriptions = <StreamSubscription>[];
+
   void _listenConnectionRecovered() {
-    channel.client.on(EventType.connectionRecovered).listen((event) {
+    _subscriptions
+        .add(channel.client.on(EventType.connectionRecovered).listen((event) {
       if (!_isRetrying && event.online) {
         _startRetrying();
       }
-    });
+    }));
   }
 
   final HeapPriorityQueue<Message> _messageQueue = HeapPriorityQueue(_byDate);
@@ -140,7 +145,7 @@ class RetryQueue {
   }
 
   void _listenFailedEvents() {
-    channel.on().listen((event) {
+    _subscriptions.add(channel.on().listen((event) {
       final messageList = _messageQueue.toList();
       if (event.message != null) {
         final messageIndex =
@@ -161,7 +166,13 @@ class RetryQueue {
           _messageQueue.remove(messageList[messageIndex]);
         }
       }
-    });
+    }));
+  }
+
+  /// Call this method to dispose this object
+  void dispose() {
+    _messageQueue.clear();
+    _subscriptions.forEach((s) => s.cancel());
   }
 
   static int _byDate(Message m1, Message m2) {

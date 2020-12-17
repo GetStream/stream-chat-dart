@@ -815,6 +815,8 @@ class Channel {
 
 /// The class that handles the state of the channel listening to the events
 class ChannelClientState {
+  final _subscriptions = <StreamSubscription>[];
+
   /// Creates a new instance listening to events and updating the state
   ChannelClientState(this._channel, ChannelState channelState) {
     retryQueue = RetryQueue(
@@ -880,7 +882,7 @@ class ChannelClientState {
   }
 
   void _listenMemberAdded() {
-    _channel.on(EventType.memberAdded).listen((Event e) {
+    _subscriptions.add(_channel.on(EventType.memberAdded).listen((Event e) {
       final member = e.member;
       updateChannelState(channelState.copyWith(
         members: [
@@ -888,38 +890,38 @@ class ChannelClientState {
           member,
         ],
       ));
-    });
+    }));
   }
 
   void _listenMemberRemoved() {
-    _channel.on(EventType.memberRemoved).listen((Event e) {
+    _subscriptions.add(_channel.on(EventType.memberRemoved).listen((Event e) {
       final user = e.user;
       updateChannelState(channelState.copyWith(
         members: List.from(
             channelState.members..removeWhere((m) => m.userId == user.id)),
       ));
-    });
+    }));
   }
 
   void _listenChannelUpdated() {
-    _channel.on(EventType.channelUpdated).listen((Event e) {
+    _subscriptions.add(_channel.on(EventType.channelUpdated).listen((Event e) {
       final channel = e.channel;
       updateChannelState(channelState.copyWith(
         channel: channel,
         members: channel.members,
       ));
-    });
+    }));
   }
 
   void _listenChannelTruncated() {
-    _channel
+    _subscriptions.add(_channel
         .on(EventType.channelTruncated, EventType.notificationChannelTruncated)
         .listen((event) async {
       final channel = event.channel;
       await _channel._client.offlineStorage
           ?.deleteChannelsMessages([channel.cid]);
       truncate();
-    });
+    }));
   }
 
   /// The retry queue associated to this channel
@@ -941,11 +943,11 @@ class ChannelClientState {
   }
 
   void _listenReactionDeleted() {
-    _channel.on(EventType.reactionDeleted).listen((event) {
+    _subscriptions.add(_channel.on(EventType.reactionDeleted).listen((event) {
       final reaction = event.reaction;
       final message = event.message;
       _removeMessageReaction(message, reaction);
-    });
+    }));
   }
 
   void _removeMessageReaction(Message message, Reaction reaction) {
@@ -975,7 +977,7 @@ class ChannelClientState {
   }
 
   void _listenReactions() {
-    _channel
+    _subscriptions.add(_channel
         .on(
       EventType.reactionNew,
       EventType.reactionUpdated,
@@ -986,7 +988,7 @@ class ChannelClientState {
         _removeMessageReaction(message, event.reaction);
       }
       _addMessageReaction(message, event.reaction);
-    });
+    }));
   }
 
   void _addMessageReaction(Message message, Reaction reaction) {
@@ -1016,7 +1018,7 @@ class ChannelClientState {
   }
 
   void _listenMessageUpdated() {
-    _channel.on(EventType.messageUpdated).listen((event) {
+    _subscriptions.add(_channel.on(EventType.messageUpdated).listen((event) {
       final message = event.message;
 
       final oldMessageIndex =
@@ -1029,18 +1031,18 @@ class ChannelClientState {
       } else {
         addMessage(message);
       }
-    });
+    }));
   }
 
   void _listenMessageDeleted() {
-    _channel.on(EventType.messageDeleted).listen((event) {
+    _subscriptions.add(_channel.on(EventType.messageDeleted).listen((event) {
       final message = event.message;
       addMessage(message);
-    });
+    }));
   }
 
   void _listenMessageNew() {
-    _channel
+    _subscriptions.add(_channel
         .on(
       EventType.messageNew,
       EventType.notificationMessageNew,
@@ -1048,7 +1050,7 @@ class ChannelClientState {
         .listen((event) {
       final message = event.message;
       addMessage(message);
-    });
+    }));
   }
 
   /// Add a message to this channel
@@ -1101,7 +1103,7 @@ class ChannelClientState {
       return;
     }
 
-    _channel
+    _subscriptions.add(_channel
         .on(
       EventType.messageRead,
       EventType.notificationMarkRead,
@@ -1118,7 +1120,7 @@ class ChannelClientState {
         ));
         _channelState = _channelState.copyWith(read: read);
       }
-    });
+    }));
   }
 
   Message _addReactionToMessage(Message message, Reaction reaction) {
@@ -1430,19 +1432,19 @@ class ChannelClientState {
       return;
     }
 
-    _channel.on(EventType.typingStart).listen((event) {
+    _subscriptions.add(_channel.on(EventType.typingStart).listen((event) {
       if (event.user.id != _channel.client.state.user.id) {
         _typings[event.user] = DateTime.now();
         _typingEventsController.add(_typings.keys.toList());
       }
-    });
+    }));
 
-    _channel.on(EventType.typingStop).listen((event) {
+    _subscriptions.add(_channel.on(EventType.typingStop).listen((event) {
       if (event.user.id != _channel.client.state.user.id) {
         _typings.remove(event.user);
         _typingEventsController.add(_typings.keys.toList());
       }
-    });
+    }));
   }
 
   void _clean() {
@@ -1463,6 +1465,8 @@ class ChannelClientState {
 
   /// Call this method to dispose this object
   void dispose() {
+    retryQueue.dispose();
+    _subscriptions.forEach((s) => s.cancel());
     _channelStateController.close();
     _threadsController.close();
     _typingEventsController.close();
