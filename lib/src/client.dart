@@ -852,13 +852,9 @@ class Client {
   }
 
   /// A message search.
-  Future<SearchMessagesResponse> search(
-    Map<String, dynamic> filters,
-    Map<String, dynamic> messageFilters,
-    List<SortOption> sort,
-    String query,
-    PaginationParams paginationParams,
-  ) async {
+  Future<SearchMessagesResponse> search(Map<String, dynamic> filters,
+      List<SortOption> sort, String query, PaginationParams paginationParams,
+      {Map<String, dynamic> messageFilters}) async {
     final payload = {
       'filter_conditions': filters,
       if (messageFilters != null) ...{
