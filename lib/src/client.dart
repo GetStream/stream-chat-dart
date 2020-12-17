@@ -903,10 +903,14 @@ class Client {
     Map<String, dynamic> filters,
     List<SortOption> sort,
     String query,
-    PaginationParams paginationParams,
-  ) async {
+    PaginationParams paginationParams, {
+    Map<String, dynamic> messageFilters,
+  }) async {
     final payload = {
       'filter_conditions': filters,
+      if (messageFilters != null) ...{
+        'message_filter_conditions': messageFilters,
+      },
       'query': query,
       'sort': sort,
     };

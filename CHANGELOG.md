@@ -1,3 +1,7 @@
+## 0.2.19
+
+- Added message filters for `Client.search()`
+
 ## 0.2.18
 
 - Correctly dispose resources when disposing the client state
