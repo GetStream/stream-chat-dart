@@ -194,6 +194,7 @@ void main() {
         final queryParams = {
           'payload': json.encode({
             "filter_conditions": null,
+            //'message_filter_conditions': null,
             'query': null,
             'sort': null,
           }),
@@ -237,7 +238,7 @@ void main() {
           }),
         };
 
-        final messageFilters = {};
+        final messageFilters = null;
 
         when(mockDio.get<String>('/search', queryParameters: queryParams))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));

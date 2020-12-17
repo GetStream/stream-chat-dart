@@ -861,7 +861,9 @@ class Client {
   ) async {
     final payload = {
       'filter_conditions': filters,
-      'message_filter_conditions': messageFilters,
+      if (messageFilters != null) ...{
+        'message_filter_conditions': messageFilters,
+      },
       'query': query,
       'sort': sort,
     };
