@@ -1,3 +1,7 @@
+## 0.2.18
+
+- Added message filters for `Client.search()`
+
 ## 0.2.17+1
 
 - Do not retry messages when server returns error 
