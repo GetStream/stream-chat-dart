@@ -389,6 +389,7 @@ void main() {
             'reaction': {
               'type': reactionType,
             },
+            'enforce_unique': false,
           },
         )).thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
@@ -403,6 +404,7 @@ void main() {
           'reaction': {
             'type': reactionType,
           },
+          'enforce_unique': false,
         })).called(1);
       });
 
