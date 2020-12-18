@@ -261,6 +261,7 @@ class Channel {
   }
 
   /// Send a reaction to this channel
+  /// Set [enforceUnique] to true to remove the existing user reaction
   Future<SendReactionResponse> sendReaction(
     Message message,
     String type, {
