@@ -1082,7 +1082,6 @@ class ChannelClientState {
       if (message.user?.id == _channel._client.state.user.id) {
         _unreadCountController.add(0);
       } else if (_countMessageAsUnread(message)) {
-        print('ADDING READ');
         _unreadCountController.add(_unreadCountController.value + 1);
       }
     });
