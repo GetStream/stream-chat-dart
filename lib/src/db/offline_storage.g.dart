@@ -2534,15 +2534,18 @@ class _Read extends DataClass implements Insertable<_Read> {
   final DateTime lastRead;
   final String userId;
   final String channelCid;
+  final int unreadMessages;
   _Read(
       {@required this.lastRead,
       @required this.userId,
-      @required this.channelCid});
+      @required this.channelCid,
+      this.unreadMessages});
   factory _Read.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final dateTimeType = db.typeSystem.forDartType<DateTime>();
     final stringType = db.typeSystem.forDartType<String>();
+    final intType = db.typeSystem.forDartType<int>();
     return _Read(
       lastRead: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}last_read']),
@@ -2550,6 +2553,8 @@ class _Read extends DataClass implements Insertable<_Read> {
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
       channelCid: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}channel_cid']),
+      unreadMessages: intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}unread_messages']),
     );
   }
   @override
@@ -2564,6 +2569,9 @@ class _Read extends DataClass implements Insertable<_Read> {
     if (!nullToAbsent || channelCid != null) {
       map['channel_cid'] = Variable<String>(channelCid);
     }
+    if (!nullToAbsent || unreadMessages != null) {
+      map['unread_messages'] = Variable<int>(unreadMessages);
+    }
     return map;
   }
 
@@ -2577,6 +2585,9 @@ class _Read extends DataClass implements Insertable<_Read> {
       channelCid: channelCid == null && nullToAbsent
           ? const Value.absent()
           : Value(channelCid),
+      unreadMessages: unreadMessages == null && nullToAbsent
+          ? const Value.absent()
+          : Value(unreadMessages),
     );
   }
 
@@ -2587,6 +2598,7 @@ class _Read extends DataClass implements Insertable<_Read> {
       lastRead: serializer.fromJson<DateTime>(json['lastRead']),
       userId: serializer.fromJson<String>(json['userId']),
       channelCid: serializer.fromJson<String>(json['channelCid']),
+      unreadMessages: serializer.fromJson<int>(json['unreadMessages']),
     );
   }
   @override
@@ -2596,50 +2608,63 @@ class _Read extends DataClass implements Insertable<_Read> {
       'lastRead': serializer.toJson<DateTime>(lastRead),
       'userId': serializer.toJson<String>(userId),
       'channelCid': serializer.toJson<String>(channelCid),
+      'unreadMessages': serializer.toJson<int>(unreadMessages),
     };
   }
 
-  _Read copyWith({DateTime lastRead, String userId, String channelCid}) =>
+  _Read copyWith(
+          {DateTime lastRead,
+          String userId,
+          String channelCid,
+          int unreadMessages}) =>
       _Read(
         lastRead: lastRead ?? this.lastRead,
         userId: userId ?? this.userId,
         channelCid: channelCid ?? this.channelCid,
+        unreadMessages: unreadMessages ?? this.unreadMessages,
       );
   @override
   String toString() {
     return (StringBuffer('_Read(')
           ..write('lastRead: $lastRead, ')
           ..write('userId: $userId, ')
-          ..write('channelCid: $channelCid')
+          ..write('channelCid: $channelCid, ')
+          ..write('unreadMessages: $unreadMessages')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => $mrjf(
-      $mrjc(lastRead.hashCode, $mrjc(userId.hashCode, channelCid.hashCode)));
+  int get hashCode => $mrjf($mrjc(
+      lastRead.hashCode,
+      $mrjc(userId.hashCode,
+          $mrjc(channelCid.hashCode, unreadMessages.hashCode))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
       (other is _Read &&
           other.lastRead == this.lastRead &&
           other.userId == this.userId &&
-          other.channelCid == this.channelCid);
+          other.channelCid == this.channelCid &&
+          other.unreadMessages == this.unreadMessages);
 }
 
 class _ReadsCompanion extends UpdateCompanion<_Read> {
   final Value<DateTime> lastRead;
   final Value<String> userId;
   final Value<String> channelCid;
+  final Value<int> unreadMessages;
   const _ReadsCompanion({
     this.lastRead = const Value.absent(),
     this.userId = const Value.absent(),
     this.channelCid = const Value.absent(),
+    this.unreadMessages = const Value.absent(),
   });
   _ReadsCompanion.insert({
     @required DateTime lastRead,
     @required String userId,
     @required String channelCid,
+    this.unreadMessages = const Value.absent(),
   })  : lastRead = Value(lastRead),
         userId = Value(userId),
         channelCid = Value(channelCid);
@@ -2647,22 +2672,26 @@ class _ReadsCompanion extends UpdateCompanion<_Read> {
     Expression<DateTime> lastRead,
     Expression<String> userId,
     Expression<String> channelCid,
+    Expression<int> unreadMessages,
   }) {
     return RawValuesInsertable({
       if (lastRead != null) 'last_read': lastRead,
       if (userId != null) 'user_id': userId,
       if (channelCid != null) 'channel_cid': channelCid,
+      if (unreadMessages != null) 'unread_messages': unreadMessages,
     });
   }
 
   _ReadsCompanion copyWith(
       {Value<DateTime> lastRead,
       Value<String> userId,
-      Value<String> channelCid}) {
+      Value<String> channelCid,
+      Value<int> unreadMessages}) {
     return _ReadsCompanion(
       lastRead: lastRead ?? this.lastRead,
       userId: userId ?? this.userId,
       channelCid: channelCid ?? this.channelCid,
+      unreadMessages: unreadMessages ?? this.unreadMessages,
     );
   }
 
@@ -2678,6 +2707,9 @@ class _ReadsCompanion extends UpdateCompanion<_Read> {
     if (channelCid.present) {
       map['channel_cid'] = Variable<String>(channelCid.value);
     }
+    if (unreadMessages.present) {
+      map['unread_messages'] = Variable<int>(unreadMessages.value);
+    }
     return map;
   }
 
@@ -2686,7 +2718,8 @@ class _ReadsCompanion extends UpdateCompanion<_Read> {
     return (StringBuffer('_ReadsCompanion(')
           ..write('lastRead: $lastRead, ')
           ..write('userId: $userId, ')
-          ..write('channelCid: $channelCid')
+          ..write('channelCid: $channelCid, ')
+          ..write('unreadMessages: $unreadMessages')
           ..write(')'))
         .toString();
   }
@@ -2732,8 +2765,23 @@ class $_ReadsTable extends _Reads with TableInfo<$_ReadsTable, _Read> {
     );
   }
 
+  final VerificationMeta _unreadMessagesMeta =
+      const VerificationMeta('unreadMessages');
+  GeneratedIntColumn _unreadMessages;
   @override
-  List<GeneratedColumn> get $columns => [lastRead, userId, channelCid];
+  GeneratedIntColumn get unreadMessages =>
+      _unreadMessages ??= _constructUnreadMessages();
+  GeneratedIntColumn _constructUnreadMessages() {
+    return GeneratedIntColumn(
+      'unread_messages',
+      $tableName,
+      true,
+    );
+  }
+
+  @override
+  List<GeneratedColumn> get $columns =>
+      [lastRead, userId, channelCid, unreadMessages];
   @override
   $_ReadsTable get asDslTable => this;
   @override
@@ -2764,6 +2812,12 @@ class $_ReadsTable extends _Reads with TableInfo<$_ReadsTable, _Read> {
               data['channel_cid'], _channelCidMeta));
     } else if (isInserting) {
       context.missing(_channelCidMeta);
+    }
+    if (data.containsKey('unread_messages')) {
+      context.handle(
+          _unreadMessagesMeta,
+          unreadMessages.isAcceptableOrUnknown(
+              data['unread_messages'], _unreadMessagesMeta));
     }
     return context;
   }

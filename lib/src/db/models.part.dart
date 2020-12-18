@@ -87,6 +87,8 @@ class _Reads extends Table {
 
   TextColumn get channelCid => text()();
 
+  IntColumn get unreadMessages => integer().nullable()();
+
   @override
   Set<Column> get primaryKey => {
         userId,
