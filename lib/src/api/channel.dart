@@ -868,7 +868,7 @@ class ChannelClientState {
 
   void _computeInitialUnread() {
     final userRead = channelState?.read?.firstWhere(
-      (r) => r.user.id == _channel._client.state.user.id,
+      (r) => r.user.id == _channel._client.state?.user?.id,
       orElse: () => null,
     );
     if (userRead != null) {
