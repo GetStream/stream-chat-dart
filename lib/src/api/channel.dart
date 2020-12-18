@@ -1086,9 +1086,7 @@ class ChannelClientState {
         addMessage(message);
       }
 
-      if (message.user?.id == _channel._client.state.user.id) {
-        _unreadCountController.add(0);
-      } else if (_countMessageAsUnread(message)) {
+      if (_countMessageAsUnread(message)) {
         _unreadCountController.add(_unreadCountController.value + 1);
       }
     }));
@@ -1336,7 +1334,6 @@ class ChannelClientState {
     _channelState = _channelState.copyWith(
       messages: [],
     );
-    _unreadCountController.add(0);
   }
 
   final List<String> _updatedMessagesIds = [];
