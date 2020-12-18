@@ -265,6 +265,7 @@ class Channel {
     Message message,
     String type, {
     Map<String, dynamic> extraData = const {},
+    bool enforceUnique = false,
   }) async {
     final messageId = message.id;
     final data = Map<String, dynamic>.from(extraData)
@@ -274,7 +275,10 @@ class Channel {
 
     final res = await _client.post(
       '/messages/$messageId/reaction',
-      data: {'reaction': data},
+      data: {
+        'reaction': data,
+        'enforce_unique': enforceUnique,
+      },
     );
     return _client.decode(res.data, SendReactionResponse.fromJson);
   }
