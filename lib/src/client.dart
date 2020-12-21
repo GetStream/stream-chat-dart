@@ -451,9 +451,8 @@ class Client {
           'cid': {
             '\$in': state.channels.keys.toList(),
           },
-        }).listen(
-          (_) {},
-          onDone: () async {
+        }).then(
+          (_) async {
             await resync();
             handleEvent(Event(
               type: EventType.connectionRecovered,
@@ -533,10 +532,10 @@ class Client {
     return sort?.map((s) => s.toJson().toString())?.join('');
   }
 
-  final _queryChannelsStreams = <String, Stream<List<Channel>>>{};
+  final _queryChannelsStreams = <String, Future<List<Channel>>>{};
 
   /// Requests channels with a given query.
-  Stream<List<Channel>> queryChannels({
+  Future<List<Channel>> queryChannels({
     Map<String, dynamic> filter,
     List<SortOption> sort,
     Map<String, dynamic> options,
@@ -557,8 +556,8 @@ class Client {
       paginationParams: paginationParams,
       messageLimit: messageLimit,
       onlyOffline: onlyOffline,
-    ).doOnDone(() {
-      return _queryChannelsStreams.remove(hash);
+    ).whenComplete(() {
+      _queryChannelsStreams.remove(hash);
     });
 
     _queryChannelsStreams[hash] = newQueryChannelsStream;
@@ -566,14 +565,14 @@ class Client {
     return newQueryChannelsStream;
   }
 
-  Stream<List<Channel>> _doQueryChannels({
+  Future<List<Channel>> _doQueryChannels({
     @required Map<String, dynamic> filter,
     @required List<SortOption> sort,
     @required Map<String, dynamic> options,
     @required int messageLimit,
     PaginationParams paginationParams = const PaginationParams(limit: 10),
     bool onlyOffline = false,
-  }) async* {
+  }) async {
     logger.info('Query channel start');
     final defaultOptions = {
       'state': true,
@@ -600,15 +599,107 @@ class Client {
       payload.addAll(paginationParams.toJson());
     }
 
+    if (onlyOffline) {
+      return _queryChannelsOffline(
+        filter: filter,
+        sort: sort,
+        paginationParams: paginationParams,
+      );
+    }
+
+    try {
+      final response = await get(
+        '/channels',
+        queryParameters: {
+          'payload': jsonEncode(payload),
+        },
+      );
+
+      final res = decode<QueryChannelsResponse>(
+        response.data,
+        QueryChannelsResponse.fromJson,
+      );
+
+      final users = res.channels
+          ?.expand((channel) => channel.members.map((member) => member.user))
+          ?.toList();
+
+      if (users != null) {
+        state._updateUsers(users);
+      }
+
+      logger.info('Got ${res.channels?.length} channels from api');
+
+      if (res.channels?.isEmpty != false &&
+          (paginationParams?.offset ?? 0) == 0) {
+        logger.warning('''We could not find any channel for this query.
+          Please make sure to take a look at the Flutter tutorial: https://getstream.io/chat/flutter/tutorial
+          If your application already has users and channels, you might need to adjust your query channel as explained in the docs https://getstream.io/chat/docs/query_channels/?language=dart''');
+      }
+
+      final newChannels = Map<String, Channel>.from(state.channels ?? {});
+      final channels = <Channel>[];
+
+      if (res.channels != null) {
+        for (final channelState in res.channels) {
+          final channel = newChannels[channelState.channel.cid];
+          if (channel != null) {
+            channel.state?.updateChannelState(channelState);
+            channels.add(channel);
+          } else {
+            final newChannel = Channel.fromState(this, channelState);
+            await _offlineStorage
+                ?.updateChannelState(newChannel.state.channelState);
+            newChannel.state?.updateChannelState(channelState);
+            newChannels[newChannel.cid] = newChannel;
+            channels.add(newChannel);
+          }
+        }
+      }
+
+      state.channels = newChannels;
+
+      await _offlineStorage?.updateChannelQueries(
+        filter,
+        res.channels.map((c) => c.channel.cid).toList(),
+        paginationParams?.offset == null || paginationParams.offset == 0,
+      );
+
+      return channels;
+    } catch (e) {
+      return _queryChannelsOffline(
+        filter: filter,
+        sort: sort,
+        paginationParams: paginationParams,
+      );
+    }
+  }
+
+  _parseError(DioError error) {
+    if (error.type == DioErrorType.RESPONSE) {
+      final apiError =
+          ApiError(error.response?.data, error.response?.statusCode);
+      logger.severe('apiError: ${apiError.toString()}');
+      return apiError;
+    }
+
+    return error;
+  }
+
+  Future<List<Channel>> _queryChannelsOffline({
+    @required Map<String, dynamic> filter,
+    @required List<SortOption> sort,
+    PaginationParams paginationParams = const PaginationParams(limit: 10),
+  }) async {
     final offlineChannels = await _offlineStorage?.getChannelStates(
           filter: filter,
           sort: sort,
           paginationParams: paginationParams,
         ) ??
         [];
-    var newChannels = Map<String, Channel>.from(state.channels ?? {});
+    final newChannels = Map<String, Channel>.from(state.channels ?? {});
     logger.info('Got ${offlineChannels.length} channels from storage');
-    var channels = offlineChannels.map((channelState) {
+    final channels = offlineChannels.map((channelState) {
       final channel = newChannels[channelState.channel.cid];
       if (channel != null) {
         channel.state?.updateChannelState(channelState);
@@ -622,84 +713,9 @@ class Client {
     }).toList();
 
     if (channels.isNotEmpty) {
-      yield channels;
-
       state.channels = newChannels;
     }
-
-    if (onlyOffline) {
-      return;
-    }
-
-    final response = await get(
-      '/channels',
-      queryParameters: {
-        'payload': jsonEncode(payload),
-      },
-    );
-
-    final res = decode<QueryChannelsResponse>(
-      response.data,
-      QueryChannelsResponse.fromJson,
-    );
-
-    final users = res.channels
-        ?.expand((channel) => channel.members.map((member) => member.user))
-        ?.toList();
-
-    if (users != null) {
-      state._updateUsers(users);
-    }
-
-    logger.info('Got ${res.channels?.length} channels from api');
-
-    if (res.channels?.isEmpty != false &&
-        (paginationParams?.offset ?? 0) == 0) {
-      logger.warning('''We could not find any channel for this query.
-          Please make sure to take a look at the Flutter tutorial: https://getstream.io/chat/flutter/tutorial
-          If your application already has users and channels, you might need to adjust your query channel as explained in the docs https://getstream.io/chat/docs/query_channels/?language=dart''');
-    }
-
-    newChannels = Map<String, Channel>.from(state.channels ?? {});
-    channels.clear();
-
-    if (res.channels != null) {
-      for (final channelState in res.channels) {
-        final channel = newChannels[channelState.channel.cid];
-        if (channel != null) {
-          channel.state?.updateChannelState(channelState);
-          channels.add(channel);
-        } else {
-          final newChannel = Channel.fromState(this, channelState);
-          await _offlineStorage
-              ?.updateChannelState(newChannel.state.channelState);
-          newChannel.state?.updateChannelState(channelState);
-          newChannels[newChannel.cid] = newChannel;
-          channels.add(newChannel);
-        }
-      }
-    }
-
-    yield channels;
-
-    state.channels = newChannels;
-
-    await _offlineStorage?.updateChannelQueries(
-      filter,
-      res.channels.map((c) => c.channel.cid).toList(),
-      paginationParams?.offset == null || paginationParams.offset == 0,
-    );
-  }
-
-  _parseError(DioError error) {
-    if (error.type == DioErrorType.RESPONSE) {
-      final apiError =
-          ApiError(error.response?.data, error.response?.statusCode);
-      logger.severe('apiError: ${apiError.toString()}');
-      return apiError;
-    }
-
-    return error;
+    return channels;
   }
 
   /// Handy method to make http GET request with error parsing.
