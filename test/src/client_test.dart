@@ -120,7 +120,7 @@ void main() {
         when(mockDio.get<String>('/channels', queryParameters: queryParams))
             .thenAnswer((_) async => Response(data: '{}', statusCode: 200));
 
-        await client.queryChannels().toList();
+        await client.queryChannels();
 
         verify(mockDio.get<String>('/channels', queryParameters: queryParams))
             .called(1);
@@ -138,12 +138,12 @@ void main() {
           persistenceEnabled: false,
         );
 
-        final Map<String, dynamic> queryFilter = {
+        final queryFilter = <String, dynamic>{
           "id": {
             "\$in": ["test"],
           },
         };
-        final List<SortOption> sortOptions = [];
+        final sortOptions = <SortOption>[];
         final options = {"state": false, "watch": false, "presence": true};
         final paginationParams = PaginationParams(
           limit: 10,
@@ -164,14 +164,12 @@ void main() {
           return Response(data: '{}', statusCode: 200);
         });
 
-        await client
-            .queryChannels(
-              filter: queryFilter,
-              sort: sortOptions,
-              options: options,
-              paginationParams: paginationParams,
-            )
-            .toList();
+        await client.queryChannels(
+          filter: queryFilter,
+          sort: sortOptions,
+          options: options,
+          paginationParams: paginationParams,
+        );
 
         verify(mockDio.get<String>('/channels', queryParameters: queryParams))
             .called(1);
