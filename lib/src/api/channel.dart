@@ -423,6 +423,7 @@ class Channel {
   /// Mark all channel messages as read
   Future<EmptyResponse> markRead() async {
     _checkInitialized();
+    state._unreadCountController.add(0);
     final response = await _client.post('$_channelURL/read', data: {});
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
@@ -594,10 +595,12 @@ class Channel {
       payload['watchers'] = watchersPagination.toJson();
     }
 
-    if (cid != null) {
+    if (preferOffline && cid != null) {
       final updatedState = await _client.offlineStorage?.getChannel(
         cid,
+        limit: messagesPagination?.limit,
         messageLessThan: messagesPagination?.lessThan,
+        messageGreaterThan: messagesPagination?.greaterThan,
       );
       if (updatedState != null && updatedState.messages.isNotEmpty) {
         if (state == null) {
@@ -605,9 +608,7 @@ class Channel {
         } else {
           state?.updateChannelState(updatedState);
         }
-        if (preferOffline) {
-          return updatedState;
-        }
+        return updatedState;
       }
     }
 
@@ -855,12 +856,24 @@ class ChannelClientState {
 
     _listenMemberRemoved();
 
+    _computeInitialUnread();
+
     _channel._client.offlineStorage
         ?.getChannelThreads(_channel.cid)
         ?.then((threads) {
       _threads = threads;
       retryFailedMessages();
     });
+  }
+
+  void _computeInitialUnread() {
+    final userRead = channelState?.read?.firstWhere(
+      (r) => r.user.id == _channel._client.state?.user?.id,
+      orElse: () => null,
+    );
+    if (userRead != null) {
+      _unreadCountController.add(userRead.unreadMessages ?? 0);
+    }
   }
 
   void _checkExpiredAttachmentMessages(ChannelState channelState) {
@@ -928,6 +941,20 @@ class ChannelClientState {
       truncate();
     }));
   }
+
+  /// Flag which indicates if [ChannelClientState] contain latest/recent messages or not.
+  /// This flag should be managed by UI sdks.
+  /// When false, any new message (received by WebSocket event - [EventType.messageNew]) will not
+  /// be pushed on to message list.
+  bool get isUpToDate => _isUpToDateController.value;
+
+  set isUpToDate(bool isUpToDate) => _isUpToDateController.add(isUpToDate);
+
+  /// [isUpToDate] flag count as a stream
+  Stream<bool> get isUpToDateStream => _isUpToDateController.stream;
+
+  final BehaviorSubject<bool> _isUpToDateController =
+      BehaviorSubject.seeded(true);
 
   /// The retry queue associated to this channel
   RetryQueue retryQueue;
@@ -1054,7 +1081,14 @@ class ChannelClientState {
     )
         .listen((event) {
       final message = event.message;
-      addMessage(message);
+      if (isUpToDate ||
+          (message.parentId != null && message.showInChannel != true)) {
+        addMessage(message);
+      }
+
+      if (_countMessageAsUnread(message)) {
+        _unreadCountController.add(_unreadCountController.value + 1);
+      }
     }));
   }
 
@@ -1114,16 +1148,19 @@ class ChannelClientState {
       EventType.notificationMarkRead,
     )
         .listen((event) {
-      final read = List<Read>.from(_channelState?.read ?? []);
+      final readList = List<Read>.from(_channelState?.read ?? []);
       final userReadIndex = read?.indexWhere((r) => r.user.id == event.user.id);
 
       if (userReadIndex != null && userReadIndex != -1) {
-        read.removeAt(userReadIndex);
-        read.add(Read(
+        final userRead = readList.removeAt(userReadIndex);
+        if (userRead.user?.id == _channel._client.state.user.id) {
+          _unreadCountController.add(0);
+        }
+        readList.add(Read(
           user: event.user,
           lastRead: event.createdAt,
         ));
-        _channelState = _channelState.copyWith(read: read);
+        _channelState = _channelState.copyWith(read: readList);
       }
     }));
   }
@@ -1249,36 +1286,26 @@ class ChannelClientState {
   /// Channel read list as a stream
   Stream<List<Read>> get readStream => channelStateStream.map((cs) => cs.read);
 
-  /// Unread count getter
-  int get unreadCount {
-    return _computeUnreadCount(_channelState);
-  }
-
-  int _computeUnreadCount(ChannelState channelState) {
-    final userId = _channel.client.state?.user?.id;
-    final userRead = channelState.read?.firstWhere(
-      (read) => read.user.id == userId,
-      orElse: () => null,
-    );
-    if (userRead == null) {
-      return channelState.messages?.length ?? 0;
-    } else {
-      return channelState.messages.fold<int>(0, (count, message) {
-        if (message.user.id != userId &&
-            message.createdAt.isAfter(userRead.lastRead) &&
-            message.silent != true &&
-            message.shadowed != true &&
-            !message.isSystem) {
-          return count + 1;
-        }
-        return count;
-      });
-    }
-  }
+  final BehaviorSubject<int> _unreadCountController = BehaviorSubject.seeded(0);
 
   /// Unread count getter as a stream
-  Stream<int> get unreadCountStream =>
-      channelStateStream.map((cs) => _computeUnreadCount(cs)).distinct();
+  Stream<int> get unreadCountStream => _unreadCountController.stream;
+
+  /// Unread count getter
+  int get unreadCount => _unreadCountController.value;
+
+  bool _countMessageAsUnread(Message message) {
+    final userId = _channel.client.state?.user?.id;
+    final userIsMuted = _channel.client.state.user.mutes.firstWhere(
+          (m) => m.user?.id == message.user.id,
+          orElse: () => null,
+        ) !=
+        null;
+    return message.silent != true &&
+        message.shadowed != true &&
+        message.user.id != userId &&
+        !userIsMuted;
+  }
 
   /// Update threads with updated information about messages
   void updateThreadInfo(String parentId, List<Message> messages) {
@@ -1470,9 +1497,11 @@ class ChannelClientState {
 
   /// Call this method to dispose this object
   void dispose() {
+    _unreadCountController.close();
     retryQueue.dispose();
     _subscriptions.forEach((s) => s.cancel());
     _channelStateController.close();
+    _isUpToDateController.close();
     _threadsController.close();
     _typingEventsController.close();
   }
