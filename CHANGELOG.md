@@ -1,3 +1,7 @@
+## 0.2.20
+
+- Return offline data only if the backend is unreachable. This avoids the glitch of  the ChannelListView because we cannot sort by custom properties.
+
 ## 0.2.19
 
 - Added message filters for `Client.search()`
