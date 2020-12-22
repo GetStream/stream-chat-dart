@@ -29,6 +29,8 @@ Member _$MemberFromJson(Map json) {
     updatedAt: json['updated_at'] == null
         ? null
         : DateTime.parse(json['updated_at'] as String),
+    banned: json['banned'] as bool,
+    shadowBanned: json['shadow_banned'] as bool,
   );
 }
 
@@ -40,6 +42,8 @@ Map<String, dynamic> _$MemberToJson(Member instance) => <String, dynamic>{
       'role': instance.role,
       'user_id': instance.userId,
       'is_moderator': instance.isModerator,
+      'banned': instance.banned,
+      'shadow_banned': instance.shadowBanned,
       'created_at': instance.createdAt?.toIso8601String(),
       'updated_at': instance.updatedAt?.toIso8601String(),
     };

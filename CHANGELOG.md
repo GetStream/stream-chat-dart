@@ -1,3 +1,8 @@
+## 0.2.21
+
+- Fix channel.hide(clearHistory: true) not clearing local messages
+- Add banned field to member
+
 ## 0.2.20
 
 - Return offline data only if the backend is unreachable. This avoids the glitch of  the ChannelListView because we cannot sort by custom properties.

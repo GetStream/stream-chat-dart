@@ -722,6 +722,12 @@ class Channel {
     _checkInitialized();
     final response = await _client
         .post('$_channelURL/hide', data: {'clear_history': clearHistory});
+
+    if (clearHistory == true) {
+      state.truncate();
+      await _client.offlineStorage?.deleteChannelsMessages([_cid]);
+    }
+
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 
