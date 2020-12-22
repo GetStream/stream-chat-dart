@@ -176,6 +176,8 @@ class _Members extends Table {
 
   BoolColumn get invited => boolean().nullable()();
 
+  BoolColumn get banned => boolean().nullable()();
+
   BoolColumn get isModerator => boolean().nullable()();
 
   DateTimeColumn get createdAt => dateTime()();

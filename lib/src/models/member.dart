@@ -25,8 +25,11 @@ class Member {
   /// The id of the interested user
   final String userId;
 
-  /// True if the user is a moderator of the channe;
+  /// True if the user is a moderator of the channel
   final bool isModerator;
+
+  /// True if the member is banned from the channel
+  final bool banned;
 
   /// The date of creation
   final DateTime createdAt;
@@ -45,6 +48,7 @@ class Member {
     this.isModerator,
     this.createdAt,
     this.updatedAt,
+    this.banned,
   });
 
   /// Create a new instance from a json
@@ -66,12 +70,14 @@ class Member {
     bool isModerator,
     DateTime createdAt,
     DateTime updatedAt,
+    bool banned,
   }) =>
       Member(
         user: user ?? this.user,
         inviteAcceptedAt: inviteAcceptedAt ?? this.inviteAcceptedAt,
         inviteRejectedAt: inviteRejectedAt ?? this.inviteRejectedAt,
         invited: invited ?? this.invited,
+        banned: banned ?? this.banned,
         role: role ?? this.role,
         userId: userId ?? this.userId,
         isModerator: isModerator ?? this.isModerator,

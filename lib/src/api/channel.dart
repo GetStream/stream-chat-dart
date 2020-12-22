@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/src/api/retry_queue.dart';
@@ -722,6 +723,12 @@ class Channel {
     _checkInitialized();
     final response = await _client
         .post('$_channelURL/hide', data: {'clear_history': clearHistory});
+
+    if (clearHistory == true) {
+      state.truncate();
+      await _client.offlineStorage?.deleteChannelsMessages([_cid]);
+    }
+
     return _client.decode(response.data, EmptyResponse.fromJson);
   }
 

@@ -76,7 +76,7 @@ class OfflineStorage extends _$OfflineStorage {
   // you should bump this number whenever you change or add a table definition. Migrations
   // are covered later in this readme.
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -628,6 +628,7 @@ class OfflineStorage extends _$OfflineStorage {
       return Member(
         user: _userFromUserRow(userRow),
         userId: userRow.id,
+        banned: memberRow.banned,
         updatedAt: memberRow.updatedAt,
         createdAt: memberRow.createdAt,
         role: memberRow.role,
@@ -672,6 +673,7 @@ class OfflineStorage extends _$OfflineStorage {
     final newMembers = channelStates
         .map((cs) => cs.members.map((m) => _Member(
               userId: m.user.id,
+              banned: m.banned,
               channelCid: cs.channel.cid,
               createdAt: m.createdAt,
               isModerator: m.isModerator,
