@@ -178,6 +178,8 @@ class _Members extends Table {
 
   BoolColumn get banned => boolean().nullable()();
 
+  BoolColumn get shadowBanned => boolean().nullable()();
+
   BoolColumn get isModerator => boolean().nullable()();
 
   DateTimeColumn get createdAt => dateTime()();

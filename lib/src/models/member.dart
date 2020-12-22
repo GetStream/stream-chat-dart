@@ -31,6 +31,9 @@ class Member {
   /// True if the member is banned from the channel
   final bool banned;
 
+  /// True if the member is shadow banned from the channel
+  final bool shadowBanned;
+
   /// The date of creation
   final DateTime createdAt;
 
@@ -49,6 +52,7 @@ class Member {
     this.createdAt,
     this.updatedAt,
     this.banned,
+    this.shadowBanned,
   });
 
   /// Create a new instance from a json
@@ -71,6 +75,7 @@ class Member {
     DateTime createdAt,
     DateTime updatedAt,
     bool banned,
+    bool shadowBanned,
   }) =>
       Member(
         user: user ?? this.user,
@@ -78,6 +83,7 @@ class Member {
         inviteRejectedAt: inviteRejectedAt ?? this.inviteRejectedAt,
         invited: invited ?? this.invited,
         banned: banned ?? this.banned,
+        shadowBanned: shadowBanned ?? this.shadowBanned,
         role: role ?? this.role,
         userId: userId ?? this.userId,
         isModerator: isModerator ?? this.isModerator,

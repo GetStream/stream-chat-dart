@@ -2844,6 +2844,7 @@ class _Member extends DataClass implements Insertable<_Member> {
   final DateTime inviteRejectedAt;
   final bool invited;
   final bool banned;
+  final bool shadowBanned;
   final bool isModerator;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -2855,6 +2856,7 @@ class _Member extends DataClass implements Insertable<_Member> {
       this.inviteRejectedAt,
       this.invited,
       this.banned,
+      this.shadowBanned,
       this.isModerator,
       @required this.createdAt,
       this.updatedAt});
@@ -2878,6 +2880,8 @@ class _Member extends DataClass implements Insertable<_Member> {
           boolType.mapFromDatabaseResponse(data['${effectivePrefix}invited']),
       banned:
           boolType.mapFromDatabaseResponse(data['${effectivePrefix}banned']),
+      shadowBanned: boolType
+          .mapFromDatabaseResponse(data['${effectivePrefix}shadow_banned']),
       isModerator: boolType
           .mapFromDatabaseResponse(data['${effectivePrefix}is_moderator']),
       createdAt: dateTimeType
@@ -2910,6 +2914,9 @@ class _Member extends DataClass implements Insertable<_Member> {
     if (!nullToAbsent || banned != null) {
       map['banned'] = Variable<bool>(banned);
     }
+    if (!nullToAbsent || shadowBanned != null) {
+      map['shadow_banned'] = Variable<bool>(shadowBanned);
+    }
     if (!nullToAbsent || isModerator != null) {
       map['is_moderator'] = Variable<bool>(isModerator);
     }
@@ -2941,6 +2948,9 @@ class _Member extends DataClass implements Insertable<_Member> {
           : Value(invited),
       banned:
           banned == null && nullToAbsent ? const Value.absent() : Value(banned),
+      shadowBanned: shadowBanned == null && nullToAbsent
+          ? const Value.absent()
+          : Value(shadowBanned),
       isModerator: isModerator == null && nullToAbsent
           ? const Value.absent()
           : Value(isModerator),
@@ -2964,6 +2974,7 @@ class _Member extends DataClass implements Insertable<_Member> {
       inviteRejectedAt: serializer.fromJson<DateTime>(json['inviteRejectedAt']),
       invited: serializer.fromJson<bool>(json['invited']),
       banned: serializer.fromJson<bool>(json['banned']),
+      shadowBanned: serializer.fromJson<bool>(json['shadowBanned']),
       isModerator: serializer.fromJson<bool>(json['isModerator']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -2980,6 +2991,7 @@ class _Member extends DataClass implements Insertable<_Member> {
       'inviteRejectedAt': serializer.toJson<DateTime>(inviteRejectedAt),
       'invited': serializer.toJson<bool>(invited),
       'banned': serializer.toJson<bool>(banned),
+      'shadowBanned': serializer.toJson<bool>(shadowBanned),
       'isModerator': serializer.toJson<bool>(isModerator),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -2994,6 +3006,7 @@ class _Member extends DataClass implements Insertable<_Member> {
           DateTime inviteRejectedAt,
           bool invited,
           bool banned,
+          bool shadowBanned,
           bool isModerator,
           DateTime createdAt,
           DateTime updatedAt}) =>
@@ -3005,6 +3018,7 @@ class _Member extends DataClass implements Insertable<_Member> {
         inviteRejectedAt: inviteRejectedAt ?? this.inviteRejectedAt,
         invited: invited ?? this.invited,
         banned: banned ?? this.banned,
+        shadowBanned: shadowBanned ?? this.shadowBanned,
         isModerator: isModerator ?? this.isModerator,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
@@ -3019,6 +3033,7 @@ class _Member extends DataClass implements Insertable<_Member> {
           ..write('inviteRejectedAt: $inviteRejectedAt, ')
           ..write('invited: $invited, ')
           ..write('banned: $banned, ')
+          ..write('shadowBanned: $shadowBanned, ')
           ..write('isModerator: $isModerator, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -3042,9 +3057,11 @@ class _Member extends DataClass implements Insertable<_Member> {
                           $mrjc(
                               banned.hashCode,
                               $mrjc(
-                                  isModerator.hashCode,
-                                  $mrjc(createdAt.hashCode,
-                                      updatedAt.hashCode))))))))));
+                                  shadowBanned.hashCode,
+                                  $mrjc(
+                                      isModerator.hashCode,
+                                      $mrjc(createdAt.hashCode,
+                                          updatedAt.hashCode)))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -3056,6 +3073,7 @@ class _Member extends DataClass implements Insertable<_Member> {
           other.inviteRejectedAt == this.inviteRejectedAt &&
           other.invited == this.invited &&
           other.banned == this.banned &&
+          other.shadowBanned == this.shadowBanned &&
           other.isModerator == this.isModerator &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
@@ -3069,6 +3087,7 @@ class _MembersCompanion extends UpdateCompanion<_Member> {
   final Value<DateTime> inviteRejectedAt;
   final Value<bool> invited;
   final Value<bool> banned;
+  final Value<bool> shadowBanned;
   final Value<bool> isModerator;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -3080,6 +3099,7 @@ class _MembersCompanion extends UpdateCompanion<_Member> {
     this.inviteRejectedAt = const Value.absent(),
     this.invited = const Value.absent(),
     this.banned = const Value.absent(),
+    this.shadowBanned = const Value.absent(),
     this.isModerator = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -3092,6 +3112,7 @@ class _MembersCompanion extends UpdateCompanion<_Member> {
     this.inviteRejectedAt = const Value.absent(),
     this.invited = const Value.absent(),
     this.banned = const Value.absent(),
+    this.shadowBanned = const Value.absent(),
     this.isModerator = const Value.absent(),
     @required DateTime createdAt,
     this.updatedAt = const Value.absent(),
@@ -3106,6 +3127,7 @@ class _MembersCompanion extends UpdateCompanion<_Member> {
     Expression<DateTime> inviteRejectedAt,
     Expression<bool> invited,
     Expression<bool> banned,
+    Expression<bool> shadowBanned,
     Expression<bool> isModerator,
     Expression<DateTime> createdAt,
     Expression<DateTime> updatedAt,
@@ -3118,6 +3140,7 @@ class _MembersCompanion extends UpdateCompanion<_Member> {
       if (inviteRejectedAt != null) 'invite_rejected_at': inviteRejectedAt,
       if (invited != null) 'invited': invited,
       if (banned != null) 'banned': banned,
+      if (shadowBanned != null) 'shadow_banned': shadowBanned,
       if (isModerator != null) 'is_moderator': isModerator,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -3132,6 +3155,7 @@ class _MembersCompanion extends UpdateCompanion<_Member> {
       Value<DateTime> inviteRejectedAt,
       Value<bool> invited,
       Value<bool> banned,
+      Value<bool> shadowBanned,
       Value<bool> isModerator,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt}) {
@@ -3143,6 +3167,7 @@ class _MembersCompanion extends UpdateCompanion<_Member> {
       inviteRejectedAt: inviteRejectedAt ?? this.inviteRejectedAt,
       invited: invited ?? this.invited,
       banned: banned ?? this.banned,
+      shadowBanned: shadowBanned ?? this.shadowBanned,
       isModerator: isModerator ?? this.isModerator,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -3173,6 +3198,9 @@ class _MembersCompanion extends UpdateCompanion<_Member> {
     if (banned.present) {
       map['banned'] = Variable<bool>(banned.value);
     }
+    if (shadowBanned.present) {
+      map['shadow_banned'] = Variable<bool>(shadowBanned.value);
+    }
     if (isModerator.present) {
       map['is_moderator'] = Variable<bool>(isModerator.value);
     }
@@ -3195,6 +3223,7 @@ class _MembersCompanion extends UpdateCompanion<_Member> {
           ..write('inviteRejectedAt: $inviteRejectedAt, ')
           ..write('invited: $invited, ')
           ..write('banned: $banned, ')
+          ..write('shadowBanned: $shadowBanned, ')
           ..write('isModerator: $isModerator, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -3295,6 +3324,20 @@ class $_MembersTable extends _Members with TableInfo<$_MembersTable, _Member> {
     );
   }
 
+  final VerificationMeta _shadowBannedMeta =
+      const VerificationMeta('shadowBanned');
+  GeneratedBoolColumn _shadowBanned;
+  @override
+  GeneratedBoolColumn get shadowBanned =>
+      _shadowBanned ??= _constructShadowBanned();
+  GeneratedBoolColumn _constructShadowBanned() {
+    return GeneratedBoolColumn(
+      'shadow_banned',
+      $tableName,
+      true,
+    );
+  }
+
   final VerificationMeta _isModeratorMeta =
       const VerificationMeta('isModerator');
   GeneratedBoolColumn _isModerator;
@@ -3342,6 +3385,7 @@ class $_MembersTable extends _Members with TableInfo<$_MembersTable, _Member> {
         inviteRejectedAt,
         invited,
         banned,
+        shadowBanned,
         isModerator,
         createdAt,
         updatedAt
@@ -3394,6 +3438,12 @@ class $_MembersTable extends _Members with TableInfo<$_MembersTable, _Member> {
     if (data.containsKey('banned')) {
       context.handle(_bannedMeta,
           banned.isAcceptableOrUnknown(data['banned'], _bannedMeta));
+    }
+    if (data.containsKey('shadow_banned')) {
+      context.handle(
+          _shadowBannedMeta,
+          shadowBanned.isAcceptableOrUnknown(
+              data['shadow_banned'], _shadowBannedMeta));
     }
     if (data.containsKey('is_moderator')) {
       context.handle(
