@@ -561,7 +561,7 @@ class Client {
       return _queryChannelsStreams.remove(hash);
     });
 
-    _queryChannelsStreams[hash] = newQueryChannelsStream;
+    _queryChannelsStreams[hash] = newQueryChannelsStream.asBroadcastStream();
 
     return newQueryChannelsStream;
   }
