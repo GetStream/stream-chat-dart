@@ -20,7 +20,6 @@ import '../models/read.dart';
 import '../models/user.dart';
 
 part 'models.part.dart';
-
 part 'offline_storage.g.dart';
 
 /// Gets a new instance of the database running on a background isolate
@@ -178,7 +177,7 @@ class OfflineStorage extends _$OfflineStorage {
   /// Get the channel cids saved in the offline storage
   Future<List<String>> getChannelCids() async {
     return (select(channels)
-          ..orderBy([(c) => OrderingTerm.desc(c._lastMessageAt)])
+          ..orderBy([(c) => OrderingTerm.desc(c.lastMessageAt)])
           ..limit(250))
         .map((c) => c.cid)
         .get();
