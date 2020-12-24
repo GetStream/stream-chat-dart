@@ -1,3 +1,7 @@
+## 0.2.21+1
+
+- Fix error in the offline storage queryChannelCids query
+
 ## 0.2.21
 
 - Fix channel.hide(clearHistory: true) not clearing local messages
