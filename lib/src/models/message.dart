@@ -75,6 +75,14 @@ class Message {
   /// The ID of the parent message, if the message is a reply.
   final String parentId;
 
+  ///
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  final Message replyToMessage;
+
+  ///
+  @JsonKey(includeIfNull: false)
+  final String replyToMessageId;
+
   /// Reserved field indicating the number of replies for this message.
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final int replyCount;
@@ -138,6 +146,8 @@ class Message {
     'reaction_scores',
     'silent',
     'parent_id',
+    'reply_to_message',
+    'reply_to_message_id',
     'reply_count',
     'show_in_channel',
     'command',
@@ -161,6 +171,8 @@ class Message {
     this.latestReactions,
     this.ownReactions,
     this.parentId,
+    this.replyToMessage,
+    this.replyToMessageId,
     this.replyCount = 0,
     this.showInChannel,
     this.command,
@@ -192,6 +204,8 @@ class Message {
     List<Reaction> latestReactions,
     List<Reaction> ownReactions,
     String parentId,
+    Message replyToMessage,
+    String replyToMessageId,
     int replyCount,
     bool showInChannel,
     bool shadowed,
@@ -215,6 +229,8 @@ class Message {
         latestReactions: latestReactions ?? this.latestReactions,
         ownReactions: ownReactions ?? this.ownReactions,
         parentId: parentId ?? this.parentId,
+        replyToMessage: replyToMessage ?? this.replyToMessage,
+        replyToMessageId: replyToMessageId ?? this.replyToMessageId,
         replyCount: replyCount ?? this.replyCount,
         showInChannel: showInChannel ?? this.showInChannel,
         command: command ?? this.command,
