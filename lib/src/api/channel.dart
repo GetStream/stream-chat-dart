@@ -174,10 +174,15 @@ class Channel {
   /// Send a message to this channel
   Future<SendMessageResponse> sendMessage(Message message) async {
     final messageId = message.id ?? Uuid().v4();
+    final quotedMessage = state?.messages?.firstWhere(
+      (m) => m.id == message?.quotedMessageId,
+      orElse: () => null,
+    );
     final newMessage = message.copyWith(
       createdAt: message.createdAt ?? DateTime.now(),
       user: _client.state.user,
       id: messageId,
+      quotedMessage: quotedMessage,
       status: MessageSendingStatus.SENDING,
     );
 
@@ -1111,6 +1116,8 @@ class ChannelClientState {
           latestReactions: message.latestReactions,
           ownReactions: message.ownReactions,
           parentId: message.parentId,
+          quotedMessageId: message.quotedMessageId,
+          quotedMessage: message.quotedMessage,
           replyCount: message.replyCount,
           showInChannel: message.showInChannel,
           command: message.command,

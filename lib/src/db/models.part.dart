@@ -139,6 +139,8 @@ class _Messages extends Table {
 
   TextColumn get parentId => text().nullable()();
 
+  TextColumn get quotedMessageId => text().nullable()();
+
   IntColumn get replyCount => integer().nullable()();
 
   BoolColumn get showInChannel => boolean().nullable()();

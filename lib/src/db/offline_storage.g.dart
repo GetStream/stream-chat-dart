@@ -1562,6 +1562,7 @@ class _Message extends DataClass implements Insertable<_Message> {
   final Map<String, int> reactionCounts;
   final Map<String, int> reactionScores;
   final String parentId;
+  final String quotedMessageId;
   final int replyCount;
   final bool showInChannel;
   final bool shadowed;
@@ -1581,6 +1582,7 @@ class _Message extends DataClass implements Insertable<_Message> {
       this.reactionCounts,
       this.reactionScores,
       this.parentId,
+      this.quotedMessageId,
       this.replyCount,
       this.showInChannel,
       this.shadowed,
@@ -1613,6 +1615,8 @@ class _Message extends DataClass implements Insertable<_Message> {
           .mapFromDatabaseResponse(data['${effectivePrefix}reaction_scores'])),
       parentId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}parent_id']),
+      quotedMessageId: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}quoted_message_id']),
       replyCount: intType
           .mapFromDatabaseResponse(data['${effectivePrefix}reply_count']),
       showInChannel: boolType
@@ -1666,6 +1670,9 @@ class _Message extends DataClass implements Insertable<_Message> {
     }
     if (!nullToAbsent || parentId != null) {
       map['parent_id'] = Variable<String>(parentId);
+    }
+    if (!nullToAbsent || quotedMessageId != null) {
+      map['quoted_message_id'] = Variable<String>(quotedMessageId);
     }
     if (!nullToAbsent || replyCount != null) {
       map['reply_count'] = Variable<int>(replyCount);
@@ -1722,6 +1729,9 @@ class _Message extends DataClass implements Insertable<_Message> {
       parentId: parentId == null && nullToAbsent
           ? const Value.absent()
           : Value(parentId),
+      quotedMessageId: quotedMessageId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quotedMessageId),
       replyCount: replyCount == null && nullToAbsent
           ? const Value.absent()
           : Value(replyCount),
@@ -1768,6 +1778,7 @@ class _Message extends DataClass implements Insertable<_Message> {
       reactionScores:
           serializer.fromJson<Map<String, int>>(json['reactionScores']),
       parentId: serializer.fromJson<String>(json['parentId']),
+      quotedMessageId: serializer.fromJson<String>(json['quotedMessageId']),
       replyCount: serializer.fromJson<int>(json['replyCount']),
       showInChannel: serializer.fromJson<bool>(json['showInChannel']),
       shadowed: serializer.fromJson<bool>(json['shadowed']),
@@ -1792,6 +1803,7 @@ class _Message extends DataClass implements Insertable<_Message> {
       'reactionCounts': serializer.toJson<Map<String, int>>(reactionCounts),
       'reactionScores': serializer.toJson<Map<String, int>>(reactionScores),
       'parentId': serializer.toJson<String>(parentId),
+      'quotedMessageId': serializer.toJson<String>(quotedMessageId),
       'replyCount': serializer.toJson<int>(replyCount),
       'showInChannel': serializer.toJson<bool>(showInChannel),
       'shadowed': serializer.toJson<bool>(shadowed),
@@ -1814,6 +1826,7 @@ class _Message extends DataClass implements Insertable<_Message> {
           Map<String, int> reactionCounts,
           Map<String, int> reactionScores,
           String parentId,
+          String quotedMessageId,
           int replyCount,
           bool showInChannel,
           bool shadowed,
@@ -1833,6 +1846,7 @@ class _Message extends DataClass implements Insertable<_Message> {
         reactionCounts: reactionCounts ?? this.reactionCounts,
         reactionScores: reactionScores ?? this.reactionScores,
         parentId: parentId ?? this.parentId,
+        quotedMessageId: quotedMessageId ?? this.quotedMessageId,
         replyCount: replyCount ?? this.replyCount,
         showInChannel: showInChannel ?? this.showInChannel,
         shadowed: shadowed ?? this.shadowed,
@@ -1855,6 +1869,7 @@ class _Message extends DataClass implements Insertable<_Message> {
           ..write('reactionCounts: $reactionCounts, ')
           ..write('reactionScores: $reactionScores, ')
           ..write('parentId: $parentId, ')
+          ..write('quotedMessageId: $quotedMessageId, ')
           ..write('replyCount: $replyCount, ')
           ..write('showInChannel: $showInChannel, ')
           ..write('shadowed: $shadowed, ')
@@ -1887,28 +1902,31 @@ class _Message extends DataClass implements Insertable<_Message> {
                               $mrjc(
                                   parentId.hashCode,
                                   $mrjc(
-                                      replyCount.hashCode,
+                                      quotedMessageId.hashCode,
                                       $mrjc(
-                                          showInChannel.hashCode,
+                                          replyCount.hashCode,
                                           $mrjc(
-                                              shadowed.hashCode,
+                                              showInChannel.hashCode,
                                               $mrjc(
-                                                  command.hashCode,
+                                                  shadowed.hashCode,
                                                   $mrjc(
-                                                      createdAt.hashCode,
+                                                      command.hashCode,
                                                       $mrjc(
-                                                          updatedAt.hashCode,
+                                                          createdAt.hashCode,
                                                           $mrjc(
-                                                              deletedAt
+                                                              updatedAt
                                                                   .hashCode,
                                                               $mrjc(
-                                                                  userId
+                                                                  deletedAt
                                                                       .hashCode,
                                                                   $mrjc(
-                                                                      channelCid
+                                                                      userId
                                                                           .hashCode,
-                                                                      extraData
-                                                                          .hashCode))))))))))))))))));
+                                                                      $mrjc(
+                                                                          channelCid
+                                                                              .hashCode,
+                                                                          extraData
+                                                                              .hashCode)))))))))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -1921,6 +1939,7 @@ class _Message extends DataClass implements Insertable<_Message> {
           other.reactionCounts == this.reactionCounts &&
           other.reactionScores == this.reactionScores &&
           other.parentId == this.parentId &&
+          other.quotedMessageId == this.quotedMessageId &&
           other.replyCount == this.replyCount &&
           other.showInChannel == this.showInChannel &&
           other.shadowed == this.shadowed &&
@@ -1942,6 +1961,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
   final Value<Map<String, int>> reactionCounts;
   final Value<Map<String, int>> reactionScores;
   final Value<String> parentId;
+  final Value<String> quotedMessageId;
   final Value<int> replyCount;
   final Value<bool> showInChannel;
   final Value<bool> shadowed;
@@ -1961,6 +1981,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
     this.reactionCounts = const Value.absent(),
     this.reactionScores = const Value.absent(),
     this.parentId = const Value.absent(),
+    this.quotedMessageId = const Value.absent(),
     this.replyCount = const Value.absent(),
     this.showInChannel = const Value.absent(),
     this.shadowed = const Value.absent(),
@@ -1981,6 +2002,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
     this.reactionCounts = const Value.absent(),
     this.reactionScores = const Value.absent(),
     this.parentId = const Value.absent(),
+    this.quotedMessageId = const Value.absent(),
     this.replyCount = const Value.absent(),
     this.showInChannel = const Value.absent(),
     this.shadowed = const Value.absent(),
@@ -2002,6 +2024,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
     Expression<String> reactionCounts,
     Expression<String> reactionScores,
     Expression<String> parentId,
+    Expression<String> quotedMessageId,
     Expression<int> replyCount,
     Expression<bool> showInChannel,
     Expression<bool> shadowed,
@@ -2022,6 +2045,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
       if (reactionCounts != null) 'reaction_counts': reactionCounts,
       if (reactionScores != null) 'reaction_scores': reactionScores,
       if (parentId != null) 'parent_id': parentId,
+      if (quotedMessageId != null) 'quoted_message_id': quotedMessageId,
       if (replyCount != null) 'reply_count': replyCount,
       if (showInChannel != null) 'show_in_channel': showInChannel,
       if (shadowed != null) 'shadowed': shadowed,
@@ -2044,6 +2068,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
       Value<Map<String, int>> reactionCounts,
       Value<Map<String, int>> reactionScores,
       Value<String> parentId,
+      Value<String> quotedMessageId,
       Value<int> replyCount,
       Value<bool> showInChannel,
       Value<bool> shadowed,
@@ -2063,6 +2088,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
       reactionCounts: reactionCounts ?? this.reactionCounts,
       reactionScores: reactionScores ?? this.reactionScores,
       parentId: parentId ?? this.parentId,
+      quotedMessageId: quotedMessageId ?? this.quotedMessageId,
       replyCount: replyCount ?? this.replyCount,
       showInChannel: showInChannel ?? this.showInChannel,
       shadowed: shadowed ?? this.shadowed,
@@ -2107,6 +2133,9 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
     }
     if (parentId.present) {
       map['parent_id'] = Variable<String>(parentId.value);
+    }
+    if (quotedMessageId.present) {
+      map['quoted_message_id'] = Variable<String>(quotedMessageId.value);
     }
     if (replyCount.present) {
       map['reply_count'] = Variable<int>(replyCount.value);
@@ -2153,6 +2182,7 @@ class _MessagesCompanion extends UpdateCompanion<_Message> {
           ..write('reactionCounts: $reactionCounts, ')
           ..write('reactionScores: $reactionScores, ')
           ..write('parentId: $parentId, ')
+          ..write('quotedMessageId: $quotedMessageId, ')
           ..write('replyCount: $replyCount, ')
           ..write('showInChannel: $showInChannel, ')
           ..write('shadowed: $shadowed, ')
@@ -2272,6 +2302,20 @@ class $_MessagesTable extends _Messages
   GeneratedTextColumn _constructParentId() {
     return GeneratedTextColumn(
       'parent_id',
+      $tableName,
+      true,
+    );
+  }
+
+  final VerificationMeta _quotedMessageIdMeta =
+      const VerificationMeta('quotedMessageId');
+  GeneratedTextColumn _quotedMessageId;
+  @override
+  GeneratedTextColumn get quotedMessageId =>
+      _quotedMessageId ??= _constructQuotedMessageId();
+  GeneratedTextColumn _constructQuotedMessageId() {
+    return GeneratedTextColumn(
+      'quoted_message_id',
       $tableName,
       true,
     );
@@ -2409,6 +2453,7 @@ class $_MessagesTable extends _Messages
         reactionCounts,
         reactionScores,
         parentId,
+        quotedMessageId,
         replyCount,
         showInChannel,
         shadowed,
@@ -2458,6 +2503,12 @@ class $_MessagesTable extends _Messages
     if (data.containsKey('parent_id')) {
       context.handle(_parentIdMeta,
           parentId.isAcceptableOrUnknown(data['parent_id'], _parentIdMeta));
+    }
+    if (data.containsKey('quoted_message_id')) {
+      context.handle(
+          _quotedMessageIdMeta,
+          quotedMessageId.isAcceptableOrUnknown(
+              data['quoted_message_id'], _quotedMessageIdMeta));
     }
     if (data.containsKey('reply_count')) {
       context.handle(
