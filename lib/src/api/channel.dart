@@ -174,7 +174,7 @@ class Channel {
   /// Send a message to this channel
   Future<SendMessageResponse> sendMessage(Message message) async {
     final messageId = message.id ?? Uuid().v4();
-    final quotedMessage = state.messages.firstWhere(
+    final quotedMessage = state?.messages?.firstWhere(
       (m) => m.id == message?.quotedMessageId,
       orElse: () => null,
     );

@@ -141,6 +141,8 @@ void main() {
             ],
             "mentioned_users": null,
             "parent_id": "parentId",
+            "quoted_message": null,
+            "quoted_message_id": null,
             "show_in_channel": true,
             "hey": "test"
           }
