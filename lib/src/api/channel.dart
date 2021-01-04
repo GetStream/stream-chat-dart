@@ -1018,13 +1018,9 @@ class ChannelClientState {
     _subscriptions.add(_channel
         .on(
       EventType.reactionNew,
-      EventType.reactionUpdated,
     )
         .listen((event) {
       final message = event.message;
-      if (event.type == EventType.reactionUpdated) {
-        _removeMessageReaction(message, event.reaction);
-      }
       _addMessageReaction(message, event.reaction);
     }));
   }
@@ -1056,19 +1052,19 @@ class ChannelClientState {
   }
 
   void _listenMessageUpdated() {
-    _subscriptions.add(_channel.on(EventType.messageUpdated).listen((event) {
+    _subscriptions.add(_channel
+        .on(
+      EventType.messageUpdated,
+      EventType.reactionUpdated,
+    )
+        .listen((event) {
       final message = event.message;
-
-      final oldMessageIndex =
-          messages.indexWhere((element) => element.id == message.id);
-      if (oldMessageIndex != -1) {
-        final oldMessage = messages[oldMessageIndex];
-        addMessage(message.copyWith(
-          ownReactions: oldMessage.ownReactions,
-        ));
-      } else {
-        addMessage(message);
-      }
+      addMessage(message.copyWith(
+        ownReactions: message.latestReactions
+            .where(
+                (element) => element.user?.id == _channel._client.state.user.id)
+            .toList(),
+      ));
     }));
   }
 

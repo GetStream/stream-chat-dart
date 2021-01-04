@@ -667,6 +667,9 @@ class Client {
 
       return channels;
     } catch (e) {
+      if (!persistenceEnabled) {
+        rethrow;
+      }
       return _queryChannelsOffline(
         filter: filter,
         sort: sort,
