@@ -1,3 +1,7 @@
+## 0.2.22
+
+- Add thread-less message reply feature (QuotedMessage)
+
 ## 0.2.21+2
 
 - Fix but not throwing error during querychannels and persistance disabled
