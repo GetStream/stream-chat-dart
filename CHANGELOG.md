@@ -1,6 +1,7 @@
 ## 0.2.21+1
 
 - Fix error in the offline storage queryChannelCids query
+- Fix reaction.updated event handling
 
 ## 0.2.21
 
