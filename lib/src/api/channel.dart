@@ -1120,6 +1120,8 @@ class ChannelClientState {
           latestReactions: message.latestReactions,
           ownReactions: message.ownReactions,
           parentId: message.parentId,
+          quotedMessageId: message.quotedMessageId,
+          quotedMessage: message.quotedMessage,
           replyCount: message.replyCount,
           showInChannel: message.showInChannel,
           command: message.command,

@@ -20,6 +20,7 @@ import '../models/read.dart';
 import '../models/user.dart';
 
 part 'models.part.dart';
+
 part 'offline_storage.g.dart';
 
 /// Gets a new instance of the database running on a background isolate
@@ -364,6 +365,7 @@ class OfflineStorage extends _$OfflineStorage {
               channelCid: cid,
               type: m.type,
               parentId: m.parentId,
+              quotedMessageId: m.quotedMessageId,
               command: m.command,
               createdAt: m.createdAt,
               shadowed: m.shadowed,
@@ -482,6 +484,17 @@ class OfflineStorage extends _$OfflineStorage {
     return hash;
   }
 
+  Future<Message> _getMessageById(String id) async {
+    if (id == null || id.isEmpty) return null;
+    final message = await Future.wait(await (select(messages).join([
+      leftOuterJoin(users, messages.userId.equalsExp(users.id)),
+    ])
+          ..where(messages.id.equals(id)))
+        .map(_messageFromJoinRow)
+        .get());
+    return message.first;
+  }
+
   Future<List<Message>> _getChannelMessages(
     _Channel channelRow, {
     int limit,
@@ -525,6 +538,7 @@ class OfflineStorage extends _$OfflineStorage {
 
     final latestReactions = await _getLatestReactions(messageRow);
     final ownReactions = await _getOwnReactions(messageRow);
+    final quotedMessage = await _getMessageById(messageRow.quotedMessageId);
 
     return Message(
       shadowed: messageRow.shadowed,
@@ -544,6 +558,8 @@ class OfflineStorage extends _$OfflineStorage {
       status: messageRow.status,
       command: messageRow.command,
       parentId: messageRow.parentId,
+      quotedMessageId: messageRow.quotedMessageId,
+      quotedMessage: quotedMessage,
       reactionCounts: messageRow.reactionCounts,
       reactionScores: messageRow.reactionScores,
       replyCount: messageRow.replyCount,
