@@ -48,12 +48,12 @@ Message _$MessageFromJson(Map json) {
               )))
         ?.toList(),
     parentId: json['parent_id'] as String,
-    replyToMessage: json['reply_to_message'] == null
+    quotedMessage: json['quoted_message'] == null
         ? null
-        : Message.fromJson((json['reply_to_message'] as Map)?.map(
+        : Message.fromJson((json['quoted_message'] as Map)?.map(
             (k, e) => MapEntry(k as String, e),
           )),
-    replyToMessageId: json['reply_to_message_id'] as String,
+    quotedMessageId: json['quoted_message_id'] as String,
     replyCount: json['reply_count'] as int,
     showInChannel: json['show_in_channel'] as bool,
     command: json['command'] as String,
@@ -98,8 +98,8 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   writeNotNull('latest_reactions', readonly(instance.latestReactions));
   writeNotNull('own_reactions', readonly(instance.ownReactions));
   val['parent_id'] = instance.parentId;
-  writeNotNull('reply_to_message', readonly(instance.replyToMessage));
-  writeNotNull('reply_to_message_id', instance.replyToMessageId);
+  val['quoted_message'] = readonly(instance.quotedMessage);
+  val['quoted_message_id'] = instance.quotedMessageId;
   writeNotNull('reply_count', readonly(instance.replyCount));
   val['show_in_channel'] = instance.showInChannel;
   val['silent'] = instance.silent;
