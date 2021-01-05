@@ -1127,6 +1127,7 @@ class ChannelClientState {
           deletedAt: message.deletedAt,
           user: message.user,
           status: message.status,
+          threadParticipants: message.threadParticipants,
           extraData: message.extraData,
         );
       } else {
