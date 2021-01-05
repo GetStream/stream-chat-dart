@@ -1,3 +1,7 @@
+## 0.2.23
+
+- Add thread_participants in message model
+
 ## 0.2.22
 
 - Add thread-less message reply feature (QuotedMessage)

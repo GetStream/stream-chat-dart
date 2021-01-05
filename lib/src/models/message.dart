@@ -86,6 +86,10 @@ class Message {
   @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
   final int replyCount;
 
+  /// Reserved field indicating the thread participants for this message.
+  @JsonKey(includeIfNull: false, toJson: Serialization.readOnly)
+  final List<User> threadParticipants;
+
   /// Check if this message needs to show in the channel.
   final bool showInChannel;
 
@@ -148,6 +152,7 @@ class Message {
     'quoted_message',
     'quoted_message_id',
     'reply_count',
+    'thread_participants',
     'show_in_channel',
     'command',
     'created_at',
@@ -173,6 +178,7 @@ class Message {
     this.quotedMessage,
     this.quotedMessageId,
     this.replyCount = 0,
+    this.threadParticipants,
     this.showInChannel,
     this.command,
     this.createdAt,
@@ -206,6 +212,7 @@ class Message {
     Message quotedMessage,
     String quotedMessageId,
     int replyCount,
+    List<User> threadParticipants,
     bool showInChannel,
     bool shadowed,
     bool silent,
@@ -231,6 +238,7 @@ class Message {
         quotedMessage: quotedMessage ?? this.quotedMessage,
         quotedMessageId: quotedMessageId ?? this.quotedMessageId,
         replyCount: replyCount ?? this.replyCount,
+        threadParticipants: threadParticipants ?? this.threadParticipants,
         showInChannel: showInChannel ?? this.showInChannel,
         command: command ?? this.command,
         createdAt: createdAt ?? this.createdAt,

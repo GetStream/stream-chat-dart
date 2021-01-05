@@ -55,6 +55,13 @@ Message _$MessageFromJson(Map json) {
           )),
     quotedMessageId: json['quoted_message_id'] as String,
     replyCount: json['reply_count'] as int,
+    threadParticipants: (json['thread_participants'] as List)
+        ?.map((e) => e == null
+            ? null
+            : User.fromJson((e as Map)?.map(
+                (k, e) => MapEntry(k as String, e),
+              )))
+        ?.toList(),
     showInChannel: json['show_in_channel'] as bool,
     command: json['command'] as String,
     createdAt: json['created_at'] == null
@@ -101,6 +108,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) {
   val['quoted_message'] = readonly(instance.quotedMessage);
   val['quoted_message_id'] = instance.quotedMessageId;
   writeNotNull('reply_count', readonly(instance.replyCount));
+  writeNotNull('thread_participants', readonly(instance.threadParticipants));
   val['show_in_channel'] = instance.showInChannel;
   val['silent'] = instance.silent;
   writeNotNull('shadowed', readonly(instance.shadowed));
