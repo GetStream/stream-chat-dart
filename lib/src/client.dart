@@ -557,15 +557,17 @@ class Client {
     PaginationParams paginationParams = const PaginationParams(limit: 10),
     int messageLimit,
     bool onlyOffline = false,
+    bool waitForConnect = true,
   }) async {
-    if (_connectCompleter != null && !_connectCompleter.isCompleted) {
-      logger.info('awaiting connection completer');
-      await _connectCompleter.future;
-    }
-
-    if (wsConnectionStatus.value != ConnectionStatus.connected) {
-      throw Exception(
-          'You cannot use queryChannels without an active connection. Call setUser to connect the client.');
+    if (waitForConnect) {
+      if (_connectCompleter != null && !_connectCompleter.isCompleted) {
+        logger.info('awaiting connection completer');
+        await _connectCompleter.future;
+      }
+      if (wsConnectionStatus.value != ConnectionStatus.connected) {
+        throw Exception(
+            'You cannot use queryChannels without an active connection. Call setUser to connect the client.');
+      }
     }
 
     final hash = base64.encode(utf8.encode(
