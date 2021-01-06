@@ -558,7 +558,6 @@ class Client {
     int messageLimit,
     bool onlyOffline = false,
   }) async {
-    print('_connectCompleter.isCompleted: ${_connectCompleter.isCompleted}');
     if (_connectCompleter != null && !_connectCompleter.isCompleted) {
       logger.info('awaiting connection completer');
       await _connectCompleter.future;
