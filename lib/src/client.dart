@@ -334,6 +334,13 @@ class Client {
   /// Set the current user, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
   Future<Event> setUser(User user, String token) async {
+    if (_connectCompleter != null && !_connectCompleter.isCompleted) {
+      logger.warning('Already connecting');
+      throw Exception('Already connecting');
+    }
+
+    _connectCompleter = Completer();
+
     logger.info('set user');
     state.user = OwnUser.fromJson(user.toJson());
     this.token = token;
@@ -344,7 +351,13 @@ class Client {
     await sharedPreferences.setString(KEY_TOKEN, token);
     await sharedPreferences.setString(KEY_API_KEY, apiKey);
 
-    return connect();
+    return connect().then((event) {
+      _connectCompleter.complete(event);
+      return event;
+    }).catchError((e, s) {
+      _connectCompleter.completeError(e, s);
+      throw e;
+    });
   }
 
   /// Set the current user using the [tokenProvider] to fetch the token.
@@ -399,6 +412,8 @@ class Client {
     }
     _controller.add(event);
   }
+
+  Completer<Event> _connectCompleter;
 
   /// Connect the client websocket
   Future<Event> connect() async {
@@ -542,7 +557,18 @@ class Client {
     PaginationParams paginationParams = const PaginationParams(limit: 10),
     int messageLimit,
     bool onlyOffline = false,
-  }) {
+  }) async {
+    print('_connectCompleter.isCompleted: ${_connectCompleter.isCompleted}');
+    if (_connectCompleter != null && !_connectCompleter.isCompleted) {
+      logger.info('awaiting connection completer');
+      await _connectCompleter.future;
+    }
+
+    if (wsConnectionStatus.value != ConnectionStatus.connected) {
+      throw Exception(
+          'You cannot use queryChannels without an active connection. Call setUser to connect the client.');
+    }
+
     final hash = base64.encode(utf8.encode(
         '$filter${_asMap(sort)}$options${paginationParams?.toJson()}$messageLimit$onlyOffline'));
     if (_queryChannelsStreams.containsKey(hash)) {
@@ -827,10 +853,24 @@ class Client {
   /// Set the current user with an anonymous id, this triggers a connection to the API.
   /// It returns a [Future] that resolves when the connection is setup.
   Future<Event> setAnonymousUser() async {
+    if (_connectCompleter != null && !_connectCompleter.isCompleted) {
+      logger.warning('Already connecting');
+      throw Exception('Already connecting');
+    }
+
+    _connectCompleter = Completer();
+
     _anonymous = true;
     final uuid = Uuid();
     state.user = OwnUser(id: uuid.v4());
-    return connect();
+
+    return connect().then((event) {
+      _connectCompleter.complete(event);
+      return event;
+    }).catchError((e, s) {
+      _connectCompleter.completeError(e, s);
+      throw e;
+    });
   }
 
   /// Set the current user as guest, this triggers a connection to the API.
