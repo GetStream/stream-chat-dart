@@ -1,3 +1,8 @@
+## 0.2.23+1
+
+- Throw an error when calling queryChannels without an active connection
+- Wait to establish a connection if calling queryChannels while connecting
+
 ## 0.2.23
 
 - Add thread_participants in message model
