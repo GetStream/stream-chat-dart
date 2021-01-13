@@ -565,8 +565,15 @@ class Client {
         await _connectCompleter.future;
       }
       if (wsConnectionStatus.value != ConnectionStatus.connected) {
-        throw Exception(
-            'You cannot use queryChannels without an active connection. Call setUser to connect the client.');
+        final errorMessage =
+            'You cannot use queryChannels without an active connection. Please call setUser to connect the client.';
+        if (persistenceEnabled) {
+          logger.warning(
+              '$errorMessage\nTrying to retrieve channels from the offline storage.');
+          onlyOffline = true;
+        } else {
+          throw Exception(errorMessage);
+        }
       }
     }
 
