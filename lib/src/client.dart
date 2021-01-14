@@ -850,7 +850,8 @@ class Client {
   String get _authType => _anonymous ? 'anonymous' : 'jwt';
 
   // TODO: get the right version of the lib from the build toolchain
-  String get _userAgent => 'stream-chat-dart-client-$PACKAGE_VERSION';
+  String get _userAgent =>
+      'stream-chat-dart-client-${PACKAGE_VERSION.split('+')[0]}';
 
   Map<String, String> get _commonQueryParams => {
         'user_id': state.user?.id,
@@ -1286,6 +1287,11 @@ class ClientState {
     _listenChannelHidden();
 
     _listenUserUpdated();
+  }
+
+  /// Used internally for optimistic update of unread count
+  set totalUnreadCount(int unreadCount) {
+    _totalUnreadCountController?.add(unreadCount ?? 0);
   }
 
   void _listenChannelHidden() {
