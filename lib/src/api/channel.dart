@@ -429,7 +429,7 @@ class Channel {
   Future<EmptyResponse> markRead() async {
     _checkInitialized();
     client.state.totalUnreadCount =
-        max(0, client.state.totalUnreadCount - state.unreadCount);
+        max(0, (client.state.totalUnreadCount ?? 0) - (state.unreadCount ?? 0));
     state._unreadCountController.add(0);
     final response = await _client.post('$_channelURL/read', data: {});
     return _client.decode(response.data, EmptyResponse.fromJson);
